@@ -106,12 +106,13 @@ function updateSurgeryHistoryOptions(query = "") {
 function createSurgeryField() {
   const fieldNumber = getSurgeryInputs().length + 1;
   const label = document.createElement("label");
-  label.textContent = `Cirurgia proposta ${fieldNumber}`;
+  label.className = "unlabeled-field";
 
   const input = document.createElement("input");
   input.name = "surgery";
   input.type = "text";
   input.className = "surgery-input";
+  input.setAttribute("aria-label", `Cirurgia proposta ${fieldNumber}`);
   input.setAttribute("list", "surgeryHistoryOptions");
   input.setAttribute("autocomplete", "off");
 
