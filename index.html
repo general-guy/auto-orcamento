@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Auto Orcamento</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="panel form-panel" aria-labelledby="form-title">
+        <div class="panel-header">
+          <p class="eyebrow">Auto Orcamento</p>
+          <h1 id="form-title">Gerador de orcamento cirurgico</h1>
+          <p>
+            Preencha os dados principais, selecione as orientacoes e gere uma
+            pagina pronta para impressao.
+          </p>
+        </div>
+
+        <form id="budget-form" class="budget-form">
+          <fieldset>
+            <legend>Dados da paciente</legend>
+
+            <label>
+              Nome da paciente
+              <input id="patientName" name="patientName" type="text" autocomplete="name" />
+            </label>
+
+            <label>
+              Data
+              <input id="budgetDate" name="budgetDate" type="date" />
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Cirurgia e hospital</legend>
+
+            <label>
+              Cirurgia proposta
+              <input id="surgery" name="surgery" type="text" />
+            </label>
+
+            <label>
+              Hospital
+              <input id="hospital" name="hospital" type="text" />
+            </label>
+
+            <label>
+              Tempo previsto de hospital
+              <input id="hospitalStay" name="hospitalStay" type="text" placeholder="Ex.: 1 diaria" />
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Valores</legend>
+
+            <div class="field-grid">
+              <label>
+                Hospital
+                <input id="hospitalValue" name="hospitalValue" type="text" placeholder="R$" />
+              </label>
+
+              <label>
+                Equipe
+                <input id="teamValue" name="teamValue" type="text" placeholder="R$" />
+              </label>
+
+              <label>
+                Tecnologias
+                <input id="technologyValue" name="technologyValue" type="text" placeholder="R$" />
+              </label>
+
+              <label>
+                Total
+                <input id="totalValue" name="totalValue" type="text" placeholder="R$" />
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Pagamento e itens incluidos</legend>
+
+            <label>
+              Formas de pagamento
+              <textarea id="paymentTerms" name="paymentTerms" rows="3"></textarea>
+            </label>
+
+            <label>
+              O que esta incluido
+              <textarea id="includedItems" name="includedItems" rows="3"></textarea>
+            </label>
+          </fieldset>
+
+          <fieldset>
+            <legend>Orientacoes</legend>
+
+            <label class="checkbox-row">
+              <input type="checkbox" name="guidance" value="Orcamento valido por 30 dias." />
+              <span>Orcamento valido por 30 dias.</span>
+            </label>
+
+            <label class="checkbox-row">
+              <input type="checkbox" name="guidance" value="Valores sujeitos a confirmacao com o hospital." />
+              <span>Valores sujeitos a confirmacao com o hospital.</span>
+            </label>
+
+            <label class="checkbox-row">
+              <input type="checkbox" name="guidance" value="Materiais especiais e tecnologias podem depender da indicacao intraoperatoria." />
+              <span>Materiais especiais e tecnologias podem depender da indicacao intraoperatoria.</span>
+            </label>
+
+            <label>
+              Orientacao adicional
+              <textarea id="customGuidance" name="customGuidance" rows="3"></textarea>
+            </label>
+          </fieldset>
+
+          <div class="actions">
+            <button type="button" id="clearButton" class="secondary-button">Limpar</button>
+            <button type="button" id="printButton">Imprimir orcamento</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel preview-panel" aria-labelledby="preview-title">
+        <div class="preview-toolbar">
+          <div>
+            <p class="eyebrow">Pre-visualizacao</p>
+            <h2 id="preview-title">Documento final</h2>
+          </div>
+          <p>Use a impressao do navegador para gerar papel ou PDF.</p>
+        </div>
+
+        <article class="print-page" id="printPage">
+          <img
+            class="letterhead-background"
+            src="assets/papel-timbrado.png"
+            alt=""
+            aria-hidden="true"
+          />
+
+          <div class="document-content">
+            <p class="document-date" data-preview="budgetDate"></p>
+            <h2>Orcamento cirurgico</h2>
+
+            <dl class="summary-list">
+              <div>
+                <dt>Paciente</dt>
+                <dd data-preview="patientName">Nome da paciente</dd>
+              </div>
+              <div>
+                <dt>Cirurgia proposta</dt>
+                <dd data-preview="surgery">Cirurgia proposta</dd>
+              </div>
+              <div>
+                <dt>Hospital</dt>
+                <dd data-preview="hospital">Hospital</dd>
+              </div>
+              <div>
+                <dt>Tempo previsto</dt>
+                <dd data-preview="hospitalStay">Tempo previsto de hospital</dd>
+              </div>
+            </dl>
+
+            <section class="document-section">
+              <h3>Valores</h3>
+              <table>
+                <tbody>
+                  <tr>
+                    <th>Hospital</th>
+                    <td data-preview="hospitalValue">R$</td>
+                  </tr>
+                  <tr>
+                    <th>Equipe</th>
+                    <td data-preview="teamValue">R$</td>
+                  </tr>
+                  <tr>
+                    <th>Tecnologias</th>
+                    <td data-preview="technologyValue">R$</td>
+                  </tr>
+                  <tr class="total-row">
+                    <th>Total</th>
+                    <td data-preview="totalValue">R$</td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+
+            <section class="document-section">
+              <h3>Formas de pagamento</h3>
+              <p data-preview="paymentTerms">Preencha as formas de pagamento.</p>
+            </section>
+
+            <section class="document-section">
+              <h3>Itens incluidos</h3>
+              <p data-preview="includedItems">Preencha os itens incluidos no valor.</p>
+            </section>
+
+            <section class="document-section">
+              <h3>Orientacoes</h3>
+              <ul id="guidancePreview">
+                <li>Selecione as orientacoes desejadas.</li>
+              </ul>
+            </section>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
