@@ -140,6 +140,23 @@ function updateSurgeryButtons() {
   removeSurgeryButton.disabled = getSurgeryInputs().length <= 1;
 }
 
+function isTextField(element) {
+  return element.matches('input[type="date"], input[type="text"], textarea');
+}
+
+function focusNextTextField(currentField) {
+  const textFields = [...form.querySelectorAll('input[type="date"], input[type="text"], textarea')]
+    .filter((field) => !field.disabled && !field.readOnly);
+  const currentIndex = textFields.indexOf(currentField);
+  const nextField = textFields[currentIndex + 1];
+
+  if (nextField) {
+    nextField.focus();
+  } else {
+    currentField.blur();
+  }
+}
+
 function updateSimpleFields() {
   Object.entries(previewFields).forEach(([fieldName, fallback]) => {
     const preview = document.querySelector(`[data-preview="${fieldName}"]`);
@@ -218,6 +235,12 @@ form.addEventListener("keydown", (event) => {
   if (event.target.matches(".surgery-input") && event.shiftKey && event.key === "Enter") {
     event.preventDefault();
     createSurgeryField();
+    return;
+  }
+
+  if (isTextField(event.target) && event.key === "Enter") {
+    event.preventDefault();
+    focusNextTextField(event.target);
   }
 });
 clearButton.addEventListener("click", clearForm);
