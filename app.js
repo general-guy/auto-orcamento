@@ -2,6 +2,7 @@ const form = document.querySelector("#budget-form");
 const printButton = document.querySelector("#printButton");
 const clearButton = document.querySelector("#clearButton");
 const addSurgeryButton = document.querySelector("#addSurgeryButton");
+const removeSurgeryButton = document.querySelector("#removeSurgeryButton");
 const guidancePreview = document.querySelector("#guidancePreview");
 const surgeryList = document.querySelector("#surgeryList");
 const surgeryHistoryOptions = document.querySelector("#surgeryHistoryOptions");
@@ -116,7 +117,27 @@ function createSurgeryField() {
 
   label.append(input);
   surgeryList.append(label);
+  updateSurgeryButtons();
   input.focus();
+}
+
+function removeLastSurgeryField() {
+  const inputs = getSurgeryInputs();
+  if (inputs.length <= 1) {
+    inputs[0].value = "";
+    inputs[0].focus();
+    updatePreview();
+    return;
+  }
+
+  inputs.at(-1).closest("label").remove();
+  getSurgeryInputs().at(-1).focus();
+  updateSurgeryButtons();
+  updatePreview();
+}
+
+function updateSurgeryButtons() {
+  removeSurgeryButton.disabled = getSurgeryInputs().length <= 1;
 }
 
 function updateSimpleFields() {
@@ -170,6 +191,7 @@ function clearForm() {
   form.reset();
   getSurgeryInputs().slice(1).forEach((input) => input.closest("label").remove());
   form.elements.budgetDate.value = formatDateForInput(new Date());
+  updateSurgeryButtons();
   updatePreview();
 }
 
@@ -200,6 +222,7 @@ form.addEventListener("keydown", (event) => {
 });
 clearButton.addEventListener("click", clearForm);
 addSurgeryButton.addEventListener("click", createSurgeryField);
+removeSurgeryButton.addEventListener("click", removeLastSurgeryField);
 printButton.addEventListener("click", async () => {
   await Promise.all(getSurgeryValues().map(saveSurgeryToHistory));
   window.print();
@@ -207,5 +230,6 @@ printButton.addEventListener("click", async () => {
 
 loadSurgeryHistory().then(() => {
   updateSurgeryHistoryOptions();
+  updateSurgeryButtons();
   updatePreview();
 });
