@@ -1,11 +1,13 @@
 :root {
-  --background: #f3f5f7;
+  --background: #fafafa;
   --panel: #ffffff;
-  --text: #18212f;
-  --muted: #667085;
-  --line: #d9dee7;
+  --text: #1f2933;
+  --muted: #7a8493;
+  --line: #e8e8e8;
   --primary: #1f5eff;
   --primary-dark: #1648c5;
+  --primary-soft: #edf3ff;
+  --soft: #f7f7f7;
   --paper-width: 210mm;
   --paper-height: 297mm;
 }
@@ -29,32 +31,34 @@ textarea {
 
 .app-shell {
   display: grid;
-  grid-template-columns: minmax(320px, 460px) minmax(640px, 1fr);
-  gap: 24px;
+  grid-template-columns: minmax(320px, 430px) minmax(640px, 1fr);
+  gap: 20px;
   height: 100vh;
-  padding: 24px;
+  padding: 20px;
 }
 
 .panel {
   background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 18px;
-  box-shadow: 0 18px 45px rgba(16, 24, 40, 0.08);
+  border: 1px solid rgba(31, 41, 51, 0.06);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(31, 41, 51, 0.05);
 }
 
 .form-panel {
-  height: calc(100vh - 48px);
+  height: calc(100vh - 40px);
   overflow: auto;
-  padding: 24px;
+  padding: 24px 22px;
 }
 
 .panel-header,
 .preview-toolbar {
-  margin-bottom: 24px;
+  margin-bottom: 22px;
 }
 
 .panel-header h1,
 .preview-toolbar h2 {
+  font-size: 1.45rem;
+  letter-spacing: -0.03em;
   margin: 4px 0 8px;
 }
 
@@ -66,46 +70,56 @@ textarea {
 
 .eyebrow {
   color: var(--primary) !important;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 .budget-form {
   display: grid;
-  gap: 18px;
+  gap: 10px;
 }
 
 fieldset {
-  border: 1px solid var(--line);
-  border-radius: 14px;
+  border: 0;
+  border-top: 1px solid var(--line);
   display: grid;
-  gap: 14px;
+  gap: 12px;
   margin: 0;
-  padding: 18px;
+  padding: 18px 0 8px;
 }
 
 legend {
+  color: var(--text);
+  font-size: 0.86rem;
   font-weight: 700;
-  padding: 0 8px;
+  padding: 0 12px 0 0;
 }
 
 label {
-  color: #344054;
+  color: #4b5563;
   display: grid;
-  gap: 7px;
-  font-size: 0.92rem;
-  font-weight: 700;
+  gap: 6px;
+  font-size: 0.86rem;
+  font-weight: 600;
 }
 
 input,
 textarea {
-  border: 1px solid #c9d2df;
-  border-radius: 10px;
+  background: var(--soft);
+  border: 1px solid transparent;
+  border-radius: 12px;
   color: var(--text);
-  padding: 10px 12px;
+  padding: 11px 12px;
   width: 100%;
+}
+
+input:focus,
+textarea:focus {
+  background: #ffffff;
+  border-color: #cfcfcf;
+  outline: none;
 }
 
 textarea {
@@ -137,7 +151,7 @@ textarea {
   justify-content: flex-end;
   position: sticky;
   bottom: 0;
-  background: linear-gradient(rgba(255, 255, 255, 0), #ffffff 28%);
+  background: linear-gradient(rgba(255, 255, 255, 0), #ffffff 32%);
   padding-top: 24px;
 }
 
@@ -147,6 +161,7 @@ button {
   background: var(--primary);
   color: #ffffff;
   cursor: pointer;
+  font-size: 0.9rem;
   font-weight: 700;
   padding: 12px 18px;
 }
@@ -156,19 +171,25 @@ button:hover {
 }
 
 .secondary-button {
-  background: #edf2f7;
-  color: #344054;
+  background: var(--soft);
+  color: #4b5563;
 }
 
 .secondary-button:hover {
-  background: #dfe7f1;
+  background: #ececec;
+}
+
+button:focus-visible,
+input:focus,
+textarea:focus {
+  box-shadow: 0 0 0 3px var(--primary-soft);
 }
 
 .preview-panel {
   display: grid;
   grid-template-rows: auto 1fr;
   overflow: auto;
-  padding: 24px;
+  padding: 22px;
 }
 
 .preview-toolbar {
@@ -179,7 +200,7 @@ button:hover {
 
 .print-page {
   background: #ffffff;
-  box-shadow: 0 12px 30px rgba(16, 24, 40, 0.18);
+  box-shadow: 0 12px 36px rgba(31, 41, 51, 0.12);
   height: var(--paper-height);
   margin: 0 auto;
   overflow: hidden;
@@ -203,7 +224,7 @@ button:hover {
 .document-content {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 11px;
   inset: 38mm 20mm 28mm;
   position: absolute;
   z-index: 1;
@@ -211,18 +232,19 @@ button:hover {
 
 .document-date {
   align-self: flex-end;
-  font-size: 0.92rem;
+  font-size: 0.88rem;
   margin: 0;
 }
 
 .document-content h2 {
-  font-size: 1.45rem;
-  margin: 0 0 4px;
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+  margin: 0 0 6px;
   text-align: center;
 }
 
 .summary-list {
-  border: 1px solid rgba(91, 107, 130, 0.48);
+  border: 1px solid rgba(31, 41, 51, 0.22);
   border-radius: 10px;
   display: grid;
   margin: 0;
@@ -235,17 +257,18 @@ button:hover {
 }
 
 .summary-list div + div {
-  border-top: 1px solid rgba(91, 107, 130, 0.28);
+  border-top: 1px solid rgba(31, 41, 51, 0.14);
 }
 
 dt,
 dd {
+  font-size: 0.9rem;
   margin: 0;
-  padding: 8px 10px;
+  padding: 7px 10px;
 }
 
 dt {
-  background: rgba(243, 246, 250, 0.82);
+  background: rgba(255, 255, 255, 0.72);
   font-weight: 700;
 }
 
@@ -255,12 +278,13 @@ dt {
 }
 
 .document-section h3 {
-  font-size: 1rem;
+  font-size: 0.9rem;
   margin: 0;
 }
 
 .document-section p,
 .document-section ul {
+  font-size: 0.9rem;
   margin: 0;
   white-space: pre-line;
 }
@@ -272,13 +296,14 @@ table {
 
 th,
 td {
-  border: 1px solid rgba(91, 107, 130, 0.48);
-  padding: 8px 10px;
+  border: 1px solid rgba(31, 41, 51, 0.22);
+  font-size: 0.9rem;
+  padding: 7px 10px;
   text-align: left;
 }
 
 th {
-  background: rgba(243, 246, 250, 0.82);
+  background: rgba(255, 255, 255, 0.72);
   width: 42mm;
 }
 
