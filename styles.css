@@ -132,6 +132,30 @@ textarea {
   grid-template-columns: 1fr 1fr;
 }
 
+.dynamic-field-group,
+.surgery-list {
+  display: grid;
+  gap: 10px;
+}
+
+.add-button {
+  align-items: center;
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: inline-flex;
+  font-size: 1.2rem;
+  height: 34px;
+  justify-content: center;
+  justify-self: start;
+  line-height: 1;
+  padding: 0;
+  width: 34px;
+}
+
+.add-button:hover {
+  background: #dfe9ff;
+}
+
 .checkbox-row {
   align-items: start;
   display: grid;
@@ -233,7 +257,7 @@ textarea:focus {
 .document-date {
   align-self: flex-end;
   font-size: 0.88rem;
-  margin: 0;
+  margin: auto 0 0;
 }
 
 .document-content h2 {
@@ -265,6 +289,7 @@ dd {
   font-size: 0.9rem;
   margin: 0;
   padding: 7px 10px;
+  white-space: pre-line;
 }
 
 dt {

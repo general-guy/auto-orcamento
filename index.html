@@ -36,10 +36,26 @@
           <fieldset>
             <legend>Cirurgia e Hospital</legend>
 
-            <label>
-              Cirurgia proposta
-              <input id="surgery" name="surgery" type="text" />
-            </label>
+            <div class="dynamic-field-group">
+              <div id="surgeryList" class="surgery-list">
+                <label>
+                  Cirurgia proposta
+                  <input
+                    id="surgery"
+                    name="surgery"
+                    type="text"
+                    class="surgery-input"
+                    list="surgeryHistoryOptions"
+                    autocomplete="off"
+                  />
+                </label>
+              </div>
+
+              <button type="button" id="addSurgeryButton" class="add-button" aria-label="Adicionar outra cirurgia">
+                +
+              </button>
+              <datalist id="surgeryHistoryOptions"></datalist>
+            </div>
 
             <label>
               Hospital
@@ -141,7 +157,6 @@
           />
 
           <div class="document-content">
-            <p class="document-date" data-preview="budgetDate"></p>
             <h2>Orçamento Cirúrgico</h2>
 
             <dl class="summary-list">
@@ -150,7 +165,7 @@
                 <dd data-preview="patientName">Nome da paciente</dd>
               </div>
               <div>
-                <dt>Cirurgia proposta</dt>
+                <dt>Cirurgias propostas</dt>
                 <dd data-preview="surgery">Cirurgia proposta</dd>
               </div>
               <div>
@@ -203,6 +218,8 @@
                 <li>Selecione as orientações desejadas.</li>
               </ul>
             </section>
+
+            <p class="document-date" data-preview="budgetDate"></p>
           </div>
         </article>
       </section>

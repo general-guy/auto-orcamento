@@ -1,11 +1,14 @@
 const form = document.querySelector("#budget-form");
 const printButton = document.querySelector("#printButton");
 const clearButton = document.querySelector("#clearButton");
+const addSurgeryButton = document.querySelector("#addSurgeryButton");
 const guidancePreview = document.querySelector("#guidancePreview");
+const surgeryList = document.querySelector("#surgeryList");
+const surgeryHistoryOptions = document.querySelector("#surgeryHistoryOptions");
+let surgeryHistory = [];
 
 const previewFields = {
   patientName: "Nome da paciente",
-  surgery: "Cirurgia proposta",
   hospital: "Hospital",
   hospitalStay: "Tempo previsto de hospital",
   hospitalValue: "R$",
@@ -34,6 +37,88 @@ function getFieldValue(fieldName) {
   return field?.value.trim() || "";
 }
 
+function normalizeText(value) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function getSurgeryInputs() {
+  return [...surgeryList.querySelectorAll(".surgery-input")];
+}
+
+function getSurgeryValues() {
+  return getSurgeryInputs()
+    .map((input) => input.value.trim())
+    .filter(Boolean);
+}
+
+async function loadSurgeryHistory() {
+  try {
+    const response = await fetch("/api/cirurgias");
+    surgeryHistory = await response.json();
+  } catch {
+    surgeryHistory = [];
+  }
+}
+
+async function saveSurgeryToHistory(value) {
+  const surgery = value.trim();
+  if (!surgery) {
+    return;
+  }
+
+  const alreadyExists = surgeryHistory.some((item) => normalizeText(item) === normalizeText(surgery));
+  if (alreadyExists) {
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/cirurgias", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ value: surgery }),
+    });
+
+    surgeryHistory = await response.json();
+    updateSurgeryHistoryOptions();
+  } catch {
+    console.warn("Não foi possível salvar a cirurgia no histórico local.");
+  }
+}
+
+function updateSurgeryHistoryOptions(query = "") {
+  const normalizedQuery = normalizeText(query);
+  const options = surgeryHistory
+    .filter((item) => !normalizedQuery || normalizeText(item).includes(normalizedQuery))
+    .slice(0, 12);
+
+  surgeryHistoryOptions.innerHTML = "";
+  options.forEach((optionText) => {
+    const option = document.createElement("option");
+    option.value = optionText;
+    surgeryHistoryOptions.append(option);
+  });
+}
+
+function createSurgeryField() {
+  const fieldNumber = getSurgeryInputs().length + 1;
+  const label = document.createElement("label");
+  label.textContent = `Cirurgia proposta ${fieldNumber}`;
+
+  const input = document.createElement("input");
+  input.name = "surgery";
+  input.type = "text";
+  input.className = "surgery-input";
+  input.setAttribute("list", "surgeryHistoryOptions");
+  input.setAttribute("autocomplete", "off");
+
+  label.append(input);
+  surgeryList.append(label);
+  input.focus();
+}
+
 function updateSimpleFields() {
   Object.entries(previewFields).forEach(([fieldName, fallback]) => {
     const preview = document.querySelector(`[data-preview="${fieldName}"]`);
@@ -46,6 +131,9 @@ function updateSimpleFields() {
 
   const datePreview = document.querySelector('[data-preview="budgetDate"]');
   datePreview.textContent = formatDateForDocument(getFieldValue("budgetDate"));
+
+  const surgeryPreview = document.querySelector('[data-preview="surgery"]');
+  surgeryPreview.textContent = getSurgeryValues().join("\n") || "Cirurgia proposta";
 }
 
 function updateGuidance() {
@@ -80,6 +168,7 @@ function updatePreview() {
 
 function clearForm() {
   form.reset();
+  getSurgeryInputs().slice(1).forEach((input) => input.closest("label").remove());
   form.elements.budgetDate.value = formatDateForInput(new Date());
   updatePreview();
 }
@@ -87,7 +176,30 @@ function clearForm() {
 form.elements.budgetDate.value = formatDateForInput(new Date());
 form.addEventListener("input", updatePreview);
 form.addEventListener("change", updatePreview);
+form.addEventListener("input", (event) => {
+  if (event.target.matches(".surgery-input")) {
+    updateSurgeryHistoryOptions(event.target.value);
+  }
+});
+form.addEventListener("focusin", (event) => {
+  if (event.target.matches(".surgery-input")) {
+    updateSurgeryHistoryOptions(event.target.value);
+  }
+});
+form.addEventListener("focusout", (event) => {
+  if (event.target.matches(".surgery-input")) {
+    saveSurgeryToHistory(event.target.value);
+    updateSurgeryHistoryOptions();
+  }
+});
 clearButton.addEventListener("click", clearForm);
-printButton.addEventListener("click", () => window.print());
+addSurgeryButton.addEventListener("click", createSurgeryField);
+printButton.addEventListener("click", async () => {
+  await Promise.all(getSurgeryValues().map(saveSurgeryToHistory));
+  window.print();
+});
 
-updatePreview();
+loadSurgeryHistory().then(() => {
+  updateSurgeryHistoryOptions();
+  updatePreview();
+});
