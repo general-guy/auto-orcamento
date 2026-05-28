@@ -92,8 +92,9 @@ fieldset {
 
 legend {
   color: var(--text);
-  font-size: 0.86rem;
+  font-size: 0.9rem;
   font-weight: 700;
+  letter-spacing: -0.01em;
   padding: 0 12px 0 0;
 }
 
@@ -101,7 +102,7 @@ label {
   color: #4b5563;
   display: grid;
   gap: 6px;
-  font-size: 0.86rem;
+  font-size: 0.85rem;
   font-weight: 600;
 }
 
