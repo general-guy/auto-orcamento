@@ -3,24 +3,24 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Auto Orcamento</title>
+    <title>Auto Orçamento</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main class="app-shell">
       <section class="panel form-panel" aria-labelledby="form-title">
         <div class="panel-header">
-          <p class="eyebrow">Auto Orcamento</p>
-          <h1 id="form-title">Gerador de orcamento cirurgico</h1>
+          <p class="eyebrow">Auto Orçamento</p>
+          <h1 id="form-title">Gerador de Orçamento Cirúrgico</h1>
           <p>
-            Preencha os dados principais, selecione as orientacoes e gere uma
-            pagina pronta para impressao.
+            Preencha os dados principais, selecione as orientações e gere uma
+            página pronta para impressão.
           </p>
         </div>
 
         <form id="budget-form" class="budget-form">
           <fieldset>
-            <legend>Dados da paciente</legend>
+            <legend>Dados da Paciente</legend>
 
             <label>
               Nome da paciente
@@ -34,7 +34,7 @@
           </fieldset>
 
           <fieldset>
-            <legend>Cirurgia e hospital</legend>
+            <legend>Cirurgia e Hospital</legend>
 
             <label>
               Cirurgia proposta
@@ -48,7 +48,7 @@
 
             <label>
               Tempo previsto de hospital
-              <input id="hospitalStay" name="hospitalStay" type="text" placeholder="Ex.: 1 diaria" />
+              <input id="hospitalStay" name="hospitalStay" type="text" placeholder="Ex.: 1 diária" />
             </label>
           </fieldset>
 
@@ -79,7 +79,7 @@
           </fieldset>
 
           <fieldset>
-            <legend>Pagamento e itens incluidos</legend>
+            <legend>Pagamento e Itens Incluídos</legend>
 
             <label>
               Formas de pagamento
@@ -87,38 +87,38 @@
             </label>
 
             <label>
-              O que esta incluido
+              O que está incluído
               <textarea id="includedItems" name="includedItems" rows="3"></textarea>
             </label>
           </fieldset>
 
           <fieldset>
-            <legend>Orientacoes</legend>
+            <legend>Orientações</legend>
 
             <label class="checkbox-row">
-              <input type="checkbox" name="guidance" value="Orcamento valido por 30 dias." />
-              <span>Orcamento valido por 30 dias.</span>
+              <input type="checkbox" name="guidance" value="Orçamento válido por 30 dias." />
+              <span>Orçamento válido por 30 dias.</span>
             </label>
 
             <label class="checkbox-row">
-              <input type="checkbox" name="guidance" value="Valores sujeitos a confirmacao com o hospital." />
-              <span>Valores sujeitos a confirmacao com o hospital.</span>
+              <input type="checkbox" name="guidance" value="Valores sujeitos à confirmação com o hospital." />
+              <span>Valores sujeitos à confirmação com o hospital.</span>
             </label>
 
             <label class="checkbox-row">
-              <input type="checkbox" name="guidance" value="Materiais especiais e tecnologias podem depender da indicacao intraoperatoria." />
-              <span>Materiais especiais e tecnologias podem depender da indicacao intraoperatoria.</span>
+              <input type="checkbox" name="guidance" value="Materiais especiais e tecnologias podem depender da indicação intraoperatória." />
+              <span>Materiais especiais e tecnologias podem depender da indicação intraoperatória.</span>
             </label>
 
             <label>
-              Orientacao adicional
+              Orientação adicional
               <textarea id="customGuidance" name="customGuidance" rows="3"></textarea>
             </label>
           </fieldset>
 
           <div class="actions">
             <button type="button" id="clearButton" class="secondary-button">Limpar</button>
-            <button type="button" id="printButton">Imprimir orcamento</button>
+            <button type="button" id="printButton">Imprimir orçamento</button>
           </div>
         </form>
       </section>
@@ -126,10 +126,10 @@
       <section class="panel preview-panel" aria-labelledby="preview-title">
         <div class="preview-toolbar">
           <div>
-            <p class="eyebrow">Pre-visualizacao</p>
-            <h2 id="preview-title">Documento final</h2>
+            <p class="eyebrow">Pré-visualização</p>
+            <h2 id="preview-title">Documento Final</h2>
           </div>
-          <p>Use a impressao do navegador para gerar papel ou PDF.</p>
+          <p>Use a impressão do navegador para gerar papel ou PDF.</p>
         </div>
 
         <article class="print-page" id="printPage">
@@ -142,7 +142,7 @@
 
           <div class="document-content">
             <p class="document-date" data-preview="budgetDate"></p>
-            <h2>Orcamento cirurgico</h2>
+            <h2>Orçamento Cirúrgico</h2>
 
             <dl class="summary-list">
               <div>
@@ -188,19 +188,19 @@
             </section>
 
             <section class="document-section">
-              <h3>Formas de pagamento</h3>
+              <h3>Formas de Pagamento</h3>
               <p data-preview="paymentTerms">Preencha as formas de pagamento.</p>
             </section>
 
             <section class="document-section">
-              <h3>Itens incluidos</h3>
-              <p data-preview="includedItems">Preencha os itens incluidos no valor.</p>
+              <h3>Itens Incluídos</h3>
+              <p data-preview="includedItems">Preencha os itens incluídos no valor.</p>
             </section>
 
             <section class="document-section">
-              <h3>Orientacoes</h3>
+              <h3>Orientações</h3>
               <ul id="guidancePreview">
-                <li>Selecione as orientacoes desejadas.</li>
+                <li>Selecione as orientações desejadas.</li>
               </ul>
             </section>
           </div>

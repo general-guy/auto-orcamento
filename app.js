@@ -13,7 +13,7 @@ const previewFields = {
   technologyValue: "R$",
   totalValue: "R$",
   paymentTerms: "Preencha as formas de pagamento.",
-  includedItems: "Preencha os itens incluidos no valor.",
+  includedItems: "Preencha os itens incluídos no valor.",
 };
 
 function formatDateForInput(date) {
@@ -61,7 +61,7 @@ function updateGuidance() {
 
   if (selectedGuidance.length === 0) {
     const emptyItem = document.createElement("li");
-    emptyItem.textContent = "Selecione as orientacoes desejadas.";
+    emptyItem.textContent = "Selecione as orientações desejadas.";
     guidancePreview.append(emptyItem);
     return;
   }

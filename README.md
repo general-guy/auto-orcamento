@@ -1,10 +1,10 @@
-# Auto Orcamento
+# Auto Orçamento
 
-Projeto local para automatizar a criacao de orcamentos medicos em papel timbrado.
+Projeto local para automatizar a criação de orçamentos médicos em papel timbrado.
 
 ## Contexto
 
-Durante a consulta, o medico precisa montar um orcamento para pacientes com cirurgia programada. Hoje esse processo e feito a mao em uma folha timbrada pessoal, incluindo informacoes como:
+Durante a consulta, o médico precisa montar um orçamento para pacientes com cirurgia programada. Hoje esse processo é feito à mão em uma folha timbrada pessoal, incluindo informações como:
 
 - nome da paciente;
 - cirurgia proposta;
@@ -12,30 +12,30 @@ Durante a consulta, o medico precisa montar um orcamento para pacientes com ciru
 - tempo previsto de hospital;
 - valores de hospital, equipe e tecnologias;
 - formas de pagamento;
-- itens incluidos nos valores;
-- orientacoes adicionais.
+- itens incluídos nos valores;
+- orientações adicionais.
 
-O objetivo do projeto e reduzir a escrita manual, padronizar o documento e acelerar a entrega do orcamento ao final da consulta.
+O objetivo do projeto é reduzir a escrita manual, padronizar o documento e acelerar a entrega do orçamento ao final da consulta.
 
 ## Ideia do Produto
 
-A proposta inicial e criar um mini programa de uso local, mais rapido e direto do que editar um documento no Word. A aplicacao deve usar o papel timbrado como fundo e oferecer uma interface simples para preencher os campos variaveis do orcamento.
+A proposta inicial é criar um mini programa de uso local, mais rápido e direto do que editar um documento no Word. A aplicação deve usar o papel timbrado como fundo e oferecer uma interface simples para preencher os campos variáveis do orçamento.
 
-Tambem deve permitir selecionar modelos ou conjuntos de orientacoes por meio de opcoes como checkboxes, evitando reescrever textos repetitivos em cada consulta.
+Também deve permitir selecionar modelos ou conjuntos de orientações por meio de opções como checkboxes, evitando reescrever textos repetitivos em cada consulta.
 
-Ao final, o sistema deve gerar um documento pronto, padronizado e adequado para impressao, usando o papel timbrado como base visual.
+Ao final, o sistema deve gerar um documento pronto, padronizado e adequado para impressão, usando o papel timbrado como base visual.
 
 ## Decisao Tecnica Inicial
 
-A abordagem escolhida inicialmente e um web app local em HTML, CSS e JavaScript.
+A abordagem escolhida inicialmente é um web app local em HTML, CSS e JavaScript.
 
 Essa escolha favorece:
 
 - uso local, sem depender de servidor externo;
 - interface visual simples para preenchimento;
-- facilidade para gerar uma pagina pronta para impressao;
-- evolucao gradual do projeto sem complexidade desnecessaria.
+- facilidade para gerar uma página pronta para impressão;
+- evolução gradual do projeto sem complexidade desnecessária.
 
 ## Objetivo Principal
 
-Criar uma ferramenta que torne o preenchimento de orcamentos cirurgicos mais rapido, padronizado e profissional, preservando a apresentacao visual do papel timbrado.
+Criar uma ferramenta que torne o preenchimento de orçamentos cirúrgicos mais rápido, padronizado e profissional, preservando a apresentação visual do papel timbrado.
