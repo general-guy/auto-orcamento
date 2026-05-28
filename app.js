@@ -192,6 +192,12 @@ form.addEventListener("focusout", (event) => {
     updateSurgeryHistoryOptions();
   }
 });
+form.addEventListener("keydown", (event) => {
+  if (event.target.matches(".surgery-input") && event.shiftKey && event.key === "Enter") {
+    event.preventDefault();
+    createSurgeryField();
+  }
+});
 clearButton.addEventListener("click", clearForm);
 addSurgeryButton.addEventListener("click", createSurgeryField);
 printButton.addEventListener("click", async () => {
