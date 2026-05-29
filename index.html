@@ -58,11 +58,24 @@
               <div id="surgeryHistoryDropdown" class="history-dropdown" hidden></div>
             </div>
 
-            <label>
-              Hospital
-              <input id="hospital" name="hospital" type="text" class="hospital-input" autocomplete="off" />
+            <div class="dynamic-field-group">
+              <div id="hospitalList" class="hospital-list">
+                <label>
+                  Hospital
+                  <input id="hospital" name="hospital" type="text" class="hospital-input" autocomplete="off" />
+                </label>
+              </div>
+
+              <div class="field-actions">
+                <button type="button" id="addHospitalButton" class="add-button" aria-label="Adicionar outro hospital">
+                  +
+                </button>
+                <button type="button" id="removeHospitalButton" class="remove-button" aria-label="Remover último hospital">
+                  -
+                </button>
+              </div>
               <div id="hospitalHistoryDropdown" class="history-dropdown" hidden></div>
-            </label>
+            </div>
 
             <label>
               Tempo previsto de hospital

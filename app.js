@@ -4,10 +4,13 @@ const clearButton = document.querySelector("#clearButton");
 const shutdownButton = document.querySelector("#shutdownButton");
 const addSurgeryButton = document.querySelector("#addSurgeryButton");
 const removeSurgeryButton = document.querySelector("#removeSurgeryButton");
+const addHospitalButton = document.querySelector("#addHospitalButton");
+const removeHospitalButton = document.querySelector("#removeHospitalButton");
 const guidancePreview = document.querySelector("#guidancePreview");
 const surgeryList = document.querySelector("#surgeryList");
 const surgeryHistoryDropdown = document.querySelector("#surgeryHistoryDropdown");
 const hospitalInput = document.querySelector("#hospital");
+const hospitalList = document.querySelector("#hospitalList");
 const hospitalHistoryDropdown = document.querySelector("#hospitalHistoryDropdown");
 const patientInput = document.querySelector("#patientName");
 const patientHistoryDropdown = document.querySelector("#patientHistoryDropdown");
@@ -23,7 +26,6 @@ let isInteractingWithPatientDropdown = false;
 
 const previewFields = {
   patientName: "Nome da paciente",
-  hospital: "Hospital",
   hospitalStay: "Tempo previsto de hospital",
   hospitalValue: "R$",
   teamValue: "R$",
@@ -64,6 +66,16 @@ function getSurgeryInputs() {
 
 function getSurgeryValues() {
   return getSurgeryInputs()
+    .map((input) => input.value.trim())
+    .filter(Boolean);
+}
+
+function getHospitalInputs() {
+  return [...hospitalList.querySelectorAll(".hospital-input")];
+}
+
+function getHospitalValues() {
+  return getHospitalInputs()
     .map((input) => input.value.trim())
     .filter(Boolean);
 }
@@ -173,7 +185,7 @@ async function saveHospitalToHistory(value, sourceInput = null) {
     });
 
     hospitalHistory = await response.json();
-    updateHospitalHistoryDropdown(hospitalInput.value);
+    updateHospitalHistoryDropdown(activeHospitalInput?.value || "");
   } catch {
     console.warn("Não foi possível salvar o hospital no histórico local.");
   }
@@ -182,7 +194,7 @@ async function saveHospitalToHistory(value, sourceInput = null) {
 async function deleteHospitalFromHistory(value) {
   const deletedKey = normalizeText(value);
   hospitalHistory = hospitalHistory.filter((item) => normalizeText(item) !== deletedKey);
-  updateHospitalHistoryDropdown(hospitalInput.value);
+  updateHospitalHistoryDropdown(activeHospitalInput?.value || "");
 
   try {
     const response = await fetch("/api/hospitais", {
@@ -197,7 +209,7 @@ async function deleteHospitalFromHistory(value) {
 
     const nextHistory = await response.json();
     hospitalHistory = Array.isArray(nextHistory) ? nextHistory : hospitalHistory;
-    updateHospitalHistoryDropdown(hospitalInput.value);
+    updateHospitalHistoryDropdown(activeHospitalInput?.value || "");
   } catch {
     console.warn("Não foi possível remover o hospital do histórico local.");
   }
@@ -289,9 +301,10 @@ function showSurgeryHistoryDropdown(input) {
   updateSurgeryHistoryDropdown(input.value);
 }
 
-function showHospitalHistoryDropdown() {
-  activeHospitalInput = hospitalInput;
-  updateHospitalHistoryDropdown(hospitalInput.value);
+function showHospitalHistoryDropdown(input) {
+  activeHospitalInput = input;
+  input.closest("label").append(hospitalHistoryDropdown);
+  updateHospitalHistoryDropdown(input.value);
 }
 
 function showPatientHistoryDropdown() {
@@ -425,6 +438,24 @@ function createSurgeryField() {
   input.focus();
 }
 
+function createHospitalField() {
+  const fieldNumber = getHospitalInputs().length + 1;
+  const label = document.createElement("label");
+  label.className = "unlabeled-field";
+
+  const input = document.createElement("input");
+  input.name = "hospital";
+  input.type = "text";
+  input.className = "hospital-input";
+  input.setAttribute("aria-label", `Hospital ${fieldNumber}`);
+  input.setAttribute("autocomplete", "off");
+
+  label.append(input);
+  hospitalList.append(label);
+  updateHospitalButtons();
+  input.focus();
+}
+
 function removeLastSurgeryField() {
   const inputs = getSurgeryInputs();
   if (inputs.length <= 1) {
@@ -440,8 +471,27 @@ function removeLastSurgeryField() {
   updatePreview();
 }
 
+function removeLastHospitalField() {
+  const inputs = getHospitalInputs();
+  if (inputs.length <= 1) {
+    inputs[0].value = "";
+    inputs[0].focus();
+    updatePreview();
+    return;
+  }
+
+  inputs.at(-1).closest("label").remove();
+  getHospitalInputs().at(-1).focus();
+  updateHospitalButtons();
+  updatePreview();
+}
+
 function updateSurgeryButtons() {
   removeSurgeryButton.disabled = getSurgeryInputs().length <= 1;
+}
+
+function updateHospitalButtons() {
+  removeHospitalButton.disabled = getHospitalInputs().length <= 1;
 }
 
 function isTextField(element) {
@@ -501,17 +551,22 @@ function selectSurgeryHistoryOption(option, shouldAdvance = false) {
 }
 
 function selectHospitalHistoryOption(option, shouldAdvance = false) {
-  hospitalInput.value = option.dataset.value;
+  const input = activeHospitalInput;
+  if (!input) {
+    return;
+  }
+
+  input.value = option.dataset.value;
   updatePreview();
   isInteractingWithHospitalDropdown = false;
   hideHospitalHistoryDropdown();
 
   if (shouldAdvance) {
-    focusNextTextField(hospitalInput);
+    focusNextTextField(input);
     return;
   }
 
-  hospitalInput.focus();
+  input.focus();
 }
 
 function selectPatientHistoryOption(option, shouldAdvance = false) {
@@ -543,6 +598,9 @@ function updateSimpleFields() {
 
   const surgeryPreview = document.querySelector('[data-preview="surgery"]');
   surgeryPreview.textContent = getSurgeryValues().join("\n") || "Cirurgia proposta";
+
+  const hospitalPreview = document.querySelector('[data-preview="hospital"]');
+  hospitalPreview.textContent = getHospitalValues().join("\n") || "Hospital";
 }
 
 function updateGuidance() {
@@ -578,8 +636,10 @@ function updatePreview() {
 function clearForm() {
   form.reset();
   getSurgeryInputs().slice(1).forEach((input) => input.closest("label").remove());
+  getHospitalInputs().slice(1).forEach((input) => input.closest("label").remove());
   form.elements.budgetDate.value = formatDateForInput(new Date());
   updateSurgeryButtons();
+  updateHospitalButtons();
   updatePreview();
 }
 
@@ -608,7 +668,7 @@ form.addEventListener("input", (event) => {
       delete event.target.dataset.skipHistoryValue;
     }
 
-    showHospitalHistoryDropdown();
+    showHospitalHistoryDropdown(event.target);
   }
 });
 form.addEventListener("focusin", (event) => {
@@ -621,7 +681,7 @@ form.addEventListener("focusin", (event) => {
   }
 
   if (event.target.matches(".hospital-input")) {
-    showHospitalHistoryDropdown();
+    showHospitalHistoryDropdown(event.target);
   }
 });
 form.addEventListener("focusout", (event) => {
@@ -665,6 +725,12 @@ form.addEventListener("keydown", (event) => {
     return;
   }
 
+  if (event.target.matches(".hospital-input") && event.shiftKey && event.key === "Enter") {
+    event.preventDefault();
+    createHospitalField();
+    return;
+  }
+
   if (event.target.matches(".patient-input") && event.key === "ArrowDown") {
     event.preventDefault();
     showPatientHistoryDropdown();
@@ -678,7 +744,7 @@ form.addEventListener("keydown", (event) => {
 
   if (event.target.matches(".hospital-input") && event.key === "ArrowDown") {
     event.preventDefault();
-    showHospitalHistoryDropdown();
+    showHospitalHistoryDropdown(event.target);
     isInteractingWithHospitalDropdown = true;
     focusDropdownOption(hospitalHistoryDropdown, 0);
     setTimeout(() => {
@@ -711,7 +777,7 @@ form.addEventListener("keydown", (event) => {
 
   if (event.target.matches(".hospital-input") && event.key === "ArrowUp") {
     event.preventDefault();
-    showHospitalHistoryDropdown();
+    showHospitalHistoryDropdown(event.target);
     isInteractingWithHospitalDropdown = true;
     focusDropdownOption(hospitalHistoryDropdown, getDropdownOptions(hospitalHistoryDropdown).length - 1);
     setTimeout(() => {
@@ -872,10 +938,11 @@ hospitalHistoryDropdown.addEventListener("click", (event) => {
   const optionText = option.dataset.value;
   if (event.target.closest(".history-delete")) {
     event.stopPropagation();
-    hospitalInput.dataset.skipHistoryValue = normalizeText(optionText);
+    const input = activeHospitalInput;
+    input.dataset.skipHistoryValue = normalizeText(optionText);
     deleteHospitalFromHistory(optionText);
-    updateHospitalHistoryDropdown(hospitalInput.value);
-    hospitalInput.focus();
+    updateHospitalHistoryDropdown(input.value);
+    input.focus();
     isInteractingWithHospitalDropdown = false;
     return;
   }
@@ -884,7 +951,7 @@ hospitalHistoryDropdown.addEventListener("click", (event) => {
 });
 hospitalHistoryDropdown.addEventListener("keydown", (event) => {
   const option = event.target.closest(".history-option");
-  if (!option) {
+  if (!option || !activeHospitalInput) {
     return;
   }
 
@@ -899,7 +966,7 @@ hospitalHistoryDropdown.addEventListener("keydown", (event) => {
   if (event.key === "ArrowUp") {
     event.preventDefault();
     if (currentIndex <= 0) {
-      hospitalInput.focus();
+      activeHospitalInput.focus();
       return;
     }
 
@@ -915,7 +982,7 @@ hospitalHistoryDropdown.addEventListener("keydown", (event) => {
     event.preventDefault();
     isInteractingWithHospitalDropdown = false;
     hideHospitalHistoryDropdown();
-    hospitalInput.focus();
+    activeHospitalInput.focus();
   }
 });
 document.addEventListener("pointerdown", (event) => {
@@ -937,12 +1004,14 @@ document.addEventListener("pointerdown", (event) => {
 clearButton.addEventListener("click", clearForm);
 addSurgeryButton.addEventListener("click", createSurgeryField);
 removeSurgeryButton.addEventListener("click", removeLastSurgeryField);
+addHospitalButton.addEventListener("click", createHospitalField);
+removeHospitalButton.addEventListener("click", removeLastHospitalField);
 printButton.addEventListener("click", async () => {
   await Promise.all(
     [
       savePatientToHistory(patientInput.value, patientInput),
       ...getSurgeryInputs().map((input) => saveSurgeryToHistory(input.value, input)),
-      saveHospitalToHistory(hospitalInput.value, hospitalInput),
+      ...getHospitalInputs().map((input) => saveHospitalToHistory(input.value, input)),
     ]
   );
   window.print();
@@ -967,5 +1036,6 @@ Promise.all([loadPatientHistory(), loadSurgeryHistory(), loadHospitalHistory()])
   hideHospitalHistoryDropdown();
   hidePatientHistoryDropdown();
   updateSurgeryButtons();
+  updateHospitalButtons();
   updatePreview();
 });
