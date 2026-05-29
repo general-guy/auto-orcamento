@@ -466,7 +466,6 @@ function removeLastSurgeryField() {
   }
 
   inputs.at(-1).closest("label").remove();
-  getSurgeryInputs().at(-1).focus();
   updateSurgeryButtons();
   updatePreview();
 }
@@ -481,7 +480,6 @@ function removeLastHospitalField() {
   }
 
   inputs.at(-1).closest("label").remove();
-  getHospitalInputs().at(-1).focus();
   updateHospitalButtons();
   updatePreview();
 }
