@@ -432,6 +432,29 @@ textarea:focus {
   border-top: 1px solid rgba(31, 41, 51, 0.22);
 }
 
+.summary-list .summary-stacked {
+  border: 0;
+  border-radius: 0;
+  gap: 5px;
+  grid-template-columns: 1fr;
+  overflow: visible;
+}
+
+.summary-list .summary-stacked + .summary-stacked {
+  border-top: 0;
+}
+
+.summary-stacked dt {
+  background: transparent;
+  padding: 0;
+}
+
+.summary-stacked dd {
+  border: 1px solid rgba(31, 41, 51, 0.22);
+  border-radius: 9px;
+  padding: 8px 10px;
+}
+
 dt,
 dd {
   font-size: 0.9rem;
