@@ -452,6 +452,7 @@ textarea:focus {
 .summary-stacked dd {
   border: 1px solid rgba(31, 41, 51, 0.22);
   border-radius: 9px;
+  line-height: 1.35;
   padding: 8px 10px;
 }
 
