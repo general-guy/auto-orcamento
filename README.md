@@ -64,6 +64,7 @@ Os históricos ficam salvos em:
 ```text
 data/cirurgias.json
 data/hospitais.json
+data/pacientes.json
 ```
 
 ## Objetivo Principal

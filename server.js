@@ -7,6 +7,7 @@ const rootDir = __dirname;
 const dataDir = path.join(rootDir, "data");
 const surgeriesFile = path.join(dataDir, "cirurgias.json");
 const hospitalsFile = path.join(dataDir, "hospitais.json");
+const patientsFile = path.join(dataDir, "pacientes.json");
 
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
@@ -33,6 +34,10 @@ function ensureDataFile() {
 
   if (!fs.existsSync(hospitalsFile)) {
     fs.writeFileSync(hospitalsFile, "[]\n", "utf8");
+  }
+
+  if (!fs.existsSync(patientsFile)) {
+    fs.writeFileSync(patientsFile, "[]\n", "utf8");
   }
 }
 
@@ -157,6 +162,11 @@ const server = http.createServer(async (request, response) => {
 
     if (request.url.startsWith("/api/hospitais")) {
       await handleHistoryApi(request, response, hospitalsFile, "um hospital válido");
+      return;
+    }
+
+    if (request.url.startsWith("/api/pacientes")) {
+      await handleHistoryApi(request, response, patientsFile, "um paciente válido");
       return;
     }
 
