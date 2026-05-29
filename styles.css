@@ -173,7 +173,8 @@ textarea {
 }
 
 .dynamic-field-group,
-.surgery-list {
+.surgery-list,
+.hospital-list {
   display: grid;
   gap: 10px;
 }
