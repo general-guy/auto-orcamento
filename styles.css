@@ -284,10 +284,40 @@ button:hover {
   background: #ececec;
 }
 
+.danger-button {
+  background: #fff1f0;
+  color: #b42318;
+}
+
+.danger-button:hover {
+  background: #ffe4e0;
+}
+
+.danger-button:disabled {
+  cursor: wait;
+  opacity: 0.8;
+}
+
 button:focus-visible,
 input:focus,
 textarea:focus {
   box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.shutdown-message {
+  display: grid;
+  min-height: 100vh;
+  place-content: center;
+  text-align: center;
+}
+
+.shutdown-message h1 {
+  margin: 0 0 8px;
+}
+
+.shutdown-message p {
+  color: var(--muted);
+  margin: 0;
 }
 
 .preview-panel {

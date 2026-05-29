@@ -1,6 +1,7 @@
 const form = document.querySelector("#budget-form");
 const printButton = document.querySelector("#printButton");
 const clearButton = document.querySelector("#clearButton");
+const shutdownButton = document.querySelector("#shutdownButton");
 const addSurgeryButton = document.querySelector("#addSurgeryButton");
 const removeSurgeryButton = document.querySelector("#removeSurgeryButton");
 const guidancePreview = document.querySelector("#guidancePreview");
@@ -945,6 +946,19 @@ printButton.addEventListener("click", async () => {
     ]
   );
   window.print();
+});
+shutdownButton.addEventListener("click", async () => {
+  shutdownButton.disabled = true;
+  shutdownButton.textContent = "Encerrando...";
+
+  try {
+    await fetch("/api/shutdown", { method: "POST" });
+  } catch {
+    // O servidor pode encerrar antes de responder completamente.
+  }
+
+  window.close();
+  document.body.innerHTML = "<main class=\"shutdown-message\"><h1>Auto Orçamento encerrado</h1><p>Você já pode fechar esta aba.</p></main>";
 });
 
 Promise.all([loadPatientHistory(), loadSurgeryHistory(), loadHospitalHistory()]).then(() => {

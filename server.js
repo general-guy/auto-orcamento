@@ -155,6 +155,19 @@ function serveStaticFile(request, response) {
 
 const server = http.createServer(async (request, response) => {
   try {
+    if (request.url.startsWith("/api/shutdown")) {
+      if (request.method !== "POST") {
+        sendJson(response, 405, { error: "Método não permitido." });
+        return;
+      }
+
+      sendJson(response, 200, { ok: true });
+      setTimeout(() => {
+        server.close(() => process.exit(0));
+      }, 100);
+      return;
+    }
+
     if (request.url.startsWith("/api/cirurgias")) {
       await handleHistoryApi(request, response, surgeriesFile, "uma cirurgia válida");
       return;
