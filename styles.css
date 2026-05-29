@@ -206,8 +206,10 @@ textarea {
   text-align: left;
 }
 
-.history-option:hover {
+.history-option:hover,
+.history-option:focus {
   background: var(--primary-soft);
+  outline: none;
 }
 
 .history-delete {

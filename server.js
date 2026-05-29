@@ -6,6 +6,7 @@ const port = 3000;
 const rootDir = __dirname;
 const dataDir = path.join(rootDir, "data");
 const surgeriesFile = path.join(dataDir, "cirurgias.json");
+const hospitalsFile = path.join(dataDir, "hospitais.json");
 
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
@@ -29,23 +30,27 @@ function ensureDataFile() {
   if (!fs.existsSync(surgeriesFile)) {
     fs.writeFileSync(surgeriesFile, "[]\n", "utf8");
   }
+
+  if (!fs.existsSync(hospitalsFile)) {
+    fs.writeFileSync(hospitalsFile, "[]\n", "utf8");
+  }
 }
 
-function readSurgeries() {
+function readJsonList(filePath) {
   ensureDataFile();
 
   try {
-    const content = fs.readFileSync(surgeriesFile, "utf8");
-    const surgeries = JSON.parse(content);
-    return Array.isArray(surgeries) ? surgeries : [];
+    const content = fs.readFileSync(filePath, "utf8");
+    const items = JSON.parse(content);
+    return Array.isArray(items) ? items : [];
   } catch {
     return [];
   }
 }
 
-function writeSurgeries(surgeries) {
+function writeJsonList(filePath, items) {
   ensureDataFile();
-  fs.writeFileSync(surgeriesFile, `${JSON.stringify(surgeries, null, 2)}\n`, "utf8");
+  fs.writeFileSync(filePath, `${JSON.stringify(items, null, 2)}\n`, "utf8");
 }
 
 function sendJson(response, statusCode, data) {
@@ -71,46 +76,46 @@ function collectRequestBody(request) {
   });
 }
 
-async function handleSurgeriesApi(request, response) {
+async function handleHistoryApi(request, response, filePath, itemLabel) {
   if (request.method === "GET") {
-    sendJson(response, 200, readSurgeries());
+    sendJson(response, 200, readJsonList(filePath));
     return;
   }
 
   if (request.method === "POST") {
     const body = await collectRequestBody(request);
     const { value } = JSON.parse(body || "{}");
-    const surgery = typeof value === "string" ? value.trim() : "";
+    const item = typeof value === "string" ? value.trim() : "";
 
-    if (!surgery) {
-      sendJson(response, 400, { error: "Informe uma cirurgia válida." });
+    if (!item) {
+      sendJson(response, 400, { error: `Informe ${itemLabel}.` });
       return;
     }
 
-    const surgeries = readSurgeries();
-    const alreadyExists = surgeries.some((item) => normalizeText(item) === normalizeText(surgery));
-    const nextSurgeries = alreadyExists ? surgeries : [surgery, ...surgeries].slice(0, 200);
+    const items = readJsonList(filePath);
+    const alreadyExists = items.some((existingItem) => normalizeText(existingItem) === normalizeText(item));
+    const nextItems = alreadyExists ? items : [item, ...items].slice(0, 200);
 
-    writeSurgeries(nextSurgeries);
-    sendJson(response, 200, nextSurgeries);
+    writeJsonList(filePath, nextItems);
+    sendJson(response, 200, nextItems);
     return;
   }
 
   if (request.method === "DELETE") {
     const body = await collectRequestBody(request);
     const { value } = JSON.parse(body || "{}");
-    const surgery = typeof value === "string" ? value.trim() : "";
+    const item = typeof value === "string" ? value.trim() : "";
 
-    if (!surgery) {
-      sendJson(response, 400, { error: "Informe uma cirurgia válida." });
+    if (!item) {
+      sendJson(response, 400, { error: `Informe ${itemLabel}.` });
       return;
     }
 
-    const nextSurgeries = readSurgeries()
-      .filter((item) => normalizeText(item) !== normalizeText(surgery));
+    const nextItems = readJsonList(filePath)
+      .filter((existingItem) => normalizeText(existingItem) !== normalizeText(item));
 
-    writeSurgeries(nextSurgeries);
-    sendJson(response, 200, nextSurgeries);
+    writeJsonList(filePath, nextItems);
+    sendJson(response, 200, nextItems);
     return;
   }
 
@@ -146,7 +151,12 @@ function serveStaticFile(request, response) {
 const server = http.createServer(async (request, response) => {
   try {
     if (request.url.startsWith("/api/cirurgias")) {
-      await handleSurgeriesApi(request, response);
+      await handleHistoryApi(request, response, surgeriesFile, "uma cirurgia válida");
+      return;
+    }
+
+    if (request.url.startsWith("/api/hospitais")) {
+      await handleHistoryApi(request, response, hospitalsFile, "um hospital válido");
       return;
     }
 

@@ -59,10 +59,11 @@ Depois acesse:
 http://localhost:3000
 ```
 
-O histórico de cirurgias fica salvo em:
+Os históricos ficam salvos em:
 
 ```text
 data/cirurgias.json
+data/hospitais.json
 ```
 
 ## Objetivo Principal
