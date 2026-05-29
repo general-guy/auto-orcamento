@@ -1,3 +1,39 @@
+@font-face {
+  font-family: "Gotham Local";
+  font-weight: 400;
+  src: url("assets/fonts/gotham/Gotham-Book.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Gotham Local";
+  font-weight: 500;
+  src: url("assets/fonts/gotham/Gotham-Medium.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Gotham Local";
+  font-weight: 700;
+  src: url("assets/fonts/gotham/Gotham-Bold.otf") format("opentype");
+}
+
+@font-face {
+  font-family: "Cinzel Local";
+  font-weight: 400;
+  src: url("assets/fonts/cinzel/Cinzel-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Cinzel Local";
+  font-weight: 600;
+  src: url("assets/fonts/cinzel/Cinzel-SemiBold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Cinzel Local";
+  font-weight: 700;
+  src: url("assets/fonts/cinzel/Cinzel-Bold.ttf") format("truetype");
+}
+
 :root {
   --background: #fafafa;
   --panel: #ffffff;
@@ -8,6 +44,8 @@
   --primary-dark: #1648c5;
   --primary-soft: #edf3ff;
   --soft: #f7f7f7;
+  --brand-font-primary: "Gotham Local", "Gotham", "Montserrat", "Avenir Next", Arial, sans-serif;
+  --brand-font-highlight: "Cinzel Local", "Cinzel", "Times New Roman", Georgia, serif;
   --paper-width: 210mm;
   --paper-height: 297mm;
 }
@@ -395,6 +433,7 @@ textarea:focus {
 .document-content {
   display: flex;
   flex-direction: column;
+  font-family: var(--brand-font-primary);
   gap: 11px;
   inset: 38mm 20mm 28mm;
   position: absolute;
@@ -408,8 +447,11 @@ textarea:focus {
 }
 
 .document-content h2 {
+  color: #192036;
+  font-family: var(--brand-font-highlight);
   font-size: 1.35rem;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   margin: 0 0 6px;
   text-align: center;
 }
@@ -417,7 +459,7 @@ textarea:focus {
 .summary-list {
   display: grid;
   gap: 16px;
-  margin: 0;
+  margin: 8px 0 0;
 }
 
 .summary-list div {
@@ -446,6 +488,10 @@ textarea:focus {
 
 .summary-stacked dt {
   background: transparent;
+  color: #192036;
+  font-family: var(--brand-font-highlight);
+  font-weight: 600;
+  letter-spacing: 0.02em;
   padding: 0;
 }
 
@@ -475,7 +521,11 @@ dt {
 }
 
 .document-section h3 {
+  color: #192036;
+  font-family: var(--brand-font-highlight);
   font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   margin: 0;
 }
 
@@ -501,6 +551,7 @@ td {
 
 th {
   background: rgba(255, 255, 255, 0.72);
+  color: #192036;
   width: 42mm;
 }
 
