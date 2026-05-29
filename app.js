@@ -5,8 +5,10 @@ const addSurgeryButton = document.querySelector("#addSurgeryButton");
 const removeSurgeryButton = document.querySelector("#removeSurgeryButton");
 const guidancePreview = document.querySelector("#guidancePreview");
 const surgeryList = document.querySelector("#surgeryList");
-const surgeryHistoryOptions = document.querySelector("#surgeryHistoryOptions");
+const surgeryHistoryDropdown = document.querySelector("#surgeryHistoryDropdown");
 let surgeryHistory = [];
+let activeSurgeryInput = null;
+let isInteractingWithHistoryDropdown = false;
 
 const previewFields = {
   patientName: "Nome da paciente",
@@ -64,9 +66,13 @@ async function loadSurgeryHistory() {
   }
 }
 
-async function saveSurgeryToHistory(value) {
+async function saveSurgeryToHistory(value, sourceInput = null) {
   const surgery = value.trim();
   if (!surgery) {
+    return;
+  }
+
+  if (sourceInput?.dataset.skipHistoryValue === normalizeText(surgery)) {
     return;
   }
 
@@ -83,23 +89,86 @@ async function saveSurgeryToHistory(value) {
     });
 
     surgeryHistory = await response.json();
-    updateSurgeryHistoryOptions();
+    if (activeSurgeryInput) {
+      updateSurgeryHistoryDropdown(activeSurgeryInput.value);
+    }
   } catch {
     console.warn("Não foi possível salvar a cirurgia no histórico local.");
   }
 }
 
-function updateSurgeryHistoryOptions(query = "") {
+async function deleteSurgeryFromHistory(value) {
+  const deletedKey = normalizeText(value);
+  surgeryHistory = surgeryHistory.filter((item) => normalizeText(item) !== deletedKey);
+  updateSurgeryHistoryDropdown(activeSurgeryInput?.value || "");
+
+  try {
+    const response = await fetch("/api/cirurgias", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ value }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Falha ao remover no servidor.");
+    }
+
+    const nextHistory = await response.json();
+    surgeryHistory = Array.isArray(nextHistory) ? nextHistory : surgeryHistory;
+    updateSurgeryHistoryDropdown(activeSurgeryInput?.value || "");
+  } catch {
+    console.warn("Não foi possível remover a cirurgia do histórico local.");
+  }
+}
+
+function hideSurgeryHistoryDropdown() {
+  if (isInteractingWithHistoryDropdown) {
+    return;
+  }
+
+  surgeryHistoryDropdown.hidden = true;
+  activeSurgeryInput = null;
+}
+
+function showSurgeryHistoryDropdown(input) {
+  activeSurgeryInput = input;
+  input.closest("label").append(surgeryHistoryDropdown);
+  updateSurgeryHistoryDropdown(input.value);
+}
+
+function updateSurgeryHistoryDropdown(query = "") {
+  if (!activeSurgeryInput) {
+    surgeryHistoryDropdown.hidden = true;
+    return;
+  }
+
   const normalizedQuery = normalizeText(query);
   const options = surgeryHistory
     .filter((item) => !normalizedQuery || normalizeText(item).includes(normalizedQuery))
     .slice(0, 12);
 
-  surgeryHistoryOptions.innerHTML = "";
+  surgeryHistoryDropdown.innerHTML = "";
+  surgeryHistoryDropdown.hidden = options.length === 0;
+
   options.forEach((optionText) => {
-    const option = document.createElement("option");
-    option.value = optionText;
-    surgeryHistoryOptions.append(option);
+    const option = document.createElement("div");
+    option.className = "history-option";
+    option.dataset.value = optionText;
+    option.setAttribute("role", "button");
+    option.setAttribute("tabindex", "0");
+
+    const optionLabel = document.createElement("span");
+    optionLabel.textContent = optionText;
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "history-delete";
+    deleteButton.textContent = "x";
+    deleteButton.setAttribute("aria-label", `Remover ${optionText} do histórico`);
+
+    option.append(optionLabel);
+    option.append(deleteButton);
+    surgeryHistoryDropdown.append(option);
   });
 }
 
@@ -113,7 +182,6 @@ function createSurgeryField() {
   input.type = "text";
   input.className = "surgery-input";
   input.setAttribute("aria-label", `Cirurgia proposta ${fieldNumber}`);
-  input.setAttribute("list", "surgeryHistoryOptions");
   input.setAttribute("autocomplete", "off");
 
   label.append(input);
@@ -218,18 +286,24 @@ form.addEventListener("input", updatePreview);
 form.addEventListener("change", updatePreview);
 form.addEventListener("input", (event) => {
   if (event.target.matches(".surgery-input")) {
-    updateSurgeryHistoryOptions(event.target.value);
+    if (event.target.dataset.skipHistoryValue !== normalizeText(event.target.value)) {
+      delete event.target.dataset.skipHistoryValue;
+    }
+
+    showSurgeryHistoryDropdown(event.target);
   }
 });
 form.addEventListener("focusin", (event) => {
   if (event.target.matches(".surgery-input")) {
-    updateSurgeryHistoryOptions(event.target.value);
+    showSurgeryHistoryDropdown(event.target);
   }
 });
 form.addEventListener("focusout", (event) => {
   if (event.target.matches(".surgery-input")) {
-    saveSurgeryToHistory(event.target.value);
-    updateSurgeryHistoryOptions();
+    if (!isInteractingWithHistoryDropdown) {
+      saveSurgeryToHistory(event.target.value, event.target);
+      hideSurgeryHistoryDropdown();
+    }
   }
 });
 form.addEventListener("keydown", (event) => {
@@ -244,16 +318,57 @@ form.addEventListener("keydown", (event) => {
     focusNextTextField(event.target);
   }
 });
+surgeryHistoryDropdown.addEventListener("pointerdown", (event) => {
+  isInteractingWithHistoryDropdown = true;
+  event.preventDefault();
+});
+surgeryHistoryDropdown.addEventListener("click", (event) => {
+  const option = event.target.closest(".history-option");
+  if (!option || !activeSurgeryInput) {
+    return;
+  }
+
+  const optionText = option.dataset.value;
+  if (event.target.closest(".history-delete")) {
+    event.stopPropagation();
+    const input = activeSurgeryInput;
+    input.dataset.skipHistoryValue = normalizeText(optionText);
+    deleteSurgeryFromHistory(optionText);
+    updateSurgeryHistoryDropdown(input.value);
+    input.focus();
+    isInteractingWithHistoryDropdown = false;
+    return;
+  }
+
+  const input = activeSurgeryInput;
+  input.value = optionText;
+  updatePreview();
+  isInteractingWithHistoryDropdown = false;
+  hideSurgeryHistoryDropdown();
+  input.focus();
+});
+document.addEventListener("pointerdown", (event) => {
+  if (
+    event.target.closest(".surgery-input") ||
+    event.target.closest("#surgeryHistoryDropdown")
+  ) {
+    return;
+  }
+
+  hideSurgeryHistoryDropdown();
+});
 clearButton.addEventListener("click", clearForm);
 addSurgeryButton.addEventListener("click", createSurgeryField);
 removeSurgeryButton.addEventListener("click", removeLastSurgeryField);
 printButton.addEventListener("click", async () => {
-  await Promise.all(getSurgeryValues().map(saveSurgeryToHistory));
+  await Promise.all(
+    getSurgeryInputs().map((input) => saveSurgeryToHistory(input.value, input))
+  );
   window.print();
 });
 
 loadSurgeryHistory().then(() => {
-  updateSurgeryHistoryOptions();
+  updateSurgeryHistoryDropdown();
   updateSurgeryButtons();
   updatePreview();
 });

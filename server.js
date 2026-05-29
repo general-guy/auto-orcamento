@@ -96,6 +96,24 @@ async function handleSurgeriesApi(request, response) {
     return;
   }
 
+  if (request.method === "DELETE") {
+    const body = await collectRequestBody(request);
+    const { value } = JSON.parse(body || "{}");
+    const surgery = typeof value === "string" ? value.trim() : "";
+
+    if (!surgery) {
+      sendJson(response, 400, { error: "Informe uma cirurgia válida." });
+      return;
+    }
+
+    const nextSurgeries = readSurgeries()
+      .filter((item) => normalizeText(item) !== normalizeText(surgery));
+
+    writeSurgeries(nextSurgeries);
+    sendJson(response, 200, nextSurgeries);
+    return;
+  }
+
   sendJson(response, 405, { error: "Método não permitido." });
 }
 

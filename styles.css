@@ -104,6 +104,7 @@ label {
   gap: 6px;
   font-size: 0.85rem;
   font-weight: 600;
+  position: relative;
 }
 
 input,
@@ -171,6 +172,67 @@ textarea {
 
 .remove-button:disabled:hover {
   background: var(--primary-soft);
+}
+
+.history-dropdown {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(31, 41, 51, 0.12);
+  display: grid;
+  left: 0;
+  overflow: hidden;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 20;
+}
+
+.history-dropdown[hidden] {
+  display: none;
+}
+
+.history-option {
+  align-items: center;
+  background: #ffffff;
+  border-radius: 0;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  font-size: 0.88rem;
+  font-weight: 500;
+  justify-content: space-between;
+  padding: 9px 10px;
+  text-align: left;
+}
+
+.history-option:hover {
+  background: var(--primary-soft);
+}
+
+.history-delete {
+  align-items: center;
+  background: transparent;
+  border-radius: 999px;
+  color: #7a8493;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 20px;
+  justify-content: center;
+  margin-left: 12px;
+  opacity: 0;
+  padding: 0;
+  width: 20px;
+}
+
+.history-option:hover .history-delete,
+.history-delete:focus {
+  opacity: 1;
+}
+
+.history-delete:hover {
+  background: #ffffff;
+  color: #d92d20;
 }
 
 .checkbox-row {
