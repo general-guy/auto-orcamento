@@ -315,8 +315,8 @@ button:hover {
   border-radius: 999px;
   content: "";
   display: block;
-  height: 2px;
-  width: 13px;
+  height: 3px;
+  width: 14px;
 }
 
 .close-button span {
