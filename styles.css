@@ -415,20 +415,21 @@ textarea:focus {
 }
 
 .summary-list {
-  border: 1px solid rgba(31, 41, 51, 0.22);
-  border-radius: 10px;
   display: grid;
+  gap: 16px;
   margin: 0;
-  overflow: hidden;
 }
 
 .summary-list div {
+  border: 1px solid rgba(31, 41, 51, 0.22);
+  border-radius: 9px;
   display: grid;
   grid-template-columns: 42mm 1fr;
+  overflow: hidden;
 }
 
 .summary-list div + div {
-  border-top: 1px solid rgba(31, 41, 51, 0.14);
+  border-top: 1px solid rgba(31, 41, 51, 0.22);
 }
 
 dt,
