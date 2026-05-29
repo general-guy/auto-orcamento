@@ -135,7 +135,6 @@
           </fieldset>
 
           <div class="actions">
-            <button type="button" id="shutdownButton" class="danger-button">Encerrar</button>
             <button type="button" id="clearButton" class="secondary-button">Limpar</button>
             <button type="button" id="printButton">Imprimir orçamento</button>
           </div>
@@ -148,7 +147,12 @@
             <p class="eyebrow">Pré-visualização</p>
             <h2 id="preview-title">Documento Final</h2>
           </div>
-          <p>Use a impressão do navegador para gerar papel ou PDF.</p>
+          <div class="preview-actions">
+            <button type="button" id="shutdownButton" class="danger-button close-button" aria-label="Encerrar programa">
+              <span aria-hidden="true"></span>
+            </button>
+            <p>Use a impressão do navegador para gerar papel ou PDF.</p>
+          </div>
         </div>
 
         <article class="print-page" id="printPage">

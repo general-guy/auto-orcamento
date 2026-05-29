@@ -285,17 +285,46 @@ button:hover {
 }
 
 .danger-button {
-  background: #fff1f0;
-  color: #b42318;
+  background: #d92d20;
+  color: #ffffff;
 }
 
 .danger-button:hover {
-  background: #ffe4e0;
+  background: #b42318;
 }
 
 .danger-button:disabled {
   cursor: wait;
   opacity: 0.8;
+}
+
+.close-button {
+  align-items: center;
+  border-radius: 10px;
+  display: inline-flex;
+  height: 32px;
+  justify-content: center;
+  padding: 0;
+  position: relative;
+  width: 32px;
+}
+
+.close-button span,
+.close-button span::after {
+  background: #ffffff;
+  border-radius: 999px;
+  content: "";
+  display: block;
+  height: 2px;
+  width: 13px;
+}
+
+.close-button span {
+  transform: rotate(45deg);
+}
+
+.close-button span::after {
+  transform: rotate(90deg);
 }
 
 button:focus-visible,
@@ -331,6 +360,13 @@ textarea:focus {
   align-items: end;
   display: flex;
   justify-content: space-between;
+}
+
+.preview-actions {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+  text-align: right;
 }
 
 .print-page {
