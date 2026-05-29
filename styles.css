@@ -458,7 +458,7 @@ textarea:focus {
 
 .summary-list {
   display: grid;
-  gap: 16px;
+  gap: 12px;
   margin: 8px 0 0;
 }
 
