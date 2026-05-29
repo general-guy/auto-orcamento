@@ -503,6 +503,17 @@ textarea:focus {
   padding: 8px 10px;
 }
 
+.summary-stacked .summary-inline {
+  display: grid;
+  grid-template-columns: 42mm 1fr;
+  padding: 0;
+}
+
+.summary-inline strong,
+.summary-inline span {
+  padding: 8px 10px;
+}
+
 dt,
 dd {
   font-size: 0.9rem;
