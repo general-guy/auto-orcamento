@@ -581,6 +581,26 @@ function selectPatientHistoryOption(option, shouldAdvance = false) {
   patientInput.focus();
 }
 
+function updateHospitalPreview() {
+  const hospitalSummary = document.querySelector(".hospital-summary");
+  if (!hospitalSummary) {
+    return;
+  }
+
+  hospitalSummary.querySelectorAll(".hospital-preview-item").forEach((item) => item.remove());
+
+  const hospitals = getHospitalValues();
+  const previewValues = hospitals.length > 0 ? hospitals : ["Hospital"];
+
+  previewValues.forEach((hospital) => {
+    const previewItem = document.createElement("dd");
+    previewItem.className = "hospital-preview-item";
+    previewItem.dataset.preview = "hospital";
+    previewItem.textContent = hospital;
+    hospitalSummary.append(previewItem);
+  });
+}
+
 function updateSimpleFields() {
   Object.entries(previewFields).forEach(([fieldName, fallback]) => {
     const preview = document.querySelector(`[data-preview="${fieldName}"]`);
@@ -597,8 +617,7 @@ function updateSimpleFields() {
   const surgeryPreview = document.querySelector('[data-preview="surgery"]');
   surgeryPreview.textContent = getSurgeryValues().join("\n") || "Cirurgia proposta";
 
-  const hospitalPreview = document.querySelector('[data-preview="hospital"]');
-  hospitalPreview.textContent = getHospitalValues().join("\n") || "Hospital";
+  updateHospitalPreview();
 }
 
 function updateGuidance() {
