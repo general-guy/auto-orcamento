@@ -217,6 +217,89 @@ function createHospitalDetailEntry(detailList, detailConfig, shouldFocus = false
   }
 }
 
+function createHospitalDetailActions() {
+  const actions = document.createElement("div");
+  actions.className = "hospital-detail-actions";
+
+  const addButton = document.createElement("button");
+  addButton.type = "button";
+  addButton.className = "add-button hospital-detail-add";
+  addButton.textContent = "+";
+  addButton.setAttribute("aria-label", "Adicionar entrada adicional");
+
+  const removeButton = document.createElement("button");
+  removeButton.type = "button";
+  removeButton.className = "remove-button hospital-detail-remove";
+  removeButton.textContent = "-";
+  removeButton.setAttribute("aria-label", "Remover última entrada adicional");
+
+  actions.append(addButton);
+  actions.append(removeButton);
+
+  return actions;
+}
+
+function wrapHospitalInputWithActions(input) {
+  if (input.parentElement?.classList.contains("hospital-control-row")) {
+    return input.parentElement;
+  }
+
+  const controlRow = document.createElement("div");
+  controlRow.className = "hospital-control-row";
+  input.insertAdjacentElement("beforebegin", controlRow);
+  controlRow.append(input);
+  controlRow.append(createHospitalDetailActions());
+
+  return controlRow;
+}
+
+function unwrapHospitalInput(input) {
+  const controlRow = input.parentElement;
+  if (!controlRow?.classList.contains("hospital-control-row")) {
+    return;
+  }
+
+  controlRow.insertAdjacentElement("beforebegin", input);
+  controlRow.remove();
+}
+
+function updateHospitalDetailButtons(detailList) {
+  const label = detailList.closest("label");
+  const removeButton = label.querySelector(".hospital-detail-remove");
+  if (!removeButton) {
+    return;
+  }
+
+  removeButton.disabled = detailList.querySelectorAll(".hospital-detail-field").length <= 1;
+}
+
+function addHospitalDetailEntryFromButton(button) {
+  const label = button.closest("label");
+  const detailList = label.querySelector(".hospital-detail-list");
+  if (!detailList) {
+    return;
+  }
+
+  createHospitalDetailEntry(detailList, getHospitalDetailConfigFromList(detailList), true);
+  updateHospitalDetailButtons(detailList);
+}
+
+function removeHospitalDetailEntryFromButton(button) {
+  const label = button.closest("label");
+  const detailList = label.querySelector(".hospital-detail-list");
+  if (!detailList) {
+    return;
+  }
+
+  const detailFields = detailList.querySelectorAll(".hospital-detail-field");
+  if (detailFields.length <= 1) {
+    return;
+  }
+
+  detailFields[detailFields.length - 1].remove();
+  updateHospitalDetailButtons(detailList);
+}
+
 function getHospitalDetailConfigFromList(detailList) {
   return {
     datalistId: detailList.dataset.datalistId,
@@ -233,14 +316,18 @@ function syncHospitalDetailField(input) {
 
   if (!detailConfig) {
     existingList?.remove();
+    unwrapHospitalInput(input);
     return;
   }
 
   if (existingList?.dataset.detailName === detailConfig.name) {
+    wrapHospitalInputWithActions(input);
+    updateHospitalDetailButtons(existingList);
     return;
   }
 
   existingList?.remove();
+  wrapHospitalInputWithActions(input);
 
   const detailList = document.createElement("div");
   detailList.className = "hospital-detail-list";
@@ -250,7 +337,8 @@ function syncHospitalDetailField(input) {
   detailList.dataset.placeholder = detailConfig.placeholder;
 
   createHospitalDetailEntry(detailList, detailConfig);
-  input.insertAdjacentElement("afterend", detailList);
+  input.parentElement.insertAdjacentElement("afterend", detailList);
+  updateHospitalDetailButtons(detailList);
 }
 
 function syncAllHospitalDetailFields() {
@@ -936,6 +1024,7 @@ form.addEventListener("keydown", (event) => {
     event.preventDefault();
     const detailList = event.target.closest(".hospital-detail-list");
     createHospitalDetailEntry(detailList, getHospitalDetailConfigFromList(detailList), true);
+    updateHospitalDetailButtons(detailList);
     return;
   }
 
@@ -1208,6 +1297,16 @@ document.addEventListener("pointerdown", (event) => {
   hidePatientHistoryDropdown();
   hideSurgeryHistoryDropdown();
   hideHospitalHistoryDropdown();
+});
+form.addEventListener("click", (event) => {
+  if (event.target.closest(".hospital-detail-add")) {
+    addHospitalDetailEntryFromButton(event.target);
+    return;
+  }
+
+  if (event.target.closest(".hospital-detail-remove")) {
+    removeHospitalDetailEntryFromButton(event.target);
+  }
 });
 clearButton.addEventListener("click", clearForm);
 addSurgeryButton.addEventListener("click", createSurgeryField);

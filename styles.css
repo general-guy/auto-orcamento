@@ -184,6 +184,24 @@ textarea {
   gap: 8px;
 }
 
+.hospital-control-row {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.hospital-detail-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.hospital-detail-actions .add-button,
+.hospital-detail-actions .remove-button {
+  height: 30px;
+  width: 30px;
+}
+
 .hospital-detail-list {
   display: grid;
   gap: 8px;
