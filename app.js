@@ -23,6 +23,7 @@ let isInteractingWithHospitalDropdown = false;
 let patientHistory = [];
 let activePatientInput = null;
 let isInteractingWithPatientDropdown = false;
+let hospitalTables = null;
 
 const previewFields = {
   patientName: "Nome da paciente",
@@ -109,14 +110,86 @@ function getHospitalDetailConfig(value) {
   const normalizedValue = normalizeText(value);
 
   if (normalizedValue.includes("regin")) {
-    return { label: "Reg.:", name: "hospitalReg" };
+    return {
+      datalistId: "reginaHospitalOptions",
+      label: "Reg.:",
+      name: "hospitalReg",
+      placeholder: "Buscar pacote ou taxa Regina",
+    };
   }
 
   if (normalizedValue.includes("sapirang")) {
-    return { label: "Sap.:", name: "hospitalSap" };
+    return {
+      datalistId: "sapirangaHospitalOptions",
+      label: "Sap.:",
+      name: "hospitalSap",
+      placeholder: "Buscar pacote Sapiranga",
+    };
   }
 
   return null;
+}
+
+function formatReginaOption(item, type) {
+  if (type === "taxa") {
+    return `${item.descricao} - ${item.valor}`;
+  }
+
+  return `${item.procedimento} - Sala ${item.tempoSalaCirurgica} - Recuperação ${item.tempoSalaRecuperacao} - ${item.valor}`;
+}
+
+function formatSapirangaOption(item, type) {
+  if (type === "diaria") {
+    return `${item.codigo} - ${item.descricao} - ${item.particular}`;
+  }
+
+  return `${item.codigo} - ${item.pacote} - ${item.particular}`;
+}
+
+function createHospitalDatalist(id, options) {
+  document.querySelector(`#${id}`)?.remove();
+
+  const datalist = document.createElement("datalist");
+  datalist.id = id;
+
+  options.forEach((optionText) => {
+    const option = document.createElement("option");
+    option.value = optionText;
+    datalist.append(option);
+  });
+
+  document.body.append(datalist);
+}
+
+function buildHospitalDatalists() {
+  if (!hospitalTables) {
+    return;
+  }
+
+  const reginaOptions = [
+    ...hospitalTables.regina.pacotesCirurgiaPlastica.map((item) => formatReginaOption(item, "pacote")),
+    ...hospitalTables.regina.taxasAdicionais.map((item) => formatReginaOption(item, "taxa")),
+  ];
+
+  const sapirangaOptions = [
+    ...hospitalTables.sapiranga.cirurgiasPlasticasCentroCirurgico.map((item) => formatSapirangaOption(item, "centro")),
+    ...hospitalTables.sapiranga.cirurgiasPlasticasAmbulatorio.map((item) => formatSapirangaOption(item, "ambulatorio")),
+    ...hospitalTables.sapiranga.diarias.map((item) => formatSapirangaOption(item, "diaria")),
+  ];
+
+  createHospitalDatalist("reginaHospitalOptions", reginaOptions);
+  createHospitalDatalist("sapirangaHospitalOptions", sapirangaOptions);
+}
+
+async function loadHospitalTables() {
+  try {
+    const response = await fetch("data/tabelas-hospitalares.json");
+    hospitalTables = await response.json();
+    buildHospitalDatalists();
+  } catch {
+    hospitalTables = null;
+    console.warn("Não foi possível carregar as tabelas hospitalares locais.");
+  }
 }
 
 function syncHospitalDetailField(input) {
@@ -145,6 +218,8 @@ function syncHospitalDetailField(input) {
   const detailInput = document.createElement("input");
   detailInput.name = detailConfig.name;
   detailInput.type = "text";
+  detailInput.setAttribute("list", detailConfig.datalistId);
+  detailInput.setAttribute("placeholder", detailConfig.placeholder);
   detailInput.setAttribute("aria-label", detailConfig.label.replace(":", ""));
 
   detailField.append(detailLabel);
@@ -1130,7 +1205,7 @@ shutdownButton.addEventListener("click", async () => {
   document.body.innerHTML = "<main class=\"shutdown-message\"><h1>Auto Orçamento encerrado</h1><p>Você já pode fechar esta aba.</p></main>";
 });
 
-Promise.all([loadPatientHistory(), loadSurgeryHistory(), loadHospitalHistory()]).then(() => {
+Promise.all([loadPatientHistory(), loadSurgeryHistory(), loadHospitalHistory(), loadHospitalTables()]).then(() => {
   updatePatientHistoryDropdown();
   updateSurgeryHistoryDropdown();
   hideHospitalHistoryDropdown();
