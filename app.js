@@ -140,10 +140,10 @@ function formatReginaOption(item, type) {
 
 function formatSapirangaOption(item, type) {
   if (type === "diaria") {
-    return `${item.codigo} - ${item.descricao} - ${item.particular}`;
+    return `${item.descricao} - ${item.particular}`;
   }
 
-  return `${item.codigo} - ${item.pacote} - ${item.particular}`;
+  return `${item.pacote} - ${item.particular}`;
 }
 
 function createHospitalDatalist(id, options) {

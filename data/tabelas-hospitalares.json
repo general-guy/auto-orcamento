@@ -198,371 +198,298 @@
     "origem": "1.Tabela Valores 2026 Hospital Sapiranga.pdf",
     "cirurgiasPlasticasCentroCirurgico": [
       {
-        "codigo": "000208",
         "pacote": "Abdominoplastia - até 2h",
         "particular": "R$ 3.052,00"
       },
       {
-        "codigo": "000921",
         "pacote": "Abdominoplastia - até 3h",
         "particular": "R$ 3.508,00"
       },
       {
-        "codigo": "000922",
         "pacote": "Abdominoplastia - até 4h",
         "particular": "R$ 3.964,00"
       },
       {
-        "codigo": "000923",
         "pacote": "Abdominoplastia + Lipoaspiração - até 3h",
         "particular": "R$ 3.998,00"
       },
       {
-        "codigo": "000924",
         "pacote": "Abdominoplastia + Lipoaspiração - até 4h",
         "particular": "R$ 4.455,00"
       },
       {
-        "codigo": "000925",
         "pacote": "Abdominoplastia + Lipoaspiração - até 5h",
         "particular": "R$ 4.909,00"
       },
       {
-        "codigo": "001327",
         "pacote": "Abdominoplastia + Lipoaspiração- até 6h e 30min",
         "particular": "R$ 5.720,00"
       },
       {
-        "codigo": "000926",
         "pacote": "Abdominoplastia + Lipo + Mamoplastia de aumento - até 3h",
         "particular": "R$ 4.957,00"
       },
       {
-        "codigo": "000927",
         "pacote": "Abdominoplastia + Lipo + Mamoplastia de aumento - até 4h",
         "particular": "R$ 5.411,00"
       },
       {
-        "codigo": "000928",
         "pacote": "Abdominoplastia + Lipo + Mamoplastia de aumento - até 5h",
         "particular": "R$ 5.867,00"
       },
       {
-        "codigo": "00842",
         "pacote": "Abdominoplastia + Mastopexia - até 3h",
         "particular": "R$ 4.558,00"
       },
       {
-        "codigo": "000748",
         "pacote": "Abdominoplastia + Mamoplastia de aumento - até 3h",
         "particular": "R$ 4.242,00"
       },
       {
-        "codigo": "000749",
         "pacote": "Abdominoplastia + Blefaroplastia - até 3h",
         "particular": "R$ 4.617,00"
       },
       {
-        "codigo": "000929",
         "pacote": "Abdominoplastia + Lipo + Mastopexia - até 4h",
         "particular": "R$ 6.606,00"
       },
       {
-        "codigo": "000930",
         "pacote": "Abdominoplastia + Lipo + Mastopexia - até 5h",
         "particular": "R$ 7.063,00"
       },
       {
-        "codigo": "000931",
         "pacote": "Abdominoplastia + Lipo + Mastopexia - até 6h",
         "particular": "R$ 7.517,00"
       },
       {
-        "codigo": "92112",
         "pacote": "Abdominoplastia + Lipo + Mastopexia - até 8h",
         "particular": "R$ 8.580,00"
       },
       {
-        "codigo": "000233",
         "pacote": "Blefaroplastia - até 1h",
         "particular": "R$ 1.571,00"
       },
       {
-        "codigo": "000932",
         "pacote": "Blefaroplastia - até 2h",
         "particular": "R$ 2.025,00"
       },
       {
-        "codigo": "000750",
         "pacote": "Blefaroplastia + Lipo Papada - até 1h e 30min",
         "particular": "R$ 2.128,00"
       },
       {
-        "codigo": "001207",
         "pacote": "Blefaroplastia + Lipo Papada - até 2h e 30min",
         "particular": "R$ 2.587,00"
       },
       {
-        "codigo": "001208",
         "pacote": "Blefaroplastia + Lipo Papada - até 3h e 30min",
         "particular": "R$ 3.041,00"
       },
       {
-        "codigo": "000955",
         "pacote": "Bichectomia - até 1h",
         "particular": "R$ 1.620,00"
       },
       {
-        "codigo": "000751",
         "pacote": "Cruroplastia unilateral - até 1h",
         "particular": "R$ 1.450,00"
       },
       {
-        "codigo": "000899",
         "pacote": "Cruroplastia bilateral - até 1h",
         "particular": "R$ 2.865,00"
       },
       {
-        "codigo": "001210",
         "pacote": "Exerese / excisão e sutura - Bloco Cirúrgico - até 30min",
         "particular": "R$ 513,00"
       },
       {
-        "codigo": "001211",
         "pacote": "Exerese / excisão e sutura - Bloco Cirúrgico - até 1h",
         "particular": "R$ 1.026,00"
       },
       {
-        "codigo": "000474",
         "pacote": "Ginecomastia - até 2h",
         "particular": "R$ 2.332,00"
       },
       {
-        "codigo": "000933",
         "pacote": "Ginecomastia - até 3h",
         "particular": "R$ 2.786,00"
       },
       {
-        "codigo": "922230",
         "pacote": "Ginecomastia - até 4h",
         "particular": "R$ 3.240,00"
       },
       {
-        "codigo": "000047",
         "pacote": "Lipoaspiração - até 1h e 30min",
         "particular": "R$ 2.376,00"
       },
       {
-        "codigo": "000107",
         "pacote": "Lipoaspiração - até 2h e 30min",
         "particular": "R$ 2.835,00"
       },
       {
-        "codigo": "000752",
         "pacote": "Lipoaspiração - até 3h e 30min",
         "particular": "R$ 3.289,00"
       },
       {
-        "codigo": "000596",
         "pacote": "Lipoaspiração + Mamoplastia de aumento - até 2h",
         "particular": "R$ 3.843,00"
       },
       {
-        "codigo": "000934",
         "pacote": "Lipoaspiração + Mamoplastia de aumento - até 3h",
         "particular": "R$ 4.298,00"
       },
       {
-        "codigo": "000935",
         "pacote": "Lipoaspiração + Mamoplastia de aumento - até 4h",
         "particular": "R$ 4.754,00"
       },
       {
-        "codigo": "000936",
         "pacote": "Lipoaspiração + Mamoplastia de aumento - até 5h",
         "particular": "R$ 5.211,00"
       },
       {
-        "codigo": "000708",
         "pacote": "Lipo + Mastopexia + Mamoplastia de aumento - até 3h e 30min",
         "particular": "R$ 5.254,00"
       },
       {
-        "codigo": "000707",
         "pacote": "Lipoaspiração + Mastopexia - até 3h e 30min",
         "particular": "R$ 4.264,00"
       },
       {
-        "codigo": "001190",
         "pacote": "Lipoaspiração + Mastopexia - até 4h e 30min",
         "particular": "R$ 4.720,00"
       },
       {
-        "codigo": "001191",
         "pacote": "Lipoaspiração + Mastopexia - até 5h e 30min",
         "particular": "R$ 5.173,00"
       },
       {
-        "codigo": "001213",
         "pacote": "Lipoaspiração + Mastopexia - até 6h e 30min",
         "particular": "R$ 5.629,00"
       },
       {
-        "codigo": "000768",
         "pacote": "Lipo de papada - até 1h",
         "particular": "R$ 913,00"
       },
       {
-        "codigo": "000216",
         "pacote": "Mamoplastia redutora c/ ou s/ colocação de prótese de mama - até 2h",
         "particular": "R$ 2.506,00"
       },
       {
-        "codigo": "000753",
         "pacote": "Mamoplastia redutora c/ ou s/ colocação de prótese de mama - até 3h",
         "particular": "R$ 2.961,00"
       },
       {
-        "codigo": "000710",
         "pacote": "Mastopexia c/ ou s/ colocação de prótese de mama - até 2h",
         "particular": "R$ 2.506,00"
       },
       {
-        "codigo": "000937",
         "pacote": "Mastopexia c/ ou s/ colocação de prótese de mama - até 3h",
         "particular": "R$ 2.961,00"
       },
       {
-        "codigo": "000938",
         "pacote": "Mastopexia c/ ou s/ colocação de prótese de mama - até 4h",
         "particular": "R$ 3.361,00"
       },
       {
-        "codigo": "000657",
         "pacote": "Ninfoplastia - até 1h",
         "particular": "R$ 988,00"
       },
       {
-        "codigo": "000048",
         "pacote": "Mamoplastia de aumento (prótese não inclusa) - até 1h",
         "particular": "R$ 1.413,00"
       },
       {
-        "codigo": "000942",
         "pacote": "Mamoplastia de aumento (prótese não inclusa) - até 2h",
         "particular": "R$ 1.868,00"
       },
       {
-        "codigo": "000282",
         "pacote": "Otoplastia unilateral - até 1h",
         "particular": "R$ 1.296,00"
       },
       {
-        "codigo": "000945",
         "pacote": "Otoplastia unilateral - até 2h",
         "particular": "R$ 1.752,00"
       },
       {
-        "codigo": "000754",
         "pacote": "Otoplastia bilateral - até 1h",
         "particular": "R$ 1.534,00"
       },
       {
-        "codigo": "000946",
         "pacote": "Otoplastia bilateral - até 2h",
         "particular": "R$ 1.989,00"
       },
       {
-        "codigo": "000565",
         "pacote": "Rinoplastia - até 2h",
         "particular": "R$ 2.392,00"
       },
       {
-        "codigo": "000947",
         "pacote": "Rinoplastia - até 3h",
         "particular": "R$ 2.846,00"
       },
       {
-        "codigo": "000948",
         "pacote": "Rinoplastia - até 4h",
         "particular": "R$ 3.299,00"
       },
       {
-        "codigo": "000010",
         "pacote": "Rinoseptoplastia - até 3h",
         "particular": "R$ 2.576,00"
       },
       {
-        "codigo": "000716",
         "pacote": "Rinoseptoplastia + Mamoplastia de aumento (sem Mastopexia) - até 3h",
         "particular": "R$ 3.704,00"
       },
       {
-        "codigo": "000268",
         "pacote": "Ritidoplastia - até 3h",
         "particular": "R$ 5.146,00"
       },
       {
-        "codigo": "000756",
         "pacote": "Revisão Cicatriz Abdominoplastia - até 1h",
         "particular": "R$ 1.296,00"
       },
       {
-        "codigo": "000990",
         "pacote": "Revisão Cicatriz Cesariana - até 1h",
         "particular": "R$ 913,00"
       },
       {
-        "codigo": "000755",
         "pacote": "Revisão Cicatriz Mamoplastia - até 1h",
         "particular": "R$ 1.190,06"
       },
       {
-        "codigo": "000757",
         "pacote": "Revisão Lipoaspiração - até 1h",
         "particular": "R$ 1.307,00"
       }
     ],
     "cirurgiasPlasticasAmbulatorio": [
       {
-        "codigo": "000884",
         "pacote": "Otoplastia unilateral ambulatório - até 1h",
         "particular": "R$ 346,00"
       },
       {
-        "codigo": "000885",
         "pacote": "Otoplastia unilateral ambulatório - até 2h",
         "particular": "R$ 572,00"
       },
       {
-        "codigo": "000886",
         "pacote": "Otoplastia bilateral ambulatório - até 1h",
         "particular": "R$ 400,00"
       },
       {
-        "codigo": "000887",
         "pacote": "Otoplastia bilateral ambulatório - até 2h",
         "particular": "R$ 626,00"
       },
       {
-        "codigo": "000889",
         "pacote": "Blefaroplastia ambulatório - até 1h",
         "particular": "R$ 707,00"
       },
       {
-        "codigo": "000890",
         "pacote": "Blefaroplastia ambulatório - até 2h",
         "particular": "R$ 934,00"
       },
       {
-        "codigo": "000891",
         "pacote": "Excisão / exerese e sutura ambulatório",
         "particular": "R$ 430,00"
       }
     ],
     "diarias": [
       {
-        "codigo": "001028",
         "descricao": "Diária compacta em quarto privativo - Cirurgia plástica",
         "particular": "R$ 685,00",
         "cartaoSaude": "R$ 548,00"
