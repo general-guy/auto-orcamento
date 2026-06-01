@@ -26,7 +26,6 @@ let isInteractingWithPatientDropdown = false;
 
 const previewFields = {
   patientName: "Nome da paciente",
-  hospitalStay: "Tempo previsto de hospital",
   hospitalValue: "R$",
   teamValue: "R$",
   technologyValue: "R$",
@@ -46,6 +45,32 @@ function formatDateForDocument(value) {
 
   const [year, month, day] = value.split("-");
   return `${day}/${month}/${year}`;
+}
+
+function formatHospitalStay(value) {
+  if (!value) {
+    return "Tempo previsto de hospital";
+  }
+
+  const normalizedValue = value.replace(",", ".");
+  if (!/^\d+(\.\d+)?$/.test(normalizedValue)) {
+    return value;
+  }
+
+  const totalMinutes = Math.round(Number(normalizedValue) * 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  const parts = [];
+
+  if (hours > 0) {
+    parts.push(`${hours} ${hours === 1 ? "hora" : "horas"}`);
+  }
+
+  if (minutes > 0) {
+    parts.push(`${minutes} ${minutes === 1 ? "minuto" : "minutos"}`);
+  }
+
+  return parts.join(" e ") || "0 minutos";
 }
 
 function getFieldValue(fieldName) {
@@ -613,6 +638,9 @@ function updateSimpleFields() {
 
   const datePreview = document.querySelector('[data-preview="budgetDate"]');
   datePreview.textContent = formatDateForDocument(getFieldValue("budgetDate"));
+
+  const hospitalStayPreview = document.querySelector('[data-preview="hospitalStay"]');
+  hospitalStayPreview.textContent = formatHospitalStay(getFieldValue("hospitalStay"));
 
   const surgeryPreview = document.querySelector('[data-preview="surgery"]');
   surgeryPreview.textContent = getSurgeryValues().join("\n") || "Cirurgia proposta";
