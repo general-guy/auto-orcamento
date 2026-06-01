@@ -831,6 +831,7 @@ function selectHospitalHistoryOption(option, shouldAdvance = false) {
     return;
   }
 
+  input.dataset.skipNextHistoryFocus = "true";
   input.focus();
 }
 
@@ -970,6 +971,11 @@ form.addEventListener("focusin", (event) => {
   }
 
   if (event.target.matches(".hospital-input")) {
+    if (event.target.dataset.skipNextHistoryFocus === "true") {
+      delete event.target.dataset.skipNextHistoryFocus;
+      return;
+    }
+
     showHospitalHistoryDropdown(event.target);
   }
 });
