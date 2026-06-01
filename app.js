@@ -105,6 +105,57 @@ function getHospitalValues() {
     .filter(Boolean);
 }
 
+function getHospitalDetailConfig(value) {
+  const normalizedValue = normalizeText(value);
+
+  if (normalizedValue.includes("regin")) {
+    return { label: "Reg.:", name: "hospitalReg" };
+  }
+
+  if (normalizedValue.includes("sapirang")) {
+    return { label: "Sap.:", name: "hospitalSap" };
+  }
+
+  return null;
+}
+
+function syncHospitalDetailField(input) {
+  const label = input.closest("label");
+  const existingField = label.querySelector(".hospital-detail-field");
+  const detailConfig = getHospitalDetailConfig(input.value);
+
+  if (!detailConfig) {
+    existingField?.remove();
+    return;
+  }
+
+  if (existingField?.dataset.detailName === detailConfig.name) {
+    return;
+  }
+
+  existingField?.remove();
+
+  const detailField = document.createElement("div");
+  detailField.className = "hospital-detail-field";
+  detailField.dataset.detailName = detailConfig.name;
+
+  const detailLabel = document.createElement("span");
+  detailLabel.textContent = detailConfig.label;
+
+  const detailInput = document.createElement("input");
+  detailInput.name = detailConfig.name;
+  detailInput.type = "text";
+  detailInput.setAttribute("aria-label", detailConfig.label.replace(":", ""));
+
+  detailField.append(detailLabel);
+  detailField.append(detailInput);
+  input.insertAdjacentElement("afterend", detailField);
+}
+
+function syncAllHospitalDetailFields() {
+  getHospitalInputs().forEach(syncHospitalDetailField);
+}
+
 async function loadSurgeryHistory() {
   try {
     const response = await fetch("/api/cirurgias");
@@ -499,6 +550,7 @@ function removeLastHospitalField() {
   const inputs = getHospitalInputs();
   if (inputs.length <= 1) {
     inputs[0].value = "";
+    syncHospitalDetailField(inputs[0]);
     inputs[0].focus();
     updatePreview();
     return;
@@ -580,6 +632,7 @@ function selectHospitalHistoryOption(option, shouldAdvance = false) {
   }
 
   input.value = option.dataset.value;
+  syncHospitalDetailField(input);
   updatePreview();
   isInteractingWithHospitalDropdown = false;
   hideHospitalHistoryDropdown();
@@ -682,6 +735,7 @@ function clearForm() {
   form.reset();
   getSurgeryInputs().slice(1).forEach((input) => input.closest("label").remove());
   getHospitalInputs().slice(1).forEach((input) => input.closest("label").remove());
+  syncAllHospitalDetailFields();
   form.elements.budgetDate.value = formatDateForInput(new Date());
   updateSurgeryButtons();
   updateHospitalButtons();
@@ -713,6 +767,7 @@ form.addEventListener("input", (event) => {
       delete event.target.dataset.skipHistoryValue;
     }
 
+    syncHospitalDetailField(event.target);
     showHospitalHistoryDropdown(event.target);
   }
 });
