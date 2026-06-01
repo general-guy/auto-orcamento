@@ -184,6 +184,11 @@ textarea {
   gap: 8px;
 }
 
+.hospital-detail-list {
+  display: grid;
+  gap: 8px;
+}
+
 .hospital-detail-field {
   align-items: center;
   display: grid;

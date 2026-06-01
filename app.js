@@ -112,7 +112,7 @@ function getHospitalDetailConfig(value) {
   if (normalizedValue.includes("regin")) {
     return {
       datalistId: "reginaHospitalOptions",
-      label: "Reg.:",
+      labelPrefix: "Reg",
       name: "hospitalReg",
       placeholder: "Buscar pacote ou taxa Regina",
     };
@@ -121,7 +121,7 @@ function getHospitalDetailConfig(value) {
   if (normalizedValue.includes("sapirang")) {
     return {
       datalistId: "sapirangaHospitalOptions",
-      label: "Sap.:",
+      labelPrefix: "Sap",
       name: "hospitalSap",
       placeholder: "Buscar pacote Sapiranga",
     };
@@ -192,39 +192,65 @@ async function loadHospitalTables() {
   }
 }
 
-function syncHospitalDetailField(input) {
-  const label = input.closest("label");
-  const existingField = label.querySelector(".hospital-detail-field");
-  const detailConfig = getHospitalDetailConfig(input.value);
-
-  if (!detailConfig) {
-    existingField?.remove();
-    return;
-  }
-
-  if (existingField?.dataset.detailName === detailConfig.name) {
-    return;
-  }
-
-  existingField?.remove();
-
+function createHospitalDetailEntry(detailList, detailConfig, shouldFocus = false) {
+  const fieldNumber = detailList.querySelectorAll(".hospital-detail-field").length + 1;
   const detailField = document.createElement("div");
   detailField.className = "hospital-detail-field";
-  detailField.dataset.detailName = detailConfig.name;
 
   const detailLabel = document.createElement("span");
-  detailLabel.textContent = detailConfig.label;
+  detailLabel.textContent = `${detailConfig.labelPrefix}${fieldNumber}:`;
 
   const detailInput = document.createElement("input");
-  detailInput.name = detailConfig.name;
+  detailInput.name = `${detailConfig.name}${fieldNumber}`;
   detailInput.type = "text";
+  detailInput.className = "hospital-detail-input";
   detailInput.setAttribute("list", detailConfig.datalistId);
   detailInput.setAttribute("placeholder", detailConfig.placeholder);
-  detailInput.setAttribute("aria-label", detailConfig.label.replace(":", ""));
+  detailInput.setAttribute("aria-label", `${detailConfig.labelPrefix}${fieldNumber}`);
 
   detailField.append(detailLabel);
   detailField.append(detailInput);
-  input.insertAdjacentElement("afterend", detailField);
+  detailList.append(detailField);
+
+  if (shouldFocus) {
+    detailInput.focus();
+  }
+}
+
+function getHospitalDetailConfigFromList(detailList) {
+  return {
+    datalistId: detailList.dataset.datalistId,
+    labelPrefix: detailList.dataset.labelPrefix,
+    name: detailList.dataset.detailName,
+    placeholder: detailList.dataset.placeholder,
+  };
+}
+
+function syncHospitalDetailField(input) {
+  const label = input.closest("label");
+  const existingList = label.querySelector(".hospital-detail-list");
+  const detailConfig = getHospitalDetailConfig(input.value);
+
+  if (!detailConfig) {
+    existingList?.remove();
+    return;
+  }
+
+  if (existingList?.dataset.detailName === detailConfig.name) {
+    return;
+  }
+
+  existingList?.remove();
+
+  const detailList = document.createElement("div");
+  detailList.className = "hospital-detail-list";
+  detailList.dataset.datalistId = detailConfig.datalistId;
+  detailList.dataset.detailName = detailConfig.name;
+  detailList.dataset.labelPrefix = detailConfig.labelPrefix;
+  detailList.dataset.placeholder = detailConfig.placeholder;
+
+  createHospitalDetailEntry(detailList, detailConfig);
+  input.insertAdjacentElement("afterend", detailList);
 }
 
 function syncAllHospitalDetailFields() {
@@ -903,6 +929,13 @@ form.addEventListener("keydown", (event) => {
   if (event.target.matches(".hospital-input") && event.shiftKey && event.key === "Enter") {
     event.preventDefault();
     createHospitalField();
+    return;
+  }
+
+  if (event.target.matches(".hospital-detail-input") && event.shiftKey && event.key === "Enter") {
+    event.preventDefault();
+    const detailList = event.target.closest(".hospital-detail-list");
+    createHospitalDetailEntry(detailList, getHospitalDetailConfigFromList(detailList), true);
     return;
   }
 
