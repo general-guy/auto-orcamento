@@ -204,7 +204,7 @@ textarea {
 
 .hospital-detail-autofill {
   align-items: center;
-  background: #22c55e;
+  background: #86efac;
   display: inline-flex;
   height: 30px;
   justify-content: center;
@@ -213,7 +213,7 @@ textarea {
 }
 
 .hospital-detail-autofill:hover {
-  background: #16a34a;
+  background: #4ade80;
 }
 
 .hospital-detail-autofill span {
