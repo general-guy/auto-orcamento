@@ -246,8 +246,15 @@ function createHospitalDetailActions() {
   removeButton.textContent = "-";
   removeButton.setAttribute("aria-label", "Remover última entrada adicional");
 
+  const autofillButton = document.createElement("button");
+  autofillButton.type = "button";
+  autofillButton.className = "hospital-detail-autofill";
+  autofillButton.setAttribute("aria-label", "Completar entradas automaticamente");
+  autofillButton.append(document.createElement("span"));
+
   actions.append(addButton);
   actions.append(removeButton);
+  actions.append(autofillButton);
 
   return actions;
 }
