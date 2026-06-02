@@ -115,6 +115,7 @@ function getHospitalDetailConfig(value) {
       labelPrefix: "Reg",
       name: "hospitalReg",
       placeholder: "Buscar pacote ou taxa Regina",
+      source: "regina",
     };
   }
 
@@ -124,6 +125,7 @@ function getHospitalDetailConfig(value) {
       labelPrefix: "Sap",
       name: "hospitalSap",
       placeholder: "Buscar pacote Sapiranga",
+      source: "sapiranga",
     };
   }
 
@@ -230,7 +232,7 @@ function createHospitalDetailEntry(detailList, detailConfig, shouldFocus = false
   }
 }
 
-function createHospitalDetailActions() {
+function createHospitalDetailActions(detailConfig) {
   const actions = document.createElement("div");
   actions.className = "hospital-detail-actions";
 
@@ -249,7 +251,8 @@ function createHospitalDetailActions() {
   const autofillButton = document.createElement("button");
   autofillButton.type = "button";
   autofillButton.className = "hospital-detail-autofill";
-  autofillButton.setAttribute("aria-label", "Completar entradas automaticamente");
+  autofillButton.dataset.autofillSource = detailConfig.source;
+  autofillButton.setAttribute("aria-label", `Completar entradas automaticamente - ${detailConfig.labelPrefix}`);
   autofillButton.append(document.createElement("span"));
 
   actions.append(addButton);
@@ -259,8 +262,14 @@ function createHospitalDetailActions() {
   return actions;
 }
 
-function wrapHospitalInputWithActions(input) {
+function wrapHospitalInputWithActions(input, detailConfig) {
   if (input.parentElement?.classList.contains("hospital-control-row")) {
+    const autofillButton = input.parentElement.querySelector(".hospital-detail-autofill");
+    if (autofillButton) {
+      autofillButton.dataset.autofillSource = detailConfig.source;
+      autofillButton.setAttribute("aria-label", `Completar entradas automaticamente - ${detailConfig.labelPrefix}`);
+    }
+
     return input.parentElement;
   }
 
@@ -268,7 +277,7 @@ function wrapHospitalInputWithActions(input) {
   controlRow.className = "hospital-control-row";
   input.insertAdjacentElement("beforebegin", controlRow);
   controlRow.append(input);
-  controlRow.append(createHospitalDetailActions());
+  controlRow.append(createHospitalDetailActions(detailConfig));
 
   return controlRow;
 }
@@ -326,6 +335,7 @@ function getHospitalDetailConfigFromList(detailList) {
     labelPrefix: detailList.dataset.labelPrefix,
     name: detailList.dataset.detailName,
     placeholder: detailList.dataset.placeholder,
+    source: detailList.dataset.autofillSource,
   };
 }
 
@@ -341,13 +351,13 @@ function syncHospitalDetailField(input) {
   }
 
   if (existingList?.dataset.detailName === detailConfig.name) {
-    wrapHospitalInputWithActions(input);
+    wrapHospitalInputWithActions(input, detailConfig);
     updateHospitalDetailButtons(existingList);
     return;
   }
 
   existingList?.remove();
-  wrapHospitalInputWithActions(input);
+  wrapHospitalInputWithActions(input, detailConfig);
 
   const detailList = document.createElement("div");
   detailList.className = "hospital-detail-list";
@@ -355,6 +365,7 @@ function syncHospitalDetailField(input) {
   detailList.dataset.detailName = detailConfig.name;
   detailList.dataset.labelPrefix = detailConfig.labelPrefix;
   detailList.dataset.placeholder = detailConfig.placeholder;
+  detailList.dataset.autofillSource = detailConfig.source;
 
   createHospitalDetailEntry(detailList, detailConfig);
   input.parentElement.insertAdjacentElement("afterend", detailList);
