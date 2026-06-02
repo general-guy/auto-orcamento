@@ -135,15 +135,15 @@ function formatReginaOption(item, type) {
     return `${item.descricao} - ${item.valor}`;
   }
 
-  return `${item.procedimento} - Sala ${item.tempoSalaCirurgica} - Recuperação ${item.tempoSalaRecuperacao} - ${item.valor}`;
+  return `${item.pacote} - Sala ${item.tempoSalaCirurgica} - Recuperação ${item.tempoSalaRecuperacao} - ${item.valor}`;
 }
 
 function formatSapirangaOption(item, type) {
   if (type === "diaria") {
-    return `${item.descricao} - ${item.particular}`;
+    return `${item.descricao} - ${item.valor}`;
   }
 
-  return `${item.pacote} - ${item.particular}`;
+  return `${item.pacote} - ${item.valor}`;
 }
 
 function createHospitalDatalist(id, options) {
