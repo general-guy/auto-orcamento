@@ -135,7 +135,7 @@ function formatReginaOption(item, type) {
     return `${item.descricao} - ${item.valor}`;
   }
 
-  return `${item.pacote} - Sala ${item.tempoSalaCirurgica} - Recuperação ${item.tempoSalaRecuperacao} - ${item.valor}`;
+  return `${item.pacote} - Sala ${item.tempoSala} - Recuperação ${item.tempoSalaRecuperacao} - ${item.valor}`;
 }
 
 function formatSapirangaOption(item, type) {
@@ -143,7 +143,7 @@ function formatSapirangaOption(item, type) {
     return `${item.descricao} - ${item.valor}`;
   }
 
-  return `${item.pacote} - ${item.valor}`;
+  return `${item.pacote} - Sala ${item.tempoSala} - ${item.valor}`;
 }
 
 function createHospitalDatalist(id, options) {

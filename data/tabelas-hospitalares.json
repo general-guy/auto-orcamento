@@ -6,160 +6,160 @@
     "condicaoPagamento": "Em até 6x sem juros",
     "pacotesCirurgiaPlastica": [
       {
-        "tempoSalaCirurgica": "2h",
         "tempoSalaRecuperacao": "4h",
         "valor": "R$ 2.796,00",
-        "pacote": "ABDOMINOPLASTIA"
+        "pacote": "ABDOMINOPLASTIA",
+        "tempoSala": "2h"
       },
       {
-        "tempoSalaCirurgica": "2h30",
         "tempoSalaRecuperacao": "12h",
         "valor": "R$ 3.890,00",
-        "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO"
+        "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO",
+        "tempoSala": "2h30"
       },
       {
-        "tempoSalaCirurgica": "2h30",
         "tempoSalaRecuperacao": "12h",
         "valor": "R$ 4.310,00",
-        "pacote": "ABDOMINOPLASTIA + PROTESE DE MAMA"
+        "pacote": "ABDOMINOPLASTIA + PROTESE DE MAMA",
+        "tempoSala": "2h30"
       },
       {
-        "tempoSalaCirurgica": "3h30",
         "tempoSalaRecuperacao": "12h",
         "valor": "R$ 4.532,00",
-        "pacote": "ABDOMINOPLASTIA + MAMOPLASTIA OU MASTOPEXIA"
+        "pacote": "ABDOMINOPLASTIA + MAMOPLASTIA OU MASTOPEXIA",
+        "tempoSala": "3h30"
       },
       {
-        "tempoSalaCirurgica": "3h30",
         "tempoSalaRecuperacao": "18h",
         "valor": "R$ 5.415,00",
-        "pacote": "ABDOMINOPLASTIA + PROTESE DE MAMA + LIPOASPIRAÇÃO"
+        "pacote": "ABDOMINOPLASTIA + PROTESE DE MAMA + LIPOASPIRAÇÃO",
+        "tempoSala": "3h30"
       },
       {
-        "tempoSalaCirurgica": "4h",
         "tempoSalaRecuperacao": "18h",
         "valor": "R$ 6.102,00",
-        "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MAMOPLASTIA OU MASTOPEXIA"
+        "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MAMOPLASTIA OU MASTOPEXIA",
+        "tempoSala": "4h"
       },
       {
-        "tempoSalaCirurgica": "1h",
         "tempoSalaRecuperacao": "-",
         "valor": "R$ 973,00",
-        "pacote": "BLEFAROPLASTIA / PTOSE (ANEST. LOCAL)"
+        "pacote": "BLEFAROPLASTIA / PTOSE (ANEST. LOCAL)",
+        "tempoSala": "1h"
       },
       {
-        "tempoSalaCirurgica": "1h30",
         "tempoSalaRecuperacao": "4h",
         "valor": "R$ 1.824,00",
-        "pacote": "BLEFAROPLASTIA / PTOSE (SEDACAO)"
+        "pacote": "BLEFAROPLASTIA / PTOSE (SEDACAO)",
+        "tempoSala": "1h30"
       },
       {
-        "tempoSalaCirurgica": "1h",
         "tempoSalaRecuperacao": "-",
         "valor": "R$ 1.338,00",
-        "pacote": "CORREÇÃO DE CICATRIZ (ANEST. LOCAL)"
+        "pacote": "CORREÇÃO DE CICATRIZ (ANEST. LOCAL)",
+        "tempoSala": "1h"
       },
       {
-        "tempoSalaCirurgica": "2h",
         "tempoSalaRecuperacao": "4h",
         "valor": "R$ 2.188,00",
-        "pacote": "CORREÇÃO DE CICATRIZ (SEDAÇÃO)"
+        "pacote": "CORREÇÃO DE CICATRIZ (SEDAÇÃO)",
+        "tempoSala": "2h"
       },
       {
-        "tempoSalaCirurgica": "15min",
         "tempoSalaRecuperacao": "-",
         "valor": "R$ 231,00",
-        "pacote": "ESCLEROTERAPIA"
+        "pacote": "ESCLEROTERAPIA",
+        "tempoSala": "15min"
       },
       {
-        "tempoSalaCirurgica": "2h",
         "tempoSalaRecuperacao": "4h",
         "valor": "R$ 3.868,00",
-        "pacote": "GINECOMASTIA"
+        "pacote": "GINECOMASTIA",
+        "tempoSala": "2h"
       },
       {
-        "tempoSalaCirurgica": "1h",
         "tempoSalaRecuperacao": "4h",
         "valor": "R$ 3.205,00",
-        "pacote": "GINECOMASTIA 1H"
+        "pacote": "GINECOMASTIA 1H",
+        "tempoSala": "1h"
       },
       {
-        "tempoSalaCirurgica": "30min",
         "tempoSalaRecuperacao": "-",
         "valor": "R$ 487,00",
-        "pacote": "LIPOASPIRAÇÃO COMPLEMENTAR"
+        "pacote": "LIPOASPIRAÇÃO COMPLEMENTAR",
+        "tempoSala": "30min"
       },
       {
-        "tempoSalaCirurgica": "1h",
         "tempoSalaRecuperacao": "-",
         "valor": "R$ 973,00",
-        "pacote": "LIPOASPIRACAO (ANEST. LOCAL)"
+        "pacote": "LIPOASPIRACAO (ANEST. LOCAL)",
+        "tempoSala": "1h"
       },
       {
-        "tempoSalaCirurgica": "1h",
         "tempoSalaRecuperacao": "8h",
         "valor": "R$ 1.824,00",
-        "pacote": "LIPOASPIRACAO (SEDAÇÃO)"
+        "pacote": "LIPOASPIRACAO (SEDAÇÃO)",
+        "tempoSala": "1h"
       },
       {
-        "tempoSalaCirurgica": "1h30",
         "tempoSalaRecuperacao": "8h",
         "valor": "R$ 2.188,00",
-        "pacote": "LIPOASPIRACAO (SEDAÇÃO)"
+        "pacote": "LIPOASPIRACAO (SEDAÇÃO)",
+        "tempoSala": "1h30"
       },
       {
-        "tempoSalaCirurgica": "-",
         "tempoSalaRecuperacao": "-",
         "valor": "R$ 111,00",
-        "pacote": "LIPOENXERTIA"
+        "pacote": "LIPOENXERTIA",
+        "tempoSala": "-"
       },
       {
-        "tempoSalaCirurgica": "2h",
         "tempoSalaRecuperacao": "8h",
         "valor": "R$ 3.161,00",
-        "pacote": "MAMOPLASTIA OU MASTOPEXIA"
+        "pacote": "MAMOPLASTIA OU MASTOPEXIA",
+        "tempoSala": "2h"
       },
       {
-        "tempoSalaCirurgica": "3h",
         "tempoSalaRecuperacao": "12h",
         "valor": "R$ 4.692,00",
-        "pacote": "MAMOPLASTIA OU MASTOPEXIA + LIPOASPIRAÇÃO"
+        "pacote": "MAMOPLASTIA OU MASTOPEXIA + LIPOASPIRAÇÃO",
+        "tempoSala": "3h"
       },
       {
-        "tempoSalaCirurgica": "1h30",
         "tempoSalaRecuperacao": "-",
         "valor": "R$ 1.105,00",
-        "pacote": "OTOPLASTIA - LOCAL"
+        "pacote": "OTOPLASTIA - LOCAL",
+        "tempoSala": "1h30"
       },
       {
-        "tempoSalaCirurgica": "1h30",
         "tempoSalaRecuperacao": "4h",
         "valor": "R$ 2.763,00",
-        "pacote": "OTOPLASTIA - SEDAÇÃO"
+        "pacote": "OTOPLASTIA - SEDAÇÃO",
+        "tempoSala": "1h30"
       },
       {
-        "tempoSalaCirurgica": "1h",
         "tempoSalaRecuperacao": "8h",
         "valor": "R$ 2.188,00",
-        "pacote": "PROTESE DE MAMA"
+        "pacote": "PROTESE DE MAMA",
+        "tempoSala": "1h"
       },
       {
-        "tempoSalaCirurgica": "2h",
         "tempoSalaRecuperacao": "12h",
         "valor": "R$ 3.757,00",
-        "pacote": "PROTESE DE MAMA + LIPOASPIRAÇÃO"
+        "pacote": "PROTESE DE MAMA + LIPOASPIRAÇÃO",
+        "tempoSala": "2h"
       },
       {
-        "tempoSalaCirurgica": "2h",
         "tempoSalaRecuperacao": "4h",
         "valor": "R$ 2.763,00",
-        "pacote": "RINOPLASTIA"
+        "pacote": "RINOPLASTIA",
+        "tempoSala": "2h"
       },
       {
-        "tempoSalaCirurgica": "3h",
         "tempoSalaRecuperacao": "8h",
         "valor": "R$ 4.973,00",
-        "pacote": "RITIDOPLASTIA"
+        "pacote": "RITIDOPLASTIA",
+        "tempoSala": "3h"
       }
     ],
     "taxasAdicionais": [
@@ -198,301 +198,378 @@
     "origem": "1.Tabela Valores 2026 Hospital Sapiranga.pdf",
     "cirurgiasPlasticasCentroCirurgico": [
       {
-        "pacote": "Abdominoplastia - até 2h",
-        "valor": "R$ 3.052,00"
+        "pacote": "Abdominoplastia",
+        "valor": "R$ 3.052,00",
+        "tempoSala": "2h"
       },
       {
-        "pacote": "Abdominoplastia - até 3h",
-        "valor": "R$ 3.508,00"
+        "pacote": "Abdominoplastia",
+        "valor": "R$ 3.508,00",
+        "tempoSala": "3h"
       },
       {
-        "pacote": "Abdominoplastia - até 4h",
-        "valor": "R$ 3.964,00"
+        "pacote": "Abdominoplastia",
+        "valor": "R$ 3.964,00",
+        "tempoSala": "4h"
       },
       {
-        "pacote": "Abdominoplastia + Lipoaspiração - até 3h",
-        "valor": "R$ 3.998,00"
+        "pacote": "Abdominoplastia + Lipoaspiração",
+        "valor": "R$ 3.998,00",
+        "tempoSala": "3h"
       },
       {
-        "pacote": "Abdominoplastia + Lipoaspiração - até 4h",
-        "valor": "R$ 4.455,00"
+        "pacote": "Abdominoplastia + Lipoaspiração",
+        "valor": "R$ 4.455,00",
+        "tempoSala": "4h"
       },
       {
-        "pacote": "Abdominoplastia + Lipoaspiração - até 5h",
-        "valor": "R$ 4.909,00"
+        "pacote": "Abdominoplastia + Lipoaspiração",
+        "valor": "R$ 4.909,00",
+        "tempoSala": "5h"
       },
       {
-        "pacote": "Abdominoplastia + Lipoaspiração- até 6h e 30min",
-        "valor": "R$ 5.720,00"
+        "pacote": "Abdominoplastia + Lipoaspiração",
+        "valor": "R$ 5.720,00",
+        "tempoSala": "6h e 30min"
       },
       {
-        "pacote": "Abdominoplastia + Lipo + Mamoplastia de aumento - até 3h",
-        "valor": "R$ 4.957,00"
+        "pacote": "Abdominoplastia + Lipo + Mamoplastia de aumento",
+        "valor": "R$ 4.957,00",
+        "tempoSala": "3h"
       },
       {
-        "pacote": "Abdominoplastia + Lipo + Mamoplastia de aumento - até 4h",
-        "valor": "R$ 5.411,00"
+        "pacote": "Abdominoplastia + Lipo + Mamoplastia de aumento",
+        "valor": "R$ 5.411,00",
+        "tempoSala": "4h"
       },
       {
-        "pacote": "Abdominoplastia + Lipo + Mamoplastia de aumento - até 5h",
-        "valor": "R$ 5.867,00"
+        "pacote": "Abdominoplastia + Lipo + Mamoplastia de aumento",
+        "valor": "R$ 5.867,00",
+        "tempoSala": "5h"
       },
       {
-        "pacote": "Abdominoplastia + Mastopexia - até 3h",
-        "valor": "R$ 4.558,00"
+        "pacote": "Abdominoplastia + Mastopexia",
+        "valor": "R$ 4.558,00",
+        "tempoSala": "3h"
       },
       {
-        "pacote": "Abdominoplastia + Mamoplastia de aumento - até 3h",
-        "valor": "R$ 4.242,00"
+        "pacote": "Abdominoplastia + Mamoplastia de aumento",
+        "valor": "R$ 4.242,00",
+        "tempoSala": "3h"
       },
       {
-        "pacote": "Abdominoplastia + Blefaroplastia - até 3h",
-        "valor": "R$ 4.617,00"
+        "pacote": "Abdominoplastia + Blefaroplastia",
+        "valor": "R$ 4.617,00",
+        "tempoSala": "3h"
       },
       {
-        "pacote": "Abdominoplastia + Lipo + Mastopexia - até 4h",
-        "valor": "R$ 6.606,00"
+        "pacote": "Abdominoplastia + Lipo + Mastopexia",
+        "valor": "R$ 6.606,00",
+        "tempoSala": "4h"
       },
       {
-        "pacote": "Abdominoplastia + Lipo + Mastopexia - até 5h",
-        "valor": "R$ 7.063,00"
+        "pacote": "Abdominoplastia + Lipo + Mastopexia",
+        "valor": "R$ 7.063,00",
+        "tempoSala": "5h"
       },
       {
-        "pacote": "Abdominoplastia + Lipo + Mastopexia - até 6h",
-        "valor": "R$ 7.517,00"
+        "pacote": "Abdominoplastia + Lipo + Mastopexia",
+        "valor": "R$ 7.517,00",
+        "tempoSala": "6h"
       },
       {
-        "pacote": "Abdominoplastia + Lipo + Mastopexia - até 8h",
-        "valor": "R$ 8.580,00"
+        "pacote": "Abdominoplastia + Lipo + Mastopexia",
+        "valor": "R$ 8.580,00",
+        "tempoSala": "8h"
       },
       {
-        "pacote": "Blefaroplastia - até 1h",
-        "valor": "R$ 1.571,00"
+        "pacote": "Blefaroplastia",
+        "valor": "R$ 1.571,00",
+        "tempoSala": "1h"
       },
       {
-        "pacote": "Blefaroplastia - até 2h",
-        "valor": "R$ 2.025,00"
+        "pacote": "Blefaroplastia",
+        "valor": "R$ 2.025,00",
+        "tempoSala": "2h"
       },
       {
-        "pacote": "Blefaroplastia + Lipo Papada - até 1h e 30min",
-        "valor": "R$ 2.128,00"
+        "pacote": "Blefaroplastia + Lipo Papada",
+        "valor": "R$ 2.128,00",
+        "tempoSala": "1h e 30min"
       },
       {
-        "pacote": "Blefaroplastia + Lipo Papada - até 2h e 30min",
-        "valor": "R$ 2.587,00"
+        "pacote": "Blefaroplastia + Lipo Papada",
+        "valor": "R$ 2.587,00",
+        "tempoSala": "2h e 30min"
       },
       {
-        "pacote": "Blefaroplastia + Lipo Papada - até 3h e 30min",
-        "valor": "R$ 3.041,00"
+        "pacote": "Blefaroplastia + Lipo Papada",
+        "valor": "R$ 3.041,00",
+        "tempoSala": "3h e 30min"
       },
       {
-        "pacote": "Bichectomia - até 1h",
-        "valor": "R$ 1.620,00"
+        "pacote": "Bichectomia",
+        "valor": "R$ 1.620,00",
+        "tempoSala": "1h"
       },
       {
-        "pacote": "Cruroplastia unilateral - até 1h",
-        "valor": "R$ 1.450,00"
+        "pacote": "Cruroplastia unilateral",
+        "valor": "R$ 1.450,00",
+        "tempoSala": "1h"
       },
       {
-        "pacote": "Cruroplastia bilateral - até 1h",
-        "valor": "R$ 2.865,00"
+        "pacote": "Cruroplastia bilateral",
+        "valor": "R$ 2.865,00",
+        "tempoSala": "1h"
       },
       {
-        "pacote": "Exerese / excisão e sutura - Bloco Cirúrgico - até 30min",
-        "valor": "R$ 513,00"
+        "pacote": "Exerese / excisão e sutura - Bloco Cirúrgico",
+        "valor": "R$ 513,00",
+        "tempoSala": "30min"
       },
       {
-        "pacote": "Exerese / excisão e sutura - Bloco Cirúrgico - até 1h",
-        "valor": "R$ 1.026,00"
+        "pacote": "Exerese / excisão e sutura - Bloco Cirúrgico",
+        "valor": "R$ 1.026,00",
+        "tempoSala": "1h"
       },
       {
-        "pacote": "Ginecomastia - até 2h",
-        "valor": "R$ 2.332,00"
+        "pacote": "Ginecomastia",
+        "valor": "R$ 2.332,00",
+        "tempoSala": "2h"
       },
       {
-        "pacote": "Ginecomastia - até 3h",
-        "valor": "R$ 2.786,00"
+        "pacote": "Ginecomastia",
+        "valor": "R$ 2.786,00",
+        "tempoSala": "3h"
       },
       {
-        "pacote": "Ginecomastia - até 4h",
-        "valor": "R$ 3.240,00"
+        "pacote": "Ginecomastia",
+        "valor": "R$ 3.240,00",
+        "tempoSala": "4h"
       },
       {
-        "pacote": "Lipoaspiração - até 1h e 30min",
-        "valor": "R$ 2.376,00"
+        "pacote": "Lipoaspiração",
+        "valor": "R$ 2.376,00",
+        "tempoSala": "1h e 30min"
       },
       {
-        "pacote": "Lipoaspiração - até 2h e 30min",
-        "valor": "R$ 2.835,00"
+        "pacote": "Lipoaspiração",
+        "valor": "R$ 2.835,00",
+        "tempoSala": "2h e 30min"
       },
       {
-        "pacote": "Lipoaspiração - até 3h e 30min",
-        "valor": "R$ 3.289,00"
+        "pacote": "Lipoaspiração",
+        "valor": "R$ 3.289,00",
+        "tempoSala": "3h e 30min"
       },
       {
-        "pacote": "Lipoaspiração + Mamoplastia de aumento - até 2h",
-        "valor": "R$ 3.843,00"
+        "pacote": "Lipoaspiração + Mamoplastia de aumento",
+        "valor": "R$ 3.843,00",
+        "tempoSala": "2h"
       },
       {
-        "pacote": "Lipoaspiração + Mamoplastia de aumento - até 3h",
-        "valor": "R$ 4.298,00"
+        "pacote": "Lipoaspiração + Mamoplastia de aumento",
+        "valor": "R$ 4.298,00",
+        "tempoSala": "3h"
       },
       {
-        "pacote": "Lipoaspiração + Mamoplastia de aumento - até 4h",
-        "valor": "R$ 4.754,00"
+        "pacote": "Lipoaspiração + Mamoplastia de aumento",
+        "valor": "R$ 4.754,00",
+        "tempoSala": "4h"
       },
       {
-        "pacote": "Lipoaspiração + Mamoplastia de aumento - até 5h",
-        "valor": "R$ 5.211,00"
+        "pacote": "Lipoaspiração + Mamoplastia de aumento",
+        "valor": "R$ 5.211,00",
+        "tempoSala": "5h"
       },
       {
-        "pacote": "Lipo + Mastopexia + Mamoplastia de aumento - até 3h e 30min",
-        "valor": "R$ 5.254,00"
+        "pacote": "Lipo + Mastopexia + Mamoplastia de aumento",
+        "valor": "R$ 5.254,00",
+        "tempoSala": "3h e 30min"
       },
       {
-        "pacote": "Lipoaspiração + Mastopexia - até 3h e 30min",
-        "valor": "R$ 4.264,00"
+        "pacote": "Lipoaspiração + Mastopexia",
+        "valor": "R$ 4.264,00",
+        "tempoSala": "3h e 30min"
       },
       {
-        "pacote": "Lipoaspiração + Mastopexia - até 4h e 30min",
-        "valor": "R$ 4.720,00"
+        "pacote": "Lipoaspiração + Mastopexia",
+        "valor": "R$ 4.720,00",
+        "tempoSala": "4h e 30min"
       },
       {
-        "pacote": "Lipoaspiração + Mastopexia - até 5h e 30min",
-        "valor": "R$ 5.173,00"
+        "pacote": "Lipoaspiração + Mastopexia",
+        "valor": "R$ 5.173,00",
+        "tempoSala": "5h e 30min"
       },
       {
-        "pacote": "Lipoaspiração + Mastopexia - até 6h e 30min",
-        "valor": "R$ 5.629,00"
+        "pacote": "Lipoaspiração + Mastopexia",
+        "valor": "R$ 5.629,00",
+        "tempoSala": "6h e 30min"
       },
       {
-        "pacote": "Lipo de papada - até 1h",
-        "valor": "R$ 913,00"
+        "pacote": "Lipo de papada",
+        "valor": "R$ 913,00",
+        "tempoSala": "1h"
       },
       {
-        "pacote": "Mamoplastia redutora c/ ou s/ colocação de prótese de mama - até 2h",
-        "valor": "R$ 2.506,00"
+        "pacote": "Mamoplastia redutora c/ ou s/ colocação de prótese de mama",
+        "valor": "R$ 2.506,00",
+        "tempoSala": "2h"
       },
       {
-        "pacote": "Mamoplastia redutora c/ ou s/ colocação de prótese de mama - até 3h",
-        "valor": "R$ 2.961,00"
+        "pacote": "Mamoplastia redutora c/ ou s/ colocação de prótese de mama",
+        "valor": "R$ 2.961,00",
+        "tempoSala": "3h"
       },
       {
-        "pacote": "Mastopexia c/ ou s/ colocação de prótese de mama - até 2h",
-        "valor": "R$ 2.506,00"
+        "pacote": "Mastopexia c/ ou s/ colocação de prótese de mama",
+        "valor": "R$ 2.506,00",
+        "tempoSala": "2h"
       },
       {
-        "pacote": "Mastopexia c/ ou s/ colocação de prótese de mama - até 3h",
-        "valor": "R$ 2.961,00"
+        "pacote": "Mastopexia c/ ou s/ colocação de prótese de mama",
+        "valor": "R$ 2.961,00",
+        "tempoSala": "3h"
       },
       {
-        "pacote": "Mastopexia c/ ou s/ colocação de prótese de mama - até 4h",
-        "valor": "R$ 3.361,00"
+        "pacote": "Mastopexia c/ ou s/ colocação de prótese de mama",
+        "valor": "R$ 3.361,00",
+        "tempoSala": "4h"
       },
       {
-        "pacote": "Ninfoplastia - até 1h",
-        "valor": "R$ 988,00"
+        "pacote": "Ninfoplastia",
+        "valor": "R$ 988,00",
+        "tempoSala": "1h"
       },
       {
-        "pacote": "Mamoplastia de aumento (prótese não inclusa) - até 1h",
-        "valor": "R$ 1.413,00"
+        "pacote": "Mamoplastia de aumento (prótese não inclusa)",
+        "valor": "R$ 1.413,00",
+        "tempoSala": "1h"
       },
       {
-        "pacote": "Mamoplastia de aumento (prótese não inclusa) - até 2h",
-        "valor": "R$ 1.868,00"
+        "pacote": "Mamoplastia de aumento (prótese não inclusa)",
+        "valor": "R$ 1.868,00",
+        "tempoSala": "2h"
       },
       {
-        "pacote": "Otoplastia unilateral - até 1h",
-        "valor": "R$ 1.296,00"
+        "pacote": "Otoplastia unilateral",
+        "valor": "R$ 1.296,00",
+        "tempoSala": "1h"
       },
       {
-        "pacote": "Otoplastia unilateral - até 2h",
-        "valor": "R$ 1.752,00"
+        "pacote": "Otoplastia unilateral",
+        "valor": "R$ 1.752,00",
+        "tempoSala": "2h"
       },
       {
-        "pacote": "Otoplastia bilateral - até 1h",
-        "valor": "R$ 1.534,00"
+        "pacote": "Otoplastia bilateral",
+        "valor": "R$ 1.534,00",
+        "tempoSala": "1h"
       },
       {
-        "pacote": "Otoplastia bilateral - até 2h",
-        "valor": "R$ 1.989,00"
+        "pacote": "Otoplastia bilateral",
+        "valor": "R$ 1.989,00",
+        "tempoSala": "2h"
       },
       {
-        "pacote": "Rinoplastia - até 2h",
-        "valor": "R$ 2.392,00"
+        "pacote": "Rinoplastia",
+        "valor": "R$ 2.392,00",
+        "tempoSala": "2h"
       },
       {
-        "pacote": "Rinoplastia - até 3h",
-        "valor": "R$ 2.846,00"
+        "pacote": "Rinoplastia",
+        "valor": "R$ 2.846,00",
+        "tempoSala": "3h"
       },
       {
-        "pacote": "Rinoplastia - até 4h",
-        "valor": "R$ 3.299,00"
+        "pacote": "Rinoplastia",
+        "valor": "R$ 3.299,00",
+        "tempoSala": "4h"
       },
       {
-        "pacote": "Rinoseptoplastia - até 3h",
-        "valor": "R$ 2.576,00"
+        "pacote": "Rinoseptoplastia",
+        "valor": "R$ 2.576,00",
+        "tempoSala": "3h"
       },
       {
-        "pacote": "Rinoseptoplastia + Mamoplastia de aumento (sem Mastopexia) - até 3h",
-        "valor": "R$ 3.704,00"
+        "pacote": "Rinoseptoplastia + Mamoplastia de aumento (sem Mastopexia)",
+        "valor": "R$ 3.704,00",
+        "tempoSala": "3h"
       },
       {
-        "pacote": "Ritidoplastia - até 3h",
-        "valor": "R$ 5.146,00"
+        "pacote": "Ritidoplastia",
+        "valor": "R$ 5.146,00",
+        "tempoSala": "3h"
       },
       {
-        "pacote": "Revisão Cicatriz Abdominoplastia - até 1h",
-        "valor": "R$ 1.296,00"
+        "pacote": "Revisão Cicatriz Abdominoplastia",
+        "valor": "R$ 1.296,00",
+        "tempoSala": "1h"
       },
       {
-        "pacote": "Revisão Cicatriz Cesariana - até 1h",
-        "valor": "R$ 913,00"
+        "pacote": "Revisão Cicatriz Cesariana",
+        "valor": "R$ 913,00",
+        "tempoSala": "1h"
       },
       {
-        "pacote": "Revisão Cicatriz Mamoplastia - até 1h",
-        "valor": "R$ 1.190,06"
+        "pacote": "Revisão Cicatriz Mamoplastia",
+        "valor": "R$ 1.190,06",
+        "tempoSala": "1h"
       },
       {
-        "pacote": "Revisão Lipoaspiração - até 1h",
-        "valor": "R$ 1.307,00"
+        "pacote": "Revisão Lipoaspiração",
+        "valor": "R$ 1.307,00",
+        "tempoSala": "1h"
       }
     ],
     "cirurgiasPlasticasAmbulatorio": [
       {
-        "pacote": "Otoplastia unilateral ambulatório - até 1h",
-        "valor": "R$ 346,00"
+        "pacote": "Otoplastia unilateral ambulatório",
+        "valor": "R$ 346,00",
+        "tempoSala": "1h"
       },
       {
-        "pacote": "Otoplastia unilateral ambulatório - até 2h",
-        "valor": "R$ 572,00"
+        "pacote": "Otoplastia unilateral ambulatório",
+        "valor": "R$ 572,00",
+        "tempoSala": "2h"
       },
       {
-        "pacote": "Otoplastia bilateral ambulatório - até 1h",
-        "valor": "R$ 400,00"
+        "pacote": "Otoplastia bilateral ambulatório",
+        "valor": "R$ 400,00",
+        "tempoSala": "1h"
       },
       {
-        "pacote": "Otoplastia bilateral ambulatório - até 2h",
-        "valor": "R$ 626,00"
+        "pacote": "Otoplastia bilateral ambulatório",
+        "valor": "R$ 626,00",
+        "tempoSala": "2h"
       },
       {
-        "pacote": "Blefaroplastia ambulatório - até 1h",
-        "valor": "R$ 707,00"
+        "pacote": "Blefaroplastia ambulatório",
+        "valor": "R$ 707,00",
+        "tempoSala": "1h"
       },
       {
-        "pacote": "Blefaroplastia ambulatório - até 2h",
-        "valor": "R$ 934,00"
+        "pacote": "Blefaroplastia ambulatório",
+        "valor": "R$ 934,00",
+        "tempoSala": "2h"
       },
       {
         "pacote": "Excisão / exerese e sutura ambulatório",
-        "valor": "R$ 430,00"
+        "valor": "R$ 430,00",
+        "tempoSala": "-"
       }
     ],
     "diarias": [
       {
         "descricao": "Diária compacta em quarto privativo - Cirurgia plástica",
-        "cartaoSaude": "R$ 548,00",
         "valor": "R$ 685,00"
+      }
+    ],
+    "excedente": [
+      {
+        "descricao": "Hora excedente em bloco cirúrgico",
+        "valor": "R$ 360,00"
       }
     ]
   }
