@@ -46,6 +46,7 @@
   --soft: #f7f7f7;
   --brand-font-primary: "Gotham Local", "Gotham", "Montserrat", "Avenir Next", Arial, sans-serif;
   --brand-font-highlight: "Cinzel Local", "Cinzel", "Times New Roman", Georgia, serif;
+  --form-panel-width: 430px;
   --paper-width: 210mm;
   --paper-height: 297mm;
 }
@@ -69,8 +70,8 @@ textarea {
 
 .app-shell {
   display: grid;
-  grid-template-columns: minmax(320px, 430px) minmax(640px, 1fr);
-  gap: 20px;
+  grid-template-columns: minmax(320px, var(--form-panel-width)) 10px minmax(640px, 1fr);
+  gap: 12px;
   height: 100vh;
   padding: 20px;
 }
@@ -86,6 +87,30 @@ textarea {
   height: calc(100vh - 40px);
   overflow: auto;
   padding: 24px 22px;
+}
+
+.panel-resize-handle {
+  align-self: stretch;
+  cursor: col-resize;
+  display: flex;
+  justify-content: center;
+  position: relative;
+  touch-action: none;
+}
+
+.panel-resize-handle::before {
+  background: #d6dbe3;
+  border-radius: 999px;
+  content: "";
+  margin: 18px 0;
+  transition: background 0.16s ease, width 0.16s ease;
+  width: 4px;
+}
+
+.panel-resize-handle:hover::before,
+.app-shell.is-resizing .panel-resize-handle::before {
+  background: var(--primary);
+  width: 6px;
 }
 
 .panel-header,
@@ -645,6 +670,10 @@ th {
     grid-template-columns: 1fr;
   }
 
+  .panel-resize-handle {
+    display: none;
+  }
+
   .form-panel {
     max-height: none;
   }
@@ -656,6 +685,7 @@ th {
   }
 
   .form-panel,
+  .panel-resize-handle,
   .preview-toolbar {
     display: none;
   }

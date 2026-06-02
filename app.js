@@ -7,6 +7,8 @@ const removeSurgeryButton = document.querySelector("#removeSurgeryButton");
 const addHospitalButton = document.querySelector("#addHospitalButton");
 const removeHospitalButton = document.querySelector("#removeHospitalButton");
 const guidancePreview = document.querySelector("#guidancePreview");
+const appShell = document.querySelector(".app-shell");
+const panelResizeHandle = document.querySelector("#panelResizeHandle");
 const surgeryList = document.querySelector("#surgeryList");
 const surgeryHistoryDropdown = document.querySelector("#surgeryHistoryDropdown");
 const hospitalInput = document.querySelector("#hospital");
@@ -34,6 +36,20 @@ const previewFields = {
   paymentTerms: "Preencha as formas de pagamento.",
   includedItems: "Preencha os itens incluídos no valor.",
 };
+
+const minFormPanelWidth = 320;
+const maxFormPanelWidth = 620;
+
+function getCurrentFormPanelWidth() {
+  const currentWidth = getComputedStyle(document.documentElement).getPropertyValue("--form-panel-width");
+  return Number.parseFloat(currentWidth) || 430;
+}
+
+function setFormPanelWidth(width) {
+  const nextWidth = Math.min(Math.max(width, minFormPanelWidth), maxFormPanelWidth);
+  document.documentElement.style.setProperty("--form-panel-width", `${nextWidth}px`);
+  panelResizeHandle?.setAttribute("aria-valuenow", String(Math.round(nextWidth)));
+}
 
 function formatDateForInput(date) {
   return date.toISOString().slice(0, 10);
@@ -1415,6 +1431,39 @@ document.addEventListener("pointerdown", (event) => {
   hidePatientHistoryDropdown();
   hideSurgeryHistoryDropdown();
   hideHospitalHistoryDropdown();
+});
+panelResizeHandle?.addEventListener("pointerdown", (event) => {
+  event.preventDefault();
+  panelResizeHandle.setPointerCapture(event.pointerId);
+  appShell.classList.add("is-resizing");
+
+  const startX = event.clientX;
+  const startWidth = getCurrentFormPanelWidth();
+
+  function handlePointerMove(moveEvent) {
+    setFormPanelWidth(startWidth + moveEvent.clientX - startX);
+  }
+
+  function handlePointerUp() {
+    panelResizeHandle.releasePointerCapture(event.pointerId);
+    appShell.classList.remove("is-resizing");
+    panelResizeHandle.removeEventListener("pointermove", handlePointerMove);
+    panelResizeHandle.removeEventListener("pointerup", handlePointerUp);
+    panelResizeHandle.removeEventListener("pointercancel", handlePointerUp);
+  }
+
+  panelResizeHandle.addEventListener("pointermove", handlePointerMove);
+  panelResizeHandle.addEventListener("pointerup", handlePointerUp);
+  panelResizeHandle.addEventListener("pointercancel", handlePointerUp);
+});
+panelResizeHandle?.addEventListener("keydown", (event) => {
+  if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
+    return;
+  }
+
+  event.preventDefault();
+  const direction = event.key === "ArrowRight" ? 1 : -1;
+  setFormPanelWidth(getCurrentFormPanelWidth() + direction * 20);
 });
 form.addEventListener("click", (event) => {
   if (event.target.closest(".hospital-detail-add")) {
