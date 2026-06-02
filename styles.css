@@ -211,12 +211,23 @@ textarea {
   align-items: center;
   display: grid;
   gap: 8px;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto minmax(0, 1fr) auto 56px;
 }
 
 .hospital-detail-field span {
   color: #4b5563;
   font-weight: 700;
+}
+
+.hospital-detail-field .hospital-detail-multiplier-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.hospital-detail-multiplier {
+  padding-left: 8px;
+  padding-right: 8px;
+  text-align: center;
 }
 
 .add-button,

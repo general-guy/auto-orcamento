@@ -208,8 +208,21 @@ function createHospitalDetailEntry(detailList, detailConfig, shouldFocus = false
   detailInput.setAttribute("placeholder", detailConfig.placeholder);
   detailInput.setAttribute("aria-label", `${detailConfig.labelPrefix}${fieldNumber}`);
 
+  const multiplierLabel = document.createElement("span");
+  multiplierLabel.className = "hospital-detail-multiplier-label";
+  multiplierLabel.textContent = "x";
+
+  const multiplierInput = document.createElement("input");
+  multiplierInput.name = `${detailConfig.name}${fieldNumber}Multiplier`;
+  multiplierInput.type = "text";
+  multiplierInput.className = "hospital-detail-multiplier";
+  multiplierInput.value = "1";
+  multiplierInput.setAttribute("aria-label", `Multiplicador ${detailConfig.labelPrefix}${fieldNumber}`);
+
   detailField.append(detailLabel);
   detailField.append(detailInput);
+  detailField.append(multiplierLabel);
+  detailField.append(multiplierInput);
   detailList.append(detailField);
 
   if (shouldFocus) {
