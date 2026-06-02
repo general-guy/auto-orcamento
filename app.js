@@ -153,7 +153,7 @@ function formatReginaOption(item, type) {
     return `${item.descricao} - ${item.valor}`;
   }
 
-  return `${item.pacote} - Sala ${item.tempoSala} - Recuperação ${item.tempoSalaRecuperacao} - ${item.valor}`;
+  return `${item.pacote} - Sala ${item.tempoSala} - SR ${item.tempoSR} - ${item.valor}`;
 }
 
 function formatSapirangaOption(item, type) {
