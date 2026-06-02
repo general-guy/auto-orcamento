@@ -161,7 +161,24 @@ function formatSapirangaOption(item, type) {
     return `${item.descricao} - ${item.valor}`;
   }
 
+  if (type === "excedente") {
+    return `${item.descricao} - ${item.valor}`;
+  }
+
   return `${item.pacote} - Sala ${item.tempoSala} - ${item.valor}`;
+}
+
+function parseHourValue(value) {
+  if (!value) {
+    return null;
+  }
+
+  const normalizedValue = value.replace(",", ".");
+  if (!/^\d+(\.\d+)?$/.test(normalizedValue)) {
+    return null;
+  }
+
+  return Number(normalizedValue);
 }
 
 function parseCurrencyValue(value) {
@@ -185,9 +202,22 @@ function getSapirangaCentroOptionMap() {
       {
         optionText: formatSapirangaOption(item, "centro"),
         value: parseCurrencyValue(item.valor),
+        hours: item.tempoSalaHoras,
       },
     ])
   );
+}
+
+function getSapirangaExcedenteOption() {
+  const excedente = hospitalTables?.sapiranga?.excedente?.[0];
+  if (!excedente) {
+    return null;
+  }
+
+  return {
+    optionText: formatSapirangaOption(excedente, "excedente"),
+    value: parseCurrencyValue(excedente.valor),
+  };
 }
 
 function createHospitalDatalist(id, options) {
@@ -219,6 +249,7 @@ function buildHospitalDatalists() {
     ...hospitalTables.sapiranga.cirurgiasPlasticasCentroCirurgico.map((item) => formatSapirangaOption(item, "centro")),
     ...hospitalTables.sapiranga.cirurgiasPlasticasAmbulatorio.map((item) => formatSapirangaOption(item, "ambulatorio")),
     ...hospitalTables.sapiranga.diarias.map((item) => formatSapirangaOption(item, "diaria")),
+    ...(hospitalTables.sapiranga.excedente || []).map((item) => formatSapirangaOption(item, "excedente")),
   ];
 
   createHospitalDatalist("reginaHospitalOptions", reginaOptions);
@@ -387,11 +418,16 @@ function autofillSapirangaDetails(button) {
   }
 
   const centroOptions = getSapirangaCentroOptionMap();
+  const excedenteOption = getSapirangaExcedenteOption();
   const rows = getHospitalDetailRows(detailList);
   const centroEntries = [];
   const otherEntries = [];
 
   rows.forEach((row) => {
+    if (row.input.value === excedenteOption?.optionText) {
+      return;
+    }
+
     const option = centroOptions.get(row.input.value);
     if (option) {
       centroEntries.push(option);
@@ -406,8 +442,24 @@ function autofillSapirangaDetails(button) {
 
   centroEntries.sort((left, right) => right.value - left.value);
 
-  const orderedEntries = [...centroEntries, ...otherEntries];
-  rows.forEach((row, index) => {
+  const totalCentroHours = centroEntries.reduce((total, entry) => total + (entry.hours || 0), 0);
+  const expectedHours = parseHourValue(getFieldValue("hospitalStay"));
+  const missingHours = expectedHours === null ? 0 : Math.max(0, expectedHours - totalCentroHours);
+  const excessEntries = missingHours > 0 && excedenteOption
+    ? [{ ...excedenteOption, multiplierValue: String(Number(missingHours.toFixed(2))) }]
+    : [];
+  const orderedEntries = [...centroEntries, ...excessEntries, ...otherEntries];
+  if (orderedEntries.length === 0) {
+    orderedEntries.push({ optionText: "", multiplierValue: "1" });
+  }
+
+  while (getHospitalDetailRows(detailList).length < orderedEntries.length) {
+    createHospitalDetailEntry(detailList, getHospitalDetailConfigFromList(detailList));
+  }
+
+  getHospitalDetailRows(detailList).slice(orderedEntries.length).forEach((row) => row.field.remove());
+
+  getHospitalDetailRows(detailList).forEach((row, index) => {
     const entry = orderedEntries[index];
     row.input.value = entry.optionText;
 
@@ -418,6 +470,8 @@ function autofillSapirangaDetails(button) {
 
     row.multiplier.value = entry.multiplierValue;
   });
+
+  updateHospitalDetailButtons(detailList);
 }
 
 function autofillHospitalDetails(button) {
