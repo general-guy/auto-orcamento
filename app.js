@@ -148,6 +148,32 @@ function formatSapirangaOption(item, type) {
   return `${item.pacote} - Sala ${item.tempoSala} - ${item.valor}`;
 }
 
+function parseCurrencyValue(value) {
+  return Number(
+    value
+      .replace("R$", "")
+      .replace(/\./g, "")
+      .replace(",", ".")
+      .trim()
+  );
+}
+
+function getSapirangaCentroOptionMap() {
+  if (!hospitalTables?.sapiranga?.cirurgiasPlasticasCentroCirurgico) {
+    return new Map();
+  }
+
+  return new Map(
+    hospitalTables.sapiranga.cirurgiasPlasticasCentroCirurgico.map((item) => [
+      formatSapirangaOption(item, "centro"),
+      {
+        optionText: formatSapirangaOption(item, "centro"),
+        value: parseCurrencyValue(item.valor),
+      },
+    ])
+  );
+}
+
 function createHospitalDatalist(id, options) {
   document.querySelector(`#${id}`)?.remove();
 
@@ -327,6 +353,61 @@ function removeHospitalDetailEntryFromButton(button) {
 
   detailFields[detailFields.length - 1].remove();
   updateHospitalDetailButtons(detailList);
+}
+
+function getHospitalDetailRows(detailList) {
+  return [...detailList.querySelectorAll(".hospital-detail-field")].map((field) => ({
+    field,
+    input: field.querySelector(".hospital-detail-input"),
+    multiplier: field.querySelector(".hospital-detail-multiplier"),
+  }));
+}
+
+function autofillSapirangaDetails(button) {
+  const label = button.closest("label");
+  const detailList = label.querySelector(".hospital-detail-list");
+  if (!detailList) {
+    return;
+  }
+
+  const centroOptions = getSapirangaCentroOptionMap();
+  const rows = getHospitalDetailRows(detailList);
+  const centroEntries = [];
+  const otherEntries = [];
+
+  rows.forEach((row) => {
+    const option = centroOptions.get(row.input.value);
+    if (option) {
+      centroEntries.push(option);
+      return;
+    }
+
+    otherEntries.push({
+      optionText: row.input.value,
+      multiplierValue: row.multiplier.value,
+    });
+  });
+
+  centroEntries.sort((left, right) => right.value - left.value);
+
+  const orderedEntries = [...centroEntries, ...otherEntries];
+  rows.forEach((row, index) => {
+    const entry = orderedEntries[index];
+    row.input.value = entry.optionText;
+
+    if (index < centroEntries.length) {
+      row.multiplier.value = index === 0 ? "1" : index === 1 ? "0.7" : "0.6";
+      return;
+    }
+
+    row.multiplier.value = entry.multiplierValue;
+  });
+}
+
+function autofillHospitalDetails(button) {
+  if (button.dataset.autofillSource === "sapiranga") {
+    autofillSapirangaDetails(button);
+  }
 }
 
 function getHospitalDetailConfigFromList(detailList) {
@@ -1343,6 +1424,11 @@ form.addEventListener("click", (event) => {
 
   if (event.target.closest(".hospital-detail-remove")) {
     removeHospitalDetailEntryFromButton(event.target);
+    return;
+  }
+
+  if (event.target.closest(".hospital-detail-autofill")) {
+    autofillHospitalDetails(event.target.closest(".hospital-detail-autofill"));
   }
 });
 clearButton.addEventListener("click", clearForm);
