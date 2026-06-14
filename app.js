@@ -192,10 +192,12 @@ function parseCurrencyValue(value) {
 }
 
 function formatCurrency(value) {
-  return value.toLocaleString("pt-BR", {
-    currency: "BRL",
-    style: "currency",
-  });
+  return value
+    .toLocaleString("pt-BR", {
+      currency: "BRL",
+      style: "currency",
+    })
+    .replace(/\u00a0/g, " ");
 }
 
 function parseMultiplierValue(value) {
