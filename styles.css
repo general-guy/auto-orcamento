@@ -599,7 +599,7 @@ textarea:focus {
 .summary-stacked .hospital-preview-item {
   display: grid;
   gap: 8px;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 42mm;
+  grid-template-columns: 42mm minmax(0, 1fr) 42mm;
 }
 
 .hospital-preview-name {
