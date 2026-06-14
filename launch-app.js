@@ -9,12 +9,12 @@ const browserProfileDir = path.join(os.tmpdir(), "auto-orcamento-browser-profile
 
 const browserCandidates = [
   process.env.AUTO_ORCAMENTO_BROWSER,
-  path.join(process.env["ProgramFiles(x86)"] || "", "Microsoft", "Edge", "Application", "msedge.exe"),
-  path.join(process.env.ProgramFiles || "", "Microsoft", "Edge", "Application", "msedge.exe"),
-  path.join(process.env.LocalAppData || "", "Microsoft", "Edge", "Application", "msedge.exe"),
   path.join(process.env.ProgramFiles || "", "Google", "Chrome", "Application", "chrome.exe"),
   path.join(process.env["ProgramFiles(x86)"] || "", "Google", "Chrome", "Application", "chrome.exe"),
   path.join(process.env.LocalAppData || "", "Google", "Chrome", "Application", "chrome.exe"),
+  path.join(process.env["ProgramFiles(x86)"] || "", "Microsoft", "Edge", "Application", "msedge.exe"),
+  path.join(process.env.ProgramFiles || "", "Microsoft", "Edge", "Application", "msedge.exe"),
+  path.join(process.env.LocalAppData || "", "Microsoft", "Edge", "Application", "msedge.exe"),
 ].filter(Boolean);
 
 let serverProcess = null;

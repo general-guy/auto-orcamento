@@ -38,11 +38,11 @@ const previewFields = {
 };
 
 const minFormPanelWidth = 320;
-const maxFormPanelWidth = 620;
+const maxFormPanelWidth = 760;
 
 function getCurrentFormPanelWidth() {
   const currentWidth = getComputedStyle(document.documentElement).getPropertyValue("--form-panel-width");
-  return Number.parseFloat(currentWidth) || 430;
+  return Number.parseFloat(currentWidth) || 560;
 }
 
 function setFormPanelWidth(width) {
