@@ -1,53 +1,18 @@
 # Auto Orçamento
 
-Projeto local para automatizar a criação de orçamentos médicos em papel timbrado.
+Aplicativo local para gerar orçamentos cirúrgicos em papel timbrado, com preenchimento rápido, histórico de campos e pré-visualização pronta para impressão.
 
-## Contexto
+## Como Usar
 
-Durante a consulta, o médico precisa montar um orçamento para pacientes com cirurgia programada. Hoje esse processo é feito à mão em uma folha timbrada pessoal, incluindo informações como:
-
-- nome da paciente;
-- cirurgia proposta;
-- hospital;
-- tempo previsto de hospital;
-- valores de hospital, equipe e tecnologias;
-- formas de pagamento;
-- itens incluídos nos valores;
-- orientações adicionais.
-
-O objetivo do projeto é reduzir a escrita manual, padronizar o documento e acelerar a entrega do orçamento ao final da consulta.
-
-## Ideia do Produto
-
-A proposta inicial é criar um mini programa de uso local, mais rápido e direto do que editar um documento no Word. A aplicação deve usar o papel timbrado como fundo e oferecer uma interface simples para preencher os campos variáveis do orçamento.
-
-Também deve permitir selecionar modelos ou conjuntos de orientações por meio de opções como checkboxes, evitando reescrever textos repetitivos em cada consulta.
-
-Ao final, o sistema deve gerar um documento pronto, padronizado e adequado para impressão, usando o papel timbrado como base visual.
-
-## Decisão Técnica Inicial
-
-A abordagem escolhida inicialmente é um web app local em HTML, CSS e JavaScript, servido por um pequeno servidor Node.js local.
-
-Essa escolha favorece:
-
-- uso local, sem depender de servidor externo;
-- interface visual simples para preenchimento;
-- facilidade para gerar uma página pronta para impressão;
-- armazenamento do histórico em arquivos dentro do projeto;
-- evolução gradual do projeto sem complexidade desnecessária.
-
-## Como Rodar
-
-No Windows, clique duas vezes no arquivo:
+No Windows, clique duas vezes em:
 
 ```text
 abrir-auto-orcamento.bat
 ```
 
-Ele inicia o servidor local e abre o navegador automaticamente.
+Esse atalho inicia o servidor local, abre o app em uma janela do Chrome em modo app e mantém o servidor ativo enquanto essa janela estiver aberta. Ao fechar a janela do app, o processo do servidor também é encerrado.
 
-Como alternativa, execute na pasta do projeto:
+Como alternativa, execute manualmente na pasta do projeto:
 
 ```bash
 npm start
@@ -59,7 +24,19 @@ Depois acesse:
 http://localhost:3000
 ```
 
-Os históricos ficam salvos em:
+## O Que o App Faz
+
+- Preenche os dados da paciente, cirurgia, hospital, valores, formas de pagamento, itens incluídos e orientações.
+- Mostra uma pré-visualização do documento final sobre o papel timbrado.
+- Permite imprimir ou salvar em PDF usando a impressão do navegador.
+- Guarda histórico local de pacientes, cirurgias e hospitais.
+- Cria múltiplas entradas de cirurgia e hospital.
+- Para Regina e Sapiranga, cria entradas auxiliares (`Reg1`, `Sap1`, etc.) com multiplicadores.
+- Usa tabelas hospitalares locais para sugerir pacotes e calcular valores auxiliares no preview.
+
+## Dados Locais
+
+Os históricos ficam em arquivos JSON dentro de `data/`:
 
 ```text
 data/cirurgias.json
@@ -67,6 +44,32 @@ data/hospitais.json
 data/pacientes.json
 ```
 
-## Objetivo Principal
+As tabelas hospitalares estruturadas ficam em:
 
-Criar uma ferramenta que torne o preenchimento de orçamentos cirúrgicos mais rápido, padronizado e profissional, preservando a apresentação visual do papel timbrado.
+```text
+data/tabelas-hospitalares.json
+```
+
+Esses arquivos são usados apenas localmente pelo servidor Node.js.
+
+## Hospitais Com Autofill
+
+O botão verde ao lado do hospital preenche e reorganiza as entradas auxiliares.
+
+Para Sapiranga, os pacotes são ordenados por valor e recebem multiplicadores progressivos. Se o tempo total dos pacotes for menor que o tempo previsto de hospital, o app adiciona uma entrada de hora excedente com multiplicador proporcional.
+
+Para Regina, o app soma o `tempoSalaHoras` dos pacotes selecionados. Se faltar tempo em relação ao tempo previsto de hospital, adiciona `SALA CIRÚRGICA - MEIA HORA SUBSEQUENTE` com multiplicador em unidades de meia hora.
+
+## Documentação Técnica
+
+Detalhes de arquitetura, arquivos principais, endpoints locais e fluxo do launcher ficam em:
+
+```text
+ARCHITECTURE.md
+```
+
+Detalhes sobre a origem e manutenção das tabelas hospitalares ficam em:
+
+```text
+docs/tabelas-hospitalares.md
+```
