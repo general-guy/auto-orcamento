@@ -208,6 +208,36 @@ function getSapirangaCentroOptionMap() {
   );
 }
 
+function getReginaPackageOptionMap() {
+  if (!hospitalTables?.regina?.pacotesCirurgiaPlastica) {
+    return new Map();
+  }
+
+  return new Map(
+    hospitalTables.regina.pacotesCirurgiaPlastica.map((item) => [
+      formatReginaOption(item, "pacote"),
+      {
+        optionText: formatReginaOption(item, "pacote"),
+        hours: item.tempoSalaHoras,
+      },
+    ])
+  );
+}
+
+function getReginaHalfHourOption() {
+  const halfHourTax = hospitalTables?.regina?.taxasAdicionais?.find(
+    (item) => item.descricao === "SALA CIRÚRGICA - MEIA HORA SUBSEQUENTE"
+  );
+  if (!halfHourTax) {
+    return null;
+  }
+
+  return {
+    optionText: formatReginaOption(halfHourTax, "taxa"),
+    value: parseCurrencyValue(halfHourTax.valor),
+  };
+}
+
 function getSapirangaExcedenteOption() {
   const excedente = hospitalTables?.sapiranga?.excedente?.[0];
   if (!excedente) {
@@ -474,7 +504,68 @@ function autofillSapirangaDetails(button) {
   updateHospitalDetailButtons(detailList);
 }
 
+function autofillReginaDetails(button) {
+  const label = button.closest("label");
+  const detailList = label.querySelector(".hospital-detail-list");
+  if (!detailList) {
+    return;
+  }
+
+  const packageOptions = getReginaPackageOptionMap();
+  const halfHourOption = getReginaHalfHourOption();
+  const rows = getHospitalDetailRows(detailList);
+  const detailEntries = [];
+  let totalPackageHours = 0;
+
+  rows.forEach((row) => {
+    if (row.input.value === halfHourOption?.optionText) {
+      return;
+    }
+
+    const option = packageOptions.get(row.input.value);
+    if (option) {
+      totalPackageHours += option.hours || 0;
+    }
+
+    detailEntries.push({
+      optionText: row.input.value,
+      multiplierValue: row.multiplier.value,
+    });
+  });
+
+  const expectedHours = parseHourValue(getFieldValue("hospitalStay"));
+  const missingHours = expectedHours === null ? 0 : Math.max(0, expectedHours - totalPackageHours);
+  const halfHourMultiplier = Number((missingHours / 0.5).toFixed(2));
+  const excessEntries = missingHours > 0 && halfHourOption
+    ? [{ ...halfHourOption, multiplierValue: String(halfHourMultiplier) }]
+    : [];
+  const orderedEntries = [...detailEntries, ...excessEntries];
+
+  if (orderedEntries.length === 0) {
+    orderedEntries.push({ optionText: "", multiplierValue: "1" });
+  }
+
+  while (getHospitalDetailRows(detailList).length < orderedEntries.length) {
+    createHospitalDetailEntry(detailList, getHospitalDetailConfigFromList(detailList));
+  }
+
+  getHospitalDetailRows(detailList).slice(orderedEntries.length).forEach((row) => row.field.remove());
+
+  getHospitalDetailRows(detailList).forEach((row, index) => {
+    const entry = orderedEntries[index];
+    row.input.value = entry.optionText;
+    row.multiplier.value = entry.multiplierValue;
+  });
+
+  updateHospitalDetailButtons(detailList);
+}
+
 function autofillHospitalDetails(button) {
+  if (button.dataset.autofillSource === "regina") {
+    autofillReginaDetails(button);
+    return;
+  }
+
   if (button.dataset.autofillSource === "sapiranga") {
     autofillSapirangaDetails(button);
   }
