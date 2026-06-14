@@ -596,6 +596,22 @@ textarea:focus {
   padding: 8px 10px;
 }
 
+.summary-stacked .hospital-preview-item {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 42mm;
+}
+
+.hospital-preview-name {
+  align-self: start;
+}
+
+.hospital-preview-procedures,
+.hospital-preview-values {
+  display: grid;
+  gap: 4px;
+}
+
 .summary-stacked .summary-inline {
   display: grid;
   grid-template-columns: 42mm 1fr;

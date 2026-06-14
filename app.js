@@ -191,6 +191,74 @@ function parseCurrencyValue(value) {
   );
 }
 
+function formatCurrency(value) {
+  return value.toLocaleString("pt-BR", {
+    currency: "BRL",
+    style: "currency",
+  });
+}
+
+function parseMultiplierValue(value) {
+  const normalizedValue = value.replace(",", ".").trim();
+  const multiplier = Number(normalizedValue);
+  return Number.isFinite(multiplier) ? multiplier : 1;
+}
+
+function createHospitalPreviewOptionMap() {
+  const options = new Map();
+
+  hospitalTables?.regina?.pacotesCirurgiaPlastica?.forEach((item) => {
+    options.set(formatReginaOption(item, "pacote"), {
+      label: item.pacote,
+      tempoSala: item.tempoSala,
+      value: parseCurrencyValue(item.valor),
+    });
+  });
+
+  hospitalTables?.regina?.taxasAdicionais?.forEach((item) => {
+    const tempoSala = item.descricao === "SALA CIRÚRGICA - MEIA HORA SUBSEQUENTE" ? "30min" : "";
+    options.set(formatReginaOption(item, "taxa"), {
+      label: item.descricao,
+      tempoSala,
+      value: parseCurrencyValue(item.valor),
+    });
+  });
+
+  hospitalTables?.sapiranga?.cirurgiasPlasticasCentroCirurgico?.forEach((item) => {
+    options.set(formatSapirangaOption(item, "centro"), {
+      label: item.pacote,
+      tempoSala: item.tempoSala,
+      value: parseCurrencyValue(item.valor),
+    });
+  });
+
+  hospitalTables?.sapiranga?.cirurgiasPlasticasAmbulatorio?.forEach((item) => {
+    options.set(formatSapirangaOption(item, "ambulatorio"), {
+      label: item.pacote,
+      tempoSala: item.tempoSala,
+      value: parseCurrencyValue(item.valor),
+    });
+  });
+
+  hospitalTables?.sapiranga?.diarias?.forEach((item) => {
+    options.set(formatSapirangaOption(item, "diaria"), {
+      label: item.descricao,
+      tempoSala: "",
+      value: parseCurrencyValue(item.valor),
+    });
+  });
+
+  hospitalTables?.sapiranga?.excedente?.forEach((item) => {
+    options.set(formatSapirangaOption(item, "excedente"), {
+      label: item.descricao,
+      tempoSala: "1h",
+      value: parseCurrencyValue(item.valor),
+    });
+  });
+
+  return options;
+}
+
 function getSapirangaCentroOptionMap() {
   if (!hospitalTables?.sapiranga?.cirurgiasPlasticasCentroCirurgico) {
     return new Map();
@@ -1122,6 +1190,66 @@ function selectPatientHistoryOption(option, shouldAdvance = false) {
   patientInput.focus();
 }
 
+function getHospitalPreviewRows(input, optionMap) {
+  const detailList = input.closest("label")?.querySelector(".hospital-detail-list");
+  if (!detailList) {
+    return [];
+  }
+
+  return getHospitalDetailRows(detailList)
+    .map((row) => {
+      const option = optionMap.get(row.input.value);
+      if (!option) {
+        return null;
+      }
+
+      const multiplier = parseMultiplierValue(row.multiplier.value);
+      return {
+        label: option.label,
+        tempoSala: option.tempoSala,
+        totalValue: option.value * multiplier,
+      };
+    })
+    .filter(Boolean);
+}
+
+function createHospitalPreviewItem(hospital, rows = []) {
+  const previewItem = document.createElement("dd");
+  previewItem.className = "hospital-preview-item";
+  previewItem.dataset.preview = "hospital";
+
+  const hospitalName = document.createElement("span");
+  hospitalName.className = "hospital-preview-name";
+  hospitalName.textContent = hospital;
+
+  const procedures = document.createElement("span");
+  procedures.className = "hospital-preview-procedures";
+
+  const values = document.createElement("span");
+  values.className = "hospital-preview-values";
+
+  if (rows.length === 0) {
+    procedures.textContent = "";
+    values.textContent = "";
+  } else {
+    rows.forEach((row) => {
+      const procedureLine = document.createElement("span");
+      procedureLine.textContent = row.tempoSala ? `${row.label} = ${row.tempoSala}` : row.label;
+      procedures.append(procedureLine);
+
+      const valueLine = document.createElement("span");
+      valueLine.textContent = formatCurrency(row.totalValue);
+      values.append(valueLine);
+    });
+  }
+
+  previewItem.append(hospitalName);
+  previewItem.append(procedures);
+  previewItem.append(values);
+
+  return previewItem;
+}
+
 function updateHospitalPreview() {
   const hospitalSummary = document.querySelector(".hospital-summary");
   if (!hospitalSummary) {
@@ -1130,15 +1258,17 @@ function updateHospitalPreview() {
 
   hospitalSummary.querySelectorAll(".hospital-preview-item").forEach((item) => item.remove());
 
-  const hospitals = getHospitalValues();
-  const previewValues = hospitals.length > 0 ? hospitals : ["Hospital"];
+  const optionMap = createHospitalPreviewOptionMap();
+  const hospitalInputs = getHospitalInputs();
+  const filledHospitalInputs = hospitalInputs.filter((input) => input.value.trim());
 
-  previewValues.forEach((hospital) => {
-    const previewItem = document.createElement("dd");
-    previewItem.className = "hospital-preview-item";
-    previewItem.dataset.preview = "hospital";
-    previewItem.textContent = hospital;
-    hospitalSummary.append(previewItem);
+  if (filledHospitalInputs.length === 0) {
+    hospitalSummary.append(createHospitalPreviewItem("Hospital"));
+    return;
+  }
+
+  filledHospitalInputs.forEach((input) => {
+    hospitalSummary.append(createHospitalPreviewItem(input.value.trim(), getHospitalPreviewRows(input, optionMap)));
   });
 }
 
