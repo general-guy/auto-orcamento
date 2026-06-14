@@ -47,6 +47,7 @@ function openBrowserApp(browserPath) {
       `--user-data-dir=${browserProfileDir}`,
       "--no-first-run",
       "--new-window",
+      "--start-maximized",
     ],
     {
       stdio: "ignore",
