@@ -1745,16 +1745,19 @@ panelResizeHandle?.addEventListener("keydown", (event) => {
 form.addEventListener("click", (event) => {
   if (event.target.closest(".hospital-detail-add")) {
     addHospitalDetailEntryFromButton(event.target);
+    updatePreview();
     return;
   }
 
   if (event.target.closest(".hospital-detail-remove")) {
     removeHospitalDetailEntryFromButton(event.target);
+    updatePreview();
     return;
   }
 
   if (event.target.closest(".hospital-detail-autofill")) {
     autofillHospitalDetails(event.target.closest(".hospital-detail-autofill"));
+    updatePreview();
   }
 });
 clearButton.addEventListener("click", clearForm);
