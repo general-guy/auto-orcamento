@@ -705,6 +705,8 @@ dt {
 .implant-preview-values {
   color: #192036;
   font-weight: 700;
+  justify-self: end;
+  text-align: right;
 }
 
 table {

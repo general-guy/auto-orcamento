@@ -1432,7 +1432,7 @@ function updateImplantsPreview() {
 
   const valuesLine = document.createElement("span");
   valuesLine.className = "implant-preview-values";
-  valuesLine.textContent = `À vista ${implant.valorAVista || "R$"} - 07x cartão ${implant.valorCartao7x || "R$"}`;
+  valuesLine.textContent = `${implant.valorAVista || "R$"} à vista ou ${implant.valorCartao7x || "R$"} em 7x no cartão`;
   implantSummaryPreview.append(valuesLine);
 }
 
