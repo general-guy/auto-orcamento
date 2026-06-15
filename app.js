@@ -218,10 +218,9 @@ function createHospitalPreviewOptionMap() {
   });
 
   hospitalTables?.regina?.taxasAdicionais?.forEach((item) => {
-    const tempoSala = item.descricao === "SALA CIRÚRGICA - MEIA HORA SUBSEQUENTE" ? "30min" : "";
     options.set(formatReginaOption(item, "taxa"), {
       label: item.descricao,
-      tempoSala,
+      tempoSala: "",
       value: parseCurrencyValue(item.valor),
     });
   });
@@ -253,7 +252,7 @@ function createHospitalPreviewOptionMap() {
   hospitalTables?.sapiranga?.excedente?.forEach((item) => {
     options.set(formatSapirangaOption(item, "excedente"), {
       label: item.descricao,
-      tempoSala: "1h",
+      tempoSala: "",
       value: parseCurrencyValue(item.valor),
     });
   });
@@ -1236,7 +1235,7 @@ function createHospitalPreviewItem(hospital, rows = []) {
   } else {
     rows.forEach((row) => {
       const procedureLine = document.createElement("span");
-      procedureLine.textContent = row.tempoSala ? `${row.label} = ${row.tempoSala}` : row.label;
+      procedureLine.textContent = row.tempoSala ? `${row.label} - ${row.tempoSala}` : row.label;
       procedures.append(procedureLine);
 
       const valueLine = document.createElement("span");
