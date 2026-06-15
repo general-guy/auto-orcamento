@@ -64,6 +64,7 @@ body {
 
 button,
 input,
+select,
 textarea {
   font: inherit;
 }
@@ -161,6 +162,18 @@ legend {
   padding: 0 12px 0 0;
 }
 
+.legend-checkbox {
+  align-items: center;
+  display: inline-grid;
+  gap: 8px;
+  grid-template-columns: auto 1fr;
+}
+
+.legend-checkbox input {
+  margin: 0;
+  width: auto;
+}
+
 label {
   color: #4b5563;
   display: grid;
@@ -171,6 +184,7 @@ label {
 }
 
 input,
+select,
 textarea {
   background: var(--soft);
   border: 1px solid transparent;
@@ -181,6 +195,7 @@ textarea {
 }
 
 input:focus,
+select:focus,
 textarea:focus {
   background: #ffffff;
   border-color: #cfcfcf;
@@ -461,6 +476,7 @@ button:hover {
 
 button:focus-visible,
 input:focus,
+select:focus,
 textarea:focus {
   box-shadow: 0 0 0 3px var(--primary-soft);
 }
@@ -649,6 +665,10 @@ dt {
 .document-section {
   display: grid;
   gap: 7px;
+}
+
+.document-section[hidden] {
+  display: none;
 }
 
 .document-section h3 {

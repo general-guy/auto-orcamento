@@ -88,29 +88,19 @@
           </fieldset>
 
           <fieldset>
-            <legend>Valores</legend>
-
-            <div class="field-grid">
-              <label>
-                Hospital
-                <input id="hospitalValue" name="hospitalValue" type="text" placeholder="R$" />
+            <legend>
+              <label class="legend-checkbox">
+                <input id="implantsEnabled" name="implantsEnabled" type="checkbox" />
+                <span>Implantes</span>
               </label>
+            </legend>
 
-              <label>
-                Equipe
-                <input id="teamValue" name="teamValue" type="text" placeholder="R$" />
-              </label>
-
-              <label>
-                Tecnologias
-                <input id="technologyValue" name="technologyValue" type="text" placeholder="R$" />
-              </label>
-
-              <label>
-                Total
-                <input id="totalValue" name="totalValue" type="text" placeholder="R$" />
-              </label>
-            </div>
+            <label>
+              Modelo
+              <select id="implantSelect" name="implantSelection" disabled>
+                <option value="">Selecione um implante</option>
+              </select>
+            </label>
           </fieldset>
 
           <fieldset>
@@ -206,25 +196,21 @@
               </div>
             </dl>
 
-            <section class="document-section">
-              <h3>Valores</h3>
+            <section id="implantsPreviewSection" class="document-section" hidden>
+              <h3>Implantes</h3>
               <table>
                 <tbody>
                   <tr>
-                    <th>Hospital</th>
-                    <td data-preview="hospitalValue">R$</td>
+                    <th>Implante</th>
+                    <td data-preview="implantLabel">Selecione um implante.</td>
                   </tr>
                   <tr>
-                    <th>Equipe</th>
-                    <td data-preview="teamValue">R$</td>
+                    <th>07x cartão</th>
+                    <td data-preview="implantCardValue">R$</td>
                   </tr>
                   <tr>
-                    <th>Tecnologias</th>
-                    <td data-preview="technologyValue">R$</td>
-                  </tr>
-                  <tr class="total-row">
-                    <th>Total</th>
-                    <td data-preview="totalValue">R$</td>
+                    <th>À vista</th>
+                    <td data-preview="implantCashValue">R$</td>
                   </tr>
                 </tbody>
               </table>

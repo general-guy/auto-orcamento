@@ -16,6 +16,9 @@ const hospitalList = document.querySelector("#hospitalList");
 const hospitalHistoryDropdown = document.querySelector("#hospitalHistoryDropdown");
 const patientInput = document.querySelector("#patientName");
 const patientHistoryDropdown = document.querySelector("#patientHistoryDropdown");
+const implantsEnabledInput = document.querySelector("#implantsEnabled");
+const implantSelect = document.querySelector("#implantSelect");
+const implantsPreviewSection = document.querySelector("#implantsPreviewSection");
 let surgeryHistory = [];
 let activeSurgeryInput = null;
 let isInteractingWithHistoryDropdown = false;
@@ -26,13 +29,10 @@ let patientHistory = [];
 let activePatientInput = null;
 let isInteractingWithPatientDropdown = false;
 let hospitalTables = null;
+let implantTable = null;
 
 const previewFields = {
   patientName: "Nome da paciente",
-  hospitalValue: "R$",
-  teamValue: "R$",
-  technologyValue: "R$",
-  totalValue: "R$",
   paymentTerms: "Preencha as formas de pagamento.",
   includedItems: "Preencha os itens incluídos no valor.",
 };
@@ -401,6 +401,43 @@ async function loadHospitalTables() {
   } catch {
     hospitalTables = null;
     console.warn("Não foi possível carregar as tabelas hospitalares locais.");
+  }
+}
+
+function getImplantDisplayName(item) {
+  return item.rotulo || item.modelo || item.referencia;
+}
+
+function formatImplantOption(item) {
+  const displayName = getImplantDisplayName(item);
+  const detailParts = [item.modelo, item.referencia].filter(Boolean);
+  return detailParts.length > 0 ? `${displayName} - ${detailParts.join(" - ")}` : displayName;
+}
+
+function buildImplantOptions() {
+  implantSelect.innerHTML = "";
+
+  const placeholder = document.createElement("option");
+  placeholder.value = "";
+  placeholder.textContent = "Selecione um implante";
+  implantSelect.append(placeholder);
+
+  (implantTable?.itens || []).forEach((item, index) => {
+    const option = document.createElement("option");
+    option.value = String(index);
+    option.textContent = formatImplantOption(item);
+    implantSelect.append(option);
+  });
+}
+
+async function loadImplantTable() {
+  try {
+    const response = await fetch("data/tabela-implantes.json");
+    implantTable = await response.json();
+    buildImplantOptions();
+  } catch {
+    implantTable = null;
+    console.warn("Não foi possível carregar a tabela de implantes local.");
   }
 }
 
@@ -1354,6 +1391,34 @@ function updateHospitalPreview() {
   });
 }
 
+function getSelectedImplant() {
+  if (!implantsEnabledInput.checked || !implantSelect.value) {
+    return null;
+  }
+
+  return implantTable?.itens?.[Number(implantSelect.value)] || null;
+}
+
+function updateImplantsPreview() {
+  const isEnabled = implantsEnabledInput.checked;
+  implantSelect.disabled = !isEnabled;
+
+  if (!isEnabled) {
+    implantSelect.value = "";
+  }
+
+  implantsPreviewSection.hidden = !isEnabled;
+
+  const implant = getSelectedImplant();
+  const implantLabelPreview = document.querySelector('[data-preview="implantLabel"]');
+  const implantCardValuePreview = document.querySelector('[data-preview="implantCardValue"]');
+  const implantCashValuePreview = document.querySelector('[data-preview="implantCashValue"]');
+
+  implantLabelPreview.textContent = implant ? getImplantDisplayName(implant) : "Selecione um implante.";
+  implantCardValuePreview.textContent = implant?.valorCartao7x || "R$";
+  implantCashValuePreview.textContent = implant?.valorAVista || "R$";
+}
+
 function updateSimpleFields() {
   Object.entries(previewFields).forEach(([fieldName, fallback]) => {
     const preview = document.querySelector(`[data-preview="${fieldName}"]`);
@@ -1374,6 +1439,7 @@ function updateSimpleFields() {
   surgeryPreview.textContent = getSurgeryValues().join("\n") || "Cirurgia proposta";
 
   updateHospitalPreview();
+  updateImplantsPreview();
 }
 
 function updateGuidance() {
@@ -1869,7 +1935,7 @@ shutdownButton.addEventListener("click", async () => {
   document.body.innerHTML = "<main class=\"shutdown-message\"><h1>Auto Orçamento encerrado</h1><p>Você já pode fechar esta aba.</p></main>";
 });
 
-Promise.all([loadPatientHistory(), loadSurgeryHistory(), loadHospitalHistory(), loadHospitalTables()]).then(() => {
+Promise.all([loadPatientHistory(), loadSurgeryHistory(), loadHospitalHistory(), loadHospitalTables(), loadImplantTable()]).then(() => {
   updatePatientHistoryDropdown();
   updateSurgeryHistoryDropdown();
   hideHospitalHistoryDropdown();
