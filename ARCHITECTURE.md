@@ -110,31 +110,40 @@ O preview hospitalar é montado em três colunas:
 
 - nome do hospital;
 - procedimentos e tempos de sala;
-- valores calculados.
+- valor total do hospital.
 
-Os valores são calculados como `valor * multiplicador` e formatados em reais. O formatador troca espaços não quebráveis por espaços comuns para evitar problemas de largura com a fonte do documento.
+O valor exibido é a soma de `valor * multiplicador` de todas as entradas válidas daquele hospital. O formatador troca espaços não quebráveis por espaços comuns para evitar problemas de largura com a fonte do documento.
 
 ## Autofill Sapiranga
 
 O autofill de Sapiranga:
 
-- identifica os pacotes de centro cirúrgico selecionados;
-- ordena os pacotes por valor decrescente;
-- aplica multiplicadores `1`, `0.7` e `0.6` aos pacotes principais;
-- soma `tempoSalaHoras`;
+- identifica pacotes de centro cirúrgico, pacotes de ambulatório, hora excedente, diárias e entradas desconhecidas;
+- ordena os pacotes de centro cirúrgico por valor decrescente;
+- aplica multiplicadores `1`, `0.7` e `0.6` apenas aos pacotes de centro cirúrgico;
+- ordena os pacotes de ambulatório na ordem do JSON;
+- soma `tempoSalaHoras` dos pacotes de centro cirúrgico;
 - compara com `Tempo previsto de hospital`;
-- adiciona `Hora excedente em bloco cirúrgico` quando faltar tempo.
+- adiciona `Hora excedente em bloco cirúrgico` quando faltar tempo;
+- posiciona as diárias depois da hora excedente, sem usá-las no cálculo de tempo de sala e sem multiplicador automático.
+
+A ordem final é: `cirurgiasPlasticasCentroCirurgico`, `cirurgiasPlasticasAmbulatorio`, `excedente`, `diarias` e, ao fim, entradas não reconhecidas.
 
 ## Autofill Regina
 
 O autofill de Regina:
 
+- identifica pacotes, taxas adicionais e entradas desconhecidas;
+- ordena os pacotes na ordem de `regina.pacotesCirurgiaPlastica`;
 - soma o `tempoSalaHoras` dos pacotes selecionados;
 - compara com `Tempo previsto de hospital`;
 - quando faltar tempo, adiciona `SALA CIRÚRGICA - MEIA HORA SUBSEQUENTE`;
-- calcula o multiplicador em unidades de meia hora.
+- calcula o multiplicador em unidades de meia hora;
+- ordena as taxas adicionais na ordem de `regina.taxasAdicionais`.
 
 Exemplo: se faltam `6` horas, o multiplicador da taxa de meia hora é `12`.
+
+A ordem final é: pacotes de cirurgia plástica, taxas adicionais e, ao fim, entradas não reconhecidas.
 
 ## Convenções
 

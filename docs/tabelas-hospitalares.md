@@ -36,6 +36,23 @@ Também usa a tabela para:
 - somar `tempoSalaHoras`;
 - adicionar hora excedente de Sapiranga quando o tempo previsto for maior que a soma dos pacotes;
 - adicionar meia hora subsequente de Regina quando o tempo previsto for maior que a soma dos pacotes.
+- ordenar o resultado do botão verde conforme as seções e a ordem interna do JSON.
+
+## Ordem usada pelo autofill
+
+No Regina, a ordem do JSON é a ordem funcional do botão verde:
+
+1. `regina.pacotesCirurgiaPlastica`
+2. `regina.taxasAdicionais`
+
+No Sapiranga, o botão verde agrupa os itens nesta ordem:
+
+1. `sapiranga.cirurgiasPlasticasCentroCirurgico`, ordenado por valor decrescente
+2. `sapiranga.cirurgiasPlasticasAmbulatorio`, na ordem do JSON
+3. `sapiranga.excedente`
+4. `sapiranga.diarias`
+
+Diárias não entram no cálculo de tempo de sala e não recebem multiplicador automático, além do `1` padrão de novas entradas.
 
 ## Como atualizar no futuro
 

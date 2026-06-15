@@ -260,37 +260,71 @@ function createHospitalPreviewOptionMap() {
   return options;
 }
 
-function getSapirangaCentroOptionMap() {
-  if (!hospitalTables?.sapiranga?.cirurgiasPlasticasCentroCirurgico) {
-    return new Map();
-  }
-
+function createSapirangaOptionMap(items = [], type, category) {
   return new Map(
-    hospitalTables.sapiranga.cirurgiasPlasticasCentroCirurgico.map((item) => [
-      formatSapirangaOption(item, "centro"),
-      {
-        optionText: formatSapirangaOption(item, "centro"),
-        value: parseCurrencyValue(item.valor),
-        hours: item.tempoSalaHoras,
-      },
-    ])
+    items.map((item, order) => {
+      const optionText = formatSapirangaOption(item, type);
+      return [
+        optionText,
+        {
+          category,
+          hours: item.tempoSalaHoras,
+          optionText,
+          order,
+          value: parseCurrencyValue(item.valor),
+        },
+      ];
+    })
   );
 }
 
-function getReginaPackageOptionMap() {
-  if (!hospitalTables?.regina?.pacotesCirurgiaPlastica) {
-    return new Map();
-  }
+function getSapirangaOptionMaps() {
+  return {
+    ambulatorio: createSapirangaOptionMap(
+      hospitalTables?.sapiranga?.cirurgiasPlasticasAmbulatorio,
+      "ambulatorio",
+      "ambulatorio"
+    ),
+    centro: createSapirangaOptionMap(
+      hospitalTables?.sapiranga?.cirurgiasPlasticasCentroCirurgico,
+      "centro",
+      "centro"
+    ),
+    diaria: createSapirangaOptionMap(hospitalTables?.sapiranga?.diarias, "diaria", "diaria"),
+    excedente: createSapirangaOptionMap(hospitalTables?.sapiranga?.excedente, "excedente", "excedente"),
+  };
+}
 
-  return new Map(
-    hospitalTables.regina.pacotesCirurgiaPlastica.map((item) => [
-      formatReginaOption(item, "pacote"),
-      {
-        optionText: formatReginaOption(item, "pacote"),
-        hours: item.tempoSalaHoras,
-      },
-    ])
-  );
+function getReginaOptionMaps() {
+  return {
+    pacote: new Map(
+      (hospitalTables?.regina?.pacotesCirurgiaPlastica || []).map((item, order) => {
+        const optionText = formatReginaOption(item, "pacote");
+        return [
+          optionText,
+          {
+            category: "pacote",
+            hours: item.tempoSalaHoras,
+            optionText,
+            order,
+          },
+        ];
+      })
+    ),
+    taxa: new Map(
+      (hospitalTables?.regina?.taxasAdicionais || []).map((item, order) => {
+        const optionText = formatReginaOption(item, "taxa");
+        return [
+          optionText,
+          {
+            category: "taxa",
+            optionText,
+            order,
+          },
+        ];
+      })
+    ),
+  };
 }
 
 function getReginaHalfHourOption() {
@@ -302,7 +336,9 @@ function getReginaHalfHourOption() {
   }
 
   return {
+    category: "taxa",
     optionText: formatReginaOption(halfHourTax, "taxa"),
+    order: hospitalTables.regina.taxasAdicionais.indexOf(halfHourTax),
     value: parseCurrencyValue(halfHourTax.valor),
   };
 }
@@ -314,7 +350,9 @@ function getSapirangaExcedenteOption() {
   }
 
   return {
+    category: "excedente",
     optionText: formatSapirangaOption(excedente, "excedente"),
+    order: 0,
     value: parseCurrencyValue(excedente.valor),
   };
 }
@@ -347,8 +385,8 @@ function buildHospitalDatalists() {
   const sapirangaOptions = [
     ...hospitalTables.sapiranga.cirurgiasPlasticasCentroCirurgico.map((item) => formatSapirangaOption(item, "centro")),
     ...hospitalTables.sapiranga.cirurgiasPlasticasAmbulatorio.map((item) => formatSapirangaOption(item, "ambulatorio")),
-    ...hospitalTables.sapiranga.diarias.map((item) => formatSapirangaOption(item, "diaria")),
     ...(hospitalTables.sapiranga.excedente || []).map((item) => formatSapirangaOption(item, "excedente")),
+    ...hospitalTables.sapiranga.diarias.map((item) => formatSapirangaOption(item, "diaria")),
   ];
 
   createHospitalDatalist("reginaHospitalOptions", reginaOptions);
@@ -516,10 +554,12 @@ function autofillSapirangaDetails(button) {
     return;
   }
 
-  const centroOptions = getSapirangaCentroOptionMap();
+  const sapirangaOptions = getSapirangaOptionMaps();
   const excedenteOption = getSapirangaExcedenteOption();
   const rows = getHospitalDetailRows(detailList);
   const centroEntries = [];
+  const ambulatorioEntries = [];
+  const diariaEntries = [];
   const otherEntries = [];
 
   rows.forEach((row) => {
@@ -527,9 +567,27 @@ function autofillSapirangaDetails(button) {
       return;
     }
 
-    const option = centroOptions.get(row.input.value);
-    if (option) {
-      centroEntries.push(option);
+    const centroOption = sapirangaOptions.centro.get(row.input.value);
+    if (centroOption) {
+      centroEntries.push(centroOption);
+      return;
+    }
+
+    const ambulatorioOption = sapirangaOptions.ambulatorio.get(row.input.value);
+    if (ambulatorioOption) {
+      ambulatorioEntries.push({
+        ...ambulatorioOption,
+        multiplierValue: row.multiplier.value,
+      });
+      return;
+    }
+
+    const diariaOption = sapirangaOptions.diaria.get(row.input.value);
+    if (diariaOption) {
+      diariaEntries.push({
+        ...diariaOption,
+        multiplierValue: row.multiplier.value,
+      });
       return;
     }
 
@@ -539,7 +597,9 @@ function autofillSapirangaDetails(button) {
     });
   });
 
-  centroEntries.sort((left, right) => right.value - left.value);
+  centroEntries.sort((left, right) => right.value - left.value || left.order - right.order);
+  ambulatorioEntries.sort((left, right) => left.order - right.order);
+  diariaEntries.sort((left, right) => left.order - right.order);
 
   const totalCentroHours = centroEntries.reduce((total, entry) => total + (entry.hours || 0), 0);
   const expectedHours = parseHourValue(getFieldValue("hospitalStay"));
@@ -547,7 +607,7 @@ function autofillSapirangaDetails(button) {
   const excessEntries = missingHours > 0 && excedenteOption
     ? [{ ...excedenteOption, multiplierValue: String(Number(missingHours.toFixed(2))) }]
     : [];
-  const orderedEntries = [...centroEntries, ...excessEntries, ...otherEntries];
+  const orderedEntries = [...centroEntries, ...ambulatorioEntries, ...excessEntries, ...diariaEntries, ...otherEntries];
   if (orderedEntries.length === 0) {
     orderedEntries.push({ optionText: "", multiplierValue: "1" });
   }
@@ -580,10 +640,12 @@ function autofillReginaDetails(button) {
     return;
   }
 
-  const packageOptions = getReginaPackageOptionMap();
+  const reginaOptions = getReginaOptionMaps();
   const halfHourOption = getReginaHalfHourOption();
   const rows = getHospitalDetailRows(detailList);
-  const detailEntries = [];
+  const packageEntries = [];
+  const taxEntries = [];
+  const otherEntries = [];
   let totalPackageHours = 0;
 
   rows.forEach((row) => {
@@ -591,12 +653,26 @@ function autofillReginaDetails(button) {
       return;
     }
 
-    const option = packageOptions.get(row.input.value);
-    if (option) {
-      totalPackageHours += option.hours || 0;
+    const packageOption = reginaOptions.pacote.get(row.input.value);
+    if (packageOption) {
+      totalPackageHours += packageOption.hours || 0;
+      packageEntries.push({
+        ...packageOption,
+        multiplierValue: row.multiplier.value,
+      });
+      return;
     }
 
-    detailEntries.push({
+    const taxOption = reginaOptions.taxa.get(row.input.value);
+    if (taxOption) {
+      taxEntries.push({
+        ...taxOption,
+        multiplierValue: row.multiplier.value,
+      });
+      return;
+    }
+
+    otherEntries.push({
       optionText: row.input.value,
       multiplierValue: row.multiplier.value,
     });
@@ -608,7 +684,12 @@ function autofillReginaDetails(button) {
   const excessEntries = missingHours > 0 && halfHourOption
     ? [{ ...halfHourOption, multiplierValue: String(halfHourMultiplier) }]
     : [];
-  const orderedEntries = [...detailEntries, ...excessEntries];
+  const orderedTaxEntries = [...taxEntries, ...excessEntries].sort((left, right) => left.order - right.order);
+  const orderedEntries = [
+    ...packageEntries.sort((left, right) => left.order - right.order),
+    ...orderedTaxEntries,
+    ...otherEntries,
+  ];
 
   if (orderedEntries.length === 0) {
     orderedEntries.push({ optionText: "", multiplierValue: "1" });
