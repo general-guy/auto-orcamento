@@ -13,7 +13,8 @@
       "modelo": "STANDARD-MAXIMUN",
       "valorCartao7x": "R$ 3.840,00",
       "valorAVista": "R$ 3.648,00",
-      "marca": "Silimed"
+      "marca": "Silimed",
+      "favorito": false
     },
     {
       "rotulo": "Texturizada",
@@ -21,7 +22,8 @@
       "modelo": "BIODESIGN-MAXIMUN",
       "valorCartao7x": "R$ 4.750,00",
       "valorAVista": "R$ 4.513,00",
-      "marca": "Silimed"
+      "marca": "Silimed",
+      "favorito": true
     },
     {
       "rotulo": "Poliuretano",
@@ -29,7 +31,8 @@
       "modelo": "BIODESIGN-MAXIMUN",
       "valorCartao7x": "R$ 5.320,00",
       "valorAVista": "R$ 5.054,00",
-      "marca": "Silimed"
+      "marca": "Silimed",
+      "favorito": true
     },
     {
       "rotulo": "Cônica",
@@ -37,7 +40,8 @@
       "modelo": "ADVANCE",
       "valorCartao7x": "R$ 6.220,00",
       "valorAVista": "R$ 5.909,00",
-      "marca": "Silimed"
+      "marca": "Silimed",
+      "favorito": false
     },
     {
       "rotulo": "Anatômica - Polo Médio",
@@ -45,7 +49,8 @@
       "modelo": "NATURAL",
       "valorCartao7x": "R$ 6.130,00",
       "valorAVista": "R$ 5.824,00",
-      "marca": "Silimed"
+      "marca": "Silimed",
+      "favorito": false
     },
     {
       "rotulo": "Anatômica - Polo Superior",
@@ -53,7 +58,8 @@
       "modelo": "ENHANCE",
       "valorCartao7x": "R$ 6.130,00",
       "valorAVista": "R$ 5.824,00",
-      "marca": "Silimed"
+      "marca": "Silimed",
+      "favorito": false
     },
     {
       "rotulo": "Anatômica - Polo Inferior",
@@ -61,7 +67,8 @@
       "modelo": "NUANCE",
       "valorCartao7x": "R$ 6.130,00",
       "valorAVista": "R$ 5.824,00",
-      "marca": "Silimed"
+      "marca": "Silimed",
+      "favorito": false
     },
     {
       "rotulo": "Liso - Standard",
@@ -69,7 +76,8 @@
       "modelo": "MAXIMUM",
       "valorCartao7x": "R$ 3.730,00",
       "valorAVista": "R$ 3.544,00",
-      "marca": "Silimed"
+      "marca": "Silimed",
+      "favorito": false
     },
     {
       "rotulo": "Glúteo Quartzo/Redondo",
@@ -77,7 +85,8 @@
       "modelo": "GLUTEO",
       "valorCartao7x": "R$ 5.600,00",
       "valorAVista": "R$ 5.320,00",
-      "marca": "Silimed"
+      "marca": "Silimed",
+      "favorito": false
     },
     {
       "rotulo": "Panturrilha",
@@ -85,7 +94,8 @@
       "modelo": "PANTURRILHA",
       "valorCartao7x": "R$ 3.680,00",
       "valorAVista": "R$ 3.496,00",
-      "marca": "Silimed"
+      "marca": "Silimed",
+      "favorito": false
     },
     {
       "rotulo": "Mento",
@@ -93,7 +103,8 @@
       "modelo": "MENTO LISO/ANAT",
       "valorCartao7x": "R$ 2.655,00",
       "valorAVista": "R$ 2.523,00",
-      "marca": "Silimed"
+      "marca": "Silimed",
+      "favorito": false
     },
     {
       "rotulo": "Expansor Redondo/Retangular",
@@ -101,7 +112,8 @@
       "modelo": "EXPANSORES",
       "valorCartao7x": "R$ 3.115,00",
       "valorAVista": "R$ 2.960,00",
-      "marca": "Silimed"
+      "marca": "Silimed",
+      "favorito": false
     },
     {
       "rotulo": "Expansor de Mama",
@@ -109,7 +121,8 @@
       "modelo": "EXPANSORES",
       "valorCartao7x": "R$ 4.350,00",
       "valorAVista": "R$ 4.133,00",
-      "marca": "Silimed"
+      "marca": "Silimed",
+      "favorito": false
     },
     {
       "rotulo": "Modelador",
@@ -117,7 +130,8 @@
       "modelo": "MEDIDOR MAMA",
       "valorCartao7x": "R$ 834,00",
       "valorAVista": "R$ 793,00",
-      "marca": "Silimed"
+      "marca": "Silimed",
+      "favorito": false
     }
   ]
 }
