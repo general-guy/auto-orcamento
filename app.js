@@ -1430,10 +1430,17 @@ function updateImplantsPreview() {
     implant.referencia,
   ].filter(Boolean).join(" - ");
 
-  const valuesLine = document.createElement("span");
-  valuesLine.className = "implant-preview-values";
-  valuesLine.textContent = `${implant.valorAVista || "R$"} à vista ou ${implant.valorCartao7x || "R$"} em 7x no cartão`;
-  implantSummaryPreview.append(valuesLine);
+  const values = document.createElement("span");
+  values.className = "implant-preview-values";
+
+  const cashValue = document.createElement("span");
+  cashValue.textContent = `${implant.valorAVista || "R$"} à vista`;
+
+  const cardValue = document.createElement("span");
+  cardValue.textContent = `${implant.valorCartao7x || "R$"} em 7x no cartão`;
+
+  values.append(cashValue, cardValue);
+  implantSummaryPreview.append(values);
 }
 
 function updateSimpleFields() {

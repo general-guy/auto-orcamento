@@ -704,9 +704,12 @@ dt {
 
 .implant-preview-values {
   color: #192036;
+  display: grid;
+  gap: 2px;
   font-weight: 400;
-  justify-self: center;
-  text-align: center;
+  justify-items: end;
+  justify-self: end;
+  text-align: right;
 }
 
 table {
