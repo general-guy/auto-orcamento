@@ -1429,6 +1429,11 @@ function updateImplantsPreview() {
     implant.modelo,
     implant.referencia,
   ].filter(Boolean).join(" - ");
+
+  const valuesLine = document.createElement("span");
+  valuesLine.className = "implant-preview-values";
+  valuesLine.textContent = `À vista ${implant.valorAVista || "R$"} - 07x cartão ${implant.valorCartao7x || "R$"}`;
+  implantSummaryPreview.append(valuesLine);
 }
 
 function updateSimpleFields() {

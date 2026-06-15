@@ -695,9 +695,16 @@ dt {
 .implant-preview-box {
   border: 1px solid rgba(31, 41, 51, 0.22);
   border-radius: 9px;
+  display: grid;
+  gap: 4px;
   font-size: 0.9rem;
   line-height: 1.35;
   padding: 8px 10px;
+}
+
+.implant-preview-values {
+  color: #192036;
+  font-weight: 700;
 }
 
 table {
