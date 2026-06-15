@@ -21,10 +21,19 @@ O arquivo contém:
 
 Cada item contém:
 
+- `rotulo`: texto curto usado como nome amigável no dropdown.
 - `referencia`: código ou conjunto de códigos da referência.
 - `modelo`: nome do modelo.
 - `valorCartao7x`: valor da coluna `07x cartão`.
 - `valorAVista`: valor da coluna `à vista`.
+- `marca`: marca do implante.
+- `favorito`: booleano usado para destacar opções preferenciais.
+
+## Uso no app
+
+A seção `Implantes` substitui a antiga seção `Valores` e é opcional. No formulário, o checkbox ao lado do título habilita ou desabilita o dropdown.
+
+O dropdown usa `rotulo`, `modelo` e `referencia` para montar cada opção. Quando `favorito` é `true`, o item recebe destaque visual e uma estrela ao final da linha, depois do número de referência.
 
 ## Extração
 

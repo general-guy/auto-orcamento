@@ -202,6 +202,11 @@ textarea:focus {
   outline: none;
 }
 
+option.implant-option-favorite {
+  background: var(--primary-soft);
+  font-weight: 700;
+}
+
 textarea {
   resize: vertical;
 }

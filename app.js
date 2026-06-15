@@ -411,7 +411,8 @@ function getImplantDisplayName(item) {
 function formatImplantOption(item) {
   const displayName = getImplantDisplayName(item);
   const detailParts = [item.modelo, item.referencia].filter(Boolean);
-  return detailParts.length > 0 ? `${displayName} - ${detailParts.join(" - ")}` : displayName;
+  const optionText = detailParts.length > 0 ? `${displayName} - ${detailParts.join(" - ")}` : displayName;
+  return item.favorito ? `${optionText} ★` : optionText;
 }
 
 function buildImplantOptions() {
@@ -426,6 +427,10 @@ function buildImplantOptions() {
     const option = document.createElement("option");
     option.value = String(index);
     option.textContent = formatImplantOption(item);
+    option.dataset.favorite = String(item.favorito === true);
+    if (item.favorito) {
+      option.className = "implant-option-favorite";
+    }
     implantSelect.append(option);
   });
 }
