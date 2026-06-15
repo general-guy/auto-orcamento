@@ -1237,11 +1237,11 @@ function createHospitalPreviewItem(hospital, rows = []) {
       const procedureLine = document.createElement("span");
       procedureLine.textContent = row.tempoSala ? `${row.label} - ${row.tempoSala}` : row.label;
       procedures.append(procedureLine);
-
-      const valueLine = document.createElement("span");
-      valueLine.textContent = formatCurrency(row.totalValue);
-      values.append(valueLine);
     });
+
+    const totalValueLine = document.createElement("span");
+    totalValueLine.textContent = formatCurrency(rows.reduce((total, row) => total + row.totalValue, 0));
+    values.append(totalValueLine);
   }
 
   previewItem.append(hospitalName);
