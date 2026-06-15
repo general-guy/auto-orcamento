@@ -10,7 +10,7 @@
     {
       "rotulo": "Texturizada - Standard",
       "referencia": "20621/20621EA",
-      "modelo": "STANDARD-MAXIMUN",
+      "modelo": "STANDARD-MAXIMUM",
       "valorCartao7x": "R$ 3.840,00",
       "valorAVista": "R$ 3.648,00",
       "marca": "Silimed",
@@ -19,7 +19,7 @@
     {
       "rotulo": "Texturizada",
       "referencia": "20622",
-      "modelo": "BIODESIGN-MAXIMUN",
+      "modelo": "BIODESIGN-MAXIMUM",
       "valorCartao7x": "R$ 4.750,00",
       "valorAVista": "R$ 4.513,00",
       "marca": "Silimed",
@@ -28,7 +28,7 @@
     {
       "rotulo": "Poliuretano",
       "referencia": "30622",
-      "modelo": "BIODESIGN-MAXIMUN",
+      "modelo": "BIODESIGN-MAXIMUM",
       "valorCartao7x": "R$ 5.320,00",
       "valorAVista": "R$ 5.054,00",
       "marca": "Silimed",
@@ -125,7 +125,7 @@
       "favorito": false
     },
     {
-      "rotulo": "Modelador",
+      "rotulo": "Molde",
       "referencia": "XXX",
       "modelo": "MEDIDOR MAMA",
       "valorCartao7x": "R$ 834,00",

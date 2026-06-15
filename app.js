@@ -1415,13 +1415,26 @@ function updateImplantsPreview() {
   implantsPreviewSection.hidden = !isEnabled;
 
   const implant = getSelectedImplant();
-  const implantLabelPreview = document.querySelector('[data-preview="implantLabel"]');
-  const implantCardValuePreview = document.querySelector('[data-preview="implantCardValue"]');
-  const implantCashValuePreview = document.querySelector('[data-preview="implantCashValue"]');
+  const implantSummaryPreview = document.querySelector('[data-preview="implantSummary"]');
+  implantSummaryPreview.innerHTML = "";
 
-  implantLabelPreview.textContent = implant ? getImplantDisplayName(implant) : "Selecione um implante.";
-  implantCardValuePreview.textContent = implant?.valorCartao7x || "R$";
-  implantCashValuePreview.textContent = implant?.valorAVista || "R$";
+  if (!implant) {
+    implantSummaryPreview.textContent = "Selecione um implante.";
+    return;
+  }
+
+  const brandLabel = document.createElement("strong");
+  brandLabel.textContent = "Marca";
+
+  const label = document.createElement("strong");
+  label.textContent = getImplantDisplayName(implant);
+
+  implantSummaryPreview.append(
+    brandLabel,
+    ` ${implant.marca || ""} `,
+    label,
+    ` - ${implant.modelo || ""} - ${implant.referencia || ""}`
+  );
 }
 
 function updateSimpleFields() {
