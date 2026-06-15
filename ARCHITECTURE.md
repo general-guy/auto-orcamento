@@ -75,6 +75,7 @@ Os históricos são listas JSON simples, limitadas a 200 itens por tipo.
 - entradas auxiliares de Regina e Sapiranga;
 - multiplicadores de pacotes hospitalares;
 - autofill das entradas auxiliares;
+- carregamento e renderização da tabela de implantes;
 - redimensionamento do painel;
 - impressão, limpeza e shutdown.
 
@@ -97,7 +98,16 @@ data/tabela-implantes.json
 
 O frontend carrega `data/tabelas-hospitalares.json` diretamente para montar os `datalist` de Regina e Sapiranga e para calcular os valores exibidos no preview.
 
-`data/tabela-implantes.json` guarda uma tabela independente de implantes, extraída de documento `.doc`, para uso futuro no preenchimento de valores de tecnologias ou materiais. O dropdown de implantes usa `rotulo`, `modelo` e `referencia`; itens com `favorito: true` recebem uma estrela ao final da opção.
+`data/tabela-implantes.json` guarda uma tabela independente de implantes, extraída de documento `.doc`, para preenchimento opcional da seção `Implantes`. O dropdown usa `rotulo`, `modelo` e `referencia`; itens com `favorito: true` recebem uma estrela ao final da opção.
+
+## Lógica de Implantes
+
+A seção `Implantes` no formulário é controlada por um checkbox no próprio título. Quando o checkbox está desmarcado, o dropdown fica desabilitado e a seção não aparece no documento.
+
+Quando um item é selecionado, o preview exibe uma caixa arredondada com duas colunas:
+
+- à esquerda: `marca - rotulo - modelo - referencia`, com quebra de linha se necessário;
+- à direita: `valorAVista` na primeira linha e `valorCartao7x` na segunda linha, ambos alinhados à direita.
 
 ## Lógica Hospitalar
 

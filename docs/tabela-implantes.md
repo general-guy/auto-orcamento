@@ -35,6 +35,14 @@ A seção `Implantes` substitui a antiga seção `Valores` e é opcional. No for
 
 O dropdown usa `rotulo`, `modelo` e `referencia` para montar cada opção. Quando `favorito` é `true`, o item recebe destaque visual e uma estrela ao final da linha, depois do número de referência.
 
+No documento final, o implante selecionado é exibido em uma caixa de bordas arredondadas:
+
+- a coluna esquerda mostra `marca - rotulo - modelo - referencia`;
+- a coluna direita mostra `valorAVista` na primeira linha, com o sufixo `à vista`;
+- a coluna direita mostra `valorCartao7x` na segunda linha, com o sufixo `em 7x no cartão`.
+
+A coluna de valores fica alinhada à direita. A descrição pode quebrar linha quando necessário para não invadir o espaço reservado aos valores.
+
 ## Extração
 
 O arquivo original era um `.doc`. Como Word e LibreOffice não estavam disponíveis no ambiente, a conversão foi feita com o conversor local do OnlyOffice:

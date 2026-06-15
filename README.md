@@ -33,6 +33,7 @@ http://localhost:3000
 - Cria múltiplas entradas de cirurgia e hospital.
 - Para Regina e Sapiranga, cria entradas auxiliares (`Reg1`, `Sap1`, etc.) com multiplicadores.
 - Usa tabelas hospitalares locais para sugerir pacotes e calcular valores auxiliares no preview.
+- Permite incluir uma seção opcional de implantes, alimentada por `data/tabela-implantes.json`.
 
 ## Dados Locais
 
@@ -60,6 +61,14 @@ O botão verde ao lado do hospital preenche e reorganiza as entradas auxiliares.
 Para Sapiranga, os pacotes de centro cirúrgico ficam no topo, ordenados do maior valor para o menor, e recebem multiplicadores progressivos. Depois vêm os pacotes de ambulatório, a hora excedente e, por último, as diárias. Diárias não entram no cálculo de tempo de sala e mantêm o multiplicador normal.
 
 Para Regina, o app reorganiza os itens na ordem do `data/tabelas-hospitalares.json`: pacotes primeiro e taxas adicionais depois. Se faltar tempo em relação ao tempo previsto de hospital, adiciona `SALA CIRÚRGICA - MEIA HORA SUBSEQUENTE` com multiplicador em unidades de meia hora.
+
+## Implantes
+
+A seção `Implantes` é opcional. Ao marcar o checkbox no título da seção, o dropdown é habilitado e o implante selecionado aparece no documento em uma caixa arredondada.
+
+O dropdown usa `rotulo`, `modelo` e `referencia`. Itens marcados com `favorito: true` recebem destaque e uma estrela no final da opção.
+
+No documento, a caixa mostra a descrição do implante à esquerda e os valores à direita: primeiro o valor à vista, depois o valor em 7x no cartão.
 
 ## Documentação Técnica
 

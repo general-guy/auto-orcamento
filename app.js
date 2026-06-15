@@ -1423,7 +1423,9 @@ function updateImplantsPreview() {
     return;
   }
 
-  implantSummaryPreview.textContent = [
+  const description = document.createElement("span");
+  description.className = "implant-preview-description";
+  description.textContent = [
     implant.marca,
     getImplantDisplayName(implant),
     implant.modelo,
@@ -1440,7 +1442,7 @@ function updateImplantsPreview() {
   cardValue.textContent = `${implant.valorCartao7x || "R$"} em 7x no cartão`;
 
   values.append(cashValue, cardValue);
-  implantSummaryPreview.append(values);
+  implantSummaryPreview.append(description, values);
 }
 
 function updateSimpleFields() {
