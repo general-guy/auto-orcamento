@@ -88,13 +88,16 @@ data/hospitais.json
 data/pacientes.json
 ```
 
-Tabela hospitalar estruturada:
+Tabelas de referência estruturadas:
 
 ```text
 data/tabelas-hospitalares.json
+data/tabela-implantes.json
 ```
 
 O frontend carrega `data/tabelas-hospitalares.json` diretamente para montar os `datalist` de Regina e Sapiranga e para calcular os valores exibidos no preview.
+
+`data/tabela-implantes.json` guarda uma tabela independente de implantes, extraída de documento `.doc`, para uso futuro no preenchimento de valores de tecnologias ou materiais.
 
 ## Lógica Hospitalar
 

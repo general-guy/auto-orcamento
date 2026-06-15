@@ -44,10 +44,11 @@ data/hospitais.json
 data/pacientes.json
 ```
 
-As tabelas hospitalares estruturadas ficam em:
+As tabelas de referência estruturadas ficam em:
 
 ```text
 data/tabelas-hospitalares.json
+data/tabela-implantes.json
 ```
 
 Esses arquivos são usados apenas localmente pelo servidor Node.js.
@@ -72,4 +73,5 @@ Detalhes sobre a origem e manutenção das tabelas hospitalares ficam em:
 
 ```text
 docs/tabelas-hospitalares.md
+docs/tabela-implantes.md
 ```

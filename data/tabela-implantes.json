@@ -1,0 +1,113 @@
+{
+  "nome": "Tabela de implantes",
+  "origem": "TABELA PRECOS 2026.doc",
+  "vigencia": "2026-01-01",
+  "condicaoPagamento": "07x cartao",
+  "observacoes": [
+    "Valor do frete: favor consultar a sua cidade"
+  ],
+  "itens": [
+    {
+      "referencia": "20621/20621EA",
+      "modelo": "STANDARD-MAXIMUN",
+      "valorCartao7x": "R$ 3.840,00",
+      "valorAVista": "R$ 3.648,00"
+    },
+    {
+      "referencia": "20622",
+      "modelo": "BIODESIGN-MAXIMUN",
+      "valorCartao7x": "R$ 4.750,00",
+      "valorAVista": "R$ 4.513,00"
+    },
+    {
+      "referencia": "30622",
+      "modelo": "BIODESIGN-MAXIMUN",
+      "valorCartao7x": "R$ 5.320,00",
+      "valorAVista": "R$ 5.054,00"
+    },
+    {
+      "referencia": "30535",
+      "modelo": "ADVANCE",
+      "valorCartao7x": "R$ 6.220,00",
+      "valorAVista": "R$ 5.909,00"
+    },
+    {
+      "referencia": "20637/30637",
+      "modelo": "NATURAL",
+      "valorCartao7x": "R$ 6.130,00",
+      "valorAVista": "R$ 5.824,00"
+    },
+    {
+      "referencia": "20674/30674",
+      "modelo": "ENHANCE",
+      "valorCartao7x": "R$ 6.130,00",
+      "valorAVista": "R$ 5.824,00"
+    },
+    {
+      "referencia": "20646/30646",
+      "modelo": "NUANCE",
+      "valorCartao7x": "R$ 6.130,00",
+      "valorAVista": "R$ 5.824,00"
+    },
+    {
+      "referencia": "10521/10521EA",
+      "modelo": "MAXIMUM",
+      "valorCartao7x": "R$ 3.730,00",
+      "valorAVista": "R$ 3.544,00"
+    },
+    {
+      "referencia": "13961/10910",
+      "modelo": "GLUTEO",
+      "valorCartao7x": "R$ 5.600,00",
+      "valorAVista": "R$ 5.320,00"
+    },
+    {
+      "referencia": "10410",
+      "modelo": "PANTURRILHA",
+      "valorCartao7x": "R$ 3.680,00",
+      "valorAVista": "R$ 3.496,00"
+    },
+    {
+      "referencia": "10/15",
+      "modelo": "MENTO LISO/ANAT",
+      "valorCartao7x": "R$ 2.655,00",
+      "valorAVista": "R$ 2.523,00"
+    },
+    {
+      "referencia": "800/810",
+      "modelo": "EXPANSORES",
+      "valorCartao7x": "R$ 3.115,00",
+      "valorAVista": "R$ 2.960,00"
+    },
+    {
+      "referencia": "207674/207637/20800",
+      "modelo": "EXPANSORES",
+      "valorCartao7x": "R$ 4.350,00",
+      "valorAVista": "R$ 4.133,00"
+    },
+    {
+      "referencia": "1171",
+      "modelo": "MOD. NASAL",
+      "valorCartao7x": "R$ 730,00",
+      "valorAVista": "R$ 694,00"
+    },
+    {
+      "referencia": "6330",
+      "modelo": "BALAO GASTRICO",
+      "valorCartao7x": "R$ 6.225,00",
+      "valorAVista": "R$ 5.914,00"
+    },
+    {
+      "referencia": "3230",
+      "modelo": "TESTICULO",
+      "valorCartao7x": "R$ 5.450,00",
+      "valorAVista": "R$ 5.178,00"
+    },
+    {
+      "referencia": "XXX",
+      "modelo": "MEDIDOR MAMA",
+      "valorCartao7x": "R$ 834,00",
+      "valorAVista": "R$ 793,00"
+    }
+  ]
+}
