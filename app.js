@@ -1423,18 +1423,12 @@ function updateImplantsPreview() {
     return;
   }
 
-  const brandLabel = document.createElement("strong");
-  brandLabel.textContent = "Marca";
-
-  const label = document.createElement("strong");
-  label.textContent = getImplantDisplayName(implant);
-
-  implantSummaryPreview.append(
-    brandLabel,
-    ` ${implant.marca || ""} `,
-    label,
-    ` - ${implant.modelo || ""} - ${implant.referencia || ""}`
-  );
+  implantSummaryPreview.textContent = [
+    implant.marca,
+    getImplantDisplayName(implant),
+    implant.modelo,
+    implant.referencia,
+  ].filter(Boolean).join(" - ");
 }
 
 function updateSimpleFields() {
