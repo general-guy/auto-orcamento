@@ -829,7 +829,7 @@ dt {
 
 .payment-preview-list {
   display: grid;
-  gap: 3px;
+  gap: 6px;
 }
 
 .implant-preview-box {
