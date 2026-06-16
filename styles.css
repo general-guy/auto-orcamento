@@ -227,9 +227,15 @@ textarea {
   grid-template-columns: auto minmax(0, 1fr);
 }
 
+#hospitalFormContent[hidden],
 #implantsFormContent[hidden],
 #technologiesFormContent[hidden] {
   display: none;
+}
+
+#hospitalFormContent {
+  display: grid;
+  gap: 12px;
 }
 
 #technologiesFormContent {
@@ -610,6 +616,10 @@ textarea:focus {
   display: grid;
   grid-template-columns: 42mm 1fr;
   overflow: hidden;
+}
+
+.summary-list .hospital-summary[hidden] {
+  display: none;
 }
 
 .summary-list div + div {

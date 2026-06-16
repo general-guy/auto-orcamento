@@ -72,6 +72,8 @@ Esses arquivos são usados apenas localmente pelo servidor Node.js.
 
 ## Hospitais Com Autofill
 
+A seção `Hospital` tem checkbox no título e vem marcada por padrão a cada nova sessão do app. Quando desmarcada, o conteúdo da seção é recolhido no painel esquerdo e o bloco de hospital deixa de aparecer no documento.
+
 O botão verde ao lado do hospital preenche e reorganiza as entradas auxiliares.
 
 Para Sapiranga, os pacotes de centro cirúrgico ficam no topo, ordenados do maior valor para o menor, e recebem multiplicadores progressivos. Depois vêm os pacotes de ambulatório, a hora excedente e, por último, as diárias. Diárias não entram no cálculo de tempo de sala e mantêm o multiplicador normal.

@@ -15,6 +15,9 @@ const surgeryList = document.querySelector("#surgeryList");
 const surgeryHistoryDropdown = document.querySelector("#surgeryHistoryDropdown");
 const paymentList = document.querySelector("#paymentList");
 const paymentHistoryDropdown = document.querySelector("#paymentHistoryDropdown");
+const hospitalEnabledInput = document.querySelector("#hospitalEnabled");
+const hospitalFieldset = document.querySelector("#hospitalFieldset");
+const hospitalFormContent = document.querySelector("#hospitalFormContent");
 const hospitalInput = document.querySelector("#hospital");
 const hospitalList = document.querySelector("#hospitalList");
 const hospitalHistoryDropdown = document.querySelector("#hospitalHistoryDropdown");
@@ -1732,6 +1735,24 @@ function updateHospitalPreview() {
   }
 
   hospitalSummary.querySelectorAll(".hospital-preview-item").forEach((item) => item.remove());
+
+  const isEnabled = hospitalEnabledInput.checked;
+  hospitalFieldset.classList.toggle("is-collapsed", !isEnabled);
+  hospitalFormContent.hidden = !isEnabled;
+  hospitalFormContent.querySelectorAll("input, button").forEach((control) => {
+    control.disabled = !isEnabled;
+  });
+  hospitalSummary.hidden = !isEnabled;
+
+  if (!isEnabled) {
+    hideHospitalHistoryDropdown();
+    return;
+  }
+
+  updateHospitalButtons();
+  hospitalFormContent
+    .querySelectorAll(".hospital-detail-list")
+    .forEach(updateHospitalDetailButtons);
 
   const optionMap = createHospitalPreviewOptionMap();
   const hospitalInputs = getHospitalInputs();

@@ -154,6 +154,8 @@ No preview, as formas de pagamento preenchidas são concatenadas em linhas separ
 
 ## Lógica Hospitalar
 
+A seção `Hospital` é controlada por um checkbox no título, marcado por padrão no HTML para cada nova sessão do app. Quando desmarcado, o conteúdo do formulário é ocultado, os controles internos são desabilitados e o bloco de hospital no preview recebe `hidden`.
+
 Quando o nome do hospital contém `regin`, o app cria entradas auxiliares `Reg1`, `Reg2`, etc. Quando contém `sapirang`, cria `Sap1`, `Sap2`, etc.
 
 Cada entrada auxiliar tem:

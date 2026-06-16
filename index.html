@@ -59,31 +59,38 @@
             </div>
           </fieldset>
 
-          <fieldset>
-            <legend>Hospital</legend>
+          <fieldset id="hospitalFieldset" class="optional-fieldset">
+            <legend>
+              <label class="legend-checkbox">
+                <span>Hospital</span>
+                <input id="hospitalEnabled" name="hospitalEnabled" type="checkbox" checked />
+              </label>
+            </legend>
 
-            <label>
-              Tempo previsto de hospital
-              <input id="hospitalStay" name="hospitalStay" type="text" placeholder="Tempo de sala em horas" />
-            </label>
+            <div id="hospitalFormContent">
+              <label>
+                Tempo previsto de hospital
+                <input id="hospitalStay" name="hospitalStay" type="text" placeholder="Tempo de sala em horas" />
+              </label>
 
-            <div class="dynamic-field-group">
-              <div id="hospitalList" class="hospital-list">
-                <label>
-                  Nome do hospital
-                  <input id="hospital" name="hospital" type="text" class="hospital-input" autocomplete="off" />
-                </label>
+              <div class="dynamic-field-group">
+                <div id="hospitalList" class="hospital-list">
+                  <label>
+                    Nome do hospital
+                    <input id="hospital" name="hospital" type="text" class="hospital-input" autocomplete="off" />
+                  </label>
+                </div>
+
+                <div class="field-actions">
+                  <button type="button" id="addHospitalButton" class="add-button" aria-label="Adicionar outro hospital">
+                    +
+                  </button>
+                  <button type="button" id="removeHospitalButton" class="remove-button" aria-label="Remover último hospital">
+                    -
+                  </button>
+                </div>
+                <div id="hospitalHistoryDropdown" class="history-dropdown" hidden></div>
               </div>
-
-              <div class="field-actions">
-                <button type="button" id="addHospitalButton" class="add-button" aria-label="Adicionar outro hospital">
-                  +
-                </button>
-                <button type="button" id="removeHospitalButton" class="remove-button" aria-label="Remover último hospital">
-                  -
-                </button>
-              </div>
-              <div id="hospitalHistoryDropdown" class="history-dropdown" hidden></div>
             </div>
           </fieldset>
 
