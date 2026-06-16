@@ -79,7 +79,7 @@ Para Regina, o app reorganiza os itens na ordem do `data/tabelas-hospitalares.js
 
 ## Implantes
 
-A seção `Implantes` é opcional. Ao marcar o checkbox no título da seção, o dropdown é habilitado e o implante selecionado aparece no documento em uma caixa arredondada.
+A seção `Implantes` é opcional. Ao marcar o checkbox no título da seção, o dropdown é exibido e habilitado, e o implante selecionado aparece no documento em uma caixa arredondada. Quando desmarcada, o conteúdo da seção fica oculto no painel esquerdo para economizar espaço visual.
 
 O dropdown usa `rotulo`, `modelo` e `referencia`. Itens marcados com `favorito: true` recebem destaque e uma estrela no final da opção.
 
@@ -87,7 +87,7 @@ No documento, a caixa mostra a descrição do implante à esquerda e os valores 
 
 ## Tecnologias
 
-A seção `Tecnologias` é opcional. Ao marcar o checkbox no título da seção, o campo `Tecnologia` é habilitado e usa o histórico local de `data/tecnologias.json`.
+A seção `Tecnologias` é opcional. Ao marcar o checkbox no título da seção, os campos de tecnologia e valor são exibidos e habilitados. Quando desmarcada, o conteúdo da seção fica oculto no painel esquerdo para economizar espaço visual.
 
 Cada tecnologia salva o `nome` junto com seu `valor`. Ao selecionar uma tecnologia já cadastrada, o valor correspondente é carregado automaticamente. O campo de valor normaliza moeda em padrão brasileiro, por exemplo `10000` vira `R$ 10.000,00`.
 

@@ -222,6 +222,16 @@ textarea {
   grid-template-columns: auto minmax(0, 1fr);
 }
 
+#implantsFormContent[hidden],
+#technologiesFormContent[hidden] {
+  display: none;
+}
+
+#technologiesFormContent {
+  display: grid;
+  gap: 12px;
+}
+
 .team-items-grid {
   display: grid;
   gap: 8px 12px;

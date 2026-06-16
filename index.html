@@ -95,7 +95,7 @@
               </label>
             </legend>
 
-            <label>
+            <label id="implantsFormContent">
               Modelo
               <select id="implantSelect" name="implantSelection" disabled>
                 <option value="">Selecione um implante</option>
@@ -111,16 +111,18 @@
               </label>
             </legend>
 
-            <label>
-              Tecnologia
-              <input id="technologyName" name="technologyName" type="text" class="technology-input" autocomplete="off" disabled />
-              <div id="technologyHistoryDropdown" class="history-dropdown" hidden></div>
-            </label>
+            <div id="technologiesFormContent">
+              <label>
+                Tecnologia
+                <input id="technologyName" name="technologyName" type="text" class="technology-input" autocomplete="off" disabled />
+                <div id="technologyHistoryDropdown" class="history-dropdown" hidden></div>
+              </label>
 
-            <label class="inline-value-field">
-              <span>Valor:</span>
-              <input id="technologyValue" name="technologyValue" type="text" placeholder="R$" disabled />
-            </label>
+              <label class="inline-value-field">
+                <span>Valor:</span>
+                <input id="technologyValue" name="technologyValue" type="text" placeholder="R$" disabled />
+              </label>
+            </div>
           </fieldset>
 
           <fieldset>
