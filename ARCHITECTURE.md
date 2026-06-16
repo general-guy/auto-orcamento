@@ -55,7 +55,7 @@ Endpoints principais:
 - `GET /api/cirurgias`, `POST /api/cirurgias`, `DELETE /api/cirurgias`: histórico de cirurgias.
 - `GET /api/hospitais`, `POST /api/hospitais`, `DELETE /api/hospitais`: histórico de hospitais.
 - `GET /api/pacientes`, `POST /api/pacientes`, `DELETE /api/pacientes`: histórico de pacientes.
-- `GET /api/pagamentos`, `POST /api/pagamentos`, `DELETE /api/pagamentos`: histórico de formas de pagamento.
+- `GET /api/pagamentos`, `POST /api/pagamentos`, `DELETE /api/pagamentos`, `PUT /api/pagamentos`: histórico de formas de pagamento e persistência da ordem manual.
 - `GET /api/tecnologias`, `POST /api/tecnologias`, `DELETE /api/tecnologias`: histórico de tecnologias com valor associado.
 - `POST /api/shutdown`: encerra o servidor quando acionado pela interface.
 
@@ -87,7 +87,7 @@ Os históricos de pacientes, cirurgias, hospitais e pagamentos são listas JSON 
 - carregamento e renderização da tabela de implantes;
 - persistência de tecnologias com valor monetário associado;
 - renderização da equipe fixa com itens selecionáveis e valor monetário;
-- renderização da seção de pagamento com campos dinâmicos;
+- renderização da seção de pagamento com campos dinâmicos e lista rápida reordenável;
 - paginação da pré-visualização do documento em páginas A4;
 - redimensionamento do painel;
 - impressão, limpeza e shutdown.
@@ -117,7 +117,7 @@ O frontend carrega `data/tabelas-hospitalares.json` diretamente para montar os `
 
 `data/tecnologias.json` guarda as tecnologias cadastradas no próprio app. Diferente dos históricos simples, cada item tem `nome` e `valor`, permitindo carregar o valor automaticamente quando a tecnologia é selecionada.
 
-`data/pagamentos.json` guarda as formas de pagamento cadastradas no formulário. O arquivo é uma lista simples de textos, usada pelo dropdown de histórico da seção `Pagamento`.
+`data/pagamentos.json` guarda as formas de pagamento cadastradas no formulário. O arquivo é uma lista simples de textos, usada pelo dropdown de histórico da seção `Pagamento` e pela lista rápida reordenável.
 
 ## Lógica de Implantes
 
@@ -153,6 +153,8 @@ A seção `Pagamento` mantém apenas as formas de pagamento. O antigo campo `Ite
 No formulário, `Pagamento` usa uma lista dinâmica de inputs com botões `+/-`, no mesmo padrão de `Cirurgia`. Cada input usa dropdown de histórico alimentado por `data/pagamentos.json` via `/api/pagamentos`.
 
 As entradas salvas em `data/pagamentos.json` também são renderizadas em uma lista rápida acima do campo manual. Cada item vem marcado por padrão, pode ser desmarcado sem sair do histórico e tem um botão de exclusão que remove a entrada via `/api/pagamentos`.
+
+A lista rápida usa eventos de ponteiro para permitir drag and drop sem interferir nos checkboxes e no botão de exclusão. Durante o arraste, `app.js` mostra uma linha de encaixe entre os itens; ao soltar, reorganiza `paymentHistory`, atualiza o preview e envia a lista completa para `PUT /api/pagamentos`, que normaliza duplicatas e grava a nova ordem em `data/pagamentos.json`.
 
 No preview, as formas de pagamento preenchidas são renderizadas como parágrafos sem marcadores, com espaçamento leve entre cada item.
 

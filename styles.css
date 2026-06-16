@@ -278,10 +278,30 @@ textarea {
   background: rgba(246, 247, 249, 0.75);
   border-radius: 10px;
   color: var(--text);
+  cursor: grab;
   display: grid;
   gap: 8px;
   grid-template-columns: auto minmax(0, 1fr) auto;
   padding: 8px 10px;
+  touch-action: none;
+}
+
+.payment-quick-option.is-dragging {
+  background: rgba(221, 231, 245, 0.95);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+  cursor: grabbing;
+  opacity: 0.76;
+}
+
+.payment-quick-drop-indicator {
+  background: #2f80ed;
+  border-radius: 999px;
+  height: 2px;
+  margin: 1px 8px;
+}
+
+.payment-quick-list.is-dragging-payment {
+  user-select: none;
 }
 
 .payment-quick-option span {
@@ -289,6 +309,7 @@ textarea {
 }
 
 .payment-quick-option input {
+  cursor: pointer;
   margin: 0;
   width: auto;
 }

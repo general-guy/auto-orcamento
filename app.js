@@ -48,6 +48,7 @@ let paymentHistory = [];
 let activePaymentInput = null;
 let isInteractingWithPaymentDropdown = false;
 let deselectedPaymentQuickItems = new Set();
+let paymentDragState = null;
 let hospitalHistory = [];
 let activeHospitalInput = null;
 let isInteractingWithHospitalDropdown = false;
@@ -1355,6 +1356,7 @@ function renderPaymentQuickList() {
   paymentHistory.forEach((optionText) => {
     const row = document.createElement("label");
     row.className = "payment-quick-option";
+    row.dataset.value = optionText;
 
     const optionLabel = document.createElement("span");
     optionLabel.textContent = optionText;
@@ -1375,6 +1377,113 @@ function renderPaymentQuickList() {
     row.append(checkbox, optionLabel, deleteButton);
     paymentQuickList.append(row);
   });
+}
+
+async function savePaymentOrderToHistory(items) {
+  try {
+    const response = await fetch("/api/pagamentos", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Falha ao reordenar no servidor.");
+    }
+
+    const nextHistory = await response.json();
+    paymentHistory = Array.isArray(nextHistory) ? nextHistory : paymentHistory;
+    renderPaymentQuickList();
+    updatePaymentHistoryDropdown(activePaymentInput?.value || "");
+    updatePreview();
+  } catch {
+    console.warn("Não foi possível salvar a ordem das formas de pagamento.");
+    renderPaymentQuickList();
+  }
+}
+
+function getPaymentQuickRows() {
+  return Array.from(paymentQuickList.querySelectorAll(".payment-quick-option"));
+}
+
+function createPaymentDropIndicator() {
+  const indicator = document.createElement("div");
+  indicator.className = "payment-quick-drop-indicator";
+  return indicator;
+}
+
+function movePaymentDropIndicator(clientY) {
+  if (!paymentDragState) {
+    return;
+  }
+
+  const rows = getPaymentQuickRows().filter((row) => row !== paymentDragState.row);
+  const nextRow = rows.find((row) => {
+    const rect = row.getBoundingClientRect();
+    return clientY < rect.top + rect.height / 2;
+  });
+
+  paymentQuickList.insertBefore(paymentDragState.indicator, nextRow || null);
+}
+
+function endPaymentQuickDrag({ shouldCommit = true } = {}) {
+  if (!paymentDragState) {
+    return;
+  }
+
+  const { row, indicator, pointerId } = paymentDragState;
+  const hasNewPosition = indicator.parentElement === paymentQuickList;
+
+  row.classList.remove("is-dragging");
+  paymentQuickList.classList.remove("is-dragging-payment");
+
+  if (hasNewPosition && shouldCommit) {
+    paymentQuickList.insertBefore(row, indicator);
+  }
+
+  indicator.remove();
+
+  if (row.hasPointerCapture?.(pointerId)) {
+    row.releasePointerCapture(pointerId);
+  }
+
+  row.removeEventListener("pointermove", handlePaymentQuickPointerMove);
+  row.removeEventListener("pointerup", handlePaymentQuickPointerUp);
+  row.removeEventListener("pointercancel", handlePaymentQuickPointerCancel);
+
+  paymentDragState = null;
+
+  if (!hasNewPosition || !shouldCommit) {
+    renderPaymentQuickList();
+    return;
+  }
+
+  const nextHistory = getPaymentQuickRows()
+    .map((item) => item.dataset.value)
+    .filter(Boolean);
+
+  paymentHistory = nextHistory;
+  updatePaymentHistoryDropdown(activePaymentInput?.value || "");
+  updatePreview();
+  savePaymentOrderToHistory(nextHistory);
+}
+
+function handlePaymentQuickPointerMove(event) {
+  if (!paymentDragState) {
+    return;
+  }
+
+  event.preventDefault();
+  movePaymentDropIndicator(event.clientY);
+}
+
+function handlePaymentQuickPointerUp(event) {
+  event.preventDefault();
+  endPaymentQuickDrag();
+}
+
+function handlePaymentQuickPointerCancel() {
+  endPaymentQuickDrag({ shouldCommit: false });
 }
 
 function updateHospitalHistoryDropdown(query = "") {
@@ -2152,6 +2261,30 @@ paymentQuickList.addEventListener("change", (event) => {
   }
 
   updatePreview();
+});
+paymentQuickList.addEventListener("pointerdown", (event) => {
+  const row = event.target.closest(".payment-quick-option");
+  if (!row || event.button !== 0 || event.target.closest("input, button")) {
+    return;
+  }
+
+  event.preventDefault();
+  hidePaymentHistoryDropdown();
+
+  paymentDragState = {
+    row,
+    indicator: createPaymentDropIndicator(),
+    pointerId: event.pointerId,
+  };
+
+  row.classList.add("is-dragging");
+  paymentQuickList.classList.add("is-dragging-payment");
+  row.setPointerCapture(event.pointerId);
+  movePaymentDropIndicator(event.clientY);
+
+  row.addEventListener("pointermove", handlePaymentQuickPointerMove);
+  row.addEventListener("pointerup", handlePaymentQuickPointerUp);
+  row.addEventListener("pointercancel", handlePaymentQuickPointerCancel);
 });
 form.addEventListener("focusout", (event) => {
   if (event.target.matches(".patient-input")) {

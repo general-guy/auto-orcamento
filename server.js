@@ -137,6 +137,42 @@ async function handleHistoryApi(request, response, filePath, itemLabel) {
   sendJson(response, 405, { error: "Método não permitido." });
 }
 
+async function handlePaymentApi(request, response) {
+  if (request.method === "PUT") {
+    const body = await collectRequestBody(request);
+    const { items } = JSON.parse(body || "{}");
+
+    if (!Array.isArray(items)) {
+      sendJson(response, 400, { error: "Informe uma lista de formas de pagamento." });
+      return;
+    }
+
+    const normalizedKeys = new Set();
+    const nextItems = items
+      .map((item) => (typeof item === "string" ? item.trim() : ""))
+      .filter((item) => {
+        if (!item) {
+          return false;
+        }
+
+        const key = normalizeText(item);
+        if (normalizedKeys.has(key)) {
+          return false;
+        }
+
+        normalizedKeys.add(key);
+        return true;
+      })
+      .slice(0, 200);
+
+    writeJsonList(paymentsFile, nextItems);
+    sendJson(response, 200, nextItems);
+    return;
+  }
+
+  await handleHistoryApi(request, response, paymentsFile, "uma forma de pagamento válida");
+}
+
 async function handleTechnologyApi(request, response) {
   if (request.method === "GET") {
     sendJson(response, 200, readJsonList(technologiesFile));
@@ -249,7 +285,7 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (request.url.startsWith("/api/pagamentos")) {
-      await handleHistoryApi(request, response, paymentsFile, "uma forma de pagamento válida");
+      await handlePaymentApi(request, response);
       return;
     }
 
