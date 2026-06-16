@@ -270,56 +270,58 @@
           />
 
           <div class="document-content">
-            <dl class="summary-list">
-              <div class="summary-stacked">
-                <dt>Paciente</dt>
-                <dd data-preview="patientName">Nome da paciente</dd>
-              </div>
-              <div class="summary-stacked">
-                <dt>Cirurgia</dt>
-                <dd data-preview="surgery">Cirurgia proposta</dd>
-              </div>
-              <div class="summary-stacked hospital-summary">
-                <dt>Hospital</dt>
-                <dd class="summary-inline"><strong>Tempo previsto</strong> <span data-preview="hospitalStay">Tempo previsto de hospital</span></dd>
-                <dd class="hospital-preview-item" data-preview="hospital">Hospital</dd>
-              </div>
-            </dl>
+            <div id="documentFlow" class="document-flow">
+              <dl class="summary-list">
+                <div class="summary-stacked">
+                  <dt>Paciente</dt>
+                  <dd data-preview="patientName">Nome da paciente</dd>
+                </div>
+                <div class="summary-stacked">
+                  <dt>Cirurgia</dt>
+                  <dd data-preview="surgery">Cirurgia proposta</dd>
+                </div>
+                <div class="summary-stacked hospital-summary">
+                  <dt>Hospital</dt>
+                  <dd class="summary-inline"><strong>Tempo previsto</strong> <span data-preview="hospitalStay">Tempo previsto de hospital</span></dd>
+                  <dd class="hospital-preview-item" data-preview="hospital">Hospital</dd>
+                </div>
+              </dl>
 
-            <section id="implantsPreviewSection" class="document-section" hidden>
-              <h3>Implantes</h3>
-              <div class="implant-preview-box" data-preview="implantSummary">Selecione um implante.</div>
-            </section>
+              <section id="implantsPreviewSection" class="document-section" hidden>
+                <h3>Implantes</h3>
+                <div class="implant-preview-box" data-preview="implantSummary">Selecione um implante.</div>
+              </section>
 
-            <section id="technologiesPreviewSection" class="document-section" hidden>
-              <h3>Tecnologias</h3>
-              <div class="technology-preview-box">
-                <span data-preview="technologyName">Selecione uma tecnologia.</span>
-                <span data-preview="technologyValue">R$</span>
-              </div>
-            </section>
+              <section id="technologiesPreviewSection" class="document-section" hidden>
+                <h3>Tecnologias</h3>
+                <div class="technology-preview-box">
+                  <span data-preview="technologyName">Selecione uma tecnologia.</span>
+                  <span data-preview="technologyValue">R$</span>
+                </div>
+              </section>
 
-            <section class="document-section">
-              <h3>Equipe</h3>
-              <div class="team-preview-box">
-                <span data-preview="teamItems">Equipe</span>
-                <span data-preview="teamValue">R$</span>
-              </div>
-            </section>
+              <section class="document-section">
+                <h3>Equipe</h3>
+                <div class="team-preview-box">
+                  <span data-preview="teamItems">Equipe</span>
+                  <span data-preview="teamValue">R$</span>
+                </div>
+              </section>
 
-            <section class="document-section">
-              <h3>Formas de Pagamento</h3>
-              <div id="paymentPreview" class="payment-preview-list">
-                <p>Preencha as formas de pagamento.</p>
-              </div>
-            </section>
+              <section class="document-section">
+                <h3>Formas de Pagamento</h3>
+                <div id="paymentPreview" class="payment-preview-list">
+                  <p>Preencha as formas de pagamento.</p>
+                </div>
+              </section>
 
-            <section class="document-section">
-              <h3>Orientações</h3>
-              <ul id="guidancePreview">
-                <li>Selecione as orientações desejadas.</li>
-              </ul>
-            </section>
+              <section class="document-section">
+                <h3>Orientações</h3>
+                <ul id="guidancePreview">
+                  <li>Selecione as orientações desejadas.</li>
+                </ul>
+              </section>
+            </div>
 
             <p class="document-date" data-preview="budgetDate"></p>
           </div>

@@ -12,6 +12,9 @@ const guidancePreview = document.querySelector("#guidancePreview");
 const paymentPreview = document.querySelector("#paymentPreview");
 const appShell = document.querySelector(".app-shell");
 const panelResizeHandle = document.querySelector("#panelResizeHandle");
+const previewPanel = document.querySelector(".preview-panel");
+const printPage = document.querySelector("#printPage");
+const documentFlow = document.querySelector("#documentFlow");
 const surgeryList = document.querySelector("#surgeryList");
 const surgeryHistoryDropdown = document.querySelector("#surgeryHistoryDropdown");
 const paymentList = document.querySelector("#paymentList");
@@ -1860,9 +1863,6 @@ function updateSimpleFields() {
     preview.textContent = getFieldValue(fieldName) || fallback;
   });
 
-  const datePreview = document.querySelector('[data-preview="budgetDate"]');
-  datePreview.textContent = formatDateForDocument(getFieldValue("budgetDate"));
-
   const hospitalStayPreview = document.querySelector('[data-preview="hospitalStay"]');
   hospitalStayPreview.textContent = formatHospitalStay(getFieldValue("hospitalStay"));
 
@@ -1918,10 +1918,78 @@ function updateGuidance() {
   });
 }
 
+function updateDocumentDates() {
+  const formattedDate = formatDateForDocument(getFieldValue("budgetDate"));
+  document.querySelectorAll('[data-preview="budgetDate"]').forEach((datePreview) => {
+    datePreview.textContent = formattedDate;
+  });
+}
+
+function createDocumentPage() {
+  const page = document.createElement("article");
+  page.className = "print-page generated-print-page";
+
+  const background = document.createElement("img");
+  background.className = "letterhead-background";
+  background.src = "assets/papel-timbrado.png";
+  background.alt = "";
+  background.setAttribute("aria-hidden", "true");
+
+  const content = document.createElement("div");
+  content.className = "document-content";
+
+  const flow = document.createElement("div");
+  flow.className = "document-flow";
+
+  const date = document.createElement("p");
+  date.className = "document-date";
+  date.dataset.preview = "budgetDate";
+  date.textContent = formatDateForDocument(getFieldValue("budgetDate"));
+
+  content.append(flow, date);
+  page.append(background, content);
+  previewPanel.append(page);
+
+  return page;
+}
+
+function paginateDocument() {
+  const pages = [printPage, ...document.querySelectorAll(".generated-print-page")];
+  const blocks = pages.flatMap((page) => [...page.querySelector(".document-flow").children]);
+  const fragment = document.createDocumentFragment();
+  blocks.forEach((block) => fragment.append(block));
+  document.querySelectorAll(".generated-print-page").forEach((page) => page.remove());
+
+  documentFlow.append(fragment);
+  updateDocumentDates();
+
+  let currentPage = printPage;
+  let currentFlow = documentFlow;
+  const content = currentPage.querySelector(".document-content");
+  const date = currentPage.querySelector(".document-date");
+  const reservedDateSpace = date.offsetHeight + 14;
+  const availableHeight = content.clientHeight - reservedDateSpace;
+
+  [...documentFlow.children].forEach((block) => {
+    currentFlow.append(block);
+
+    if (block.offsetTop + block.offsetHeight <= availableHeight || currentFlow.children.length === 1) {
+      return;
+    }
+
+    currentPage = createDocumentPage();
+    currentFlow = currentPage.querySelector(".document-flow");
+    currentFlow.append(block);
+  });
+
+  updateDocumentDates();
+}
+
 function updatePreview() {
   updateSimpleFields();
   updatePaymentPreview();
   updateGuidance();
+  paginateDocument();
 }
 
 function clearForm() {

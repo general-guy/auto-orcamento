@@ -538,6 +538,7 @@ textarea:focus {
 .preview-panel {
   display: grid;
   grid-template-rows: auto 1fr;
+  gap: 18px;
   overflow: auto;
   padding: 22px;
 }
@@ -559,10 +560,14 @@ textarea:focus {
   background: #ffffff;
   box-shadow: 0 12px 36px rgba(31, 41, 51, 0.12);
   height: var(--paper-height);
-  margin: 0 auto;
+  margin: 0 auto 18px;
   overflow: hidden;
   position: relative;
   width: var(--paper-width);
+}
+
+.print-page:last-child {
+  margin-bottom: 0;
 }
 
 .letterhead-background {
@@ -579,19 +584,23 @@ textarea:focus {
 }
 
 .document-content {
-  display: flex;
-  flex-direction: column;
   font-family: var(--brand-font-primary);
-  gap: 11px;
   inset: 38mm 20mm 28mm;
   position: absolute;
   z-index: 1;
 }
 
+.document-flow {
+  display: grid;
+  gap: 11px;
+}
+
 .document-date {
-  align-self: flex-end;
+  bottom: 0;
   font-size: 0.88rem;
-  margin: auto 0 0;
+  margin: 0;
+  position: absolute;
+  right: 0;
 }
 
 .document-content h2 {
@@ -841,28 +850,25 @@ th {
   }
 
   .print-page {
-    height: auto;
-    min-height: var(--paper-height);
-    overflow: visible;
+    break-after: page;
+    height: var(--paper-height);
+    overflow: hidden;
+    page-break-after: always;
+  }
+
+  .print-page:last-child {
+    break-after: auto;
+    page-break-after: auto;
   }
 
   .letterhead-background {
-    height: var(--paper-height);
-    position: fixed;
+    height: 100%;
+    position: absolute;
   }
 
   .document-content {
-    box-sizing: border-box;
-    display: block;
-    inset: auto;
-    min-height: var(--paper-height);
-    padding: 38mm 20mm 28mm;
-    position: relative;
-  }
-
-  .summary-list,
-  .document-section {
-    margin-bottom: 11px;
+    inset: 38mm 20mm 28mm;
+    position: absolute;
   }
 
   .summary-list .summary-stacked,
