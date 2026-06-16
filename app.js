@@ -21,10 +21,12 @@ const hospitalHistoryDropdown = document.querySelector("#hospitalHistoryDropdown
 const patientInput = document.querySelector("#patientName");
 const patientHistoryDropdown = document.querySelector("#patientHistoryDropdown");
 const implantsEnabledInput = document.querySelector("#implantsEnabled");
+const implantsFieldset = document.querySelector("#implantsFieldset");
 const implantsFormContent = document.querySelector("#implantsFormContent");
 const implantSelect = document.querySelector("#implantSelect");
 const implantsPreviewSection = document.querySelector("#implantsPreviewSection");
 const technologiesEnabledInput = document.querySelector("#technologiesEnabled");
+const technologiesFieldset = document.querySelector("#technologiesFieldset");
 const technologiesFormContent = document.querySelector("#technologiesFormContent");
 const technologyInput = document.querySelector("#technologyName");
 const technologyValueInput = document.querySelector("#technologyValue");
@@ -1755,6 +1757,7 @@ function getSelectedImplant() {
 
 function updateImplantsPreview() {
   const isEnabled = implantsEnabledInput.checked;
+  implantsFieldset.classList.toggle("is-collapsed", !isEnabled);
   implantsFormContent.hidden = !isEnabled;
   implantSelect.disabled = !isEnabled;
 
@@ -1797,6 +1800,7 @@ function updateImplantsPreview() {
 
 function updateTechnologiesPreview() {
   const isEnabled = technologiesEnabledInput.checked;
+  technologiesFieldset.classList.toggle("is-collapsed", !isEnabled);
   technologiesFormContent.hidden = !isEnabled;
   technologyInput.disabled = !isEnabled;
   technologyValueInput.disabled = !isEnabled;

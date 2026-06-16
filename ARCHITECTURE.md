@@ -119,7 +119,7 @@ O frontend carrega `data/tabelas-hospitalares.json` diretamente para montar os `
 
 ## Lógica de Implantes
 
-A seção `Implantes` no formulário é controlada por um checkbox no próprio título. Quando o checkbox está desmarcado, o dropdown fica desabilitado, o conteúdo da seção fica oculto no painel esquerdo e a seção não aparece no documento.
+A seção `Implantes` no formulário é controlada por um checkbox no próprio título. Quando o checkbox está desmarcado, o dropdown fica desabilitado, o conteúdo da seção fica oculto, o espaçamento vertical do fieldset é reduzido no painel esquerdo e a seção não aparece no documento.
 
 Quando um item é selecionado, o preview exibe uma caixa arredondada com duas colunas:
 
@@ -128,7 +128,7 @@ Quando um item é selecionado, o preview exibe uma caixa arredondada com duas co
 
 ## Lógica de Tecnologias
 
-A seção `Tecnologias` no formulário é controlada por um checkbox no próprio título. Quando o checkbox está desmarcado, os campos ficam desabilitados, o conteúdo da seção fica oculto no painel esquerdo e a seção não aparece no documento.
+A seção `Tecnologias` no formulário é controlada por um checkbox no próprio título. Quando o checkbox está desmarcado, os campos ficam desabilitados, o conteúdo da seção fica oculto, o espaçamento vertical do fieldset é reduzido no painel esquerdo e a seção não aparece no documento.
 
 O campo `Tecnologia` usa um dropdown de histórico alimentado por `data/tecnologias.json`. Ao selecionar uma opção, o app carrega o `valor` salvo junto com o `nome`.
 
