@@ -146,17 +146,17 @@ textarea {
 }
 
 fieldset {
-  border: 0;
-  border-top: 1px solid var(--line);
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
   display: grid;
   gap: 12px;
   margin: 0;
-  padding: 18px 0 8px;
+  padding: 18px 12px 10px;
 }
 
 .optional-fieldset.is-collapsed {
   gap: 0;
-  padding-bottom: 0;
+  padding-bottom: 2px;
 }
 
 legend {

@@ -48,6 +48,7 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 - Permite incluir uma seção opcional de implantes, alimentada por `data/tabela-implantes.json`.
 - Permite incluir uma seção opcional de tecnologias, com nome e valor salvos em `data/tecnologias.json`.
 - Mantém uma seção fixa de equipe com itens pré-marcados e valor normalizado em moeda brasileira.
+- Agrupa as seções do formulário em blocos com borda cinza discreta para facilitar a leitura do painel esquerdo.
 
 ## Dados Locais
 

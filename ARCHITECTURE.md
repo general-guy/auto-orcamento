@@ -72,6 +72,7 @@ Os históricos de pacientes, cirurgias, hospitais e pagamentos são listas JSON 
 
 - layout em colunas com painel esquerdo redimensionável;
 - visual dos campos, botões, dropdowns e pré-visualização;
+- agrupamento visual das seções do formulário com bordas cinza discretas;
 - papel A4 com imagem de fundo do papel timbrado;
 - regras específicas de impressão.
 
