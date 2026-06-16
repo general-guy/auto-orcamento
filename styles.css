@@ -840,6 +840,37 @@ th {
     margin: 0;
   }
 
+  .print-page {
+    height: auto;
+    min-height: var(--paper-height);
+    overflow: visible;
+  }
+
+  .letterhead-background {
+    height: var(--paper-height);
+    position: fixed;
+  }
+
+  .document-content {
+    box-sizing: border-box;
+    display: block;
+    inset: auto;
+    min-height: var(--paper-height);
+    padding: 38mm 20mm 28mm;
+    position: relative;
+  }
+
+  .summary-list,
+  .document-section {
+    margin-bottom: 11px;
+  }
+
+  .summary-list .summary-stacked,
+  .document-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
   @page {
     margin: 0;
     size: A4;
