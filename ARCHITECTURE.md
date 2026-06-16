@@ -135,7 +135,7 @@ No preview, a seção aparece em uma caixa arredondada com duas colunas: tecnolo
 
 A seção `Equipe` é fixa, sem checkbox no título. Ela contém checkboxes pré-marcados para `Cirurgião`, `Anestesista`, `Auxiliar`, `Eq. Enfermagem`, `Modelador`, `Placas` e `Meias`.
 
-Os itens ficam em duas colunas no formulário. No preview, apenas os itens marcados são exibidos, separados por ` + `.
+Os itens ficam em três colunas no formulário. No preview, apenas os itens marcados são exibidos, separados por ` + `.
 
 O campo `Valor:` usa a mesma normalização monetária de tecnologias: valores como `10000` são convertidos para `R$ 10.000,00` ao sair do campo. O preview exibe os itens à esquerda e o valor à direita.
 

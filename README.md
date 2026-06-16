@@ -97,7 +97,7 @@ No documento, a tecnologia aparece em uma caixa arredondada com o nome à esquer
 
 A seção `Equipe` é fixa e vem com os itens `Cirurgião`, `Anestesista`, `Auxiliar`, `Eq. Enfermagem`, `Modelador`, `Placas` e `Meias` pré-marcados.
 
-No formulário, os itens ficam em duas colunas. O campo `Valor:` normaliza moeda em padrão brasileiro, como `10000` para `R$ 10.000,00`.
+No formulário, os itens ficam em três colunas. O campo `Valor:` normaliza moeda em padrão brasileiro, como `10000` para `R$ 10.000,00`.
 
 No documento, a caixa de equipe mostra os itens marcados separados por ` + ` e o valor alinhado à direita.
 
