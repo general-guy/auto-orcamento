@@ -24,6 +24,18 @@ Depois acesse:
 http://localhost:3000
 ```
 
+## Ambiente Recomendado
+
+Para manutenção do projeto no Windows, recomenda-se usar PowerShell 7 (`pwsh`) como terminal padrão do Cursor. Ele aceita operadores modernos como `&&` e evita diferenças de sintaxe do Windows PowerShell 5.1.
+
+Se necessário, instale com:
+
+```powershell
+winget install Microsoft.PowerShell
+```
+
+Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`.
+
 ## O Que o App Faz
 
 - Preenche os dados da paciente, cirurgia, hospital, implantes, tecnologias, formas de pagamento, itens incluídos e orientações.

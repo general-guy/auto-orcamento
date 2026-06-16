@@ -35,6 +35,12 @@ node launch-app.js
 
 Para forçar um navegador específico, defina a variável de ambiente `AUTO_ORCAMENTO_BROWSER` com o caminho do executável antes de iniciar o launcher.
 
+## Ambiente de Desenvolvimento
+
+No Windows, recomenda-se usar PowerShell 7 (`pwsh`) no terminal integrado do Cursor. O projeto não depende dele para executar o app, mas ele simplifica comandos de manutenção e aceita operadores modernos como `&&`.
+
+O Windows PowerShell 5.1 também funciona para comandos básicos, mas alguns exemplos de terminal precisam ser adaptados para `;` ou executados em comandos separados.
+
 ## Servidor Local
 
 `server.js` usa apenas módulos nativos do Node:
