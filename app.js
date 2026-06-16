@@ -1982,11 +1982,23 @@ function paginateDocument() {
   updateDocumentDates();
 }
 
+function restorePreviewScroll(scrollTop, scrollLeft) {
+  const maxScrollTop = Math.max(0, previewPanel.scrollHeight - previewPanel.clientHeight);
+  const maxScrollLeft = Math.max(0, previewPanel.scrollWidth - previewPanel.clientWidth);
+  previewPanel.scrollTop = Math.min(scrollTop, maxScrollTop);
+  previewPanel.scrollLeft = Math.min(scrollLeft, maxScrollLeft);
+}
+
 function updatePreview() {
+  const previewScrollTop = previewPanel.scrollTop;
+  const previewScrollLeft = previewPanel.scrollLeft;
+
   updateSimpleFields();
   updatePaymentPreview();
   updateGuidance();
   paginateDocument();
+  restorePreviewScroll(previewScrollTop, previewScrollLeft);
+  requestAnimationFrame(() => restorePreviewScroll(previewScrollTop, previewScrollLeft));
 }
 
 function clearForm() {

@@ -159,6 +159,8 @@ O documento é composto por uma página base (`#printPage`) e páginas geradas d
 
 Cada seção do documento é tratada como bloco indivisível. Se uma seção não cabe antes da área reservada à data, ela é movida inteira para a próxima página. A data é renderizada no rodapé de cada página gerada.
 
+Durante `updatePreview()`, o app salva `scrollTop` e `scrollLeft` do painel de pré-visualização antes de redesenhar/paginar e restaura esses valores ao final da atualização, com um segundo ajuste no próximo frame.
+
 ## Lógica Hospitalar
 
 A seção `Hospital` é controlada por um checkbox no título, marcado por padrão no HTML para cada nova sessão do app. Quando desmarcado, o conteúdo do formulário é ocultado, os controles internos são desabilitados e o bloco de hospital no preview recebe `hidden`.

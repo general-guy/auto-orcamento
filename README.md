@@ -116,6 +116,8 @@ A pré-visualização cria páginas adicionais quando uma seção não cabe inte
 
 A data fica no rodapé de cada página do documento.
 
+Ao editar campos, o painel de pré-visualização preserva a posição de rolagem para evitar voltar automaticamente à primeira página.
+
 ## Documentação Técnica
 
 Detalhes de arquitetura, arquivos principais, endpoints locais e fluxo do launcher ficam em:
