@@ -24,6 +24,7 @@ const technologyInput = document.querySelector("#technologyName");
 const technologyValueInput = document.querySelector("#technologyValue");
 const technologyHistoryDropdown = document.querySelector("#technologyHistoryDropdown");
 const technologiesPreviewSection = document.querySelector("#technologiesPreviewSection");
+const teamValueInput = document.querySelector("#teamValue");
 let surgeryHistory = [];
 let activeSurgeryInput = null;
 let isInteractingWithHistoryDropdown = false;
@@ -223,6 +224,10 @@ function normalizeCurrencyInputValue(value) {
 
 function normalizeTechnologyValueField() {
   technologyValueInput.value = normalizeCurrencyInputValue(technologyValueInput.value);
+}
+
+function normalizeTeamValueField() {
+  teamValueInput.value = normalizeCurrencyInputValue(teamValueInput.value);
 }
 
 function parseMultiplierValue(value) {
@@ -1619,6 +1624,11 @@ function updateTechnologiesPreview() {
   technologyValuePreview.textContent = normalizeCurrencyInputValue(technologyValueInput.value) || "R$";
 }
 
+function updateTeamPreview() {
+  const teamValuePreview = document.querySelector('[data-preview="teamValue"]');
+  teamValuePreview.textContent = normalizeCurrencyInputValue(teamValueInput.value) || "R$";
+}
+
 function updateSimpleFields() {
   Object.entries(previewFields).forEach(([fieldName, fallback]) => {
     const preview = document.querySelector(`[data-preview="${fieldName}"]`);
@@ -1641,6 +1651,7 @@ function updateSimpleFields() {
   updateHospitalPreview();
   updateImplantsPreview();
   updateTechnologiesPreview();
+  updateTeamPreview();
 }
 
 function updateGuidance() {
@@ -1787,6 +1798,11 @@ form.addEventListener("focusout", (event) => {
       saveTechnologyToHistory();
       hideTechnologyHistoryDropdown();
     }
+  }
+
+  if (event.target === teamValueInput) {
+    normalizeTeamValueField();
+    updatePreview();
   }
 });
 form.addEventListener("keydown", (event) => {

@@ -723,7 +723,8 @@ dt {
   text-align: right;
 }
 
-.technology-preview-box {
+.technology-preview-box,
+.team-preview-box {
   border: 1px solid rgba(31, 41, 51, 0.22);
   border-radius: 9px;
   display: grid;
@@ -734,7 +735,8 @@ dt {
   padding: 8px 10px;
 }
 
-.technology-preview-box span:last-child {
+.technology-preview-box span:last-child,
+.team-preview-box span:last-child {
   justify-self: end;
   white-space: nowrap;
 }
