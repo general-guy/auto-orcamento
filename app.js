@@ -1367,12 +1367,12 @@ function renderPaymentQuickList() {
 
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
-    deleteButton.className = "history-delete payment-quick-delete";
+    deleteButton.className = "payment-quick-delete";
     deleteButton.textContent = "x";
     deleteButton.setAttribute("aria-label", `Remover ${optionText} do histórico de pagamentos`);
     deleteButton.dataset.value = optionText;
 
-    row.append(optionLabel, checkbox, deleteButton);
+    row.append(checkbox, optionLabel, deleteButton);
     paymentQuickList.append(row);
   });
 }
