@@ -71,7 +71,7 @@ data/tabelas-hospitalares.json
 data/tabela-implantes.json
 ```
 
-Esses arquivos são usados apenas localmente pelo servidor Node.js.
+Esses arquivos são usados pelo servidor Node.js e são versionados no repositório como base inicial do app. Quando o app altera históricos como pagamentos, observações ou tecnologias, essas mudanças ficam locais até serem adicionadas a um commit.
 
 ## Hospitais Com Autofill
 

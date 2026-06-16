@@ -107,6 +107,8 @@ data/observacoes.json
 data/tecnologias.json
 ```
 
+Esses arquivos são persistência local do app e também são versionados no repositório para manter uma base inicial compartilhada. Alterações feitas pelo uso do app só vão para o GitHub quando forem adicionadas ao staging e commitadas.
+
 Tabelas de referência estruturadas:
 
 ```text
