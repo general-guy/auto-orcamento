@@ -946,7 +946,7 @@ async function loadPaymentHistory() {
 
 async function loadGuidanceHistory() {
   try {
-    const response = await fetch("/api/orientacoes");
+    const response = await fetch("/api/observacoes");
     guidanceHistory = await response.json();
   } catch {
     guidanceHistory = [];
@@ -1111,7 +1111,7 @@ async function saveGuidanceToHistory(value, sourceInput = null) {
   }
 
   try {
-    const response = await fetch("/api/orientacoes", {
+    const response = await fetch("/api/observacoes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ value: guidance }),
@@ -1123,7 +1123,7 @@ async function saveGuidanceToHistory(value, sourceInput = null) {
       updateGuidanceHistoryDropdown(activeGuidanceInput.value);
     }
   } catch {
-    console.warn("Não foi possível salvar a orientação no histórico local.");
+    console.warn("Não foi possível salvar a observação no histórico local.");
   }
 }
 
@@ -1135,7 +1135,7 @@ async function deleteGuidanceFromHistory(value) {
   updateGuidanceHistoryDropdown(activeGuidanceInput?.value || "");
 
   try {
-    const response = await fetch("/api/orientacoes", {
+    const response = await fetch("/api/observacoes", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ value }),
@@ -1150,7 +1150,7 @@ async function deleteGuidanceFromHistory(value) {
     renderGuidanceQuickList();
     updateGuidanceHistoryDropdown(activeGuidanceInput?.value || "");
   } catch {
-    console.warn("Não foi possível remover a orientação do histórico local.");
+    console.warn("Não foi possível remover a observação do histórico local.");
   }
 }
 
@@ -1559,7 +1559,7 @@ function renderGuidanceQuickList() {
     deleteButton.type = "button";
     deleteButton.className = "quick-delete";
     deleteButton.textContent = "×";
-    deleteButton.setAttribute("aria-label", `Remover ${optionText} do histórico de orientações`);
+    deleteButton.setAttribute("aria-label", `Remover ${optionText} do histórico de observações`);
     deleteButton.dataset.value = optionText;
 
     row.append(checkbox, optionLabel, deleteButton);
@@ -1832,7 +1832,7 @@ function createGuidanceField() {
   input.name = "customGuidance";
   input.type = "text";
   input.className = "guidance-input";
-  input.setAttribute("aria-label", `Orientação adicional ${fieldNumber}`);
+  input.setAttribute("aria-label", `Observação adicional ${fieldNumber}`);
   input.setAttribute("autocomplete", "off");
 
   label.append(input);
@@ -2310,7 +2310,7 @@ function updateGuidance() {
 
   if (selectedGuidance.length === 0) {
     const emptyItem = document.createElement("li");
-    emptyItem.textContent = "Selecione as orientações desejadas.";
+    emptyItem.textContent = "Selecione as observações desejadas.";
     guidancePreview.append(emptyItem);
     return;
   }

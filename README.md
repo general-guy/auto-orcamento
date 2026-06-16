@@ -38,10 +38,10 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 
 ## O Que o App Faz
 
-- Preenche os dados da paciente, cirurgia, hospital, implantes, tecnologias, equipe, formas de pagamento e orientações.
+- Preenche os dados da paciente, cirurgia, hospital, implantes, tecnologias, equipe, formas de pagamento e observações.
 - Mostra uma pré-visualização paginada do documento final sobre o papel timbrado.
 - Permite imprimir ou salvar em PDF usando a impressão do navegador.
-- Guarda histórico local de pacientes, cirurgias, hospitais, formas de pagamento, orientações e tecnologias.
+- Guarda histórico local de pacientes, cirurgias, hospitais, formas de pagamento, observações e tecnologias.
 - Permite reordenar formas de pagamento salvas por drag and drop na lista rápida.
 - Cria múltiplas entradas de cirurgia e hospital.
 - Para Regina e Sapiranga, cria entradas auxiliares (`Reg1`, `Sap1`, etc.) com multiplicadores.
@@ -60,7 +60,7 @@ data/cirurgias.json
 data/hospitais.json
 data/pacientes.json
 data/pagamentos.json
-data/orientacoes.json
+data/observacoes.json
 data/tecnologias.json
 ```
 
@@ -117,17 +117,17 @@ A lista rápida aceita drag and drop para reorganizar as formas de pagamento. Ao
 
 No documento final, as formas de pagamento preenchidas aparecem como parágrafos sem marcadores, com espaçamento leve entre cada item.
 
-## Orientações
+## Observações
 
-A seção `Orientações` usa uma lista rápida de orientações padrão alimentada por `data/orientacoes.json`. As entradas aparecem com checkboxes marcados por padrão e podem ser removidas do histórico pelo botão `×`.
+A seção `Observações` usa uma lista rápida de observações padrão alimentada por `data/observacoes.json`. As entradas aparecem com checkboxes marcados por padrão e podem ser removidas do histórico pelo botão `×`.
 
-Abaixo da lista padrão, `Orientações adicionais` usa campos dinâmicos com dropdown de histórico e botões `+/-`, seguindo o mesmo padrão de preenchimento de `Pagamento`.
+Abaixo da lista padrão, `Observações adicionais` usa campos dinâmicos com dropdown de histórico e botões `+/-`, seguindo o mesmo padrão de preenchimento de `Pagamento`.
 
-No documento final, as orientações continuam como lista com marcadores, com espaçamento de `6px` entre os itens.
+No documento final, as observações continuam como lista com marcadores, com espaçamento de `6px` entre os itens.
 
 ## Paginação do Documento
 
-A pré-visualização cria páginas adicionais quando uma seção não cabe inteira na página atual. As seções são mantidas como blocos indivisíveis para evitar quebra no meio de `Formas de Pagamento`, `Orientações` ou outras seções.
+A pré-visualização cria páginas adicionais quando uma seção não cabe inteira na página atual. As seções são mantidas como blocos indivisíveis para evitar quebra no meio de `Formas de Pagamento`, `Observações` ou outras seções.
 
 A data fica no rodapé de cada página do documento. Quando o documento tem mais de uma página, o rodapé esquerdo exibe o contador no formato `Página 1 de 2`.
 

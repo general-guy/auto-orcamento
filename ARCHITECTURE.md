@@ -56,11 +56,11 @@ Endpoints principais:
 - `GET /api/hospitais`, `POST /api/hospitais`, `DELETE /api/hospitais`: histórico de hospitais.
 - `GET /api/pacientes`, `POST /api/pacientes`, `DELETE /api/pacientes`: histórico de pacientes.
 - `GET /api/pagamentos`, `POST /api/pagamentos`, `DELETE /api/pagamentos`, `PUT /api/pagamentos`: histórico de formas de pagamento e persistência da ordem manual.
-- `GET /api/orientacoes`, `POST /api/orientacoes`, `DELETE /api/orientacoes`: histórico de orientações.
+- `GET /api/observacoes`, `POST /api/observacoes`, `DELETE /api/observacoes`: histórico de observações.
 - `GET /api/tecnologias`, `POST /api/tecnologias`, `DELETE /api/tecnologias`: histórico de tecnologias com valor associado.
 - `POST /api/shutdown`: encerra o servidor quando acionado pela interface.
 
-Os históricos de pacientes, cirurgias, hospitais, pagamentos e orientações são listas JSON simples, limitadas a 200 itens por tipo. O histórico de tecnologias também é limitado a 200 itens, mas cada item é um objeto com `nome` e `valor`.
+Os históricos de pacientes, cirurgias, hospitais, pagamentos e observações são listas JSON simples, limitadas a 200 itens por tipo. O histórico de tecnologias também é limitado a 200 itens, mas cada item é um objeto com `nome` e `valor`.
 
 ## Frontend
 
@@ -80,7 +80,7 @@ Os históricos de pacientes, cirurgias, hospitais, pagamentos e orientações s�
 `app.js` concentra a lógica de interação:
 
 - sincronização entre formulário e preview;
-- histórico/autocomplete de pacientes, cirurgias, hospitais, pagamentos, orientações e tecnologias;
+- histórico/autocomplete de pacientes, cirurgias, hospitais, pagamentos, observações e tecnologias;
 - campos dinâmicos de cirurgia e hospital;
 - entradas auxiliares de Regina e Sapiranga;
 - multiplicadores de pacotes hospitalares;
@@ -89,7 +89,7 @@ Os históricos de pacientes, cirurgias, hospitais, pagamentos e orientações s�
 - persistência de tecnologias com valor monetário associado;
 - renderização da equipe fixa com itens selecionáveis e valor monetário;
 - renderização da seção de pagamento com campos dinâmicos e lista rápida reordenável;
-- renderização da seção de orientações com lista rápida e campos dinâmicos adicionais;
+- renderização da seção de observações com lista rápida e campos dinâmicos adicionais;
 - paginação da pré-visualização do documento em páginas A4;
 - redimensionamento do painel;
 - impressão, limpeza e shutdown.
@@ -103,7 +103,7 @@ data/cirurgias.json
 data/hospitais.json
 data/pacientes.json
 data/pagamentos.json
-data/orientacoes.json
+data/observacoes.json
 data/tecnologias.json
 ```
 
@@ -122,7 +122,7 @@ O frontend carrega `data/tabelas-hospitalares.json` diretamente para montar os `
 
 `data/pagamentos.json` guarda as formas de pagamento cadastradas no formulário. O arquivo é uma lista simples de textos, usada pelo dropdown de histórico da seção `Pagamento` e pela lista rápida reordenável.
 
-`data/orientacoes.json` guarda as orientações padrão e adicionais cadastradas no formulário. O arquivo é uma lista simples de textos, usada pela lista rápida da seção `Orientações` e pelo dropdown de histórico das orientações adicionais.
+`data/observacoes.json` guarda as observações padrão e adicionais cadastradas no formulário. O arquivo é uma lista simples de textos, usada pela lista rápida da seção `Observações` e pelo dropdown de histórico das observações adicionais.
 
 ## Lógica de Implantes
 
@@ -163,13 +163,13 @@ A lista rápida usa eventos de ponteiro para permitir drag and drop sem interfer
 
 No preview, as formas de pagamento preenchidas são renderizadas como parágrafos sem marcadores, com espaçamento leve entre cada item.
 
-## Lógica de Orientações
+## Lógica de Observações
 
-A seção `Orientações` é alimentada por `data/orientacoes.json` via `/api/orientacoes`. No formulário, `renderGuidanceQuickList()` exibe as entradas salvas como `Orientações padrão`, com checkboxes marcados por padrão e botão de exclusão integrado ao histórico.
+A seção `Observações` é alimentada por `data/observacoes.json` via `/api/observacoes`. No formulário, `renderGuidanceQuickList()` exibe as entradas salvas como `Observações padrão`, com checkboxes marcados por padrão e botão de exclusão integrado ao histórico.
 
-As `Orientações adicionais` usam uma lista dinâmica de inputs com botões `+/-`. Cada input usa dropdown legado alimentado pelo mesmo histórico e permite salvar novas entradas, selecionar existentes ou excluir opções antigas.
+As `Observações adicionais` usam uma lista dinâmica de inputs com botões `+/-`. Cada input usa dropdown legado alimentado pelo mesmo histórico e permite salvar novas entradas, selecionar existentes ou excluir opções antigas.
 
-No preview, `updateGuidance()` combina as orientações padrão marcadas com as adicionais preenchidas, remove duplicatas por texto normalizado e renderiza os itens em uma lista com marcadores. O espaçamento entre itens é controlado por `#guidancePreview` em `styles.css`.
+No preview, `updateGuidance()` combina as observações padrão marcadas com as adicionais preenchidas, remove duplicatas por texto normalizado e renderiza os itens em uma lista com marcadores. O espaçamento entre itens é controlado por `#guidancePreview` em `styles.css`.
 
 ## Paginação do Documento
 
