@@ -38,7 +38,7 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 
 ## O Que o App Faz
 
-- Preenche os dados da paciente, cirurgia, hospital, implantes, tecnologias, equipe, formas de pagamento, itens incluídos e orientações.
+- Preenche os dados da paciente, cirurgia, hospital, implantes, tecnologias, equipe, formas de pagamento e orientações.
 - Mostra uma pré-visualização do documento final sobre o papel timbrado.
 - Permite imprimir ou salvar em PDF usando a impressão do navegador.
 - Guarda histórico local de pacientes, cirurgias, hospitais e tecnologias.
@@ -100,6 +100,10 @@ A seção `Equipe` é fixa e vem com os itens `Cirurgião`, `Anestesista`, `Auxi
 No formulário, os itens ficam em três colunas. O campo `Valor:` normaliza moeda em padrão brasileiro, como `10000` para `R$ 10.000,00`.
 
 No documento, a caixa de equipe mostra os itens marcados separados por ` + ` e o valor alinhado à direita.
+
+## Pagamento
+
+A seção `Pagamento` reúne somente as formas de pagamento. O texto preenchido no formulário é exibido diretamente no documento final.
 
 ## Documentação Técnica
 

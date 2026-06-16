@@ -85,6 +85,7 @@ Os históricos de pacientes, cirurgias e hospitais são listas JSON simples, lim
 - carregamento e renderização da tabela de implantes;
 - persistência de tecnologias com valor monetário associado;
 - renderização da equipe fixa com itens selecionáveis e valor monetário;
+- renderização da seção de pagamento;
 - redimensionamento do painel;
 - impressão, limpeza e shutdown.
 
@@ -138,6 +139,10 @@ A seção `Equipe` é fixa, sem checkbox no título. Ela contém checkboxes pré
 Os itens ficam em três colunas no formulário. No preview, apenas os itens marcados são exibidos, separados por ` + `.
 
 O campo `Valor:` usa a mesma normalização monetária de tecnologias: valores como `10000` são convertidos para `R$ 10.000,00` ao sair do campo. O preview exibe os itens à esquerda e o valor à direita.
+
+## Lógica de Pagamento
+
+A seção `Pagamento` mantém apenas as formas de pagamento. O antigo campo `Itens Incluídos` foi removido do formulário, do preview e da lista de campos sincronizados em `app.js`.
 
 ## Lógica Hospitalar
 

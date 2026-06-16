@@ -44,7 +44,6 @@ let implantTable = null;
 const previewFields = {
   patientName: "Nome da paciente",
   paymentTerms: "Preencha as formas de pagamento.",
-  includedItems: "Preencha os itens incluídos no valor.",
 };
 
 const minFormPanelWidth = 320;
