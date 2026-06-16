@@ -2090,6 +2090,21 @@ function updateDocumentDates() {
   });
 }
 
+function updateDocumentPageCounters() {
+  const pages = [printPage, ...document.querySelectorAll(".generated-print-page")];
+  const totalPages = pages.length;
+
+  pages.forEach((page, index) => {
+    const pageCounter = page.querySelector('[data-preview="pageCounter"]');
+    if (!pageCounter) {
+      return;
+    }
+
+    pageCounter.hidden = totalPages <= 1;
+    pageCounter.textContent = totalPages > 1 ? `Página ${index + 1} de ${totalPages}` : "";
+  });
+}
+
 function createDocumentPage() {
   const page = document.createElement("article");
   page.className = "print-page generated-print-page";
@@ -2106,12 +2121,17 @@ function createDocumentPage() {
   const flow = document.createElement("div");
   flow.className = "document-flow";
 
+  const pageCounter = document.createElement("p");
+  pageCounter.className = "document-page-counter";
+  pageCounter.dataset.preview = "pageCounter";
+  pageCounter.hidden = true;
+
   const date = document.createElement("p");
   date.className = "document-date";
   date.dataset.preview = "budgetDate";
   date.textContent = formatDateForDocument(getFieldValue("budgetDate"));
 
-  content.append(flow, date);
+  content.append(flow, pageCounter, date);
   page.append(background, content);
   previewPanel.append(page);
 
@@ -2145,6 +2165,7 @@ function paginateDocument() {
   });
 
   updateDocumentDates();
+  updateDocumentPageCounters();
 }
 
 function restorePreviewScroll(scrollTop, scrollLeft) {

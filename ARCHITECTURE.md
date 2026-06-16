@@ -164,6 +164,8 @@ O documento é composto por uma página base (`#printPage`) e páginas geradas d
 
 Cada seção do documento é tratada como bloco indivisível. Se uma seção não cabe antes da área reservada à data, ela é movida inteira para a próxima página. A data é renderizada no rodapé de cada página gerada.
 
+Quando a paginação cria mais de uma página, `updateDocumentPageCounters()` exibe `Página X de Y` no rodapé esquerdo de cada página. Em documentos de uma página, o contador permanece oculto.
+
 Durante `updatePreview()`, o app salva `scrollTop` e `scrollLeft` do painel de pré-visualização antes de redesenhar/paginar e restaura esses valores ao final da atualização, com um segundo ajuste no próximo frame.
 
 ## Lógica Hospitalar

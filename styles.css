@@ -672,12 +672,24 @@ textarea:focus {
   gap: 11px;
 }
 
-.document-date {
+.document-date,
+.document-page-counter {
   bottom: 0;
   font-size: 0.88rem;
   margin: 0;
   position: absolute;
+}
+
+.document-date {
   right: 0;
+}
+
+.document-page-counter {
+  left: 0;
+}
+
+.document-page-counter[hidden] {
+  display: none;
 }
 
 .document-content h2 {

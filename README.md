@@ -120,7 +120,7 @@ No documento final, as formas de pagamento preenchidas aparecem como parágrafos
 
 A pré-visualização cria páginas adicionais quando uma seção não cabe inteira na página atual. As seções são mantidas como blocos indivisíveis para evitar quebra no meio de `Formas de Pagamento`, `Orientações` ou outras seções.
 
-A data fica no rodapé de cada página do documento.
+A data fica no rodapé de cada página do documento. Quando o documento tem mais de uma página, o rodapé esquerdo exibe o contador no formato `Página 1 de 2`.
 
 Ao editar campos, o painel de pré-visualização preserva a posição de rolagem para evitar voltar automaticamente à primeira página.
 
