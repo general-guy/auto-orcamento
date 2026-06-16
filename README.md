@@ -108,7 +108,7 @@ No documento, a caixa de equipe mostra os itens marcados separados por ` + ` e o
 
 A seção `Pagamento` reúne somente as formas de pagamento. No painel esquerdo, ela usa campos dinâmicos com botões `+/-`, seguindo o mesmo padrão da seção `Cirurgia`.
 
-Cada forma preenchida pode ser reaproveitada pelo dropdown de histórico, salvo em `data/pagamentos.json`. No documento final, as formas de pagamento preenchidas aparecem em linhas separadas.
+Cada forma preenchida pode ser reaproveitada pelo dropdown de histórico, salvo em `data/pagamentos.json`. No documento final, as formas de pagamento preenchidas aparecem como lista com marcadores, seguindo o padrão visual de `Orientações`.
 
 ## Documentação Técnica
 

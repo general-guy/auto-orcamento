@@ -9,6 +9,7 @@ const removeHospitalButton = document.querySelector("#removeHospitalButton");
 const addPaymentButton = document.querySelector("#addPaymentButton");
 const removePaymentButton = document.querySelector("#removePaymentButton");
 const guidancePreview = document.querySelector("#guidancePreview");
+const paymentPreview = document.querySelector("#paymentPreview");
 const appShell = document.querySelector(".app-shell");
 const panelResizeHandle = document.querySelector("#panelResizeHandle");
 const surgeryList = document.querySelector("#surgeryList");
@@ -1868,13 +1869,28 @@ function updateSimpleFields() {
   const surgeryPreview = document.querySelector('[data-preview="surgery"]');
   surgeryPreview.textContent = getSurgeryValues().join("\n") || "Cirurgia proposta";
 
-  const paymentPreview = document.querySelector('[data-preview="paymentTerms"]');
-  paymentPreview.textContent = getPaymentValues().join("\n") || "Preencha as formas de pagamento.";
-
   updateHospitalPreview();
   updateImplantsPreview();
   updateTechnologiesPreview();
   updateTeamPreview();
+}
+
+function updatePaymentPreview() {
+  const paymentValues = getPaymentValues();
+  paymentPreview.innerHTML = "";
+
+  if (paymentValues.length === 0) {
+    const emptyItem = document.createElement("li");
+    emptyItem.textContent = "Preencha as formas de pagamento.";
+    paymentPreview.append(emptyItem);
+    return;
+  }
+
+  paymentValues.forEach((payment) => {
+    const item = document.createElement("li");
+    item.textContent = payment;
+    paymentPreview.append(item);
+  });
 }
 
 function updateGuidance() {
@@ -1904,6 +1920,7 @@ function updateGuidance() {
 
 function updatePreview() {
   updateSimpleFields();
+  updatePaymentPreview();
   updateGuidance();
 }
 

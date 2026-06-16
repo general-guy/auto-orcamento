@@ -150,7 +150,7 @@ A seção `Pagamento` mantém apenas as formas de pagamento. O antigo campo `Ite
 
 No formulário, `Pagamento` usa uma lista dinâmica de inputs com botões `+/-`, no mesmo padrão de `Cirurgia`. Cada input usa dropdown de histórico alimentado por `data/pagamentos.json` via `/api/pagamentos`.
 
-No preview, as formas de pagamento preenchidas são concatenadas em linhas separadas dentro da seção `Formas de Pagamento`.
+No preview, as formas de pagamento preenchidas são renderizadas em uma lista com marcadores dentro da seção `Formas de Pagamento`, usando o mesmo padrão visual de `Orientações`.
 
 ## Lógica Hospitalar
 
