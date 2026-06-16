@@ -1880,14 +1880,14 @@ function updatePaymentPreview() {
   paymentPreview.innerHTML = "";
 
   if (paymentValues.length === 0) {
-    const emptyItem = document.createElement("li");
+    const emptyItem = document.createElement("p");
     emptyItem.textContent = "Preencha as formas de pagamento.";
     paymentPreview.append(emptyItem);
     return;
   }
 
   paymentValues.forEach((payment) => {
-    const item = document.createElement("li");
+    const item = document.createElement("p");
     item.textContent = payment;
     paymentPreview.append(item);
   });
