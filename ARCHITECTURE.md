@@ -49,9 +49,10 @@ Endpoints principais:
 - `GET /api/cirurgias`, `POST /api/cirurgias`, `DELETE /api/cirurgias`: histórico de cirurgias.
 - `GET /api/hospitais`, `POST /api/hospitais`, `DELETE /api/hospitais`: histórico de hospitais.
 - `GET /api/pacientes`, `POST /api/pacientes`, `DELETE /api/pacientes`: histórico de pacientes.
+- `GET /api/tecnologias`, `POST /api/tecnologias`, `DELETE /api/tecnologias`: histórico de tecnologias com valor associado.
 - `POST /api/shutdown`: encerra o servidor quando acionado pela interface.
 
-Os históricos são listas JSON simples, limitadas a 200 itens por tipo.
+Os históricos de pacientes, cirurgias e hospitais são listas JSON simples, limitadas a 200 itens por tipo. O histórico de tecnologias também é limitado a 200 itens, mas cada item é um objeto com `nome` e `valor`.
 
 ## Frontend
 
@@ -70,12 +71,13 @@ Os históricos são listas JSON simples, limitadas a 200 itens por tipo.
 `app.js` concentra a lógica de interação:
 
 - sincronização entre formulário e preview;
-- histórico/autocomplete de pacientes, cirurgias e hospitais;
+- histórico/autocomplete de pacientes, cirurgias, hospitais e tecnologias;
 - campos dinâmicos de cirurgia e hospital;
 - entradas auxiliares de Regina e Sapiranga;
 - multiplicadores de pacotes hospitalares;
 - autofill das entradas auxiliares;
 - carregamento e renderização da tabela de implantes;
+- persistência de tecnologias com valor monetário associado;
 - redimensionamento do painel;
 - impressão, limpeza e shutdown.
 
@@ -87,6 +89,7 @@ Arquivos de histórico:
 data/cirurgias.json
 data/hospitais.json
 data/pacientes.json
+data/tecnologias.json
 ```
 
 Tabelas de referência estruturadas:
@@ -100,6 +103,8 @@ O frontend carrega `data/tabelas-hospitalares.json` diretamente para montar os `
 
 `data/tabela-implantes.json` guarda uma tabela independente de implantes, extraída de documento `.doc`, para preenchimento opcional da seção `Implantes`. O dropdown usa `rotulo`, `modelo` e `referencia`; itens com `favorito: true` recebem uma estrela ao final da opção.
 
+`data/tecnologias.json` guarda as tecnologias cadastradas no próprio app. Diferente dos históricos simples, cada item tem `nome` e `valor`, permitindo carregar o valor automaticamente quando a tecnologia é selecionada.
+
 ## Lógica de Implantes
 
 A seção `Implantes` no formulário é controlada por um checkbox no próprio título. Quando o checkbox está desmarcado, o dropdown fica desabilitado e a seção não aparece no documento.
@@ -108,6 +113,16 @@ Quando um item é selecionado, o preview exibe uma caixa arredondada com duas co
 
 - à esquerda: `marca - rotulo - modelo - referencia`, com quebra de linha se necessário;
 - à direita: `valorAVista` na primeira linha e `valorCartao7x` na segunda linha, ambos alinhados à direita.
+
+## Lógica de Tecnologias
+
+A seção `Tecnologias` no formulário é controlada por um checkbox no próprio título. Quando o checkbox está desmarcado, os campos ficam desabilitados e a seção não aparece no documento.
+
+O campo `Tecnologia` usa um dropdown de histórico alimentado por `data/tecnologias.json`. Ao selecionar uma opção, o app carrega o `valor` salvo junto com o `nome`.
+
+O campo `Valor:` fica na mesma linha do input e normaliza moeda em padrão brasileiro ao sair do campo e antes de salvar. Exemplos: `10000` vira `R$ 10.000,00`; `10000,5` vira `R$ 10.000,50`.
+
+No preview, a seção aparece em uma caixa arredondada com duas colunas: tecnologia à esquerda e valor à direita.
 
 ## Lógica Hospitalar
 

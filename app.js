@@ -207,6 +207,24 @@ function formatCurrency(value) {
     .replace(/\u00a0/g, " ");
 }
 
+function normalizeCurrencyInputValue(value) {
+  const trimmedValue = value.trim();
+  if (!trimmedValue) {
+    return "";
+  }
+
+  if (!/\d/.test(trimmedValue)) {
+    return "";
+  }
+
+  const currencyValue = parseCurrencyValue(trimmedValue);
+  return Number.isFinite(currencyValue) ? formatCurrency(currencyValue) : trimmedValue;
+}
+
+function normalizeTechnologyValueField() {
+  technologyValueInput.value = normalizeCurrencyInputValue(technologyValueInput.value);
+}
+
 function parseMultiplierValue(value) {
   const normalizedValue = value.replace(",", ".").trim();
   const multiplier = Number(normalizedValue);
@@ -1020,6 +1038,7 @@ async function saveTechnologyToHistory() {
   if (!technology) {
     return;
   }
+  normalizeTechnologyValueField();
 
   try {
     const response = await fetch("/api/tecnologias", {
@@ -1437,7 +1456,7 @@ function selectPatientHistoryOption(option, shouldAdvance = false) {
 
 function selectTechnologyHistoryOption(option, shouldAdvance = false) {
   technologyInput.value = option.dataset.value;
-  technologyValueInput.value = option.dataset.amount || "";
+  technologyValueInput.value = normalizeCurrencyInputValue(option.dataset.amount || "");
   updatePreview();
   isInteractingWithTechnologyDropdown = false;
   hideTechnologyHistoryDropdown();
@@ -1597,7 +1616,7 @@ function updateTechnologiesPreview() {
   const technologyNamePreview = document.querySelector('[data-preview="technologyName"]');
   const technologyValuePreview = document.querySelector('[data-preview="technologyValue"]');
   technologyNamePreview.textContent = technologyInput.value.trim() || "Selecione uma tecnologia.";
-  technologyValuePreview.textContent = technologyValueInput.value.trim() || "R$";
+  technologyValuePreview.textContent = normalizeCurrencyInputValue(technologyValueInput.value) || "R$";
 }
 
 function updateSimpleFields() {
@@ -1760,6 +1779,11 @@ form.addEventListener("focusout", (event) => {
     }
 
     if (!isInteractingWithTechnologyDropdown) {
+      if (event.target === technologyValueInput) {
+        normalizeTechnologyValueField();
+        updatePreview();
+      }
+
       saveTechnologyToHistory();
       hideTechnologyHistoryDropdown();
     }

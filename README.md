@@ -26,14 +26,15 @@ http://localhost:3000
 
 ## O Que o App Faz
 
-- Preenche os dados da paciente, cirurgia, hospital, valores, formas de pagamento, itens incluídos e orientações.
+- Preenche os dados da paciente, cirurgia, hospital, implantes, tecnologias, formas de pagamento, itens incluídos e orientações.
 - Mostra uma pré-visualização do documento final sobre o papel timbrado.
 - Permite imprimir ou salvar em PDF usando a impressão do navegador.
-- Guarda histórico local de pacientes, cirurgias e hospitais.
+- Guarda histórico local de pacientes, cirurgias, hospitais e tecnologias.
 - Cria múltiplas entradas de cirurgia e hospital.
 - Para Regina e Sapiranga, cria entradas auxiliares (`Reg1`, `Sap1`, etc.) com multiplicadores.
 - Usa tabelas hospitalares locais para sugerir pacotes e calcular valores auxiliares no preview.
 - Permite incluir uma seção opcional de implantes, alimentada por `data/tabela-implantes.json`.
+- Permite incluir uma seção opcional de tecnologias, com nome e valor salvos em `data/tecnologias.json`.
 
 ## Dados Locais
 
@@ -43,6 +44,7 @@ Os históricos ficam em arquivos JSON dentro de `data/`:
 data/cirurgias.json
 data/hospitais.json
 data/pacientes.json
+data/tecnologias.json
 ```
 
 As tabelas de referência estruturadas ficam em:
@@ -70,6 +72,14 @@ O dropdown usa `rotulo`, `modelo` e `referencia`. Itens marcados com `favorito: 
 
 No documento, a caixa mostra a descrição do implante à esquerda e os valores à direita: primeiro o valor à vista, depois o valor em 7x no cartão.
 
+## Tecnologias
+
+A seção `Tecnologias` é opcional. Ao marcar o checkbox no título da seção, o campo `Tecnologia` é habilitado e usa o histórico local de `data/tecnologias.json`.
+
+Cada tecnologia salva o `nome` junto com seu `valor`. Ao selecionar uma tecnologia já cadastrada, o valor correspondente é carregado automaticamente. O campo de valor normaliza moeda em padrão brasileiro, por exemplo `10000` vira `R$ 10.000,00`.
+
+No documento, a tecnologia aparece em uma caixa arredondada com o nome à esquerda e o valor alinhado à direita.
+
 ## Documentação Técnica
 
 Detalhes de arquitetura, arquivos principais, endpoints locais e fluxo do launcher ficam em:
@@ -83,4 +93,5 @@ Detalhes sobre a origem e manutenção das tabelas hospitalares ficam em:
 ```text
 docs/tabelas-hospitalares.md
 docs/tabela-implantes.md
+docs/tabela-tecnologias.md
 ```

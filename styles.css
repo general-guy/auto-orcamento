@@ -217,6 +217,11 @@ textarea {
   grid-template-columns: 1fr 1fr;
 }
 
+.inline-value-field {
+  align-items: center;
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
 .dynamic-field-group,
 .surgery-list,
 .hospital-list {
