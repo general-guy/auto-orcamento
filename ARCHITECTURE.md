@@ -56,10 +56,11 @@ Endpoints principais:
 - `GET /api/hospitais`, `POST /api/hospitais`, `DELETE /api/hospitais`: histórico de hospitais.
 - `GET /api/pacientes`, `POST /api/pacientes`, `DELETE /api/pacientes`: histórico de pacientes.
 - `GET /api/pagamentos`, `POST /api/pagamentos`, `DELETE /api/pagamentos`, `PUT /api/pagamentos`: histórico de formas de pagamento e persistência da ordem manual.
+- `GET /api/orientacoes`, `POST /api/orientacoes`, `DELETE /api/orientacoes`: histórico de orientações.
 - `GET /api/tecnologias`, `POST /api/tecnologias`, `DELETE /api/tecnologias`: histórico de tecnologias com valor associado.
 - `POST /api/shutdown`: encerra o servidor quando acionado pela interface.
 
-Os históricos de pacientes, cirurgias, hospitais e pagamentos são listas JSON simples, limitadas a 200 itens por tipo. O histórico de tecnologias também é limitado a 200 itens, mas cada item é um objeto com `nome` e `valor`.
+Os históricos de pacientes, cirurgias, hospitais, pagamentos e orientações são listas JSON simples, limitadas a 200 itens por tipo. O histórico de tecnologias também é limitado a 200 itens, mas cada item é um objeto com `nome` e `valor`.
 
 ## Frontend
 
@@ -79,7 +80,7 @@ Os históricos de pacientes, cirurgias, hospitais e pagamentos são listas JSON 
 `app.js` concentra a lógica de interação:
 
 - sincronização entre formulário e preview;
-- histórico/autocomplete de pacientes, cirurgias, hospitais, pagamentos e tecnologias;
+- histórico/autocomplete de pacientes, cirurgias, hospitais, pagamentos, orientações e tecnologias;
 - campos dinâmicos de cirurgia e hospital;
 - entradas auxiliares de Regina e Sapiranga;
 - multiplicadores de pacotes hospitalares;
@@ -88,6 +89,7 @@ Os históricos de pacientes, cirurgias, hospitais e pagamentos são listas JSON 
 - persistência de tecnologias com valor monetário associado;
 - renderização da equipe fixa com itens selecionáveis e valor monetário;
 - renderização da seção de pagamento com campos dinâmicos e lista rápida reordenável;
+- renderização da seção de orientações com lista rápida e campos dinâmicos adicionais;
 - paginação da pré-visualização do documento em páginas A4;
 - redimensionamento do painel;
 - impressão, limpeza e shutdown.
@@ -101,6 +103,7 @@ data/cirurgias.json
 data/hospitais.json
 data/pacientes.json
 data/pagamentos.json
+data/orientacoes.json
 data/tecnologias.json
 ```
 
@@ -118,6 +121,8 @@ O frontend carrega `data/tabelas-hospitalares.json` diretamente para montar os `
 `data/tecnologias.json` guarda as tecnologias cadastradas no próprio app. Diferente dos históricos simples, cada item tem `nome` e `valor`, permitindo carregar o valor automaticamente quando a tecnologia é selecionada.
 
 `data/pagamentos.json` guarda as formas de pagamento cadastradas no formulário. O arquivo é uma lista simples de textos, usada pelo dropdown de histórico da seção `Pagamento` e pela lista rápida reordenável.
+
+`data/orientacoes.json` guarda as orientações padrão e adicionais cadastradas no formulário. O arquivo é uma lista simples de textos, usada pela lista rápida da seção `Orientações` e pelo dropdown de histórico das orientações adicionais.
 
 ## Lógica de Implantes
 
@@ -157,6 +162,14 @@ As entradas salvas em `data/pagamentos.json` também são renderizadas em uma li
 A lista rápida usa eventos de ponteiro para permitir drag and drop sem interferir nos checkboxes e no botão de exclusão. Durante o arraste, `app.js` mostra uma linha de encaixe entre os itens; ao soltar, reorganiza `paymentHistory`, atualiza o preview e envia a lista completa para `PUT /api/pagamentos`, que normaliza duplicatas e grava a nova ordem em `data/pagamentos.json`.
 
 No preview, as formas de pagamento preenchidas são renderizadas como parágrafos sem marcadores, com espaçamento leve entre cada item.
+
+## Lógica de Orientações
+
+A seção `Orientações` é alimentada por `data/orientacoes.json` via `/api/orientacoes`. No formulário, `renderGuidanceQuickList()` exibe as entradas salvas como `Orientações padrão`, com checkboxes marcados por padrão e botão de exclusão integrado ao histórico.
+
+As `Orientações adicionais` usam uma lista dinâmica de inputs com botões `+/-`. Cada input usa dropdown legado alimentado pelo mesmo histórico e permite salvar novas entradas, selecionar existentes ou excluir opções antigas.
+
+No preview, `updateGuidance()` combina as orientações padrão marcadas com as adicionais preenchidas, remove duplicatas por texto normalizado e renderiza os itens em uma lista com marcadores. O espaçamento entre itens é controlado por `#guidancePreview` em `styles.css`.
 
 ## Paginação do Documento
 

@@ -213,25 +213,33 @@
           <fieldset>
             <legend>Orientações</legend>
 
-            <label class="checkbox-row">
-              <input type="checkbox" name="guidance" value="Orçamento válido por 30 dias." />
-              <span>Orçamento válido por 30 dias.</span>
-            </label>
+            <p class="quick-list-title">Orientações padrão</p>
+            <div id="guidanceQuickList" class="quick-list"></div>
 
-            <label class="checkbox-row">
-              <input type="checkbox" name="guidance" value="Valores sujeitos à confirmação com o hospital." />
-              <span>Valores sujeitos à confirmação com o hospital.</span>
-            </label>
+            <div class="dynamic-field-group">
+              <div id="guidanceList" class="guidance-list">
+                <label>
+                  Orientações adicionais
+                  <input
+                    id="customGuidance"
+                    name="customGuidance"
+                    type="text"
+                    class="guidance-input"
+                    autocomplete="off"
+                  />
+                </label>
+              </div>
 
-            <label class="checkbox-row">
-              <input type="checkbox" name="guidance" value="Materiais especiais e tecnologias podem depender da indicação intraoperatória." />
-              <span>Materiais especiais e tecnologias podem depender da indicação intraoperatória.</span>
-            </label>
-
-            <label>
-              Orientação adicional
-              <textarea id="customGuidance" name="customGuidance" rows="3"></textarea>
-            </label>
+              <div class="field-actions">
+                <button type="button" id="addGuidanceButton" class="add-button" aria-label="Adicionar outra orientação">
+                  +
+                </button>
+                <button type="button" id="removeGuidanceButton" class="remove-button" aria-label="Remover última orientação">
+                  -
+                </button>
+              </div>
+              <div id="guidanceHistoryDropdown" class="history-dropdown" hidden></div>
+            </div>
           </fieldset>
 
           <div class="actions">

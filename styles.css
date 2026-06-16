@@ -252,16 +252,19 @@ textarea {
 .dynamic-field-group,
 .surgery-list,
 .payment-list,
+.guidance-list,
 .hospital-list {
   display: grid;
   gap: 10px;
 }
 
+.quick-list,
 .payment-quick-list {
   display: grid;
   gap: 8px;
 }
 
+.quick-list-title,
 .payment-quick-title {
   color: #4b5563;
   font-size: 0.85rem;
@@ -269,10 +272,12 @@ textarea {
   margin: 0;
 }
 
+.quick-list[hidden],
 .payment-quick-list[hidden] {
   display: none;
 }
 
+.quick-option,
 .payment-quick-option {
   align-items: center;
   background: rgba(246, 247, 249, 0.75);
@@ -284,6 +289,11 @@ textarea {
   grid-template-columns: auto minmax(0, 1fr) auto;
   padding: 8px 10px;
   touch-action: none;
+}
+
+.quick-option {
+  cursor: default;
+  touch-action: auto;
 }
 
 .payment-quick-option.is-dragging {
@@ -304,16 +314,19 @@ textarea {
   user-select: none;
 }
 
+.quick-option span,
 .payment-quick-option span {
   min-width: 0;
 }
 
+.quick-option input,
 .payment-quick-option input {
   cursor: pointer;
   margin: 0;
   width: auto;
 }
 
+.quick-delete,
 .payment-quick-delete {
   align-items: center;
   background: #8a8a8a;
@@ -330,6 +343,7 @@ textarea {
   width: 24px;
 }
 
+.quick-delete:hover,
 .payment-quick-delete:hover {
   background: #747474;
 }
@@ -828,6 +842,11 @@ dt {
 }
 
 .payment-preview-list {
+  display: grid;
+  gap: 6px;
+}
+
+#guidancePreview {
   display: grid;
   gap: 6px;
 }

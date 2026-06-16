@@ -8,6 +8,8 @@ const addHospitalButton = document.querySelector("#addHospitalButton");
 const removeHospitalButton = document.querySelector("#removeHospitalButton");
 const addPaymentButton = document.querySelector("#addPaymentButton");
 const removePaymentButton = document.querySelector("#removePaymentButton");
+const addGuidanceButton = document.querySelector("#addGuidanceButton");
+const removeGuidanceButton = document.querySelector("#removeGuidanceButton");
 const guidancePreview = document.querySelector("#guidancePreview");
 const paymentPreview = document.querySelector("#paymentPreview");
 const appShell = document.querySelector(".app-shell");
@@ -20,6 +22,9 @@ const surgeryHistoryDropdown = document.querySelector("#surgeryHistoryDropdown")
 const paymentQuickList = document.querySelector("#paymentQuickList");
 const paymentList = document.querySelector("#paymentList");
 const paymentHistoryDropdown = document.querySelector("#paymentHistoryDropdown");
+const guidanceQuickList = document.querySelector("#guidanceQuickList");
+const guidanceList = document.querySelector("#guidanceList");
+const guidanceHistoryDropdown = document.querySelector("#guidanceHistoryDropdown");
 const hospitalEnabledInput = document.querySelector("#hospitalEnabled");
 const hospitalFieldset = document.querySelector("#hospitalFieldset");
 const hospitalFormContent = document.querySelector("#hospitalFormContent");
@@ -49,6 +54,10 @@ let activePaymentInput = null;
 let isInteractingWithPaymentDropdown = false;
 let deselectedPaymentQuickItems = new Set();
 let paymentDragState = null;
+let guidanceHistory = [];
+let activeGuidanceInput = null;
+let isInteractingWithGuidanceDropdown = false;
+let deselectedGuidanceQuickItems = new Set();
 let hospitalHistory = [];
 let activeHospitalInput = null;
 let isInteractingWithHospitalDropdown = false;
@@ -164,6 +173,35 @@ function getPaymentValues() {
     }
 
     seen.add(normalizedPayment);
+    return true;
+  });
+}
+
+function getGuidanceInputs() {
+  return [...guidanceList.querySelectorAll(".guidance-input")];
+}
+
+function getManualGuidanceValues() {
+  return getGuidanceInputs()
+    .map((input) => input.value.trim())
+    .filter(Boolean);
+}
+
+function getGuidanceQuickValues() {
+  return [...guidanceQuickList.querySelectorAll('input[name="guidanceQuickItems"]:checked')]
+    .map((input) => input.value.trim())
+    .filter(Boolean);
+}
+
+function getGuidanceValues() {
+  const seen = new Set();
+  return [...getGuidanceQuickValues(), ...getManualGuidanceValues()].filter((guidance) => {
+    const normalizedGuidance = normalizeText(guidance);
+    if (seen.has(normalizedGuidance)) {
+      return false;
+    }
+
+    seen.add(normalizedGuidance);
     return true;
   });
 }
@@ -906,6 +944,15 @@ async function loadPaymentHistory() {
   }
 }
 
+async function loadGuidanceHistory() {
+  try {
+    const response = await fetch("/api/orientacoes");
+    guidanceHistory = await response.json();
+  } catch {
+    guidanceHistory = [];
+  }
+}
+
 async function loadHospitalHistory() {
   try {
     const response = await fetch("/api/hospitais");
@@ -1045,6 +1092,65 @@ async function deletePaymentFromHistory(value) {
     updatePaymentHistoryDropdown(activePaymentInput?.value || "");
   } catch {
     console.warn("Não foi possível remover a forma de pagamento do histórico local.");
+  }
+}
+
+async function saveGuidanceToHistory(value, sourceInput = null) {
+  const guidance = value.trim();
+  if (!guidance) {
+    return;
+  }
+
+  if (sourceInput?.dataset.skipHistoryValue === normalizeText(guidance)) {
+    return;
+  }
+
+  const alreadyExists = guidanceHistory.some((item) => normalizeText(item) === normalizeText(guidance));
+  if (alreadyExists) {
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/orientacoes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ value: guidance }),
+    });
+
+    guidanceHistory = await response.json();
+    renderGuidanceQuickList();
+    if (activeGuidanceInput) {
+      updateGuidanceHistoryDropdown(activeGuidanceInput.value);
+    }
+  } catch {
+    console.warn("Não foi possível salvar a orientação no histórico local.");
+  }
+}
+
+async function deleteGuidanceFromHistory(value) {
+  const deletedKey = normalizeText(value);
+  guidanceHistory = guidanceHistory.filter((item) => normalizeText(item) !== deletedKey);
+  deselectedGuidanceQuickItems.delete(deletedKey);
+  renderGuidanceQuickList();
+  updateGuidanceHistoryDropdown(activeGuidanceInput?.value || "");
+
+  try {
+    const response = await fetch("/api/orientacoes", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ value }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Falha ao remover no servidor.");
+    }
+
+    const nextHistory = await response.json();
+    guidanceHistory = Array.isArray(nextHistory) ? nextHistory : guidanceHistory;
+    renderGuidanceQuickList();
+    updateGuidanceHistoryDropdown(activeGuidanceInput?.value || "");
+  } catch {
+    console.warn("Não foi possível remover a orientação do histórico local.");
   }
 }
 
@@ -1222,6 +1328,15 @@ function hidePaymentHistoryDropdown() {
   activePaymentInput = null;
 }
 
+function hideGuidanceHistoryDropdown() {
+  if (isInteractingWithGuidanceDropdown) {
+    return;
+  }
+
+  guidanceHistoryDropdown.hidden = true;
+  activeGuidanceInput = null;
+}
+
 function hideHospitalHistoryDropdown() {
   if (isInteractingWithHospitalDropdown) {
     return;
@@ -1258,6 +1373,12 @@ function showPaymentHistoryDropdown(input) {
   activePaymentInput = input;
   input.closest("label").append(paymentHistoryDropdown);
   updatePaymentHistoryDropdown(input.value);
+}
+
+function showGuidanceHistoryDropdown(input) {
+  activeGuidanceInput = input;
+  input.closest("label").append(guidanceHistoryDropdown);
+  updateGuidanceHistoryDropdown(input.value);
 }
 
 function showHospitalHistoryDropdown(input) {
@@ -1376,6 +1497,73 @@ function renderPaymentQuickList() {
 
     row.append(checkbox, optionLabel, deleteButton);
     paymentQuickList.append(row);
+  });
+}
+
+function updateGuidanceHistoryDropdown(query = "") {
+  renderGuidanceQuickList();
+
+  if (!activeGuidanceInput) {
+    guidanceHistoryDropdown.hidden = true;
+    return;
+  }
+
+  const normalizedQuery = normalizeText(query);
+  const options = guidanceHistory
+    .filter((item) => !normalizedQuery || normalizeText(item).includes(normalizedQuery))
+    .slice(0, 12);
+
+  guidanceHistoryDropdown.innerHTML = "";
+  guidanceHistoryDropdown.hidden = options.length === 0;
+
+  options.forEach((optionText) => {
+    const option = document.createElement("div");
+    option.className = "history-option";
+    option.dataset.value = optionText;
+    option.setAttribute("role", "button");
+    option.setAttribute("tabindex", "0");
+
+    const optionLabel = document.createElement("span");
+    optionLabel.textContent = optionText;
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "history-delete";
+    deleteButton.textContent = "x";
+    deleteButton.setAttribute("aria-label", `Remover ${optionText} do histórico`);
+
+    option.append(optionLabel);
+    option.append(deleteButton);
+    guidanceHistoryDropdown.append(option);
+  });
+}
+
+function renderGuidanceQuickList() {
+  guidanceQuickList.innerHTML = "";
+  guidanceQuickList.hidden = guidanceHistory.length === 0;
+
+  guidanceHistory.forEach((optionText) => {
+    const row = document.createElement("label");
+    row.className = "quick-option";
+
+    const optionLabel = document.createElement("span");
+    optionLabel.textContent = optionText;
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.name = "guidanceQuickItems";
+    checkbox.value = optionText;
+    checkbox.checked = !deselectedGuidanceQuickItems.has(normalizeText(optionText));
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "quick-delete";
+    deleteButton.textContent = "×";
+    deleteButton.setAttribute("aria-label", `Remover ${optionText} do histórico de orientações`);
+    deleteButton.dataset.value = optionText;
+
+    row.append(checkbox, optionLabel, deleteButton);
+    guidanceQuickList.append(row);
   });
 }
 
@@ -1635,6 +1823,24 @@ function createPaymentField() {
   input.focus();
 }
 
+function createGuidanceField() {
+  const fieldNumber = getGuidanceInputs().length + 1;
+  const label = document.createElement("label");
+  label.className = "unlabeled-field";
+
+  const input = document.createElement("input");
+  input.name = "customGuidance";
+  input.type = "text";
+  input.className = "guidance-input";
+  input.setAttribute("aria-label", `Orientação adicional ${fieldNumber}`);
+  input.setAttribute("autocomplete", "off");
+
+  label.append(input);
+  guidanceList.append(label);
+  updateGuidanceButtons();
+  input.focus();
+}
+
 function createHospitalField() {
   const fieldNumber = getHospitalInputs().length + 1;
   const label = document.createElement("label");
@@ -1681,6 +1887,20 @@ function removeLastPaymentField() {
   updatePreview();
 }
 
+function removeLastGuidanceField() {
+  const inputs = getGuidanceInputs();
+  if (inputs.length <= 1) {
+    inputs[0].value = "";
+    inputs[0].focus();
+    updatePreview();
+    return;
+  }
+
+  inputs.at(-1).closest("label").remove();
+  updateGuidanceButtons();
+  updatePreview();
+}
+
 function removeLastHospitalField() {
   const inputs = getHospitalInputs();
   if (inputs.length <= 1) {
@@ -1704,6 +1924,10 @@ function updatePaymentButtons() {
   removePaymentButton.disabled = getPaymentInputs().length <= 1;
 }
 
+function updateGuidanceButtons() {
+  removeGuidanceButton.disabled = getGuidanceInputs().length <= 1;
+}
+
 function updateHospitalButtons() {
   removeHospitalButton.disabled = getHospitalInputs().length <= 1;
 }
@@ -1715,11 +1939,13 @@ function isTextField(element) {
 function focusNextTextField(currentField) {
   isInteractingWithHistoryDropdown = false;
   isInteractingWithPaymentDropdown = false;
+  isInteractingWithGuidanceDropdown = false;
   isInteractingWithHospitalDropdown = false;
   isInteractingWithPatientDropdown = false;
   isInteractingWithTechnologyDropdown = false;
   hideSurgeryHistoryDropdown();
   hidePaymentHistoryDropdown();
+  hideGuidanceHistoryDropdown();
   hideHospitalHistoryDropdown();
   hidePatientHistoryDropdown();
   hideTechnologyHistoryDropdown();
@@ -1778,6 +2004,25 @@ function selectPaymentHistoryOption(option, shouldAdvance = false) {
   updatePreview();
   isInteractingWithPaymentDropdown = false;
   hidePaymentHistoryDropdown();
+
+  if (shouldAdvance) {
+    focusNextTextField(input);
+    return;
+  }
+
+  input.focus();
+}
+
+function selectGuidanceHistoryOption(option, shouldAdvance = false) {
+  const input = activeGuidanceInput;
+  if (!input) {
+    return;
+  }
+
+  input.value = option.dataset.value;
+  updatePreview();
+  isInteractingWithGuidanceDropdown = false;
+  hideGuidanceHistoryDropdown();
 
   if (shouldAdvance) {
     focusNextTextField(input);
@@ -2059,13 +2304,7 @@ function updatePaymentPreview() {
 }
 
 function updateGuidance() {
-  const selectedGuidance = [...form.querySelectorAll('input[name="guidance"]:checked')]
-    .map((input) => input.value);
-
-  const customGuidance = getFieldValue("customGuidance");
-  if (customGuidance) {
-    selectedGuidance.push(customGuidance);
-  }
+  const selectedGuidance = getGuidanceValues();
 
   guidancePreview.innerHTML = "";
 
@@ -2190,14 +2429,18 @@ function updatePreview() {
 function clearForm() {
   form.reset();
   deselectedPaymentQuickItems = new Set();
+  deselectedGuidanceQuickItems = new Set();
   renderPaymentQuickList();
+  renderGuidanceQuickList();
   getSurgeryInputs().slice(1).forEach((input) => input.closest("label").remove());
   getPaymentInputs().slice(1).forEach((input) => input.closest("label").remove());
+  getGuidanceInputs().slice(1).forEach((input) => input.closest("label").remove());
   getHospitalInputs().slice(1).forEach((input) => input.closest("label").remove());
   syncAllHospitalDetailFields();
   form.elements.budgetDate.value = formatDateForInput(new Date());
   updateSurgeryButtons();
   updatePaymentButtons();
+  updateGuidanceButtons();
   updateHospitalButtons();
   updatePreview();
 }
@@ -2230,6 +2473,14 @@ form.addEventListener("input", (event) => {
     showPaymentHistoryDropdown(event.target);
   }
 
+  if (event.target.matches(".guidance-input")) {
+    if (event.target.dataset.skipHistoryValue !== normalizeText(event.target.value)) {
+      delete event.target.dataset.skipHistoryValue;
+    }
+
+    showGuidanceHistoryDropdown(event.target);
+  }
+
   if (event.target.matches(".hospital-input")) {
     if (event.target.dataset.skipHistoryValue !== normalizeText(event.target.value)) {
       delete event.target.dataset.skipHistoryValue;
@@ -2254,6 +2505,10 @@ form.addEventListener("focusin", (event) => {
 
   if (event.target.matches(".payment-input")) {
     showPaymentHistoryDropdown(event.target);
+  }
+
+  if (event.target.matches(".guidance-input")) {
+    showGuidanceHistoryDropdown(event.target);
   }
 
   if (event.target.matches(".hospital-input")) {
@@ -2307,6 +2562,20 @@ paymentQuickList.addEventListener("pointerdown", (event) => {
   row.addEventListener("pointerup", handlePaymentQuickPointerUp);
   row.addEventListener("pointercancel", handlePaymentQuickPointerCancel);
 });
+guidanceQuickList.addEventListener("change", (event) => {
+  if (!event.target.matches('input[name="guidanceQuickItems"]')) {
+    return;
+  }
+
+  const guidanceKey = normalizeText(event.target.value);
+  if (event.target.checked) {
+    deselectedGuidanceQuickItems.delete(guidanceKey);
+  } else {
+    deselectedGuidanceQuickItems.add(guidanceKey);
+  }
+
+  updatePreview();
+});
 form.addEventListener("focusout", (event) => {
   if (event.target.matches(".patient-input")) {
     if (patientHistoryDropdown.contains(event.relatedTarget)) {
@@ -2338,6 +2607,17 @@ form.addEventListener("focusout", (event) => {
     if (!isInteractingWithPaymentDropdown) {
       savePaymentToHistory(event.target.value, event.target);
       hidePaymentHistoryDropdown();
+    }
+  }
+
+  if (event.target.matches(".guidance-input")) {
+    if (guidanceHistoryDropdown.contains(event.relatedTarget)) {
+      return;
+    }
+
+    if (!isInteractingWithGuidanceDropdown) {
+      saveGuidanceToHistory(event.target.value, event.target);
+      hideGuidanceHistoryDropdown();
     }
   }
 
@@ -2383,6 +2663,12 @@ form.addEventListener("keydown", (event) => {
   if (event.target.matches(".payment-input") && event.shiftKey && event.key === "Enter") {
     event.preventDefault();
     createPaymentField();
+    return;
+  }
+
+  if (event.target.matches(".guidance-input") && event.shiftKey && event.key === "Enter") {
+    event.preventDefault();
+    createGuidanceField();
     return;
   }
 
@@ -2455,6 +2741,17 @@ form.addEventListener("keydown", (event) => {
     return;
   }
 
+  if (event.target.matches(".guidance-input") && event.key === "ArrowDown") {
+    event.preventDefault();
+    showGuidanceHistoryDropdown(event.target);
+    isInteractingWithGuidanceDropdown = true;
+    focusDropdownOption(guidanceHistoryDropdown, 0);
+    setTimeout(() => {
+      isInteractingWithGuidanceDropdown = false;
+    });
+    return;
+  }
+
   if (event.target.matches(".patient-input") && event.key === "ArrowUp") {
     event.preventDefault();
     showPatientHistoryDropdown();
@@ -2506,6 +2803,17 @@ form.addEventListener("keydown", (event) => {
     focusDropdownOption(paymentHistoryDropdown, getDropdownOptions(paymentHistoryDropdown).length - 1);
     setTimeout(() => {
       isInteractingWithPaymentDropdown = false;
+    });
+    return;
+  }
+
+  if (event.target.matches(".guidance-input") && event.key === "ArrowUp") {
+    event.preventDefault();
+    showGuidanceHistoryDropdown(event.target);
+    isInteractingWithGuidanceDropdown = true;
+    focusDropdownOption(guidanceHistoryDropdown, getDropdownOptions(guidanceHistoryDropdown).length - 1);
+    setTimeout(() => {
+      isInteractingWithGuidanceDropdown = false;
     });
     return;
   }
@@ -2699,6 +3007,68 @@ paymentHistoryDropdown.addEventListener("keydown", (event) => {
     input.focus();
   }
 });
+guidanceHistoryDropdown.addEventListener("pointerdown", (event) => {
+  isInteractingWithGuidanceDropdown = true;
+  event.preventDefault();
+});
+guidanceHistoryDropdown.addEventListener("click", (event) => {
+  const option = event.target.closest(".history-option");
+  if (!option || !activeGuidanceInput) {
+    isInteractingWithGuidanceDropdown = false;
+    return;
+  }
+
+  const optionText = option.dataset.value;
+  if (event.target.closest(".history-delete")) {
+    event.stopPropagation();
+    const input = activeGuidanceInput;
+    input.dataset.skipHistoryValue = normalizeText(optionText);
+    deleteGuidanceFromHistory(optionText);
+    updateGuidanceHistoryDropdown(input.value);
+    input.focus();
+    isInteractingWithGuidanceDropdown = false;
+    return;
+  }
+
+  selectGuidanceHistoryOption(option);
+});
+guidanceHistoryDropdown.addEventListener("keydown", (event) => {
+  const option = event.target.closest(".history-option");
+  if (!option || !activeGuidanceInput) {
+    return;
+  }
+
+  const options = getDropdownOptions(guidanceHistoryDropdown);
+  const currentIndex = options.indexOf(option);
+
+  if (event.key === "ArrowDown") {
+    event.preventDefault();
+    focusDropdownOption(guidanceHistoryDropdown, Math.min(currentIndex + 1, options.length - 1));
+  }
+
+  if (event.key === "ArrowUp") {
+    event.preventDefault();
+    if (currentIndex <= 0) {
+      activeGuidanceInput.focus();
+      return;
+    }
+
+    focusDropdownOption(guidanceHistoryDropdown, currentIndex - 1);
+  }
+
+  if (event.key === "Enter") {
+    event.preventDefault();
+    selectGuidanceHistoryOption(option, true);
+  }
+
+  if (event.key === "Escape") {
+    event.preventDefault();
+    const input = activeGuidanceInput;
+    isInteractingWithGuidanceDropdown = false;
+    hideGuidanceHistoryDropdown();
+    input.focus();
+  }
+});
 hospitalHistoryDropdown.addEventListener("pointerdown", (event) => {
   isInteractingWithHospitalDropdown = true;
   event.preventDefault();
@@ -2827,6 +3197,8 @@ document.addEventListener("pointerdown", (event) => {
     event.target.closest("#surgeryHistoryDropdown") ||
     event.target.closest(".payment-input") ||
     event.target.closest("#paymentHistoryDropdown") ||
+    event.target.closest(".guidance-input") ||
+    event.target.closest("#guidanceHistoryDropdown") ||
     event.target.closest(".hospital-input") ||
     event.target.closest("#hospitalHistoryDropdown") ||
     event.target.closest(".technology-input") ||
@@ -2838,6 +3210,7 @@ document.addEventListener("pointerdown", (event) => {
   hidePatientHistoryDropdown();
   hideSurgeryHistoryDropdown();
   hidePaymentHistoryDropdown();
+  hideGuidanceHistoryDropdown();
   hideHospitalHistoryDropdown();
   hideTechnologyHistoryDropdown();
 });
@@ -2883,6 +3256,14 @@ form.addEventListener("click", (event) => {
     return;
   }
 
+  const guidanceQuickDelete = event.target.closest(".quick-delete");
+  if (guidanceQuickDelete) {
+    event.preventDefault();
+    deleteGuidanceFromHistory(guidanceQuickDelete.dataset.value);
+    updatePreview();
+    return;
+  }
+
   if (event.target.closest(".hospital-detail-add")) {
     addHospitalDetailEntryFromButton(event.target);
     updatePreview();
@@ -2905,6 +3286,8 @@ addSurgeryButton.addEventListener("click", createSurgeryField);
 removeSurgeryButton.addEventListener("click", removeLastSurgeryField);
 addPaymentButton.addEventListener("click", createPaymentField);
 removePaymentButton.addEventListener("click", removeLastPaymentField);
+addGuidanceButton.addEventListener("click", createGuidanceField);
+removeGuidanceButton.addEventListener("click", removeLastGuidanceField);
 addHospitalButton.addEventListener("click", createHospitalField);
 removeHospitalButton.addEventListener("click", removeLastHospitalField);
 printButton.addEventListener("click", async () => {
@@ -2913,6 +3296,7 @@ printButton.addEventListener("click", async () => {
       savePatientToHistory(patientInput.value, patientInput),
       ...getSurgeryInputs().map((input) => saveSurgeryToHistory(input.value, input)),
       ...getManualPaymentValues().map((payment) => savePaymentToHistory(payment)),
+      ...getManualGuidanceValues().map((guidance) => saveGuidanceToHistory(guidance)),
       ...getHospitalInputs().map((input) => saveHospitalToHistory(input.value, input)),
       saveTechnologyToHistory(),
     ]
@@ -2937,6 +3321,7 @@ Promise.all([
   loadPatientHistory(),
   loadSurgeryHistory(),
   loadPaymentHistory(),
+  loadGuidanceHistory(),
   loadHospitalHistory(),
   loadTechnologyHistory(),
   loadHospitalTables(),
@@ -2946,13 +3331,17 @@ Promise.all([
   updateSurgeryHistoryDropdown();
   renderPaymentQuickList();
   updatePaymentHistoryDropdown();
+  renderGuidanceQuickList();
+  updateGuidanceHistoryDropdown();
   updateTechnologyHistoryDropdown();
   hideHospitalHistoryDropdown();
   hidePatientHistoryDropdown();
   hidePaymentHistoryDropdown();
+  hideGuidanceHistoryDropdown();
   hideTechnologyHistoryDropdown();
   updateSurgeryButtons();
   updatePaymentButtons();
+  updateGuidanceButtons();
   updateHospitalButtons();
   updatePreview();
 });

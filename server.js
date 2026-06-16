@@ -10,6 +10,7 @@ const hospitalsFile = path.join(dataDir, "hospitais.json");
 const patientsFile = path.join(dataDir, "pacientes.json");
 const technologiesFile = path.join(dataDir, "tecnologias.json");
 const paymentsFile = path.join(dataDir, "pagamentos.json");
+const guidanceFile = path.join(dataDir, "orientacoes.json");
 
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
@@ -48,6 +49,10 @@ function ensureDataFile() {
 
   if (!fs.existsSync(paymentsFile)) {
     fs.writeFileSync(paymentsFile, "[]\n", "utf8");
+  }
+
+  if (!fs.existsSync(guidanceFile)) {
+    fs.writeFileSync(guidanceFile, "[]\n", "utf8");
   }
 }
 
@@ -286,6 +291,11 @@ const server = http.createServer(async (request, response) => {
 
     if (request.url.startsWith("/api/pagamentos")) {
       await handlePaymentApi(request, response);
+      return;
+    }
+
+    if (request.url.startsWith("/api/orientacoes")) {
+      await handleHistoryApi(request, response, guidanceFile, "uma orientação válida");
       return;
     }
 

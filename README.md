@@ -41,7 +41,7 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 - Preenche os dados da paciente, cirurgia, hospital, implantes, tecnologias, equipe, formas de pagamento e orientações.
 - Mostra uma pré-visualização paginada do documento final sobre o papel timbrado.
 - Permite imprimir ou salvar em PDF usando a impressão do navegador.
-- Guarda histórico local de pacientes, cirurgias, hospitais, formas de pagamento e tecnologias.
+- Guarda histórico local de pacientes, cirurgias, hospitais, formas de pagamento, orientações e tecnologias.
 - Permite reordenar formas de pagamento salvas por drag and drop na lista rápida.
 - Cria múltiplas entradas de cirurgia e hospital.
 - Para Regina e Sapiranga, cria entradas auxiliares (`Reg1`, `Sap1`, etc.) com multiplicadores.
@@ -60,6 +60,7 @@ data/cirurgias.json
 data/hospitais.json
 data/pacientes.json
 data/pagamentos.json
+data/orientacoes.json
 data/tecnologias.json
 ```
 
@@ -115,6 +116,14 @@ Cada forma preenchida pode ser reaproveitada pelo dropdown de histórico, salvo 
 A lista rápida aceita drag and drop para reorganizar as formas de pagamento. Ao soltar um item em outra posição, a ordem visual, o preview do documento e o arquivo `data/pagamentos.json` são atualizados juntos.
 
 No documento final, as formas de pagamento preenchidas aparecem como parágrafos sem marcadores, com espaçamento leve entre cada item.
+
+## Orientações
+
+A seção `Orientações` usa uma lista rápida de orientações padrão alimentada por `data/orientacoes.json`. As entradas aparecem com checkboxes marcados por padrão e podem ser removidas do histórico pelo botão `×`.
+
+Abaixo da lista padrão, `Orientações adicionais` usa campos dinâmicos com dropdown de histórico e botões `+/-`, seguindo o mesmo padrão de preenchimento de `Pagamento`.
+
+No documento final, as orientações continuam como lista com marcadores, com espaçamento de `6px` entre os itens.
 
 ## Paginação do Documento
 
