@@ -1956,11 +1956,8 @@ function createDocumentPage() {
 function paginateDocument() {
   const pages = [printPage, ...document.querySelectorAll(".generated-print-page")];
   const blocks = pages.flatMap((page) => [...page.querySelector(".document-flow").children]);
-  const fragment = document.createDocumentFragment();
-  blocks.forEach((block) => fragment.append(block));
   document.querySelectorAll(".generated-print-page").forEach((page) => page.remove());
-
-  documentFlow.append(fragment);
+  documentFlow.replaceChildren();
   updateDocumentDates();
 
   let currentPage = printPage;
@@ -1970,7 +1967,7 @@ function paginateDocument() {
   const reservedDateSpace = date.offsetHeight + 14;
   const availableHeight = content.clientHeight - reservedDateSpace;
 
-  [...documentFlow.children].forEach((block) => {
+  blocks.forEach((block) => {
     currentFlow.append(block);
 
     if (block.offsetTop + block.offsetHeight <= availableHeight || currentFlow.children.length === 1) {

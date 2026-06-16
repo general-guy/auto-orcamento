@@ -87,6 +87,7 @@ Os históricos de pacientes, cirurgias, hospitais e pagamentos são listas JSON 
 - persistência de tecnologias com valor monetário associado;
 - renderização da equipe fixa com itens selecionáveis e valor monetário;
 - renderização da seção de pagamento com campos dinâmicos;
+- paginação da pré-visualização do documento em páginas A4;
 - redimensionamento do painel;
 - impressão, limpeza e shutdown.
 
@@ -150,7 +151,13 @@ A seção `Pagamento` mantém apenas as formas de pagamento. O antigo campo `Ite
 
 No formulário, `Pagamento` usa uma lista dinâmica de inputs com botões `+/-`, no mesmo padrão de `Cirurgia`. Cada input usa dropdown de histórico alimentado por `data/pagamentos.json` via `/api/pagamentos`.
 
-No preview, as formas de pagamento preenchidas são renderizadas em uma lista com marcadores dentro da seção `Formas de Pagamento`, usando o mesmo padrão visual de `Orientações`.
+No preview, as formas de pagamento preenchidas são renderizadas como parágrafos sem marcadores, com espaçamento leve entre cada item.
+
+## Paginação do Documento
+
+O documento é composto por uma página base (`#printPage`) e páginas geradas dinamicamente quando necessário. A função de paginação coleta os blocos existentes, remove páginas geradas anteriormente, esvazia o fluxo da primeira página e redistribui os blocos em ordem.
+
+Cada seção do documento é tratada como bloco indivisível. Se uma seção não cabe antes da área reservada à data, ela é movida inteira para a próxima página. A data é renderizada no rodapé de cada página gerada.
 
 ## Lógica Hospitalar
 

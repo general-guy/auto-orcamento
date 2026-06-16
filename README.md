@@ -39,7 +39,7 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 ## O Que o App Faz
 
 - Preenche os dados da paciente, cirurgia, hospital, implantes, tecnologias, equipe, formas de pagamento e orientações.
-- Mostra uma pré-visualização do documento final sobre o papel timbrado.
+- Mostra uma pré-visualização paginada do documento final sobre o papel timbrado.
 - Permite imprimir ou salvar em PDF usando a impressão do navegador.
 - Guarda histórico local de pacientes, cirurgias, hospitais, formas de pagamento e tecnologias.
 - Cria múltiplas entradas de cirurgia e hospital.
@@ -108,7 +108,13 @@ No documento, a caixa de equipe mostra os itens marcados separados por ` + ` e o
 
 A seção `Pagamento` reúne somente as formas de pagamento. No painel esquerdo, ela usa campos dinâmicos com botões `+/-`, seguindo o mesmo padrão da seção `Cirurgia`.
 
-Cada forma preenchida pode ser reaproveitada pelo dropdown de histórico, salvo em `data/pagamentos.json`. No documento final, as formas de pagamento preenchidas aparecem como lista com marcadores, seguindo o padrão visual de `Orientações`.
+Cada forma preenchida pode ser reaproveitada pelo dropdown de histórico, salvo em `data/pagamentos.json`. No documento final, as formas de pagamento preenchidas aparecem como parágrafos sem marcadores, com espaçamento leve entre cada item.
+
+## Paginação do Documento
+
+A pré-visualização cria páginas adicionais quando uma seção não cabe inteira na página atual. As seções são mantidas como blocos indivisíveis para evitar quebra no meio de `Formas de Pagamento`, `Orientações` ou outras seções.
+
+A data fica no rodapé de cada página do documento.
 
 ## Documentação Técnica
 
