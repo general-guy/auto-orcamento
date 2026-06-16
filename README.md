@@ -26,7 +26,7 @@ http://localhost:3000
 
 ## Ambiente Recomendado
 
-Para manutenção do projeto no Windows, recomenda-se usar PowerShell 7 (`pwsh`) como terminal padrão do Cursor. Ele aceita operadores modernos como `&&` e evita diferenças de sintaxe do Windows PowerShell 5.1.
+Para manutenção do projeto no Windows, recomenda-se usar PowerShell 7 (`pwsh`) como terminal padrão do Cursor, em vez do Windows PowerShell antigo (`powershell.exe`). O `pwsh` aceita operadores modernos como `&&` e evita diferenças de sintaxe do Windows PowerShell 5.1.
 
 Se necessário, instale com:
 
@@ -41,7 +41,7 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 - Preenche os dados da paciente, cirurgia, hospital, implantes, tecnologias, equipe, formas de pagamento e orientações.
 - Mostra uma pré-visualização do documento final sobre o papel timbrado.
 - Permite imprimir ou salvar em PDF usando a impressão do navegador.
-- Guarda histórico local de pacientes, cirurgias, hospitais e tecnologias.
+- Guarda histórico local de pacientes, cirurgias, hospitais, formas de pagamento e tecnologias.
 - Cria múltiplas entradas de cirurgia e hospital.
 - Para Regina e Sapiranga, cria entradas auxiliares (`Reg1`, `Sap1`, etc.) com multiplicadores.
 - Usa tabelas hospitalares locais para sugerir pacotes e calcular valores auxiliares no preview.
@@ -57,6 +57,7 @@ Os históricos ficam em arquivos JSON dentro de `data/`:
 data/cirurgias.json
 data/hospitais.json
 data/pacientes.json
+data/pagamentos.json
 data/tecnologias.json
 ```
 
@@ -103,7 +104,9 @@ No documento, a caixa de equipe mostra os itens marcados separados por ` + ` e o
 
 ## Pagamento
 
-A seção `Pagamento` reúne somente as formas de pagamento. O texto preenchido no formulário é exibido diretamente no documento final.
+A seção `Pagamento` reúne somente as formas de pagamento. No painel esquerdo, ela usa campos dinâmicos com botões `+/-`, seguindo o mesmo padrão da seção `Cirurgia`.
+
+Cada forma preenchida pode ser reaproveitada pelo dropdown de histórico, salvo em `data/pagamentos.json`. No documento final, as formas de pagamento preenchidas aparecem em linhas separadas.
 
 ## Documentação Técnica
 

@@ -6,11 +6,15 @@ const addSurgeryButton = document.querySelector("#addSurgeryButton");
 const removeSurgeryButton = document.querySelector("#removeSurgeryButton");
 const addHospitalButton = document.querySelector("#addHospitalButton");
 const removeHospitalButton = document.querySelector("#removeHospitalButton");
+const addPaymentButton = document.querySelector("#addPaymentButton");
+const removePaymentButton = document.querySelector("#removePaymentButton");
 const guidancePreview = document.querySelector("#guidancePreview");
 const appShell = document.querySelector(".app-shell");
 const panelResizeHandle = document.querySelector("#panelResizeHandle");
 const surgeryList = document.querySelector("#surgeryList");
 const surgeryHistoryDropdown = document.querySelector("#surgeryHistoryDropdown");
+const paymentList = document.querySelector("#paymentList");
+const paymentHistoryDropdown = document.querySelector("#paymentHistoryDropdown");
 const hospitalInput = document.querySelector("#hospital");
 const hospitalList = document.querySelector("#hospitalList");
 const hospitalHistoryDropdown = document.querySelector("#hospitalHistoryDropdown");
@@ -30,6 +34,9 @@ const teamValueInput = document.querySelector("#teamValue");
 let surgeryHistory = [];
 let activeSurgeryInput = null;
 let isInteractingWithHistoryDropdown = false;
+let paymentHistory = [];
+let activePaymentInput = null;
+let isInteractingWithPaymentDropdown = false;
 let hospitalHistory = [];
 let activeHospitalInput = null;
 let isInteractingWithHospitalDropdown = false;
@@ -43,7 +50,6 @@ let implantTable = null;
 
 const previewFields = {
   patientName: "Nome da paciente",
-  paymentTerms: "Preencha as formas de pagamento.",
 };
 
 const minFormPanelWidth = 320;
@@ -117,6 +123,16 @@ function getSurgeryInputs() {
 
 function getSurgeryValues() {
   return getSurgeryInputs()
+    .map((input) => input.value.trim())
+    .filter(Boolean);
+}
+
+function getPaymentInputs() {
+  return [...paymentList.querySelectorAll(".payment-input")];
+}
+
+function getPaymentValues() {
+  return getPaymentInputs()
     .map((input) => input.value.trim())
     .filter(Boolean);
 }
@@ -850,6 +866,15 @@ async function loadSurgeryHistory() {
   }
 }
 
+async function loadPaymentHistory() {
+  try {
+    const response = await fetch("/api/pagamentos");
+    paymentHistory = await response.json();
+  } catch {
+    paymentHistory = [];
+  }
+}
+
 async function loadHospitalHistory() {
   try {
     const response = await fetch("/api/hospitais");
@@ -930,6 +955,61 @@ async function deleteSurgeryFromHistory(value) {
     updateSurgeryHistoryDropdown(activeSurgeryInput?.value || "");
   } catch {
     console.warn("Não foi possível remover a cirurgia do histórico local.");
+  }
+}
+
+async function savePaymentToHistory(value, sourceInput = null) {
+  const payment = value.trim();
+  if (!payment) {
+    return;
+  }
+
+  if (sourceInput?.dataset.skipHistoryValue === normalizeText(payment)) {
+    return;
+  }
+
+  const alreadyExists = paymentHistory.some((item) => normalizeText(item) === normalizeText(payment));
+  if (alreadyExists) {
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/pagamentos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ value: payment }),
+    });
+
+    paymentHistory = await response.json();
+    if (activePaymentInput) {
+      updatePaymentHistoryDropdown(activePaymentInput.value);
+    }
+  } catch {
+    console.warn("Não foi possível salvar a forma de pagamento no histórico local.");
+  }
+}
+
+async function deletePaymentFromHistory(value) {
+  const deletedKey = normalizeText(value);
+  paymentHistory = paymentHistory.filter((item) => normalizeText(item) !== deletedKey);
+  updatePaymentHistoryDropdown(activePaymentInput?.value || "");
+
+  try {
+    const response = await fetch("/api/pagamentos", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ value }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Falha ao remover no servidor.");
+    }
+
+    const nextHistory = await response.json();
+    paymentHistory = Array.isArray(nextHistory) ? nextHistory : paymentHistory;
+    updatePaymentHistoryDropdown(activePaymentInput?.value || "");
+  } catch {
+    console.warn("Não foi possível remover a forma de pagamento do histórico local.");
   }
 }
 
@@ -1098,6 +1178,15 @@ function hideSurgeryHistoryDropdown() {
   activeSurgeryInput = null;
 }
 
+function hidePaymentHistoryDropdown() {
+  if (isInteractingWithPaymentDropdown) {
+    return;
+  }
+
+  paymentHistoryDropdown.hidden = true;
+  activePaymentInput = null;
+}
+
 function hideHospitalHistoryDropdown() {
   if (isInteractingWithHospitalDropdown) {
     return;
@@ -1128,6 +1217,12 @@ function showSurgeryHistoryDropdown(input) {
   activeSurgeryInput = input;
   input.closest("label").append(surgeryHistoryDropdown);
   updateSurgeryHistoryDropdown(input.value);
+}
+
+function showPaymentHistoryDropdown(input) {
+  activePaymentInput = input;
+  input.closest("label").append(paymentHistoryDropdown);
+  updatePaymentHistoryDropdown(input.value);
 }
 
 function showHospitalHistoryDropdown(input) {
@@ -1178,6 +1273,42 @@ function updateSurgeryHistoryDropdown(query = "") {
     option.append(optionLabel);
     option.append(deleteButton);
     surgeryHistoryDropdown.append(option);
+  });
+}
+
+function updatePaymentHistoryDropdown(query = "") {
+  if (!activePaymentInput) {
+    paymentHistoryDropdown.hidden = true;
+    return;
+  }
+
+  const normalizedQuery = normalizeText(query);
+  const options = paymentHistory
+    .filter((item) => !normalizedQuery || normalizeText(item).includes(normalizedQuery))
+    .slice(0, 12);
+
+  paymentHistoryDropdown.innerHTML = "";
+  paymentHistoryDropdown.hidden = options.length === 0;
+
+  options.forEach((optionText) => {
+    const option = document.createElement("div");
+    option.className = "history-option";
+    option.dataset.value = optionText;
+    option.setAttribute("role", "button");
+    option.setAttribute("tabindex", "0");
+
+    const optionLabel = document.createElement("span");
+    optionLabel.textContent = optionText;
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "history-delete";
+    deleteButton.textContent = "x";
+    deleteButton.setAttribute("aria-label", `Remover ${optionText} do histórico`);
+
+    option.append(optionLabel);
+    option.append(deleteButton);
+    paymentHistoryDropdown.append(option);
   });
 }
 
@@ -1312,6 +1443,24 @@ function createSurgeryField() {
   input.focus();
 }
 
+function createPaymentField() {
+  const fieldNumber = getPaymentInputs().length + 1;
+  const label = document.createElement("label");
+  label.className = "unlabeled-field";
+
+  const input = document.createElement("input");
+  input.name = "paymentTerms";
+  input.type = "text";
+  input.className = "payment-input";
+  input.setAttribute("aria-label", `Forma de pagamento ${fieldNumber}`);
+  input.setAttribute("autocomplete", "off");
+
+  label.append(input);
+  paymentList.append(label);
+  updatePaymentButtons();
+  input.focus();
+}
+
 function createHospitalField() {
   const fieldNumber = getHospitalInputs().length + 1;
   const label = document.createElement("label");
@@ -1344,6 +1493,20 @@ function removeLastSurgeryField() {
   updatePreview();
 }
 
+function removeLastPaymentField() {
+  const inputs = getPaymentInputs();
+  if (inputs.length <= 1) {
+    inputs[0].value = "";
+    inputs[0].focus();
+    updatePreview();
+    return;
+  }
+
+  inputs.at(-1).closest("label").remove();
+  updatePaymentButtons();
+  updatePreview();
+}
+
 function removeLastHospitalField() {
   const inputs = getHospitalInputs();
   if (inputs.length <= 1) {
@@ -1363,6 +1526,10 @@ function updateSurgeryButtons() {
   removeSurgeryButton.disabled = getSurgeryInputs().length <= 1;
 }
 
+function updatePaymentButtons() {
+  removePaymentButton.disabled = getPaymentInputs().length <= 1;
+}
+
 function updateHospitalButtons() {
   removeHospitalButton.disabled = getHospitalInputs().length <= 1;
 }
@@ -1373,10 +1540,12 @@ function isTextField(element) {
 
 function focusNextTextField(currentField) {
   isInteractingWithHistoryDropdown = false;
+  isInteractingWithPaymentDropdown = false;
   isInteractingWithHospitalDropdown = false;
   isInteractingWithPatientDropdown = false;
   isInteractingWithTechnologyDropdown = false;
   hideSurgeryHistoryDropdown();
+  hidePaymentHistoryDropdown();
   hideHospitalHistoryDropdown();
   hidePatientHistoryDropdown();
   hideTechnologyHistoryDropdown();
@@ -1416,6 +1585,25 @@ function selectSurgeryHistoryOption(option, shouldAdvance = false) {
   updatePreview();
   isInteractingWithHistoryDropdown = false;
   hideSurgeryHistoryDropdown();
+
+  if (shouldAdvance) {
+    focusNextTextField(input);
+    return;
+  }
+
+  input.focus();
+}
+
+function selectPaymentHistoryOption(option, shouldAdvance = false) {
+  const input = activePaymentInput;
+  if (!input) {
+    return;
+  }
+
+  input.value = option.dataset.value;
+  updatePreview();
+  isInteractingWithPaymentDropdown = false;
+  hidePaymentHistoryDropdown();
 
   if (shouldAdvance) {
     focusNextTextField(input);
@@ -1655,6 +1843,9 @@ function updateSimpleFields() {
   const surgeryPreview = document.querySelector('[data-preview="surgery"]');
   surgeryPreview.textContent = getSurgeryValues().join("\n") || "Cirurgia proposta";
 
+  const paymentPreview = document.querySelector('[data-preview="paymentTerms"]');
+  paymentPreview.textContent = getPaymentValues().join("\n") || "Preencha as formas de pagamento.";
+
   updateHospitalPreview();
   updateImplantsPreview();
   updateTechnologiesPreview();
@@ -1694,10 +1885,12 @@ function updatePreview() {
 function clearForm() {
   form.reset();
   getSurgeryInputs().slice(1).forEach((input) => input.closest("label").remove());
+  getPaymentInputs().slice(1).forEach((input) => input.closest("label").remove());
   getHospitalInputs().slice(1).forEach((input) => input.closest("label").remove());
   syncAllHospitalDetailFields();
   form.elements.budgetDate.value = formatDateForInput(new Date());
   updateSurgeryButtons();
+  updatePaymentButtons();
   updateHospitalButtons();
   updatePreview();
 }
@@ -1722,6 +1915,14 @@ form.addEventListener("input", (event) => {
     showSurgeryHistoryDropdown(event.target);
   }
 
+  if (event.target.matches(".payment-input")) {
+    if (event.target.dataset.skipHistoryValue !== normalizeText(event.target.value)) {
+      delete event.target.dataset.skipHistoryValue;
+    }
+
+    showPaymentHistoryDropdown(event.target);
+  }
+
   if (event.target.matches(".hospital-input")) {
     if (event.target.dataset.skipHistoryValue !== normalizeText(event.target.value)) {
       delete event.target.dataset.skipHistoryValue;
@@ -1742,6 +1943,10 @@ form.addEventListener("focusin", (event) => {
 
   if (event.target.matches(".surgery-input")) {
     showSurgeryHistoryDropdown(event.target);
+  }
+
+  if (event.target.matches(".payment-input")) {
+    showPaymentHistoryDropdown(event.target);
   }
 
   if (event.target.matches(".hospital-input")) {
@@ -1777,6 +1982,17 @@ form.addEventListener("focusout", (event) => {
     if (!isInteractingWithHistoryDropdown) {
       saveSurgeryToHistory(event.target.value, event.target);
       hideSurgeryHistoryDropdown();
+    }
+  }
+
+  if (event.target.matches(".payment-input")) {
+    if (paymentHistoryDropdown.contains(event.relatedTarget)) {
+      return;
+    }
+
+    if (!isInteractingWithPaymentDropdown) {
+      savePaymentToHistory(event.target.value, event.target);
+      hidePaymentHistoryDropdown();
     }
   }
 
@@ -1816,6 +2032,12 @@ form.addEventListener("keydown", (event) => {
   if (event.target.matches(".surgery-input") && event.shiftKey && event.key === "Enter") {
     event.preventDefault();
     createSurgeryField();
+    return;
+  }
+
+  if (event.target.matches(".payment-input") && event.shiftKey && event.key === "Enter") {
+    event.preventDefault();
+    createPaymentField();
     return;
   }
 
@@ -1877,6 +2099,17 @@ form.addEventListener("keydown", (event) => {
     return;
   }
 
+  if (event.target.matches(".payment-input") && event.key === "ArrowDown") {
+    event.preventDefault();
+    showPaymentHistoryDropdown(event.target);
+    isInteractingWithPaymentDropdown = true;
+    focusDropdownOption(paymentHistoryDropdown, 0);
+    setTimeout(() => {
+      isInteractingWithPaymentDropdown = false;
+    });
+    return;
+  }
+
   if (event.target.matches(".patient-input") && event.key === "ArrowUp") {
     event.preventDefault();
     showPatientHistoryDropdown();
@@ -1917,6 +2150,17 @@ form.addEventListener("keydown", (event) => {
     focusDropdownOption(surgeryHistoryDropdown, getDropdownOptions(surgeryHistoryDropdown).length - 1);
     setTimeout(() => {
       isInteractingWithHistoryDropdown = false;
+    });
+    return;
+  }
+
+  if (event.target.matches(".payment-input") && event.key === "ArrowUp") {
+    event.preventDefault();
+    showPaymentHistoryDropdown(event.target);
+    isInteractingWithPaymentDropdown = true;
+    focusDropdownOption(paymentHistoryDropdown, getDropdownOptions(paymentHistoryDropdown).length - 1);
+    setTimeout(() => {
+      isInteractingWithPaymentDropdown = false;
     });
     return;
   }
@@ -2048,6 +2292,68 @@ surgeryHistoryDropdown.addEventListener("keydown", (event) => {
     input.focus();
   }
 });
+paymentHistoryDropdown.addEventListener("pointerdown", (event) => {
+  isInteractingWithPaymentDropdown = true;
+  event.preventDefault();
+});
+paymentHistoryDropdown.addEventListener("click", (event) => {
+  const option = event.target.closest(".history-option");
+  if (!option || !activePaymentInput) {
+    isInteractingWithPaymentDropdown = false;
+    return;
+  }
+
+  const optionText = option.dataset.value;
+  if (event.target.closest(".history-delete")) {
+    event.stopPropagation();
+    const input = activePaymentInput;
+    input.dataset.skipHistoryValue = normalizeText(optionText);
+    deletePaymentFromHistory(optionText);
+    updatePaymentHistoryDropdown(input.value);
+    input.focus();
+    isInteractingWithPaymentDropdown = false;
+    return;
+  }
+
+  selectPaymentHistoryOption(option);
+});
+paymentHistoryDropdown.addEventListener("keydown", (event) => {
+  const option = event.target.closest(".history-option");
+  if (!option || !activePaymentInput) {
+    return;
+  }
+
+  const options = getDropdownOptions(paymentHistoryDropdown);
+  const currentIndex = options.indexOf(option);
+
+  if (event.key === "ArrowDown") {
+    event.preventDefault();
+    focusDropdownOption(paymentHistoryDropdown, Math.min(currentIndex + 1, options.length - 1));
+  }
+
+  if (event.key === "ArrowUp") {
+    event.preventDefault();
+    if (currentIndex <= 0) {
+      activePaymentInput.focus();
+      return;
+    }
+
+    focusDropdownOption(paymentHistoryDropdown, currentIndex - 1);
+  }
+
+  if (event.key === "Enter") {
+    event.preventDefault();
+    selectPaymentHistoryOption(option, true);
+  }
+
+  if (event.key === "Escape") {
+    event.preventDefault();
+    const input = activePaymentInput;
+    isInteractingWithPaymentDropdown = false;
+    hidePaymentHistoryDropdown();
+    input.focus();
+  }
+});
 hospitalHistoryDropdown.addEventListener("pointerdown", (event) => {
   isInteractingWithHospitalDropdown = true;
   event.preventDefault();
@@ -2174,6 +2480,8 @@ document.addEventListener("pointerdown", (event) => {
     event.target.closest("#patientHistoryDropdown") ||
     event.target.closest(".surgery-input") ||
     event.target.closest("#surgeryHistoryDropdown") ||
+    event.target.closest(".payment-input") ||
+    event.target.closest("#paymentHistoryDropdown") ||
     event.target.closest(".hospital-input") ||
     event.target.closest("#hospitalHistoryDropdown") ||
     event.target.closest(".technology-input") ||
@@ -2184,6 +2492,7 @@ document.addEventListener("pointerdown", (event) => {
 
   hidePatientHistoryDropdown();
   hideSurgeryHistoryDropdown();
+  hidePaymentHistoryDropdown();
   hideHospitalHistoryDropdown();
   hideTechnologyHistoryDropdown();
 });
@@ -2241,6 +2550,8 @@ form.addEventListener("click", (event) => {
 clearButton.addEventListener("click", clearForm);
 addSurgeryButton.addEventListener("click", createSurgeryField);
 removeSurgeryButton.addEventListener("click", removeLastSurgeryField);
+addPaymentButton.addEventListener("click", createPaymentField);
+removePaymentButton.addEventListener("click", removeLastPaymentField);
 addHospitalButton.addEventListener("click", createHospitalField);
 removeHospitalButton.addEventListener("click", removeLastHospitalField);
 printButton.addEventListener("click", async () => {
@@ -2248,6 +2559,7 @@ printButton.addEventListener("click", async () => {
     [
       savePatientToHistory(patientInput.value, patientInput),
       ...getSurgeryInputs().map((input) => saveSurgeryToHistory(input.value, input)),
+      ...getPaymentInputs().map((input) => savePaymentToHistory(input.value, input)),
       ...getHospitalInputs().map((input) => saveHospitalToHistory(input.value, input)),
       saveTechnologyToHistory(),
     ]
@@ -2271,6 +2583,7 @@ shutdownButton.addEventListener("click", async () => {
 Promise.all([
   loadPatientHistory(),
   loadSurgeryHistory(),
+  loadPaymentHistory(),
   loadHospitalHistory(),
   loadTechnologyHistory(),
   loadHospitalTables(),
@@ -2278,11 +2591,14 @@ Promise.all([
 ]).then(() => {
   updatePatientHistoryDropdown();
   updateSurgeryHistoryDropdown();
+  updatePaymentHistoryDropdown();
   updateTechnologyHistoryDropdown();
   hideHospitalHistoryDropdown();
   hidePatientHistoryDropdown();
+  hidePaymentHistoryDropdown();
   hideTechnologyHistoryDropdown();
   updateSurgeryButtons();
+  updatePaymentButtons();
   updateHospitalButtons();
   updatePreview();
 });

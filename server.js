@@ -9,6 +9,7 @@ const surgeriesFile = path.join(dataDir, "cirurgias.json");
 const hospitalsFile = path.join(dataDir, "hospitais.json");
 const patientsFile = path.join(dataDir, "pacientes.json");
 const technologiesFile = path.join(dataDir, "tecnologias.json");
+const paymentsFile = path.join(dataDir, "pagamentos.json");
 
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
@@ -43,6 +44,10 @@ function ensureDataFile() {
 
   if (!fs.existsSync(technologiesFile)) {
     fs.writeFileSync(technologiesFile, "[]\n", "utf8");
+  }
+
+  if (!fs.existsSync(paymentsFile)) {
+    fs.writeFileSync(paymentsFile, "[]\n", "utf8");
   }
 }
 
@@ -240,6 +245,11 @@ const server = http.createServer(async (request, response) => {
 
     if (request.url.startsWith("/api/tecnologias")) {
       await handleTechnologyApi(request, response);
+      return;
+    }
+
+    if (request.url.startsWith("/api/pagamentos")) {
+      await handleHistoryApi(request, response, paymentsFile, "uma forma de pagamento válida");
       return;
     }
 

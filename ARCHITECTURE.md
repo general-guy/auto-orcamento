@@ -37,7 +37,7 @@ Para forçar um navegador específico, defina a variável de ambiente `AUTO_ORCA
 
 ## Ambiente de Desenvolvimento
 
-No Windows, recomenda-se usar PowerShell 7 (`pwsh`) no terminal integrado do Cursor. O projeto não depende dele para executar o app, mas ele simplifica comandos de manutenção e aceita operadores modernos como `&&`.
+No Windows, recomenda-se usar PowerShell 7 (`pwsh`) no terminal integrado do Cursor, em vez do Windows PowerShell antigo (`powershell.exe`). O projeto não depende dele para executar o app, mas ele simplifica comandos de manutenção e aceita operadores modernos como `&&`.
 
 O Windows PowerShell 5.1 também funciona para comandos básicos, mas alguns exemplos de terminal precisam ser adaptados para `;` ou executados em comandos separados.
 
@@ -55,10 +55,11 @@ Endpoints principais:
 - `GET /api/cirurgias`, `POST /api/cirurgias`, `DELETE /api/cirurgias`: histórico de cirurgias.
 - `GET /api/hospitais`, `POST /api/hospitais`, `DELETE /api/hospitais`: histórico de hospitais.
 - `GET /api/pacientes`, `POST /api/pacientes`, `DELETE /api/pacientes`: histórico de pacientes.
+- `GET /api/pagamentos`, `POST /api/pagamentos`, `DELETE /api/pagamentos`: histórico de formas de pagamento.
 - `GET /api/tecnologias`, `POST /api/tecnologias`, `DELETE /api/tecnologias`: histórico de tecnologias com valor associado.
 - `POST /api/shutdown`: encerra o servidor quando acionado pela interface.
 
-Os históricos de pacientes, cirurgias e hospitais são listas JSON simples, limitadas a 200 itens por tipo. O histórico de tecnologias também é limitado a 200 itens, mas cada item é um objeto com `nome` e `valor`.
+Os históricos de pacientes, cirurgias, hospitais e pagamentos são listas JSON simples, limitadas a 200 itens por tipo. O histórico de tecnologias também é limitado a 200 itens, mas cada item é um objeto com `nome` e `valor`.
 
 ## Frontend
 
@@ -77,7 +78,7 @@ Os históricos de pacientes, cirurgias e hospitais são listas JSON simples, lim
 `app.js` concentra a lógica de interação:
 
 - sincronização entre formulário e preview;
-- histórico/autocomplete de pacientes, cirurgias, hospitais e tecnologias;
+- histórico/autocomplete de pacientes, cirurgias, hospitais, pagamentos e tecnologias;
 - campos dinâmicos de cirurgia e hospital;
 - entradas auxiliares de Regina e Sapiranga;
 - multiplicadores de pacotes hospitalares;
@@ -85,7 +86,7 @@ Os históricos de pacientes, cirurgias e hospitais são listas JSON simples, lim
 - carregamento e renderização da tabela de implantes;
 - persistência de tecnologias com valor monetário associado;
 - renderização da equipe fixa com itens selecionáveis e valor monetário;
-- renderização da seção de pagamento;
+- renderização da seção de pagamento com campos dinâmicos;
 - redimensionamento do painel;
 - impressão, limpeza e shutdown.
 
@@ -97,6 +98,7 @@ Arquivos de histórico:
 data/cirurgias.json
 data/hospitais.json
 data/pacientes.json
+data/pagamentos.json
 data/tecnologias.json
 ```
 
@@ -112,6 +114,8 @@ O frontend carrega `data/tabelas-hospitalares.json` diretamente para montar os `
 `data/tabela-implantes.json` guarda uma tabela independente de implantes, extraída de documento `.doc`, para preenchimento opcional da seção `Implantes`. O dropdown usa `rotulo`, `modelo` e `referencia`; itens com `favorito: true` recebem uma estrela ao final da opção.
 
 `data/tecnologias.json` guarda as tecnologias cadastradas no próprio app. Diferente dos históricos simples, cada item tem `nome` e `valor`, permitindo carregar o valor automaticamente quando a tecnologia é selecionada.
+
+`data/pagamentos.json` guarda as formas de pagamento cadastradas no formulário. O arquivo é uma lista simples de textos, usada pelo dropdown de histórico da seção `Pagamento`.
 
 ## Lógica de Implantes
 
@@ -143,6 +147,10 @@ O campo `Valor:` usa a mesma normalização monetária de tecnologias: valores c
 ## Lógica de Pagamento
 
 A seção `Pagamento` mantém apenas as formas de pagamento. O antigo campo `Itens Incluídos` foi removido do formulário, do preview e da lista de campos sincronizados em `app.js`.
+
+No formulário, `Pagamento` usa uma lista dinâmica de inputs com botões `+/-`, no mesmo padrão de `Cirurgia`. Cada input usa dropdown de histórico alimentado por `data/pagamentos.json` via `/api/pagamentos`.
+
+No preview, as formas de pagamento preenchidas são concatenadas em linhas separadas dentro da seção `Formas de Pagamento`.
 
 ## Lógica Hospitalar
 

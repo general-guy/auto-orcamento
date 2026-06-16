@@ -174,10 +174,30 @@
           <fieldset>
             <legend>Pagamento</legend>
 
-            <label>
-              Formas de pagamento
-              <textarea id="paymentTerms" name="paymentTerms" rows="3"></textarea>
-            </label>
+            <div class="dynamic-field-group">
+              <div id="paymentList" class="payment-list">
+                <label>
+                  Formas de pagamento
+                  <input
+                    id="paymentTerms"
+                    name="paymentTerms"
+                    type="text"
+                    class="payment-input"
+                    autocomplete="off"
+                  />
+                </label>
+              </div>
+
+              <div class="field-actions">
+                <button type="button" id="addPaymentButton" class="add-button" aria-label="Adicionar outra forma de pagamento">
+                  +
+                </button>
+                <button type="button" id="removePaymentButton" class="remove-button" aria-label="Remover última forma de pagamento">
+                  -
+                </button>
+              </div>
+              <div id="paymentHistoryDropdown" class="history-dropdown" hidden></div>
+            </div>
           </fieldset>
 
           <fieldset>
