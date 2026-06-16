@@ -126,6 +126,38 @@
           <fieldset>
             <legend>Equipe</legend>
 
+            <div class="team-items-grid">
+              <label class="checkbox-row">
+                <input type="checkbox" name="teamItems" value="Anestesista" checked />
+                <span>Anestesista</span>
+              </label>
+
+              <label class="checkbox-row">
+                <input type="checkbox" name="teamItems" value="Auxiliar" checked />
+                <span>Auxiliar</span>
+              </label>
+
+              <label class="checkbox-row">
+                <input type="checkbox" name="teamItems" value="Eq. Enfermagem" checked />
+                <span>Eq. Enfermagem</span>
+              </label>
+
+              <label class="checkbox-row">
+                <input type="checkbox" name="teamItems" value="Modelador" checked />
+                <span>Modelador</span>
+              </label>
+
+              <label class="checkbox-row">
+                <input type="checkbox" name="teamItems" value="Placas" checked />
+                <span>Placas</span>
+              </label>
+
+              <label class="checkbox-row">
+                <input type="checkbox" name="teamItems" value="Meias" checked />
+                <span>Meias</span>
+              </label>
+            </div>
+
             <label class="inline-value-field">
               <span>Valor:</span>
               <input id="teamValue" name="teamValue" type="text" placeholder="R$" />
@@ -241,7 +273,7 @@
             <section class="document-section">
               <h3>Equipe</h3>
               <div class="team-preview-box">
-                <span>Equipe</span>
+                <span data-preview="teamItems">Equipe</span>
                 <span data-preview="teamValue">R$</span>
               </div>
             </section>

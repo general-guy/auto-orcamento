@@ -1625,7 +1625,11 @@ function updateTechnologiesPreview() {
 }
 
 function updateTeamPreview() {
+  const teamItemsPreview = document.querySelector('[data-preview="teamItems"]');
   const teamValuePreview = document.querySelector('[data-preview="teamValue"]');
+  const selectedTeamItems = [...form.querySelectorAll('input[name="teamItems"]:checked')]
+    .map((input) => input.value);
+  teamItemsPreview.textContent = selectedTeamItems.join(", ") || "Equipe";
   teamValuePreview.textContent = normalizeCurrencyInputValue(teamValueInput.value) || "R$";
 }
 
