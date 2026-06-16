@@ -17,6 +17,7 @@ const printPage = document.querySelector("#printPage");
 const documentFlow = document.querySelector("#documentFlow");
 const surgeryList = document.querySelector("#surgeryList");
 const surgeryHistoryDropdown = document.querySelector("#surgeryHistoryDropdown");
+const paymentQuickList = document.querySelector("#paymentQuickList");
 const paymentList = document.querySelector("#paymentList");
 const paymentHistoryDropdown = document.querySelector("#paymentHistoryDropdown");
 const hospitalEnabledInput = document.querySelector("#hospitalEnabled");
@@ -46,6 +47,7 @@ let isInteractingWithHistoryDropdown = false;
 let paymentHistory = [];
 let activePaymentInput = null;
 let isInteractingWithPaymentDropdown = false;
+let deselectedPaymentQuickItems = new Set();
 let hospitalHistory = [];
 let activeHospitalInput = null;
 let isInteractingWithHospitalDropdown = false;
@@ -140,10 +142,29 @@ function getPaymentInputs() {
   return [...paymentList.querySelectorAll(".payment-input")];
 }
 
-function getPaymentValues() {
+function getManualPaymentValues() {
   return getPaymentInputs()
     .map((input) => input.value.trim())
     .filter(Boolean);
+}
+
+function getPaymentQuickValues() {
+  return [...paymentQuickList.querySelectorAll('input[name="paymentQuickItems"]:checked')]
+    .map((input) => input.value.trim())
+    .filter(Boolean);
+}
+
+function getPaymentValues() {
+  const seen = new Set();
+  return [...getPaymentQuickValues(), ...getManualPaymentValues()].filter((payment) => {
+    const normalizedPayment = normalizeText(payment);
+    if (seen.has(normalizedPayment)) {
+      return false;
+    }
+
+    seen.add(normalizedPayment);
+    return true;
+  });
 }
 
 function getHospitalInputs() {
@@ -990,6 +1011,7 @@ async function savePaymentToHistory(value, sourceInput = null) {
     });
 
     paymentHistory = await response.json();
+    renderPaymentQuickList();
     if (activePaymentInput) {
       updatePaymentHistoryDropdown(activePaymentInput.value);
     }
@@ -1001,6 +1023,8 @@ async function savePaymentToHistory(value, sourceInput = null) {
 async function deletePaymentFromHistory(value) {
   const deletedKey = normalizeText(value);
   paymentHistory = paymentHistory.filter((item) => normalizeText(item) !== deletedKey);
+  deselectedPaymentQuickItems.delete(deletedKey);
+  renderPaymentQuickList();
   updatePaymentHistoryDropdown(activePaymentInput?.value || "");
 
   try {
@@ -1016,6 +1040,7 @@ async function deletePaymentFromHistory(value) {
 
     const nextHistory = await response.json();
     paymentHistory = Array.isArray(nextHistory) ? nextHistory : paymentHistory;
+    renderPaymentQuickList();
     updatePaymentHistoryDropdown(activePaymentInput?.value || "");
   } catch {
     console.warn("Não foi possível remover a forma de pagamento do histórico local.");
@@ -1286,6 +1311,8 @@ function updateSurgeryHistoryDropdown(query = "") {
 }
 
 function updatePaymentHistoryDropdown(query = "") {
+  renderPaymentQuickList();
+
   if (!activePaymentInput) {
     paymentHistoryDropdown.hidden = true;
     return;
@@ -1318,6 +1345,35 @@ function updatePaymentHistoryDropdown(query = "") {
     option.append(optionLabel);
     option.append(deleteButton);
     paymentHistoryDropdown.append(option);
+  });
+}
+
+function renderPaymentQuickList() {
+  paymentQuickList.innerHTML = "";
+  paymentQuickList.hidden = paymentHistory.length === 0;
+
+  paymentHistory.forEach((optionText) => {
+    const row = document.createElement("label");
+    row.className = "payment-quick-option";
+
+    const optionLabel = document.createElement("span");
+    optionLabel.textContent = optionText;
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.name = "paymentQuickItems";
+    checkbox.value = optionText;
+    checkbox.checked = !deselectedPaymentQuickItems.has(normalizeText(optionText));
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "history-delete payment-quick-delete";
+    deleteButton.textContent = "x";
+    deleteButton.setAttribute("aria-label", `Remover ${optionText} do histórico de pagamentos`);
+    deleteButton.dataset.value = optionText;
+
+    row.append(optionLabel, checkbox, deleteButton);
+    paymentQuickList.append(row);
   });
 }
 
@@ -2003,6 +2059,8 @@ function updatePreview() {
 
 function clearForm() {
   form.reset();
+  deselectedPaymentQuickItems = new Set();
+  renderPaymentQuickList();
   getSurgeryInputs().slice(1).forEach((input) => input.closest("label").remove());
   getPaymentInputs().slice(1).forEach((input) => input.closest("label").remove());
   getHospitalInputs().slice(1).forEach((input) => input.closest("label").remove());
@@ -2080,6 +2138,20 @@ form.addEventListener("focusin", (event) => {
   if (event.target.matches(".technology-input")) {
     showTechnologyHistoryDropdown();
   }
+});
+paymentQuickList.addEventListener("change", (event) => {
+  if (!event.target.matches('input[name="paymentQuickItems"]')) {
+    return;
+  }
+
+  const paymentKey = normalizeText(event.target.value);
+  if (event.target.checked) {
+    deselectedPaymentQuickItems.delete(paymentKey);
+  } else {
+    deselectedPaymentQuickItems.add(paymentKey);
+  }
+
+  updatePreview();
 });
 form.addEventListener("focusout", (event) => {
   if (event.target.matches(".patient-input")) {
@@ -2649,6 +2721,14 @@ panelResizeHandle?.addEventListener("keydown", (event) => {
   setFormPanelWidth(getCurrentFormPanelWidth() + direction * 20);
 });
 form.addEventListener("click", (event) => {
+  const paymentQuickDelete = event.target.closest(".payment-quick-delete");
+  if (paymentQuickDelete) {
+    event.preventDefault();
+    deletePaymentFromHistory(paymentQuickDelete.dataset.value);
+    updatePreview();
+    return;
+  }
+
   if (event.target.closest(".hospital-detail-add")) {
     addHospitalDetailEntryFromButton(event.target);
     updatePreview();
@@ -2678,7 +2758,7 @@ printButton.addEventListener("click", async () => {
     [
       savePatientToHistory(patientInput.value, patientInput),
       ...getSurgeryInputs().map((input) => saveSurgeryToHistory(input.value, input)),
-      ...getPaymentInputs().map((input) => savePaymentToHistory(input.value, input)),
+      ...getManualPaymentValues().map((payment) => savePaymentToHistory(payment)),
       ...getHospitalInputs().map((input) => saveHospitalToHistory(input.value, input)),
       saveTechnologyToHistory(),
     ]
@@ -2710,6 +2790,7 @@ Promise.all([
 ]).then(() => {
   updatePatientHistoryDropdown();
   updateSurgeryHistoryDropdown();
+  renderPaymentQuickList();
   updatePaymentHistoryDropdown();
   updateTechnologyHistoryDropdown();
   hideHospitalHistoryDropdown();

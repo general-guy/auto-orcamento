@@ -257,6 +257,39 @@ textarea {
   gap: 10px;
 }
 
+.payment-quick-list {
+  display: grid;
+  gap: 8px;
+}
+
+.payment-quick-list[hidden] {
+  display: none;
+}
+
+.payment-quick-option {
+  align-items: center;
+  background: rgba(246, 247, 249, 0.75);
+  border-radius: 10px;
+  color: var(--text);
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  padding: 8px 10px;
+}
+
+.payment-quick-option span {
+  min-width: 0;
+}
+
+.payment-quick-option input {
+  margin: 0;
+  width: auto;
+}
+
+.payment-quick-delete {
+  opacity: 1;
+}
+
 .field-actions {
   display: flex;
   gap: 8px;
