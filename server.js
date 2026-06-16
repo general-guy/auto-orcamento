@@ -8,6 +8,7 @@ const dataDir = path.join(rootDir, "data");
 const surgeriesFile = path.join(dataDir, "cirurgias.json");
 const hospitalsFile = path.join(dataDir, "hospitais.json");
 const patientsFile = path.join(dataDir, "pacientes.json");
+const technologiesFile = path.join(dataDir, "tecnologias.json");
 
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
@@ -38,6 +39,10 @@ function ensureDataFile() {
 
   if (!fs.existsSync(patientsFile)) {
     fs.writeFileSync(patientsFile, "[]\n", "utf8");
+  }
+
+  if (!fs.existsSync(technologiesFile)) {
+    fs.writeFileSync(technologiesFile, "[]\n", "utf8");
   }
 }
 
@@ -127,6 +132,56 @@ async function handleHistoryApi(request, response, filePath, itemLabel) {
   sendJson(response, 405, { error: "Método não permitido." });
 }
 
+async function handleTechnologyApi(request, response) {
+  if (request.method === "GET") {
+    sendJson(response, 200, readJsonList(technologiesFile));
+    return;
+  }
+
+  if (request.method === "POST") {
+    const body = await collectRequestBody(request);
+    const { nome, valor } = JSON.parse(body || "{}");
+    const technology = typeof nome === "string" ? nome.trim() : "";
+
+    if (!technology) {
+      sendJson(response, 400, { error: "Informe uma tecnologia válida." });
+      return;
+    }
+
+    const item = {
+      nome: technology,
+      valor: typeof valor === "string" ? valor.trim() : "",
+    };
+    const items = readJsonList(technologiesFile)
+      .filter((existingItem) => normalizeText(existingItem.nome || existingItem) !== normalizeText(item.nome));
+    const nextItems = [item, ...items].slice(0, 200);
+
+    writeJsonList(technologiesFile, nextItems);
+    sendJson(response, 200, nextItems);
+    return;
+  }
+
+  if (request.method === "DELETE") {
+    const body = await collectRequestBody(request);
+    const { nome, value } = JSON.parse(body || "{}");
+    const technology = typeof nome === "string" ? nome.trim() : typeof value === "string" ? value.trim() : "";
+
+    if (!technology) {
+      sendJson(response, 400, { error: "Informe uma tecnologia válida." });
+      return;
+    }
+
+    const nextItems = readJsonList(technologiesFile)
+      .filter((existingItem) => normalizeText(existingItem.nome || existingItem) !== normalizeText(technology));
+
+    writeJsonList(technologiesFile, nextItems);
+    sendJson(response, 200, nextItems);
+    return;
+  }
+
+  sendJson(response, 405, { error: "Método não permitido." });
+}
+
 function serveStaticFile(request, response) {
   const url = new URL(request.url, `http://${request.headers.host}`);
   const requestedPath = decodeURIComponent(url.pathname === "/" ? "/index.html" : url.pathname);
@@ -180,6 +235,11 @@ const server = http.createServer(async (request, response) => {
 
     if (request.url.startsWith("/api/pacientes")) {
       await handleHistoryApi(request, response, patientsFile, "um paciente válido");
+      return;
+    }
+
+    if (request.url.startsWith("/api/tecnologias")) {
+      await handleTechnologyApi(request, response);
       return;
     }
 

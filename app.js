@@ -19,6 +19,11 @@ const patientHistoryDropdown = document.querySelector("#patientHistoryDropdown")
 const implantsEnabledInput = document.querySelector("#implantsEnabled");
 const implantSelect = document.querySelector("#implantSelect");
 const implantsPreviewSection = document.querySelector("#implantsPreviewSection");
+const technologiesEnabledInput = document.querySelector("#technologiesEnabled");
+const technologyInput = document.querySelector("#technologyName");
+const technologyValueInput = document.querySelector("#technologyValue");
+const technologyHistoryDropdown = document.querySelector("#technologyHistoryDropdown");
+const technologiesPreviewSection = document.querySelector("#technologiesPreviewSection");
 let surgeryHistory = [];
 let activeSurgeryInput = null;
 let isInteractingWithHistoryDropdown = false;
@@ -28,6 +33,8 @@ let isInteractingWithHospitalDropdown = false;
 let patientHistory = [];
 let activePatientInput = null;
 let isInteractingWithPatientDropdown = false;
+let technologyHistory = [];
+let isInteractingWithTechnologyDropdown = false;
 let hospitalTables = null;
 let implantTable = null;
 
@@ -837,6 +844,16 @@ async function loadPatientHistory() {
   }
 }
 
+async function loadTechnologyHistory() {
+  try {
+    const response = await fetch("/api/tecnologias");
+    const items = await response.json();
+    technologyHistory = Array.isArray(items) ? items : [];
+  } catch {
+    technologyHistory = [];
+  }
+}
+
 async function saveSurgeryToHistory(value, sourceInput = null) {
   const surgery = value.trim();
   if (!surgery) {
@@ -998,6 +1015,55 @@ async function deletePatientFromHistory(value) {
   }
 }
 
+async function saveTechnologyToHistory() {
+  const technology = technologyInput.value.trim();
+  if (!technology) {
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/tecnologias", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        nome: technology,
+        valor: technologyValueInput.value.trim(),
+      }),
+    });
+
+    technologyHistory = await response.json();
+    if (document.activeElement === technologyInput || technologyHistoryDropdown.contains(document.activeElement)) {
+      updateTechnologyHistoryDropdown(technologyInput.value);
+    }
+  } catch {
+    console.warn("Não foi possível salvar a tecnologia no histórico local.");
+  }
+}
+
+async function deleteTechnologyFromHistory(value) {
+  const deletedKey = normalizeText(value);
+  technologyHistory = technologyHistory.filter((item) => normalizeText(item.nome || item) !== deletedKey);
+  updateTechnologyHistoryDropdown(technologyInput.value);
+
+  try {
+    const response = await fetch("/api/tecnologias", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome: value }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Falha ao remover no servidor.");
+    }
+
+    const nextHistory = await response.json();
+    technologyHistory = Array.isArray(nextHistory) ? nextHistory : technologyHistory;
+    updateTechnologyHistoryDropdown(technologyInput.value);
+  } catch {
+    console.warn("Não foi possível remover a tecnologia do histórico local.");
+  }
+}
+
 function hideSurgeryHistoryDropdown() {
   if (isInteractingWithHistoryDropdown) {
     return;
@@ -1025,6 +1091,14 @@ function hidePatientHistoryDropdown() {
   activePatientInput = null;
 }
 
+function hideTechnologyHistoryDropdown() {
+  if (isInteractingWithTechnologyDropdown) {
+    return;
+  }
+
+  technologyHistoryDropdown.hidden = true;
+}
+
 function showSurgeryHistoryDropdown(input) {
   activeSurgeryInput = input;
   input.closest("label").append(surgeryHistoryDropdown);
@@ -1040,6 +1114,10 @@ function showHospitalHistoryDropdown(input) {
 function showPatientHistoryDropdown() {
   activePatientInput = patientInput;
   updatePatientHistoryDropdown(patientInput.value);
+}
+
+function showTechnologyHistoryDropdown() {
+  updateTechnologyHistoryDropdown(technologyInput.value);
 }
 
 function updateSurgeryHistoryDropdown(query = "") {
@@ -1150,6 +1228,47 @@ function updatePatientHistoryDropdown(query = "") {
   });
 }
 
+function updateTechnologyHistoryDropdown(query = "") {
+  if (technologyInput.disabled) {
+    technologyHistoryDropdown.hidden = true;
+    return;
+  }
+
+  const normalizedQuery = normalizeText(query);
+  const options = technologyHistory
+    .filter((item) => {
+      const name = item.nome || item;
+      return !normalizedQuery || normalizeText(name).includes(normalizedQuery);
+    })
+    .slice(0, 12);
+
+  technologyHistoryDropdown.innerHTML = "";
+  technologyHistoryDropdown.hidden = options.length === 0;
+
+  options.forEach((item) => {
+    const optionText = item.nome || item;
+    const option = document.createElement("div");
+    option.className = "history-option";
+    option.dataset.value = optionText;
+    option.dataset.amount = item.valor || "";
+    option.setAttribute("role", "button");
+    option.setAttribute("tabindex", "0");
+
+    const optionLabel = document.createElement("span");
+    optionLabel.textContent = optionText;
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "history-delete";
+    deleteButton.textContent = "x";
+    deleteButton.setAttribute("aria-label", `Remover ${optionText} do histórico`);
+
+    option.append(optionLabel);
+    option.append(deleteButton);
+    technologyHistoryDropdown.append(option);
+  });
+}
+
 function createSurgeryField() {
   const fieldNumber = getSurgeryInputs().length + 1;
   const label = document.createElement("label");
@@ -1231,9 +1350,11 @@ function focusNextTextField(currentField) {
   isInteractingWithHistoryDropdown = false;
   isInteractingWithHospitalDropdown = false;
   isInteractingWithPatientDropdown = false;
+  isInteractingWithTechnologyDropdown = false;
   hideSurgeryHistoryDropdown();
   hideHospitalHistoryDropdown();
   hidePatientHistoryDropdown();
+  hideTechnologyHistoryDropdown();
 
   const textFields = [...form.querySelectorAll('input[type="date"], input[type="text"], textarea')]
     .filter((field) => !field.disabled && !field.readOnly);
@@ -1312,6 +1433,21 @@ function selectPatientHistoryOption(option, shouldAdvance = false) {
   }
 
   patientInput.focus();
+}
+
+function selectTechnologyHistoryOption(option, shouldAdvance = false) {
+  technologyInput.value = option.dataset.value;
+  technologyValueInput.value = option.dataset.amount || "";
+  updatePreview();
+  isInteractingWithTechnologyDropdown = false;
+  hideTechnologyHistoryDropdown();
+
+  if (shouldAdvance) {
+    technologyValueInput.focus();
+    return;
+  }
+
+  technologyInput.focus();
 }
 
 function getHospitalPreviewRows(input, optionMap) {
@@ -1445,6 +1581,25 @@ function updateImplantsPreview() {
   implantSummaryPreview.append(description, values);
 }
 
+function updateTechnologiesPreview() {
+  const isEnabled = technologiesEnabledInput.checked;
+  technologyInput.disabled = !isEnabled;
+  technologyValueInput.disabled = !isEnabled;
+
+  if (!isEnabled) {
+    technologyInput.value = "";
+    technologyValueInput.value = "";
+    hideTechnologyHistoryDropdown();
+  }
+
+  technologiesPreviewSection.hidden = !isEnabled;
+
+  const technologyNamePreview = document.querySelector('[data-preview="technologyName"]');
+  const technologyValuePreview = document.querySelector('[data-preview="technologyValue"]');
+  technologyNamePreview.textContent = technologyInput.value.trim() || "Selecione uma tecnologia.";
+  technologyValuePreview.textContent = technologyValueInput.value.trim() || "R$";
+}
+
 function updateSimpleFields() {
   Object.entries(previewFields).forEach(([fieldName, fallback]) => {
     const preview = document.querySelector(`[data-preview="${fieldName}"]`);
@@ -1466,6 +1621,7 @@ function updateSimpleFields() {
 
   updateHospitalPreview();
   updateImplantsPreview();
+  updateTechnologiesPreview();
 }
 
 function updateGuidance() {
@@ -1537,6 +1693,10 @@ form.addEventListener("input", (event) => {
     syncHospitalDetailField(event.target);
     showHospitalHistoryDropdown(event.target);
   }
+
+  if (event.target.matches(".technology-input")) {
+    showTechnologyHistoryDropdown();
+  }
 });
 form.addEventListener("focusin", (event) => {
   if (event.target.matches(".patient-input")) {
@@ -1554,6 +1714,10 @@ form.addEventListener("focusin", (event) => {
     }
 
     showHospitalHistoryDropdown(event.target);
+  }
+
+  if (event.target.matches(".technology-input")) {
+    showTechnologyHistoryDropdown();
   }
 });
 form.addEventListener("focusout", (event) => {
@@ -1589,6 +1753,17 @@ form.addEventListener("focusout", (event) => {
       hideHospitalHistoryDropdown();
     }
   }
+
+  if (event.target.matches(".technology-input, #technologyValue")) {
+    if (technologyHistoryDropdown.contains(event.relatedTarget)) {
+      return;
+    }
+
+    if (!isInteractingWithTechnologyDropdown) {
+      saveTechnologyToHistory();
+      hideTechnologyHistoryDropdown();
+    }
+  }
 });
 form.addEventListener("keydown", (event) => {
   if (event.target.matches(".surgery-input") && event.shiftKey && event.key === "Enter") {
@@ -1622,6 +1797,17 @@ form.addEventListener("keydown", (event) => {
     return;
   }
 
+  if (event.target.matches(".technology-input") && event.key === "ArrowDown") {
+    event.preventDefault();
+    showTechnologyHistoryDropdown();
+    isInteractingWithTechnologyDropdown = true;
+    focusDropdownOption(technologyHistoryDropdown, 0);
+    setTimeout(() => {
+      isInteractingWithTechnologyDropdown = false;
+    });
+    return;
+  }
+
   if (event.target.matches(".hospital-input") && event.key === "ArrowDown") {
     event.preventDefault();
     showHospitalHistoryDropdown(event.target);
@@ -1651,6 +1837,17 @@ form.addEventListener("keydown", (event) => {
     focusDropdownOption(patientHistoryDropdown, getDropdownOptions(patientHistoryDropdown).length - 1);
     setTimeout(() => {
       isInteractingWithPatientDropdown = false;
+    });
+    return;
+  }
+
+  if (event.target.matches(".technology-input") && event.key === "ArrowUp") {
+    event.preventDefault();
+    showTechnologyHistoryDropdown();
+    isInteractingWithTechnologyDropdown = true;
+    focusDropdownOption(technologyHistoryDropdown, getDropdownOptions(technologyHistoryDropdown).length - 1);
+    setTimeout(() => {
+      isInteractingWithTechnologyDropdown = false;
     });
     return;
   }
@@ -1865,6 +2062,65 @@ hospitalHistoryDropdown.addEventListener("keydown", (event) => {
     activeHospitalInput.focus();
   }
 });
+technologyHistoryDropdown.addEventListener("pointerdown", (event) => {
+  isInteractingWithTechnologyDropdown = true;
+  event.preventDefault();
+});
+technologyHistoryDropdown.addEventListener("click", (event) => {
+  const option = event.target.closest(".history-option");
+  if (!option) {
+    isInteractingWithTechnologyDropdown = false;
+    return;
+  }
+
+  const optionText = option.dataset.value;
+  if (event.target.closest(".history-delete")) {
+    event.stopPropagation();
+    deleteTechnologyFromHistory(optionText);
+    updateTechnologyHistoryDropdown(technologyInput.value);
+    technologyInput.focus();
+    isInteractingWithTechnologyDropdown = false;
+    return;
+  }
+
+  selectTechnologyHistoryOption(option);
+});
+technologyHistoryDropdown.addEventListener("keydown", (event) => {
+  const option = event.target.closest(".history-option");
+  if (!option) {
+    return;
+  }
+
+  const options = getDropdownOptions(technologyHistoryDropdown);
+  const currentIndex = options.indexOf(option);
+
+  if (event.key === "ArrowDown") {
+    event.preventDefault();
+    focusDropdownOption(technologyHistoryDropdown, Math.min(currentIndex + 1, options.length - 1));
+  }
+
+  if (event.key === "ArrowUp") {
+    event.preventDefault();
+    if (currentIndex <= 0) {
+      technologyInput.focus();
+      return;
+    }
+
+    focusDropdownOption(technologyHistoryDropdown, currentIndex - 1);
+  }
+
+  if (event.key === "Enter") {
+    event.preventDefault();
+    selectTechnologyHistoryOption(option, true);
+  }
+
+  if (event.key === "Escape") {
+    event.preventDefault();
+    isInteractingWithTechnologyDropdown = false;
+    hideTechnologyHistoryDropdown();
+    technologyInput.focus();
+  }
+});
 document.addEventListener("pointerdown", (event) => {
   if (
     event.target.closest(".patient-input") ||
@@ -1872,7 +2128,9 @@ document.addEventListener("pointerdown", (event) => {
     event.target.closest(".surgery-input") ||
     event.target.closest("#surgeryHistoryDropdown") ||
     event.target.closest(".hospital-input") ||
-    event.target.closest("#hospitalHistoryDropdown")
+    event.target.closest("#hospitalHistoryDropdown") ||
+    event.target.closest(".technology-input") ||
+    event.target.closest("#technologyHistoryDropdown")
   ) {
     return;
   }
@@ -1880,6 +2138,7 @@ document.addEventListener("pointerdown", (event) => {
   hidePatientHistoryDropdown();
   hideSurgeryHistoryDropdown();
   hideHospitalHistoryDropdown();
+  hideTechnologyHistoryDropdown();
 });
 panelResizeHandle?.addEventListener("pointerdown", (event) => {
   event.preventDefault();
@@ -1943,6 +2202,7 @@ printButton.addEventListener("click", async () => {
       savePatientToHistory(patientInput.value, patientInput),
       ...getSurgeryInputs().map((input) => saveSurgeryToHistory(input.value, input)),
       ...getHospitalInputs().map((input) => saveHospitalToHistory(input.value, input)),
+      saveTechnologyToHistory(),
     ]
   );
   window.print();
@@ -1961,11 +2221,20 @@ shutdownButton.addEventListener("click", async () => {
   document.body.innerHTML = "<main class=\"shutdown-message\"><h1>Auto Orçamento encerrado</h1><p>Você já pode fechar esta aba.</p></main>";
 });
 
-Promise.all([loadPatientHistory(), loadSurgeryHistory(), loadHospitalHistory(), loadHospitalTables(), loadImplantTable()]).then(() => {
+Promise.all([
+  loadPatientHistory(),
+  loadSurgeryHistory(),
+  loadHospitalHistory(),
+  loadTechnologyHistory(),
+  loadHospitalTables(),
+  loadImplantTable(),
+]).then(() => {
   updatePatientHistoryDropdown();
   updateSurgeryHistoryDropdown();
+  updateTechnologyHistoryDropdown();
   hideHospitalHistoryDropdown();
   hidePatientHistoryDropdown();
+  hideTechnologyHistoryDropdown();
   updateSurgeryButtons();
   updateHospitalButtons();
   updatePreview();

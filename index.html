@@ -104,6 +104,26 @@
           </fieldset>
 
           <fieldset>
+            <legend>
+              <label class="legend-checkbox">
+                <span>Tecnologias</span>
+                <input id="technologiesEnabled" name="technologiesEnabled" type="checkbox" />
+              </label>
+            </legend>
+
+            <label>
+              Tecnologia
+              <input id="technologyName" name="technologyName" type="text" class="technology-input" autocomplete="off" disabled />
+              <div id="technologyHistoryDropdown" class="history-dropdown" hidden></div>
+            </label>
+
+            <label>
+              Valor:
+              <input id="technologyValue" name="technologyValue" type="text" placeholder="R$" disabled />
+            </label>
+          </fieldset>
+
+          <fieldset>
             <legend>Pagamento e Itens Incluídos</legend>
 
             <label>
@@ -199,6 +219,14 @@
             <section id="implantsPreviewSection" class="document-section" hidden>
               <h3>Implantes</h3>
               <div class="implant-preview-box" data-preview="implantSummary">Selecione um implante.</div>
+            </section>
+
+            <section id="technologiesPreviewSection" class="document-section" hidden>
+              <h3>Tecnologias</h3>
+              <div class="technology-preview-box">
+                <span data-preview="technologyName">Selecione uma tecnologia.</span>
+                <span data-preview="technologyValue">R$</span>
+              </div>
             </section>
 
             <section class="document-section">

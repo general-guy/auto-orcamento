@@ -718,6 +718,22 @@ dt {
   text-align: right;
 }
 
+.technology-preview-box {
+  border: 1px solid rgba(31, 41, 51, 0.22);
+  border-radius: 9px;
+  display: grid;
+  font-size: 0.9rem;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  line-height: 1.35;
+  padding: 8px 10px;
+}
+
+.technology-preview-box span:last-child {
+  justify-self: end;
+  white-space: nowrap;
+}
+
 table {
   border-collapse: collapse;
   width: 100%;
