@@ -1368,7 +1368,7 @@ function renderPaymentQuickList() {
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
     deleteButton.className = "payment-quick-delete";
-    deleteButton.textContent = "x";
+    deleteButton.textContent = "×";
     deleteButton.setAttribute("aria-label", `Remover ${optionText} do histórico de pagamentos`);
     deleteButton.dataset.value = optionText;
 
