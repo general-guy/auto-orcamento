@@ -84,6 +84,7 @@ Os históricos de pacientes, cirurgias e hospitais são listas JSON simples, lim
 - autofill das entradas auxiliares;
 - carregamento e renderização da tabela de implantes;
 - persistência de tecnologias com valor monetário associado;
+- renderização da equipe fixa com itens selecionáveis e valor monetário;
 - redimensionamento do painel;
 - impressão, limpeza e shutdown.
 
@@ -129,6 +130,14 @@ O campo `Tecnologia` usa um dropdown de histórico alimentado por `data/tecnolog
 O campo `Valor:` fica na mesma linha do input e normaliza moeda em padrão brasileiro ao sair do campo e antes de salvar. Exemplos: `10000` vira `R$ 10.000,00`; `10000,5` vira `R$ 10.000,50`.
 
 No preview, a seção aparece em uma caixa arredondada com duas colunas: tecnologia à esquerda e valor à direita.
+
+## Lógica de Equipe
+
+A seção `Equipe` é fixa, sem checkbox no título. Ela contém checkboxes pré-marcados para `Cirurgião`, `Anestesista`, `Auxiliar`, `Eq. Enfermagem`, `Modelador`, `Placas` e `Meias`.
+
+Os itens ficam em duas colunas no formulário. No preview, apenas os itens marcados são exibidos, separados por ` + `.
+
+O campo `Valor:` usa a mesma normalização monetária de tecnologias: valores como `10000` são convertidos para `R$ 10.000,00` ao sair do campo. O preview exibe os itens à esquerda e o valor à direita.
 
 ## Lógica Hospitalar
 

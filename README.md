@@ -38,7 +38,7 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 
 ## O Que o App Faz
 
-- Preenche os dados da paciente, cirurgia, hospital, implantes, tecnologias, formas de pagamento, itens incluídos e orientações.
+- Preenche os dados da paciente, cirurgia, hospital, implantes, tecnologias, equipe, formas de pagamento, itens incluídos e orientações.
 - Mostra uma pré-visualização do documento final sobre o papel timbrado.
 - Permite imprimir ou salvar em PDF usando a impressão do navegador.
 - Guarda histórico local de pacientes, cirurgias, hospitais e tecnologias.
@@ -47,6 +47,7 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 - Usa tabelas hospitalares locais para sugerir pacotes e calcular valores auxiliares no preview.
 - Permite incluir uma seção opcional de implantes, alimentada por `data/tabela-implantes.json`.
 - Permite incluir uma seção opcional de tecnologias, com nome e valor salvos em `data/tecnologias.json`.
+- Mantém uma seção fixa de equipe com itens pré-marcados e valor normalizado em moeda brasileira.
 
 ## Dados Locais
 
@@ -91,6 +92,14 @@ A seção `Tecnologias` é opcional. Ao marcar o checkbox no título da seção,
 Cada tecnologia salva o `nome` junto com seu `valor`. Ao selecionar uma tecnologia já cadastrada, o valor correspondente é carregado automaticamente. O campo de valor normaliza moeda em padrão brasileiro, por exemplo `10000` vira `R$ 10.000,00`.
 
 No documento, a tecnologia aparece em uma caixa arredondada com o nome à esquerda e o valor alinhado à direita.
+
+## Equipe
+
+A seção `Equipe` é fixa e vem com os itens `Cirurgião`, `Anestesista`, `Auxiliar`, `Eq. Enfermagem`, `Modelador`, `Placas` e `Meias` pré-marcados.
+
+No formulário, os itens ficam em duas colunas. O campo `Valor:` normaliza moeda em padrão brasileiro, como `10000` para `R$ 10.000,00`.
+
+No documento, a caixa de equipe mostra os itens marcados separados por ` + ` e o valor alinhado à direita.
 
 ## Documentação Técnica
 
