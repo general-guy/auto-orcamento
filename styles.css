@@ -258,6 +258,58 @@ textarea {
   gap: 10px;
 }
 
+.surgery-field-row {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
+}
+
+.surgery-field-caption {
+  width: 100%;
+}
+
+.surgery-drag-handle {
+  color: #9ca3af;
+  cursor: grab;
+  flex: 0 0 auto;
+  font-size: 1rem;
+  letter-spacing: -0.12em;
+  line-height: 1;
+  touch-action: none;
+  user-select: none;
+}
+
+.surgery-drag-handle::before {
+  content: "⋮⋮";
+}
+
+.surgery-drag-handle[hidden] {
+  display: none;
+}
+
+.surgery-field .surgery-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: auto;
+}
+
+.surgery-field.is-dragging {
+  background: rgba(221, 231, 245, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+  opacity: 0.76;
+}
+
+.surgery-field.is-dragging .surgery-drag-handle {
+  cursor: grabbing;
+}
+
+.surgery-list.is-dragging-surgery {
+  user-select: none;
+}
+
 .quick-list,
 .payment-quick-list {
   display: grid;

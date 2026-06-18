@@ -49,6 +49,7 @@ const teamValueInput = document.querySelector("#teamValue");
 let surgeryHistory = [];
 let activeSurgeryInput = null;
 let isInteractingWithHistoryDropdown = false;
+let surgeryDragState = null;
 let paymentHistory = [];
 let activePaymentInput = null;
 let isInteractingWithPaymentDropdown = false;
@@ -141,6 +142,78 @@ function normalizeText(value) {
 
 function getSurgeryInputs() {
   return [...surgeryList.querySelectorAll(".surgery-input")];
+}
+
+function getSurgeryFieldRows() {
+  return Array.from(surgeryList.querySelectorAll(".surgery-field"));
+}
+
+function ensureSurgeryFieldRow(label) {
+  if (label.querySelector(".surgery-field-row")) {
+    return;
+  }
+
+  const input = label.querySelector(".surgery-input");
+  if (!input) {
+    return;
+  }
+
+  const row = document.createElement("div");
+  row.className = "surgery-field-row";
+
+  const handle = label.querySelector(".surgery-drag-handle");
+  if (handle) {
+    row.append(handle, input);
+  } else {
+    const newHandle = document.createElement("span");
+    newHandle.className = "surgery-drag-handle";
+    newHandle.setAttribute("aria-label", "Reordenar cirurgia");
+    newHandle.hidden = true;
+    row.append(newHandle, input);
+  }
+
+  label.append(row);
+}
+
+function updateSurgeryFieldStructure() {
+  const rows = getSurgeryFieldRows();
+  const showHandles = rows.length > 1;
+
+  rows.forEach((label, index) => {
+    ensureSurgeryFieldRow(label);
+
+    const input = label.querySelector(".surgery-input");
+    const handle = label.querySelector(".surgery-drag-handle");
+
+    if (handle) {
+      handle.hidden = !showHandles;
+    }
+
+    if (index === 0) {
+      label.classList.remove("unlabeled-field");
+
+      let caption = label.querySelector(".surgery-field-caption");
+      if (!caption) {
+        caption = document.createElement("span");
+        caption.className = "surgery-field-caption";
+        caption.textContent = "Cirurgia proposta";
+        label.prepend(caption);
+      }
+
+      if (input && !input.id) {
+        input.id = "surgery";
+      }
+    } else {
+      label.classList.add("unlabeled-field");
+      label.querySelector(".surgery-field-caption")?.remove();
+
+      if (input?.id === "surgery") {
+        input.removeAttribute("id");
+      }
+    }
+
+    input?.setAttribute("aria-label", `Cirurgia proposta ${index + 1}`);
+  });
 }
 
 function getSurgeryValues() {
@@ -1676,6 +1749,81 @@ function handlePaymentQuickPointerCancel() {
   endPaymentQuickDrag({ shouldCommit: false });
 }
 
+function createSurgeryDropIndicator() {
+  const indicator = document.createElement("div");
+  indicator.className = "payment-quick-drop-indicator";
+  return indicator;
+}
+
+function moveSurgeryDropIndicator(clientY) {
+  if (!surgeryDragState) {
+    return;
+  }
+
+  const rows = getSurgeryFieldRows().filter((row) => row !== surgeryDragState.row);
+  const nextRow = rows.find((row) => {
+    const rect = row.getBoundingClientRect();
+    return clientY < rect.top + rect.height / 2;
+  });
+
+  surgeryList.insertBefore(surgeryDragState.indicator, nextRow || null);
+}
+
+function endSurgeryFieldDrag({ shouldCommit = true } = {}) {
+  if (!surgeryDragState) {
+    return;
+  }
+
+  const { row, handle, indicator, pointerId, originalNextSibling } = surgeryDragState;
+  const hasNewPosition = indicator.parentElement === surgeryList;
+
+  row.classList.remove("is-dragging");
+  surgeryList.classList.remove("is-dragging-surgery");
+
+  if (hasNewPosition && shouldCommit) {
+    surgeryList.insertBefore(row, indicator);
+  } else {
+    surgeryList.insertBefore(row, originalNextSibling);
+  }
+
+  indicator.remove();
+
+  if (handle.hasPointerCapture?.(pointerId)) {
+    handle.releasePointerCapture(pointerId);
+  }
+
+  handle.removeEventListener("pointermove", handleSurgeryFieldPointerMove);
+  handle.removeEventListener("pointerup", handleSurgeryFieldPointerUp);
+  handle.removeEventListener("pointercancel", handleSurgeryFieldPointerCancel);
+
+  surgeryDragState = null;
+  updateSurgeryFieldStructure();
+
+  if (!hasNewPosition || !shouldCommit) {
+    return;
+  }
+
+  updatePreview();
+}
+
+function handleSurgeryFieldPointerMove(event) {
+  if (!surgeryDragState) {
+    return;
+  }
+
+  event.preventDefault();
+  moveSurgeryDropIndicator(event.clientY);
+}
+
+function handleSurgeryFieldPointerUp(event) {
+  event.preventDefault();
+  endSurgeryFieldDrag();
+}
+
+function handleSurgeryFieldPointerCancel() {
+  endSurgeryFieldDrag({ shouldCommit: false });
+}
+
 async function saveGuidanceOrderToHistory(items) {
   try {
     const response = await fetch("/api/observacoes", {
@@ -1899,7 +2047,15 @@ function updateTechnologyHistoryDropdown(query = "") {
 function createSurgeryField() {
   const fieldNumber = getSurgeryInputs().length + 1;
   const label = document.createElement("label");
-  label.className = "unlabeled-field";
+  label.className = "surgery-field unlabeled-field";
+
+  const row = document.createElement("div");
+  row.className = "surgery-field-row";
+
+  const handle = document.createElement("span");
+  handle.className = "surgery-drag-handle";
+  handle.setAttribute("aria-label", "Reordenar cirurgia");
+  handle.hidden = true;
 
   const input = document.createElement("input");
   input.name = "surgery";
@@ -1908,7 +2064,8 @@ function createSurgeryField() {
   input.setAttribute("aria-label", `Cirurgia proposta ${fieldNumber}`);
   input.setAttribute("autocomplete", "off");
 
-  label.append(input);
+  row.append(handle, input);
+  label.append(row);
   surgeryList.append(label);
   updateSurgeryButtons();
   input.focus();
@@ -2027,6 +2184,7 @@ function removeLastHospitalField() {
 
 function updateSurgeryButtons() {
   removeSurgeryButton.disabled = getSurgeryInputs().length <= 1;
+  updateSurgeryFieldStructure();
 }
 
 function updatePaymentButtons() {
@@ -2708,6 +2866,37 @@ guidanceQuickList.addEventListener("pointerdown", (event) => {
   row.addEventListener("pointermove", handleGuidanceQuickPointerMove);
   row.addEventListener("pointerup", handleGuidanceQuickPointerUp);
   row.addEventListener("pointercancel", handleGuidanceQuickPointerCancel);
+});
+surgeryList.addEventListener("pointerdown", (event) => {
+  const handle = event.target.closest(".surgery-drag-handle");
+  if (!handle || event.button !== 0 || handle.hidden) {
+    return;
+  }
+
+  const row = handle.closest(".surgery-field");
+  if (!row) {
+    return;
+  }
+
+  event.preventDefault();
+  hideSurgeryHistoryDropdown();
+
+  surgeryDragState = {
+    row,
+    handle,
+    indicator: createSurgeryDropIndicator(),
+    pointerId: event.pointerId,
+    originalNextSibling: row.nextElementSibling,
+  };
+
+  row.classList.add("is-dragging");
+  surgeryList.classList.add("is-dragging-surgery");
+  handle.setPointerCapture(event.pointerId);
+  moveSurgeryDropIndicator(event.clientY);
+
+  handle.addEventListener("pointermove", handleSurgeryFieldPointerMove);
+  handle.addEventListener("pointerup", handleSurgeryFieldPointerUp);
+  handle.addEventListener("pointercancel", handleSurgeryFieldPointerCancel);
 });
 form.addEventListener("focusout", (event) => {
   if (event.target.matches(".patient-input")) {

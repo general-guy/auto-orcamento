@@ -81,7 +81,7 @@ Os históricos de pacientes, cirurgias, hospitais, pagamentos e observações s�
 
 - sincronização entre formulário e preview;
 - histórico/autocomplete de pacientes, cirurgias, hospitais, pagamentos, observações e tecnologias;
-- campos dinâmicos de cirurgia e hospital;
+- campos dinâmicos e reordenáveis de cirurgia, além de hospital;
 - entradas auxiliares de Regina e Sapiranga;
 - multiplicadores de pacotes hospitalares;
 - autofill das entradas auxiliares;
@@ -120,11 +120,21 @@ O frontend carrega `data/tabelas-hospitalares.json` diretamente para montar os `
 
 `data/tabela-implantes.json` guarda uma tabela independente de implantes, extraída de documento `.doc`, para preenchimento opcional da seção `Implantes`. O dropdown usa `rotulo`, `modelo` e `referencia`; itens com `favorito: true` recebem uma estrela ao final da opção.
 
+`data/cirurgias.json` guarda as cirurgias cadastradas no formulário. O arquivo é uma lista simples de textos, usada pelo dropdown de histórico da seção `Cirurgia`. A ordem manual dos campos no formulário não altera esse arquivo.
+
 `data/tecnologias.json` guarda as tecnologias cadastradas no próprio app. Diferente dos históricos simples, cada item tem `nome` e `valor`, permitindo carregar o valor automaticamente quando a tecnologia é selecionada.
 
 `data/pagamentos.json` guarda as formas de pagamento cadastradas no formulário. O arquivo é uma lista simples de textos, usada pelo dropdown de histórico da seção `Pagamento` e pela lista rápida reordenável.
 
 `data/observacoes.json` guarda as observações padrão e adicionais cadastradas no formulário. O arquivo é uma lista simples de textos, usada pela lista rápida reordenável da seção `Observações` e pelo dropdown de histórico das observações adicionais.
+
+## Lógica de Cirurgia
+
+A seção `Cirurgia` usa uma lista dinâmica de inputs com botões `+/-`. Cada input usa dropdown de histórico alimentado por `data/cirurgias.json` via `/api/cirurgias`.
+
+Com duas ou mais entradas, `updateSurgeryFieldStructure()` exibe um handle de arraste (`⋮⋮`) à esquerda de cada campo, dentro de `.surgery-field-row`, mantendo o input em flex para ocupar toda a largura do painel. O rótulo `Cirurgia proposta` permanece sempre no primeiro campo, mesmo após reordenar.
+
+O arraste usa eventos de ponteiro apenas no handle, sem interferir na digitação. Durante o movimento, `app.js` mostra a mesma linha de encaixe usada nas listas rápidas; ao soltar, reorganiza os `<label class="surgery-field">` no DOM, chama `updatePreview()` e não persiste nada no servidor. `getSurgeryValues()` lê a ordem atual dos inputs no DOM, e essa ordem alimenta o preview do documento.
 
 ## Lógica de Implantes
 

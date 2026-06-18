@@ -35,15 +35,18 @@
 
             <div class="dynamic-field-group">
               <div id="surgeryList" class="surgery-list">
-                <label>
-                  Cirurgia proposta
-                  <input
-                    id="surgery"
-                    name="surgery"
-                    type="text"
-                    class="surgery-input"
-                    autocomplete="off"
-                  />
+                <label class="surgery-field">
+                  <span class="surgery-field-caption">Cirurgia proposta</span>
+                  <div class="surgery-field-row">
+                    <span class="surgery-drag-handle" aria-label="Reordenar cirurgia" hidden></span>
+                    <input
+                      id="surgery"
+                      name="surgery"
+                      type="text"
+                      class="surgery-input"
+                      autocomplete="off"
+                    />
+                  </div>
                 </label>
               </div>
 

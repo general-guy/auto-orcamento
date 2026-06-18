@@ -42,7 +42,7 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 - Mostra uma pré-visualização paginada do documento final sobre o papel timbrado.
 - Permite imprimir ou salvar em PDF usando a impressão do navegador.
 - Guarda histórico local de pacientes, cirurgias, hospitais, formas de pagamento, observações e tecnologias.
-- Permite reordenar formas de pagamento e observações salvas por drag and drop na lista rápida.
+- Permite reordenar por drag and drop as cirurgias propostas no formulário e as listas rápidas de pagamento e observações.
 - Cria múltiplas entradas de cirurgia e hospital.
 - Para Regina e Sapiranga, cria entradas auxiliares (`Reg1`, `Sap1`, etc.) com multiplicadores.
 - Usa tabelas hospitalares locais para sugerir pacotes e calcular valores auxiliares no preview.
@@ -106,6 +106,12 @@ A seção `Equipe` é fixa e vem com os itens `Cirurgião`, `Anestesista`, `Auxi
 No formulário, os itens ficam em três colunas. O campo `Valor:` normaliza moeda em padrão brasileiro, como `10000` para `R$ 10.000,00`.
 
 No documento, a caixa de equipe mostra os itens marcados separados por ` + ` e o valor alinhado à direita.
+
+## Cirurgia
+
+A seção `Cirurgia` usa campos dinâmicos com botões `+/-`, no mesmo padrão de `Hospital` e `Pagamento`. Cada entrada preenchida pode ser reaproveitada pelo dropdown de histórico e salva em `data/cirurgias.json`.
+
+Com duas ou mais cirurgias propostas, aparece um indicador `⋮⋮` à esquerda de cada caixa de texto. Esse drag and drop é só visual: reorganiza os campos no painel e a ordem exibida no preview do documento, sem alterar a ordem do histórico em `data/cirurgias.json`.
 
 ## Pagamento
 
