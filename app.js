@@ -58,6 +58,7 @@ let guidanceHistory = [];
 let activeGuidanceInput = null;
 let isInteractingWithGuidanceDropdown = false;
 let deselectedGuidanceQuickItems = new Set();
+let guidanceDragState = null;
 let hospitalHistory = [];
 let activeHospitalInput = null;
 let isInteractingWithHospitalDropdown = false;
@@ -1545,6 +1546,7 @@ function renderGuidanceQuickList() {
   guidanceHistory.forEach((optionText) => {
     const row = document.createElement("label");
     row.className = "quick-option";
+    row.dataset.value = optionText;
 
     const optionLabel = document.createElement("span");
     optionLabel.textContent = optionText;
@@ -1672,6 +1674,113 @@ function handlePaymentQuickPointerUp(event) {
 
 function handlePaymentQuickPointerCancel() {
   endPaymentQuickDrag({ shouldCommit: false });
+}
+
+async function saveGuidanceOrderToHistory(items) {
+  try {
+    const response = await fetch("/api/observacoes", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Falha ao reordenar no servidor.");
+    }
+
+    const nextHistory = await response.json();
+    guidanceHistory = Array.isArray(nextHistory) ? nextHistory : guidanceHistory;
+    renderGuidanceQuickList();
+    updateGuidanceHistoryDropdown(activeGuidanceInput?.value || "");
+    updatePreview();
+  } catch {
+    console.warn("Não foi possível salvar a ordem das observações.");
+    renderGuidanceQuickList();
+  }
+}
+
+function getGuidanceQuickRows() {
+  return Array.from(guidanceQuickList.querySelectorAll(".quick-option"));
+}
+
+function createGuidanceDropIndicator() {
+  const indicator = document.createElement("div");
+  indicator.className = "payment-quick-drop-indicator";
+  return indicator;
+}
+
+function moveGuidanceDropIndicator(clientY) {
+  if (!guidanceDragState) {
+    return;
+  }
+
+  const rows = getGuidanceQuickRows().filter((row) => row !== guidanceDragState.row);
+  const nextRow = rows.find((row) => {
+    const rect = row.getBoundingClientRect();
+    return clientY < rect.top + rect.height / 2;
+  });
+
+  guidanceQuickList.insertBefore(guidanceDragState.indicator, nextRow || null);
+}
+
+function endGuidanceQuickDrag({ shouldCommit = true } = {}) {
+  if (!guidanceDragState) {
+    return;
+  }
+
+  const { row, indicator, pointerId } = guidanceDragState;
+  const hasNewPosition = indicator.parentElement === guidanceQuickList;
+
+  row.classList.remove("is-dragging");
+  guidanceQuickList.classList.remove("is-dragging-guidance");
+
+  if (hasNewPosition && shouldCommit) {
+    guidanceQuickList.insertBefore(row, indicator);
+  }
+
+  indicator.remove();
+
+  if (row.hasPointerCapture?.(pointerId)) {
+    row.releasePointerCapture(pointerId);
+  }
+
+  row.removeEventListener("pointermove", handleGuidanceQuickPointerMove);
+  row.removeEventListener("pointerup", handleGuidanceQuickPointerUp);
+  row.removeEventListener("pointercancel", handleGuidanceQuickPointerCancel);
+
+  guidanceDragState = null;
+
+  if (!hasNewPosition || !shouldCommit) {
+    renderGuidanceQuickList();
+    return;
+  }
+
+  const nextHistory = getGuidanceQuickRows()
+    .map((item) => item.dataset.value)
+    .filter(Boolean);
+
+  guidanceHistory = nextHistory;
+  updateGuidanceHistoryDropdown(activeGuidanceInput?.value || "");
+  updatePreview();
+  saveGuidanceOrderToHistory(nextHistory);
+}
+
+function handleGuidanceQuickPointerMove(event) {
+  if (!guidanceDragState) {
+    return;
+  }
+
+  event.preventDefault();
+  moveGuidanceDropIndicator(event.clientY);
+}
+
+function handleGuidanceQuickPointerUp(event) {
+  event.preventDefault();
+  endGuidanceQuickDrag();
+}
+
+function handleGuidanceQuickPointerCancel() {
+  endGuidanceQuickDrag({ shouldCommit: false });
 }
 
 function updateHospitalHistoryDropdown(query = "") {
@@ -2575,6 +2684,30 @@ guidanceQuickList.addEventListener("change", (event) => {
   }
 
   updatePreview();
+});
+guidanceQuickList.addEventListener("pointerdown", (event) => {
+  const row = event.target.closest(".quick-option");
+  if (!row || event.button !== 0 || event.target.closest("input, button")) {
+    return;
+  }
+
+  event.preventDefault();
+  hideGuidanceHistoryDropdown();
+
+  guidanceDragState = {
+    row,
+    indicator: createGuidanceDropIndicator(),
+    pointerId: event.pointerId,
+  };
+
+  row.classList.add("is-dragging");
+  guidanceQuickList.classList.add("is-dragging-guidance");
+  row.setPointerCapture(event.pointerId);
+  moveGuidanceDropIndicator(event.clientY);
+
+  row.addEventListener("pointermove", handleGuidanceQuickPointerMove);
+  row.addEventListener("pointerup", handleGuidanceQuickPointerUp);
+  row.addEventListener("pointercancel", handleGuidanceQuickPointerCancel);
 });
 form.addEventListener("focusout", (event) => {
   if (event.target.matches(".patient-input")) {

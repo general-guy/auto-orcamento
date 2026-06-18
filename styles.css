@@ -291,11 +291,7 @@ textarea {
   touch-action: none;
 }
 
-.quick-option {
-  cursor: default;
-  touch-action: auto;
-}
-
+.quick-option.is-dragging,
 .payment-quick-option.is-dragging {
   background: rgba(221, 231, 245, 0.95);
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
@@ -310,7 +306,8 @@ textarea {
   margin: 1px 8px;
 }
 
-.payment-quick-list.is-dragging-payment {
+.payment-quick-list.is-dragging-payment,
+.quick-list.is-dragging-guidance {
   user-select: none;
 }
 

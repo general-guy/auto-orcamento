@@ -56,7 +56,7 @@ Endpoints principais:
 - `GET /api/hospitais`, `POST /api/hospitais`, `DELETE /api/hospitais`: histórico de hospitais.
 - `GET /api/pacientes`, `POST /api/pacientes`, `DELETE /api/pacientes`: histórico de pacientes.
 - `GET /api/pagamentos`, `POST /api/pagamentos`, `DELETE /api/pagamentos`, `PUT /api/pagamentos`: histórico de formas de pagamento e persistência da ordem manual.
-- `GET /api/observacoes`, `POST /api/observacoes`, `DELETE /api/observacoes`: histórico de observações.
+- `GET /api/observacoes`, `POST /api/observacoes`, `DELETE /api/observacoes`, `PUT /api/observacoes`: histórico de observações e persistência da ordem manual.
 - `GET /api/tecnologias`, `POST /api/tecnologias`, `DELETE /api/tecnologias`: histórico de tecnologias com valor associado.
 - `POST /api/shutdown`: encerra o servidor quando acionado pela interface.
 
@@ -89,7 +89,7 @@ Os históricos de pacientes, cirurgias, hospitais, pagamentos e observações s�
 - persistência de tecnologias com valor monetário associado;
 - renderização da equipe fixa com itens selecionáveis e valor monetário;
 - renderização da seção de pagamento com campos dinâmicos e lista rápida reordenável;
-- renderização da seção de observações com lista rápida e campos dinâmicos adicionais;
+- renderização da seção de observações com lista rápida reordenável e campos dinâmicos adicionais;
 - paginação da pré-visualização do documento em páginas A4;
 - redimensionamento do painel;
 - impressão, limpeza e shutdown.
@@ -124,7 +124,7 @@ O frontend carrega `data/tabelas-hospitalares.json` diretamente para montar os `
 
 `data/pagamentos.json` guarda as formas de pagamento cadastradas no formulário. O arquivo é uma lista simples de textos, usada pelo dropdown de histórico da seção `Pagamento` e pela lista rápida reordenável.
 
-`data/observacoes.json` guarda as observações padrão e adicionais cadastradas no formulário. O arquivo é uma lista simples de textos, usada pela lista rápida da seção `Observações` e pelo dropdown de histórico das observações adicionais.
+`data/observacoes.json` guarda as observações padrão e adicionais cadastradas no formulário. O arquivo é uma lista simples de textos, usada pela lista rápida reordenável da seção `Observações` e pelo dropdown de histórico das observações adicionais.
 
 ## Lógica de Implantes
 
@@ -170,6 +170,8 @@ No preview, as formas de pagamento preenchidas são renderizadas como parágrafo
 A seção `Observações` é alimentada por `data/observacoes.json` via `/api/observacoes`. No formulário, `renderGuidanceQuickList()` exibe as entradas salvas como `Observações padrão`, com checkboxes marcados por padrão e botão de exclusão integrado ao histórico.
 
 As `Observações adicionais` usam uma lista dinâmica de inputs com botões `+/-`. Cada input usa dropdown legado alimentado pelo mesmo histórico e permite salvar novas entradas, selecionar existentes ou excluir opções antigas.
+
+A lista rápida de observações padrão usa eventos de ponteiro para permitir drag and drop sem interferir nos checkboxes e no botão de exclusão. Durante o arraste, `app.js` mostra uma linha de encaixe entre os itens; ao soltar, reorganiza `guidanceHistory`, atualiza o preview e envia a lista completa para `PUT /api/observacoes`, que normaliza duplicatas e grava a nova ordem em `data/observacoes.json`.
 
 No preview, `updateGuidance()` combina as observações padrão marcadas com as adicionais preenchidas, remove duplicatas por texto normalizado e renderiza os itens em uma lista com marcadores. O espaçamento entre itens é controlado por `#guidancePreview` em `styles.css`.
 

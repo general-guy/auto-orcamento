@@ -42,7 +42,7 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 - Mostra uma pré-visualização paginada do documento final sobre o papel timbrado.
 - Permite imprimir ou salvar em PDF usando a impressão do navegador.
 - Guarda histórico local de pacientes, cirurgias, hospitais, formas de pagamento, observações e tecnologias.
-- Permite reordenar formas de pagamento salvas por drag and drop na lista rápida.
+- Permite reordenar formas de pagamento e observações salvas por drag and drop na lista rápida.
 - Cria múltiplas entradas de cirurgia e hospital.
 - Para Regina e Sapiranga, cria entradas auxiliares (`Reg1`, `Sap1`, etc.) com multiplicadores.
 - Usa tabelas hospitalares locais para sugerir pacotes e calcular valores auxiliares no preview.
@@ -120,6 +120,8 @@ No documento final, as formas de pagamento preenchidas aparecem como parágrafos
 ## Observações
 
 A seção `Observações` usa uma lista rápida de observações padrão alimentada por `data/observacoes.json`. As entradas aparecem com checkboxes marcados por padrão e podem ser removidas do histórico pelo botão `×`.
+
+A lista rápida aceita drag and drop para reorganizar as observações. Ao soltar um item em outra posição, a ordem visual, o preview do documento e o arquivo `data/observacoes.json` são atualizados juntos.
 
 Abaixo da lista padrão, `Observações adicionais` usa campos dinâmicos com dropdown de histórico e botões `+/-`, seguindo o mesmo padrão de preenchimento de `Pagamento`.
 
