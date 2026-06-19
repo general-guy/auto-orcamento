@@ -11,6 +11,7 @@ const patientsFile = path.join(dataDir, "pacientes.json");
 const technologiesFile = path.join(dataDir, "tecnologias.json");
 const paymentsFile = path.join(dataDir, "pagamentos.json");
 const guidanceFile = path.join(dataDir, "observacoes.json");
+const extrasFile = path.join(dataDir, "extras.json");
 
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
@@ -53,6 +54,10 @@ function ensureDataFile() {
 
   if (!fs.existsSync(guidanceFile)) {
     fs.writeFileSync(guidanceFile, "[]\n", "utf8");
+  }
+
+  if (!fs.existsSync(extrasFile)) {
+    fs.writeFileSync(extrasFile, "[]\n", "utf8");
   }
 }
 
@@ -214,6 +219,42 @@ async function handleGuidanceApi(request, response) {
   await handleHistoryApi(request, response, guidanceFile, "uma observação válida");
 }
 
+async function handleExtrasApi(request, response) {
+  if (request.method === "PUT") {
+    const body = await collectRequestBody(request);
+    const { items } = JSON.parse(body || "{}");
+
+    if (!Array.isArray(items)) {
+      sendJson(response, 400, { error: "Informe uma lista de extras." });
+      return;
+    }
+
+    const normalizedKeys = new Set();
+    const nextItems = items
+      .map((item) => (typeof item === "string" ? item.trim() : ""))
+      .filter((item) => {
+        if (!item) {
+          return false;
+        }
+
+        const key = normalizeText(item);
+        if (normalizedKeys.has(key)) {
+          return false;
+        }
+
+        normalizedKeys.add(key);
+        return true;
+      })
+      .slice(0, 200);
+
+    writeJsonList(extrasFile, nextItems);
+    sendJson(response, 200, nextItems);
+    return;
+  }
+
+  await handleHistoryApi(request, response, extrasFile, "um extra válido");
+}
+
 async function handleTechnologyApi(request, response) {
   if (request.method === "GET") {
     sendJson(response, 200, readJsonList(technologiesFile));
@@ -332,6 +373,11 @@ const server = http.createServer(async (request, response) => {
 
     if (request.url.startsWith("/api/observacoes")) {
       await handleGuidanceApi(request, response);
+      return;
+    }
+
+    if (request.url.startsWith("/api/extras")) {
+      await handleExtrasApi(request, response);
       return;
     }
 

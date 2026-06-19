@@ -8,10 +8,16 @@ const addHospitalButton = document.querySelector("#addHospitalButton");
 const removeHospitalButton = document.querySelector("#removeHospitalButton");
 const addPaymentButton = document.querySelector("#addPaymentButton");
 const removePaymentButton = document.querySelector("#removePaymentButton");
+const addExtrasButton = document.querySelector("#addExtrasButton");
+const removeExtrasButton = document.querySelector("#removeExtrasButton");
 const addGuidanceButton = document.querySelector("#addGuidanceButton");
 const removeGuidanceButton = document.querySelector("#removeGuidanceButton");
 const guidancePreview = document.querySelector("#guidancePreview");
 const paymentPreview = document.querySelector("#paymentPreview");
+const extrasQuickList = document.querySelector("#extrasQuickList");
+const extrasList = document.querySelector("#extrasList");
+const extrasHistoryDropdown = document.querySelector("#extrasHistoryDropdown");
+const extrasPreview = document.querySelector("#extrasPreview");
 const appShell = document.querySelector(".app-shell");
 const panelResizeHandle = document.querySelector("#panelResizeHandle");
 const previewPanel = document.querySelector(".preview-panel");
@@ -55,6 +61,11 @@ let activePaymentInput = null;
 let isInteractingWithPaymentDropdown = false;
 let deselectedPaymentQuickItems = new Set();
 let paymentDragState = null;
+let extrasHistory = [];
+let activeExtrasInput = null;
+let isInteractingWithExtrasDropdown = false;
+let deselectedExtrasQuickItems = new Set();
+let extrasDragState = null;
 let guidanceHistory = [];
 let activeGuidanceInput = null;
 let isInteractingWithGuidanceDropdown = false;
@@ -276,6 +287,35 @@ function getGuidanceValues() {
     }
 
     seen.add(normalizedGuidance);
+    return true;
+  });
+}
+
+function getExtrasInputs() {
+  return [...extrasList.querySelectorAll(".extras-input")];
+}
+
+function getManualExtrasValues() {
+  return getExtrasInputs()
+    .map((input) => input.value.trim())
+    .filter(Boolean);
+}
+
+function getExtrasQuickValues() {
+  return [...extrasQuickList.querySelectorAll('input[name="extrasQuickItems"]:checked')]
+    .map((input) => input.value.trim())
+    .filter(Boolean);
+}
+
+function getExtrasValues() {
+  const seen = new Set();
+  return [...getExtrasQuickValues(), ...getManualExtrasValues()].filter((extra) => {
+    const normalizedExtra = normalizeText(extra);
+    if (seen.has(normalizedExtra)) {
+      return false;
+    }
+
+    seen.add(normalizedExtra);
     return true;
   });
 }
@@ -1027,6 +1067,15 @@ async function loadGuidanceHistory() {
   }
 }
 
+async function loadExtrasHistory() {
+  try {
+    const response = await fetch("/api/extras");
+    extrasHistory = await response.json();
+  } catch {
+    extrasHistory = [];
+  }
+}
+
 async function loadHospitalHistory() {
   try {
     const response = await fetch("/api/hospitais");
@@ -1228,6 +1277,65 @@ async function deleteGuidanceFromHistory(value) {
   }
 }
 
+async function saveExtrasToHistory(value, sourceInput = null) {
+  const extra = value.trim();
+  if (!extra) {
+    return;
+  }
+
+  if (sourceInput?.dataset.skipHistoryValue === normalizeText(extra)) {
+    return;
+  }
+
+  const alreadyExists = extrasHistory.some((item) => normalizeText(item) === normalizeText(extra));
+  if (alreadyExists) {
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/extras", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ value: extra }),
+    });
+
+    extrasHistory = await response.json();
+    renderExtrasQuickList();
+    if (activeExtrasInput) {
+      updateExtrasHistoryDropdown(activeExtrasInput.value);
+    }
+  } catch {
+    console.warn("Não foi possível salvar o extra no histórico local.");
+  }
+}
+
+async function deleteExtrasFromHistory(value) {
+  const deletedKey = normalizeText(value);
+  extrasHistory = extrasHistory.filter((item) => normalizeText(item) !== deletedKey);
+  deselectedExtrasQuickItems.delete(deletedKey);
+  renderExtrasQuickList();
+  updateExtrasHistoryDropdown(activeExtrasInput?.value || "");
+
+  try {
+    const response = await fetch("/api/extras", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ value }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Falha ao remover no servidor.");
+    }
+
+    const nextHistory = await response.json();
+    extrasHistory = Array.isArray(nextHistory) ? nextHistory : extrasHistory;
+    renderExtrasQuickList();
+    updateExtrasHistoryDropdown(activeExtrasInput?.value || "");
+  } catch {
+    console.warn("Não foi possível remover o extra do histórico local.");
+  }
+}
+
 async function saveHospitalToHistory(value, sourceInput = null) {
   const hospital = value.trim();
   if (!hospital) {
@@ -1411,6 +1519,15 @@ function hideGuidanceHistoryDropdown() {
   activeGuidanceInput = null;
 }
 
+function hideExtrasHistoryDropdown() {
+  if (isInteractingWithExtrasDropdown) {
+    return;
+  }
+
+  extrasHistoryDropdown.hidden = true;
+  activeExtrasInput = null;
+}
+
 function hideHospitalHistoryDropdown() {
   if (isInteractingWithHospitalDropdown) {
     return;
@@ -1453,6 +1570,12 @@ function showGuidanceHistoryDropdown(input) {
   activeGuidanceInput = input;
   input.closest("label").append(guidanceHistoryDropdown);
   updateGuidanceHistoryDropdown(input.value);
+}
+
+function showExtrasHistoryDropdown(input) {
+  activeExtrasInput = input;
+  input.closest("label").append(extrasHistoryDropdown);
+  updateExtrasHistoryDropdown(input.value);
 }
 
 function showHospitalHistoryDropdown(input) {
@@ -1639,6 +1762,74 @@ function renderGuidanceQuickList() {
 
     row.append(checkbox, optionLabel, deleteButton);
     guidanceQuickList.append(row);
+  });
+}
+
+function updateExtrasHistoryDropdown(query = "") {
+  renderExtrasQuickList();
+
+  if (!activeExtrasInput) {
+    extrasHistoryDropdown.hidden = true;
+    return;
+  }
+
+  const normalizedQuery = normalizeText(query);
+  const options = extrasHistory
+    .filter((item) => !normalizedQuery || normalizeText(item).includes(normalizedQuery))
+    .slice(0, 12);
+
+  extrasHistoryDropdown.innerHTML = "";
+  extrasHistoryDropdown.hidden = options.length === 0;
+
+  options.forEach((optionText) => {
+    const option = document.createElement("div");
+    option.className = "history-option";
+    option.dataset.value = optionText;
+    option.setAttribute("role", "button");
+    option.setAttribute("tabindex", "0");
+
+    const optionLabel = document.createElement("span");
+    optionLabel.textContent = optionText;
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "history-delete";
+    deleteButton.textContent = "x";
+    deleteButton.setAttribute("aria-label", `Remover ${optionText} do histórico`);
+
+    option.append(optionLabel);
+    option.append(deleteButton);
+    extrasHistoryDropdown.append(option);
+  });
+}
+
+function renderExtrasQuickList() {
+  extrasQuickList.innerHTML = "";
+  extrasQuickList.hidden = extrasHistory.length === 0;
+
+  extrasHistory.forEach((optionText) => {
+    const row = document.createElement("label");
+    row.className = "extras-quick-option";
+    row.dataset.value = optionText;
+
+    const optionLabel = document.createElement("span");
+    optionLabel.textContent = optionText;
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.name = "extrasQuickItems";
+    checkbox.value = optionText;
+    checkbox.checked = !deselectedExtrasQuickItems.has(normalizeText(optionText));
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "extras-quick-delete";
+    deleteButton.textContent = "×";
+    deleteButton.setAttribute("aria-label", `Remover ${optionText} do histórico de extras`);
+    deleteButton.dataset.value = optionText;
+
+    row.append(checkbox, optionLabel, deleteButton);
+    extrasQuickList.append(row);
   });
 }
 
@@ -1931,6 +2122,113 @@ function handleGuidanceQuickPointerCancel() {
   endGuidanceQuickDrag({ shouldCommit: false });
 }
 
+async function saveExtrasOrderToHistory(items) {
+  try {
+    const response = await fetch("/api/extras", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Falha ao reordenar no servidor.");
+    }
+
+    const nextHistory = await response.json();
+    extrasHistory = Array.isArray(nextHistory) ? nextHistory : extrasHistory;
+    renderExtrasQuickList();
+    updateExtrasHistoryDropdown(activeExtrasInput?.value || "");
+    updatePreview();
+  } catch {
+    console.warn("Não foi possível salvar a ordem dos extras.");
+    renderExtrasQuickList();
+  }
+}
+
+function getExtrasQuickRows() {
+  return Array.from(extrasQuickList.querySelectorAll(".extras-quick-option"));
+}
+
+function createExtrasDropIndicator() {
+  const indicator = document.createElement("div");
+  indicator.className = "payment-quick-drop-indicator";
+  return indicator;
+}
+
+function moveExtrasDropIndicator(clientY) {
+  if (!extrasDragState) {
+    return;
+  }
+
+  const rows = getExtrasQuickRows().filter((row) => row !== extrasDragState.row);
+  const nextRow = rows.find((row) => {
+    const rect = row.getBoundingClientRect();
+    return clientY < rect.top + rect.height / 2;
+  });
+
+  extrasQuickList.insertBefore(extrasDragState.indicator, nextRow || null);
+}
+
+function endExtrasQuickDrag({ shouldCommit = true } = {}) {
+  if (!extrasDragState) {
+    return;
+  }
+
+  const { row, indicator, pointerId } = extrasDragState;
+  const hasNewPosition = indicator.parentElement === extrasQuickList;
+
+  row.classList.remove("is-dragging");
+  extrasQuickList.classList.remove("is-dragging-extras");
+
+  if (hasNewPosition && shouldCommit) {
+    extrasQuickList.insertBefore(row, indicator);
+  }
+
+  indicator.remove();
+
+  if (row.hasPointerCapture?.(pointerId)) {
+    row.releasePointerCapture(pointerId);
+  }
+
+  row.removeEventListener("pointermove", handleExtrasQuickPointerMove);
+  row.removeEventListener("pointerup", handleExtrasQuickPointerUp);
+  row.removeEventListener("pointercancel", handleExtrasQuickPointerCancel);
+
+  extrasDragState = null;
+
+  if (!hasNewPosition || !shouldCommit) {
+    renderExtrasQuickList();
+    return;
+  }
+
+  const nextHistory = getExtrasQuickRows()
+    .map((item) => item.dataset.value)
+    .filter(Boolean);
+
+  extrasHistory = nextHistory;
+  updateExtrasHistoryDropdown(activeExtrasInput?.value || "");
+  updatePreview();
+  saveExtrasOrderToHistory(nextHistory);
+}
+
+function handleExtrasQuickPointerMove(event) {
+  if (!extrasDragState) {
+    return;
+  }
+
+  event.preventDefault();
+  moveExtrasDropIndicator(event.clientY);
+}
+
+function handleExtrasQuickPointerUp(event) {
+  event.preventDefault();
+  endExtrasQuickDrag();
+}
+
+function handleExtrasQuickPointerCancel() {
+  endExtrasQuickDrag({ shouldCommit: false });
+}
+
 function updateHospitalHistoryDropdown(query = "") {
   if (!activeHospitalInput) {
     hospitalHistoryDropdown.hidden = true;
@@ -2089,6 +2387,24 @@ function createPaymentField() {
   input.focus();
 }
 
+function createExtrasField() {
+  const fieldNumber = getExtrasInputs().length + 1;
+  const label = document.createElement("label");
+  label.className = "unlabeled-field";
+
+  const input = document.createElement("input");
+  input.name = "customExtras";
+  input.type = "text";
+  input.className = "extras-input";
+  input.setAttribute("aria-label", `Extra adicional ${fieldNumber}`);
+  input.setAttribute("autocomplete", "off");
+
+  label.append(input);
+  extrasList.append(label);
+  updateExtrasButtons();
+  input.focus();
+}
+
 function createGuidanceField() {
   const fieldNumber = getGuidanceInputs().length + 1;
   const label = document.createElement("label");
@@ -2153,6 +2469,20 @@ function removeLastPaymentField() {
   updatePreview();
 }
 
+function removeLastExtrasField() {
+  const inputs = getExtrasInputs();
+  if (inputs.length <= 1) {
+    inputs[0].value = "";
+    inputs[0].focus();
+    updatePreview();
+    return;
+  }
+
+  inputs.at(-1).closest("label").remove();
+  updateExtrasButtons();
+  updatePreview();
+}
+
 function removeLastGuidanceField() {
   const inputs = getGuidanceInputs();
   if (inputs.length <= 1) {
@@ -2191,6 +2521,10 @@ function updatePaymentButtons() {
   removePaymentButton.disabled = getPaymentInputs().length <= 1;
 }
 
+function updateExtrasButtons() {
+  removeExtrasButton.disabled = getExtrasInputs().length <= 1;
+}
+
 function updateGuidanceButtons() {
   removeGuidanceButton.disabled = getGuidanceInputs().length <= 1;
 }
@@ -2206,12 +2540,14 @@ function isTextField(element) {
 function focusNextTextField(currentField) {
   isInteractingWithHistoryDropdown = false;
   isInteractingWithPaymentDropdown = false;
+  isInteractingWithExtrasDropdown = false;
   isInteractingWithGuidanceDropdown = false;
   isInteractingWithHospitalDropdown = false;
   isInteractingWithPatientDropdown = false;
   isInteractingWithTechnologyDropdown = false;
   hideSurgeryHistoryDropdown();
   hidePaymentHistoryDropdown();
+  hideExtrasHistoryDropdown();
   hideGuidanceHistoryDropdown();
   hideHospitalHistoryDropdown();
   hidePatientHistoryDropdown();
@@ -2271,6 +2607,25 @@ function selectPaymentHistoryOption(option, shouldAdvance = false) {
   updatePreview();
   isInteractingWithPaymentDropdown = false;
   hidePaymentHistoryDropdown();
+
+  if (shouldAdvance) {
+    focusNextTextField(input);
+    return;
+  }
+
+  input.focus();
+}
+
+function selectExtrasHistoryOption(option, shouldAdvance = false) {
+  const input = activeExtrasInput;
+  if (!input) {
+    return;
+  }
+
+  input.value = option.dataset.value;
+  updatePreview();
+  isInteractingWithExtrasDropdown = false;
+  hideExtrasHistoryDropdown();
 
   if (shouldAdvance) {
     focusNextTextField(input);
@@ -2570,6 +2925,24 @@ function updatePaymentPreview() {
   });
 }
 
+function updateExtrasPreview() {
+  const extrasValues = getExtrasValues();
+  extrasPreview.innerHTML = "";
+
+  if (extrasValues.length === 0) {
+    const emptyItem = document.createElement("li");
+    emptyItem.textContent = "Selecione os extras desejados.";
+    extrasPreview.append(emptyItem);
+    return;
+  }
+
+  extrasValues.forEach((extra) => {
+    const item = document.createElement("li");
+    item.textContent = extra;
+    extrasPreview.append(item);
+  });
+}
+
 function updateGuidance() {
   const selectedGuidance = getGuidanceValues();
 
@@ -2686,6 +3059,7 @@ function updatePreview() {
   const previewScrollLeft = previewPanel.scrollLeft;
 
   updateSimpleFields();
+  updateExtrasPreview();
   updatePaymentPreview();
   updateGuidance();
   paginateDocument();
@@ -2696,16 +3070,20 @@ function updatePreview() {
 function clearForm() {
   form.reset();
   deselectedPaymentQuickItems = new Set();
+  deselectedExtrasQuickItems = new Set();
   deselectedGuidanceQuickItems = new Set();
   renderPaymentQuickList();
+  renderExtrasQuickList();
   renderGuidanceQuickList();
   getSurgeryInputs().slice(1).forEach((input) => input.closest("label").remove());
+  getExtrasInputs().slice(1).forEach((input) => input.closest("label").remove());
   getPaymentInputs().slice(1).forEach((input) => input.closest("label").remove());
   getGuidanceInputs().slice(1).forEach((input) => input.closest("label").remove());
   getHospitalInputs().slice(1).forEach((input) => input.closest("label").remove());
   syncAllHospitalDetailFields();
   form.elements.budgetDate.value = formatDateForInput(new Date());
   updateSurgeryButtons();
+  updateExtrasButtons();
   updatePaymentButtons();
   updateGuidanceButtons();
   updateHospitalButtons();
@@ -2738,6 +3116,14 @@ form.addEventListener("input", (event) => {
     }
 
     showPaymentHistoryDropdown(event.target);
+  }
+
+  if (event.target.matches(".extras-input")) {
+    if (event.target.dataset.skipHistoryValue !== normalizeText(event.target.value)) {
+      delete event.target.dataset.skipHistoryValue;
+    }
+
+    showExtrasHistoryDropdown(event.target);
   }
 
   if (event.target.matches(".guidance-input")) {
@@ -2774,6 +3160,10 @@ form.addEventListener("focusin", (event) => {
     showPaymentHistoryDropdown(event.target);
   }
 
+  if (event.target.matches(".extras-input")) {
+    showExtrasHistoryDropdown(event.target);
+  }
+
   if (event.target.matches(".guidance-input")) {
     showGuidanceHistoryDropdown(event.target);
   }
@@ -2805,6 +3195,20 @@ paymentQuickList.addEventListener("change", (event) => {
 
   updatePreview();
 });
+extrasQuickList.addEventListener("change", (event) => {
+  if (!event.target.matches('input[name="extrasQuickItems"]')) {
+    return;
+  }
+
+  const extraKey = normalizeText(event.target.value);
+  if (event.target.checked) {
+    deselectedExtrasQuickItems.delete(extraKey);
+  } else {
+    deselectedExtrasQuickItems.add(extraKey);
+  }
+
+  updatePreview();
+});
 paymentQuickList.addEventListener("pointerdown", (event) => {
   const row = event.target.closest(".payment-quick-option");
   if (!row || event.button !== 0 || event.target.closest("input, button")) {
@@ -2828,6 +3232,30 @@ paymentQuickList.addEventListener("pointerdown", (event) => {
   row.addEventListener("pointermove", handlePaymentQuickPointerMove);
   row.addEventListener("pointerup", handlePaymentQuickPointerUp);
   row.addEventListener("pointercancel", handlePaymentQuickPointerCancel);
+});
+extrasQuickList.addEventListener("pointerdown", (event) => {
+  const row = event.target.closest(".extras-quick-option");
+  if (!row || event.button !== 0 || event.target.closest("input, button")) {
+    return;
+  }
+
+  event.preventDefault();
+  hideExtrasHistoryDropdown();
+
+  extrasDragState = {
+    row,
+    indicator: createExtrasDropIndicator(),
+    pointerId: event.pointerId,
+  };
+
+  row.classList.add("is-dragging");
+  extrasQuickList.classList.add("is-dragging-extras");
+  row.setPointerCapture(event.pointerId);
+  moveExtrasDropIndicator(event.clientY);
+
+  row.addEventListener("pointermove", handleExtrasQuickPointerMove);
+  row.addEventListener("pointerup", handleExtrasQuickPointerUp);
+  row.addEventListener("pointercancel", handleExtrasQuickPointerCancel);
 });
 guidanceQuickList.addEventListener("change", (event) => {
   if (!event.target.matches('input[name="guidanceQuickItems"]')) {
@@ -2932,6 +3360,17 @@ form.addEventListener("focusout", (event) => {
     }
   }
 
+  if (event.target.matches(".extras-input")) {
+    if (extrasHistoryDropdown.contains(event.relatedTarget)) {
+      return;
+    }
+
+    if (!isInteractingWithExtrasDropdown) {
+      saveExtrasToHistory(event.target.value, event.target);
+      hideExtrasHistoryDropdown();
+    }
+  }
+
   if (event.target.matches(".guidance-input")) {
     if (guidanceHistoryDropdown.contains(event.relatedTarget)) {
       return;
@@ -2985,6 +3424,12 @@ form.addEventListener("keydown", (event) => {
   if (event.target.matches(".payment-input") && event.shiftKey && event.key === "Enter") {
     event.preventDefault();
     createPaymentField();
+    return;
+  }
+
+  if (event.target.matches(".extras-input") && event.shiftKey && event.key === "Enter") {
+    event.preventDefault();
+    createExtrasField();
     return;
   }
 
@@ -3063,6 +3508,17 @@ form.addEventListener("keydown", (event) => {
     return;
   }
 
+  if (event.target.matches(".extras-input") && event.key === "ArrowDown") {
+    event.preventDefault();
+    showExtrasHistoryDropdown(event.target);
+    isInteractingWithExtrasDropdown = true;
+    focusDropdownOption(extrasHistoryDropdown, 0);
+    setTimeout(() => {
+      isInteractingWithExtrasDropdown = false;
+    });
+    return;
+  }
+
   if (event.target.matches(".guidance-input") && event.key === "ArrowDown") {
     event.preventDefault();
     showGuidanceHistoryDropdown(event.target);
@@ -3125,6 +3581,17 @@ form.addEventListener("keydown", (event) => {
     focusDropdownOption(paymentHistoryDropdown, getDropdownOptions(paymentHistoryDropdown).length - 1);
     setTimeout(() => {
       isInteractingWithPaymentDropdown = false;
+    });
+    return;
+  }
+
+  if (event.target.matches(".extras-input") && event.key === "ArrowUp") {
+    event.preventDefault();
+    showExtrasHistoryDropdown(event.target);
+    isInteractingWithExtrasDropdown = true;
+    focusDropdownOption(extrasHistoryDropdown, getDropdownOptions(extrasHistoryDropdown).length - 1);
+    setTimeout(() => {
+      isInteractingWithExtrasDropdown = false;
     });
     return;
   }
@@ -3329,6 +3796,68 @@ paymentHistoryDropdown.addEventListener("keydown", (event) => {
     input.focus();
   }
 });
+extrasHistoryDropdown.addEventListener("pointerdown", (event) => {
+  isInteractingWithExtrasDropdown = true;
+  event.preventDefault();
+});
+extrasHistoryDropdown.addEventListener("click", (event) => {
+  const option = event.target.closest(".history-option");
+  if (!option || !activeExtrasInput) {
+    isInteractingWithExtrasDropdown = false;
+    return;
+  }
+
+  const optionText = option.dataset.value;
+  if (event.target.closest(".history-delete")) {
+    event.stopPropagation();
+    const input = activeExtrasInput;
+    input.dataset.skipHistoryValue = normalizeText(optionText);
+    deleteExtrasFromHistory(optionText);
+    updateExtrasHistoryDropdown(input.value);
+    input.focus();
+    isInteractingWithExtrasDropdown = false;
+    return;
+  }
+
+  selectExtrasHistoryOption(option);
+});
+extrasHistoryDropdown.addEventListener("keydown", (event) => {
+  const option = event.target.closest(".history-option");
+  if (!option || !activeExtrasInput) {
+    return;
+  }
+
+  const options = getDropdownOptions(extrasHistoryDropdown);
+  const currentIndex = options.indexOf(option);
+
+  if (event.key === "ArrowDown") {
+    event.preventDefault();
+    focusDropdownOption(extrasHistoryDropdown, Math.min(currentIndex + 1, options.length - 1));
+  }
+
+  if (event.key === "ArrowUp") {
+    event.preventDefault();
+    if (currentIndex <= 0) {
+      activeExtrasInput.focus();
+      return;
+    }
+
+    focusDropdownOption(extrasHistoryDropdown, currentIndex - 1);
+  }
+
+  if (event.key === "Enter") {
+    event.preventDefault();
+    selectExtrasHistoryOption(option, true);
+  }
+
+  if (event.key === "Escape") {
+    event.preventDefault();
+    const input = activeExtrasInput;
+    isInteractingWithExtrasDropdown = false;
+    hideExtrasHistoryDropdown();
+    input.focus();
+  }
+});
 guidanceHistoryDropdown.addEventListener("pointerdown", (event) => {
   isInteractingWithGuidanceDropdown = true;
   event.preventDefault();
@@ -3519,6 +4048,8 @@ document.addEventListener("pointerdown", (event) => {
     event.target.closest("#surgeryHistoryDropdown") ||
     event.target.closest(".payment-input") ||
     event.target.closest("#paymentHistoryDropdown") ||
+    event.target.closest(".extras-input") ||
+    event.target.closest("#extrasHistoryDropdown") ||
     event.target.closest(".guidance-input") ||
     event.target.closest("#guidanceHistoryDropdown") ||
     event.target.closest(".hospital-input") ||
@@ -3532,6 +4063,7 @@ document.addEventListener("pointerdown", (event) => {
   hidePatientHistoryDropdown();
   hideSurgeryHistoryDropdown();
   hidePaymentHistoryDropdown();
+  hideExtrasHistoryDropdown();
   hideGuidanceHistoryDropdown();
   hideHospitalHistoryDropdown();
   hideTechnologyHistoryDropdown();
@@ -3578,6 +4110,14 @@ form.addEventListener("click", (event) => {
     return;
   }
 
+  const extrasQuickDelete = event.target.closest(".extras-quick-delete");
+  if (extrasQuickDelete) {
+    event.preventDefault();
+    deleteExtrasFromHistory(extrasQuickDelete.dataset.value);
+    updatePreview();
+    return;
+  }
+
   const guidanceQuickDelete = event.target.closest(".quick-delete");
   if (guidanceQuickDelete) {
     event.preventDefault();
@@ -3608,6 +4148,8 @@ addSurgeryButton.addEventListener("click", createSurgeryField);
 removeSurgeryButton.addEventListener("click", removeLastSurgeryField);
 addPaymentButton.addEventListener("click", createPaymentField);
 removePaymentButton.addEventListener("click", removeLastPaymentField);
+addExtrasButton.addEventListener("click", createExtrasField);
+removeExtrasButton.addEventListener("click", removeLastExtrasField);
 addGuidanceButton.addEventListener("click", createGuidanceField);
 removeGuidanceButton.addEventListener("click", removeLastGuidanceField);
 addHospitalButton.addEventListener("click", createHospitalField);
@@ -3618,6 +4160,7 @@ printButton.addEventListener("click", async () => {
       savePatientToHistory(patientInput.value, patientInput),
       ...getSurgeryInputs().map((input) => saveSurgeryToHistory(input.value, input)),
       ...getManualPaymentValues().map((payment) => savePaymentToHistory(payment)),
+      ...getManualExtrasValues().map((extra) => saveExtrasToHistory(extra)),
       ...getManualGuidanceValues().map((guidance) => saveGuidanceToHistory(guidance)),
       ...getHospitalInputs().map((input) => saveHospitalToHistory(input.value, input)),
       saveTechnologyToHistory(),
@@ -3643,6 +4186,7 @@ Promise.all([
   loadPatientHistory(),
   loadSurgeryHistory(),
   loadPaymentHistory(),
+  loadExtrasHistory(),
   loadGuidanceHistory(),
   loadHospitalHistory(),
   loadTechnologyHistory(),
@@ -3653,15 +4197,19 @@ Promise.all([
   updateSurgeryHistoryDropdown();
   renderPaymentQuickList();
   updatePaymentHistoryDropdown();
+  renderExtrasQuickList();
+  updateExtrasHistoryDropdown();
   renderGuidanceQuickList();
   updateGuidanceHistoryDropdown();
   updateTechnologyHistoryDropdown();
   hideHospitalHistoryDropdown();
   hidePatientHistoryDropdown();
   hidePaymentHistoryDropdown();
+  hideExtrasHistoryDropdown();
   hideGuidanceHistoryDropdown();
   hideTechnologyHistoryDropdown();
   updateSurgeryButtons();
+  updateExtrasButtons();
   updatePaymentButtons();
   updateGuidanceButtons();
   updateHospitalButtons();

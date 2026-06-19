@@ -182,6 +182,38 @@
           </fieldset>
 
           <fieldset>
+            <legend>Extras</legend>
+
+            <p class="extras-quick-title">Extras padrão</p>
+            <div id="extrasQuickList" class="extras-quick-list"></div>
+
+            <div class="dynamic-field-group">
+              <div id="extrasList" class="extras-list">
+                <label>
+                  Extras adicionais
+                  <input
+                    id="customExtras"
+                    name="customExtras"
+                    type="text"
+                    class="extras-input"
+                    autocomplete="off"
+                  />
+                </label>
+              </div>
+
+              <div class="field-actions">
+                <button type="button" id="addExtrasButton" class="add-button" aria-label="Adicionar outro extra">
+                  +
+                </button>
+                <button type="button" id="removeExtrasButton" class="remove-button" aria-label="Remover último extra">
+                  -
+                </button>
+              </div>
+              <div id="extrasHistoryDropdown" class="history-dropdown" hidden></div>
+            </div>
+          </fieldset>
+
+          <fieldset>
             <legend>Pagamento</legend>
 
             <p class="payment-quick-title">Formas de pagamento</p>
@@ -320,6 +352,13 @@
                   <span data-preview="teamItems">Equipe</span>
                   <span data-preview="teamValue">R$</span>
                 </div>
+              </section>
+
+              <section class="document-section">
+                <h3>Extras</h3>
+                <ul id="extrasPreview">
+                  <li>Selecione os extras desejados.</li>
+                </ul>
               </section>
 
               <section class="document-section">

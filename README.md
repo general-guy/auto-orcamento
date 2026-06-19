@@ -38,11 +38,11 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 
 ## O Que o App Faz
 
-- Preenche os dados da paciente, cirurgia, hospital, implantes, tecnologias, equipe, formas de pagamento e observações.
+- Preenche os dados da paciente, cirurgia, hospital, implantes, tecnologias, equipe, extras, formas de pagamento e observações.
 - Mostra uma pré-visualização paginada do documento final sobre o papel timbrado.
 - Permite imprimir ou salvar em PDF usando a impressão do navegador.
-- Guarda histórico local de pacientes, cirurgias, hospitais, formas de pagamento, observações e tecnologias.
-- Permite reordenar por drag and drop as cirurgias propostas no formulário e as listas rápidas de pagamento e observações.
+- Guarda histórico local de pacientes, cirurgias, hospitais, extras, formas de pagamento, observações e tecnologias.
+- Permite reordenar por drag and drop as cirurgias propostas no formulário e as listas rápidas de extras, pagamento e observações.
 - Cria múltiplas entradas de cirurgia e hospital.
 - Para Regina e Sapiranga, cria entradas auxiliares (`Reg1`, `Sap1`, etc.) com multiplicadores.
 - Usa tabelas hospitalares locais para sugerir pacotes e calcular valores auxiliares no preview.
@@ -59,6 +59,7 @@ Os históricos ficam em arquivos JSON dentro de `data/`:
 data/cirurgias.json
 data/hospitais.json
 data/pacientes.json
+data/extras.json
 data/pagamentos.json
 data/observacoes.json
 data/tecnologias.json
@@ -71,7 +72,7 @@ data/tabelas-hospitalares.json
 data/tabela-implantes.json
 ```
 
-Esses arquivos são usados pelo servidor Node.js e são versionados no repositório como base inicial do app. Quando o app altera históricos como pagamentos, observações ou tecnologias, essas mudanças ficam locais até serem adicionadas a um commit.
+Esses arquivos são usados pelo servidor Node.js e são versionados no repositório como base inicial do app. Quando o app altera históricos como extras, pagamentos, observações ou tecnologias, essas mudanças ficam locais até serem adicionadas a um commit.
 
 ## Hospitais Com Autofill
 
@@ -113,6 +114,16 @@ A seção `Cirurgia` usa campos dinâmicos com botões `+/-`, no mesmo padrão d
 
 Com duas ou mais cirurgias propostas, aparece um indicador `⋮⋮` à esquerda de cada caixa de texto. Esse drag and drop é só visual: reorganiza os campos no painel e a ordem exibida no preview do documento, sem alterar a ordem do histórico em `data/cirurgias.json`.
 
+## Extras
+
+A seção `Extras` fica antes de `Pagamento` e segue o mesmo padrão de `Observações`. No painel esquerdo, `Extras padrão` usa uma lista rápida alimentada por `data/extras.json`, com checkboxes marcados por padrão, botão `×` e drag and drop com persistência da ordem no JSON.
+
+A lista rápida aceita drag and drop para reorganizar os extras. Ao soltar um item em outra posição, a ordem visual, o preview do documento e o arquivo `data/extras.json` são atualizados juntos.
+
+`Extras adicionais` usa campos dinâmicos com dropdown de histórico e botões `+/-`, permitindo incluir novas entradas, reutilizar existentes ou excluir opções antigas.
+
+No documento final, os extras aparecem como lista com marcadores redondos, com espaçamento de `6px` entre os itens.
+
 ## Pagamento
 
 A seção `Pagamento` reúne somente as formas de pagamento. No painel esquerdo, ela usa campos dinâmicos com botões `+/-`, seguindo o mesmo padrão da seção `Cirurgia`.
@@ -135,7 +146,7 @@ No documento final, as observações continuam como lista com marcadores, com es
 
 ## Paginação do Documento
 
-A pré-visualização cria páginas adicionais quando uma seção não cabe inteira na página atual. As seções são mantidas como blocos indivisíveis para evitar quebra no meio de `Formas de Pagamento`, `Observações` ou outras seções.
+A pré-visualização cria páginas adicionais quando uma seção não cabe inteira na página atual. As seções são mantidas como blocos indivisíveis para evitar quebra no meio de `Extras`, `Formas de Pagamento`, `Observações` ou outras seções.
 
 A data fica no rodapé de cada página do documento. Quando o documento tem mais de uma página, o rodapé esquerdo exibe o contador no formato `Página 1 de 2`.
 

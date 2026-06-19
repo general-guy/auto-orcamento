@@ -57,10 +57,11 @@ Endpoints principais:
 - `GET /api/pacientes`, `POST /api/pacientes`, `DELETE /api/pacientes`: histórico de pacientes.
 - `GET /api/pagamentos`, `POST /api/pagamentos`, `DELETE /api/pagamentos`, `PUT /api/pagamentos`: histórico de formas de pagamento e persistência da ordem manual.
 - `GET /api/observacoes`, `POST /api/observacoes`, `DELETE /api/observacoes`, `PUT /api/observacoes`: histórico de observações e persistência da ordem manual.
+- `GET /api/extras`, `POST /api/extras`, `DELETE /api/extras`, `PUT /api/extras`: histórico de extras e persistência da ordem manual.
 - `GET /api/tecnologias`, `POST /api/tecnologias`, `DELETE /api/tecnologias`: histórico de tecnologias com valor associado.
 - `POST /api/shutdown`: encerra o servidor quando acionado pela interface.
 
-Os históricos de pacientes, cirurgias, hospitais, pagamentos e observações são listas JSON simples, limitadas a 200 itens por tipo. O histórico de tecnologias também é limitado a 200 itens, mas cada item é um objeto com `nome` e `valor`.
+Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observações são listas JSON simples, limitadas a 200 itens por tipo. O histórico de tecnologias também é limitado a 200 itens, mas cada item é um objeto com `nome` e `valor`.
 
 ## Frontend
 
@@ -80,7 +81,7 @@ Os históricos de pacientes, cirurgias, hospitais, pagamentos e observações s�
 `app.js` concentra a lógica de interação:
 
 - sincronização entre formulário e preview;
-- histórico/autocomplete de pacientes, cirurgias, hospitais, pagamentos, observações e tecnologias;
+- histórico/autocomplete de pacientes, cirurgias, hospitais, extras, pagamentos, observações e tecnologias;
 - campos dinâmicos e reordenáveis de cirurgia, além de hospital;
 - entradas auxiliares de Regina e Sapiranga;
 - multiplicadores de pacotes hospitalares;
@@ -88,6 +89,7 @@ Os históricos de pacientes, cirurgias, hospitais, pagamentos e observações s�
 - carregamento e renderização da tabela de implantes;
 - persistência de tecnologias com valor monetário associado;
 - renderização da equipe fixa com itens selecionáveis e valor monetário;
+- renderização da seção de extras com lista rápida reordenável e campos dinâmicos adicionais;
 - renderização da seção de pagamento com campos dinâmicos e lista rápida reordenável;
 - renderização da seção de observações com lista rápida reordenável e campos dinâmicos adicionais;
 - paginação da pré-visualização do documento em páginas A4;
@@ -102,6 +104,7 @@ Arquivos de histórico:
 data/cirurgias.json
 data/hospitais.json
 data/pacientes.json
+data/extras.json
 data/pagamentos.json
 data/observacoes.json
 data/tecnologias.json
@@ -125,6 +128,8 @@ O frontend carrega `data/tabelas-hospitalares.json` diretamente para montar os `
 `data/tecnologias.json` guarda as tecnologias cadastradas no próprio app. Diferente dos históricos simples, cada item tem `nome` e `valor`, permitindo carregar o valor automaticamente quando a tecnologia é selecionada.
 
 `data/pagamentos.json` guarda as formas de pagamento cadastradas no formulário. O arquivo é uma lista simples de textos, usada pelo dropdown de histórico da seção `Pagamento` e pela lista rápida reordenável.
+
+`data/extras.json` guarda os extras padrão e adicionais cadastrados no formulário. O arquivo é uma lista simples de textos, usada pela lista rápida reordenável da seção `Extras` e pelo dropdown de histórico dos extras adicionais.
 
 `data/observacoes.json` guarda as observações padrão e adicionais cadastradas no formulário. O arquivo é uma lista simples de textos, usada pela lista rápida reordenável da seção `Observações` e pelo dropdown de histórico das observações adicionais.
 
@@ -162,6 +167,16 @@ A seção `Equipe` é fixa, sem checkbox no título. Ela contém checkboxes pré
 Os itens ficam em três colunas no formulário. No preview, apenas os itens marcados são exibidos, separados por ` + `.
 
 O campo `Valor:` usa a mesma normalização monetária de tecnologias: valores como `10000` são convertidos para `R$ 10.000,00` ao sair do campo. O preview exibe os itens à esquerda e o valor à direita.
+
+## Lógica de Extras
+
+A seção `Extras` é alimentada por `data/extras.json` via `/api/extras` e fica antes de `Pagamento` no formulário e no documento. No painel, `renderExtrasQuickList()` exibe as entradas salvas como `Extras padrão`, com checkboxes marcados por padrão e botão de exclusão integrado ao histórico.
+
+Os `Extras adicionais` usam uma lista dinâmica de inputs com botões `+/-`. Cada input usa dropdown legado alimentado pelo mesmo histórico e permite salvar novas entradas, selecionar existentes ou excluir opções antigas.
+
+A lista rápida de extras padrão usa eventos de ponteiro para permitir drag and drop sem interferir nos checkboxes e no botão de exclusão. Durante o arraste, `app.js` mostra uma linha de encaixe entre os itens; ao soltar, reorganiza `extrasHistory`, atualiza o preview e envia a lista completa para `PUT /api/extras`, que normaliza duplicatas e grava a nova ordem em `data/extras.json`.
+
+No preview, `updateExtrasPreview()` combina os extras padrão marcados com os adicionais preenchidos, remove duplicatas por texto normalizado e renderiza os itens em uma lista com marcadores. O espaçamento entre itens é controlado por `#extrasPreview` em `styles.css`.
 
 ## Lógica de Pagamento
 
