@@ -59,6 +59,7 @@ Endpoints principais:
 - `GET /api/observacoes`, `POST /api/observacoes`, `DELETE /api/observacoes`, `PUT /api/observacoes`: histórico de observações e persistência da ordem manual.
 - `GET /api/extras`, `POST /api/extras`, `DELETE /api/extras`, `PUT /api/extras`: histórico de extras e persistência da ordem manual.
 - `GET /api/tecnologias`, `POST /api/tecnologias`, `DELETE /api/tecnologias`: histórico de tecnologias com valor associado.
+- `POST /api/pdf`: gera um PDF do documento atual e salva em `output/`.
 - `POST /api/shutdown`: encerra o servidor quando acionado pela interface.
 
 Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observações são listas JSON simples, limitadas a 200 itens por tipo. O histórico de tecnologias também é limitado a 200 itens, mas cada item é um objeto com `nome` e `valor`.
@@ -94,7 +95,9 @@ Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observa�
 - renderização da seção de observações com lista rápida reordenável e campos dinâmicos adicionais;
 - paginação da pré-visualização do documento em páginas A4;
 - redimensionamento do painel;
-- impressão, limpeza e shutdown.
+- impressão, exportação automática de PDF e shutdown.
+
+`pdf-export.js` usa o Chrome ou Edge instalado localmente, via `puppeteer-core`, para renderizar o HTML paginado recebido do frontend e gravar o arquivo em `output/`. O nome do PDF combina o nome da paciente com data e horário locais; colisões recebem sufixo `(2)`, `(3)`, etc.
 
 ## Dados
 
@@ -132,6 +135,8 @@ O frontend carrega `data/tabelas-hospitalares.json` diretamente para montar os `
 `data/extras.json` guarda os extras padrão e adicionais cadastrados no formulário. O arquivo é uma lista simples de textos, usada pela lista rápida reordenável da seção `Extras` e pelo dropdown de histórico dos extras adicionais.
 
 `data/observacoes.json` guarda as observações padrão e adicionais cadastradas no formulário. O arquivo é uma lista simples de textos, usada pela lista rápida reordenável da seção `Observações` e pelo dropdown de histórico das observações adicionais.
+
+A pasta `output/` guarda os PDFs gerados automaticamente após a impressão. Ela é criada pelo servidor quando necessário e não entra no controle de versão.
 
 ## Lógica de Cirurgia
 
@@ -217,6 +222,12 @@ Durante `updatePreview()`, o app salva `scrollTop` e `scrollLeft` do painel de p
 `focusNextTextField()` avança o foco quando o usuário pressiona `Enter` em um campo de texto. Para listas dinâmicas de `Cirurgia`, `Hospital`, `Extras`, `Pagamento` e `Observações`, o escopo fica limitado ao container da seção (`#surgeryList`, `#hospitalList`, `#extrasList`, `#paymentList` ou `#guidanceList`), evitando saltos para campos de outra seção. No último campo de uma dessas listas, `Enter` remove o foco do campo atual, disparando o salvamento no histórico via `focusout` e a atualização do preview.
 
 `Shift+Enter` continua criando uma nova linha na seção correspondente. A seleção de itens no dropdown legado com `Enter` também respeita o mesmo escopo ao avançar.
+
+## Exportação de PDF
+
+Quando o usuário clica em `Imprimir orçamento`, `app.js` salva os históricos pendentes, dispara `exportPdfDocument()` e chama `window.print()`. A exportação do PDF ocorre no clique, em paralelo com a abertura da janela de impressão; o frontend envia o HTML das páginas (`#printPage` e `.generated-print-page`) para `POST /api/pdf` junto com o nome da paciente.
+
+O servidor monta um documento HTML mínimo referenciando `styles.css`, renderiza com `puppeteer-core` em modo impressão e grava o arquivo em `output/`.
 
 ## Lógica Hospitalar
 

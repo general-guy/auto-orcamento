@@ -3079,6 +3079,39 @@ function restorePreviewScroll(scrollTop, scrollLeft) {
   previewPanel.scrollLeft = Math.min(scrollLeft, maxScrollLeft);
 }
 
+function getPrintPagesHtml() {
+  return [...document.querySelectorAll("#printPage, .generated-print-page")]
+    .map((page) => page.outerHTML)
+    .join("\n");
+}
+
+async function exportPdfDocument() {
+  const pagesHtml = getPrintPagesHtml();
+  if (!pagesHtml) {
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/pdf", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        patientName: getFieldValue("patientName"),
+        pagesHtml,
+      }),
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      throw new Error(result.error || "Falha ao gerar PDF.");
+    }
+
+    console.info(`PDF salvo em ${result.path}`);
+  } catch (error) {
+    console.warn("Não foi possível gerar o PDF automaticamente.", error);
+  }
+}
+
 function updatePreview() {
   const previewScrollTop = previewPanel.scrollTop;
   const previewScrollLeft = previewPanel.scrollLeft;
@@ -4191,6 +4224,7 @@ printButton.addEventListener("click", async () => {
       saveTechnologyToHistory(),
     ]
   );
+  void exportPdfDocument();
   window.print();
 });
 shutdownButton.addEventListener("click", async () => {

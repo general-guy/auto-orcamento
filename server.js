@@ -1,10 +1,16 @@
 const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
+const {
+  buildPdfFilename,
+  renderPdf,
+  resolveUniqueOutputPath,
+} = require("./pdf-export");
 
 const port = 3000;
 const rootDir = __dirname;
 const dataDir = path.join(rootDir, "data");
+const outputDir = path.join(rootDir, "output");
 const surgeriesFile = path.join(dataDir, "cirurgias.json");
 const hospitalsFile = path.join(dataDir, "hospitais.json");
 const patientsFile = path.join(dataDir, "pacientes.json");
@@ -83,14 +89,14 @@ function sendJson(response, statusCode, data) {
   response.end(JSON.stringify(data));
 }
 
-function collectRequestBody(request) {
+function collectRequestBody(request, maxBytes = 1024 * 32) {
   return new Promise((resolve, reject) => {
     let body = "";
 
     request.on("data", (chunk) => {
       body += chunk;
 
-      if (body.length > 1024 * 32) {
+      if (body.length > maxBytes) {
         request.destroy();
         reject(new Error("Request body too large"));
       }
@@ -98,6 +104,44 @@ function collectRequestBody(request) {
 
     request.on("end", () => resolve(body));
     request.on("error", reject);
+  });
+}
+
+function ensureOutputDir() {
+  fs.mkdirSync(outputDir, { recursive: true });
+}
+
+async function handlePdfExport(request, response) {
+  if (request.method !== "POST") {
+    sendJson(response, 405, { error: "Método não permitido." });
+    return;
+  }
+
+  const body = await collectRequestBody(request, 1024 * 1024 * 8);
+  const { patientName, pagesHtml } = JSON.parse(body || "{}");
+  const html = typeof pagesHtml === "string" ? pagesHtml.trim() : "";
+
+  if (!html) {
+    sendJson(response, 400, { error: "Informe o conteúdo do documento para exportar." });
+    return;
+  }
+
+  ensureOutputDir();
+
+  const createdAt = new Date();
+  const filename = buildPdfFilename(patientName, createdAt);
+  const outputPath = resolveUniqueOutputPath(outputDir, filename);
+  const baseUrl = `http://127.0.0.1:${port}/`;
+
+  await renderPdf({
+    pagesHtml: html,
+    outputPath,
+    baseUrl,
+  });
+
+  sendJson(response, 200, {
+    filename: path.basename(outputPath),
+    path: path.relative(rootDir, outputPath).replace(/\\/g, "/"),
   });
 }
 
@@ -381,6 +425,11 @@ const server = http.createServer(async (request, response) => {
       return;
     }
 
+    if (request.url.startsWith("/api/pdf")) {
+      await handlePdfExport(request, response);
+      return;
+    }
+
     serveStaticFile(request, response);
   } catch (error) {
     sendJson(response, 500, { error: error.message });
@@ -388,6 +437,7 @@ const server = http.createServer(async (request, response) => {
 });
 
 ensureDataFile();
+ensureOutputDir();
 server.listen(port, () => {
   console.log(`Auto Orçamento disponível em http://localhost:${port}`);
 });

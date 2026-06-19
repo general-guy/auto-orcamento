@@ -15,6 +15,7 @@ Esse atalho inicia o servidor local, abre o app em uma janela do Chrome em modo 
 Como alternativa, execute manualmente na pasta do projeto:
 
 ```bash
+npm install
 npm start
 ```
 
@@ -40,7 +41,7 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 
 - Preenche os dados da paciente, cirurgia, hospital, implantes, tecnologias, equipe, extras, formas de pagamento e observações.
 - Mostra uma pré-visualização paginada do documento final sobre o papel timbrado.
-- Permite imprimir ou salvar em PDF usando a impressão do navegador.
+- Permite imprimir o orçamento e, ao clicar em `Imprimir orçamento`, gera automaticamente um PDF em `output/`.
 - Guarda histórico local de pacientes, cirurgias, hospitais, extras, formas de pagamento, observações e tecnologias.
 - Permite reordenar por drag and drop as cirurgias propostas no formulário e as listas rápidas de extras, pagamento e observações.
 - Cria múltiplas entradas de cirurgia e hospital.
@@ -73,6 +74,20 @@ data/tabela-implantes.json
 ```
 
 Esses arquivos são usados pelo servidor Node.js e são versionados no repositório como base inicial do app. Quando o app altera históricos como extras, pagamentos, observações ou tecnologias, essas mudanças ficam locais até serem adicionadas a um commit.
+
+Os PDFs gerados automaticamente ficam em:
+
+```text
+output/
+```
+
+Essa pasta não é versionada no Git. Cada arquivo usa o nome da paciente, a data e o horário da geração, por exemplo `Maria da Silva 2026-06-18 14-30-05.pdf`.
+
+## Impressão e PDF automático
+
+Ao clicar em `Imprimir orçamento`, o app envia o documento atual da pré-visualização ao servidor e abre a impressão do navegador em seguida. O PDF é gerado no clique, sem esperar o fim da impressão, e salvo em `output/`.
+
+O PDF usa o mesmo layout paginado da pré-visualização, incluindo papel timbrado e estilos de impressão. Se já existir um arquivo com o mesmo nome, o app acrescenta um sufixo numérico, como `(2)`.
 
 ## Hospitais Com Autofill
 
