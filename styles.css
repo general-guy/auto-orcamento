@@ -229,16 +229,14 @@ textarea {
 
 #hospitalFormContent[hidden],
 #implantsFormContent[hidden],
-#technologiesFormContent[hidden] {
+#technologiesFormContent[hidden],
+#extrasFormContent[hidden] {
   display: none;
 }
 
-#hospitalFormContent {
-  display: grid;
-  gap: 12px;
-}
-
-#technologiesFormContent {
+#hospitalFormContent,
+#technologiesFormContent,
+#extrasFormContent {
   display: grid;
   gap: 12px;
 }

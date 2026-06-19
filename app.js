@@ -2570,7 +2570,7 @@ function focusNextTextField(currentField) {
 
   if (nextField) {
     nextField.focus();
-  } else if (!dynamicList) {
+  } else {
     currentField.blur();
   }
 }

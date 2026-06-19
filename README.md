@@ -128,7 +128,7 @@ No documento final, os extras aparecem como lista com marcadores redondos, com e
 
 ## Atalhos de teclado
 
-Nos campos dinâmicos de `Cirurgia`, `Hospital`, `Extras`, `Pagamento` e `Observações`, `Shift+Enter` adiciona outra linha na mesma seção. `Enter` avança apenas para a próxima linha da mesma seção; no último campo da seção, o foco permanece no lugar em vez de pular para a seção seguinte.
+Nos campos dinâmicos de `Cirurgia`, `Hospital`, `Extras`, `Pagamento` e `Observações`, `Shift+Enter` adiciona outra linha na mesma seção. `Enter` avança apenas para a próxima linha da mesma seção; no último campo da seção, tira o foco da caixa atual para salvar no histórico e atualizar o preview, sem pular para a seção seguinte.
 
 Nos demais campos de texto, `Enter` continua avançando para o próximo campo habilitado do formulário.
 

@@ -172,7 +172,7 @@ O campo `Valor:` usa a mesma normalização monetária de tecnologias: valores c
 
 A seção `Extras` é controlada por um checkbox no próprio título. Quando o checkbox está desmarcado, o conteúdo do formulário fica oculto, os controles internos são desabilitados, o fieldset recebe `is-collapsed` e a seção não aparece no documento.
 
-Quando habilitada, a seção é alimentada por `data/extras.json` via `/api/extras` e fica antes de `Pagamento` no formulário e no documento. No painel, `renderExtrasQuickList()` exibe as entradas salvas como `Extras padrão`, com checkboxes marcados por padrão e botão de exclusão integrado ao histórico.
+Quando habilitada, a seção é alimentada por `data/extras.json` via `/api/extras` e fica antes de `Pagamento` no formulário e no documento. O conteúdo interno usa `#extrasFormContent` com o mesmo `gap` em grid das outras seções opcionais, mantendo o espaçamento entre `Extras padrão`, a lista rápida e `Extras adicionais` alinhado ao de `Pagamento`. No painel, `renderExtrasQuickList()` exibe as entradas salvas como `Extras padrão`, com checkboxes marcados por padrão e botão de exclusão integrado ao histórico.
 
 Os `Extras adicionais` usam uma lista dinâmica de inputs com botões `+/-`. Cada input usa dropdown legado alimentado pelo mesmo histórico e permite salvar novas entradas, selecionar existentes ou excluir opções antigas.
 
@@ -214,7 +214,7 @@ Durante `updatePreview()`, o app salva `scrollTop` e `scrollLeft` do painel de p
 
 ## Navegação por teclado
 
-`focusNextTextField()` avança o foco quando o usuário pressiona `Enter` em um campo de texto. Para listas dinâmicas de `Cirurgia`, `Hospital`, `Extras`, `Pagamento` e `Observações`, o escopo fica limitado ao container da seção (`#surgeryList`, `#hospitalList`, `#extrasList`, `#paymentList` ou `#guidanceList`), evitando saltos para campos de outra seção. No último campo de uma dessas listas, `Enter` não move o foco.
+`focusNextTextField()` avança o foco quando o usuário pressiona `Enter` em um campo de texto. Para listas dinâmicas de `Cirurgia`, `Hospital`, `Extras`, `Pagamento` e `Observações`, o escopo fica limitado ao container da seção (`#surgeryList`, `#hospitalList`, `#extrasList`, `#paymentList` ou `#guidanceList`), evitando saltos para campos de outra seção. No último campo de uma dessas listas, `Enter` remove o foco do campo atual, disparando o salvamento no histórico via `focusout` e a atualização do preview.
 
 `Shift+Enter` continua criando uma nova linha na seção correspondente. A seleção de itens no dropdown legado com `Enter` também respeita o mesmo escopo ao avançar.
 
