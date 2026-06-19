@@ -10,6 +10,10 @@ const addPaymentButton = document.querySelector("#addPaymentButton");
 const removePaymentButton = document.querySelector("#removePaymentButton");
 const addExtrasButton = document.querySelector("#addExtrasButton");
 const removeExtrasButton = document.querySelector("#removeExtrasButton");
+const extrasEnabledInput = document.querySelector("#extrasEnabled");
+const extrasFieldset = document.querySelector("#extrasFieldset");
+const extrasFormContent = document.querySelector("#extrasFormContent");
+const extrasPreviewSection = document.querySelector("#extrasPreviewSection");
 const addGuidanceButton = document.querySelector("#addGuidanceButton");
 const removeGuidanceButton = document.querySelector("#removeGuidanceButton");
 const guidancePreview = document.querySelector("#guidancePreview");
@@ -2926,6 +2930,21 @@ function updatePaymentPreview() {
 }
 
 function updateExtrasPreview() {
+  const isEnabled = extrasEnabledInput.checked;
+  extrasFieldset.classList.toggle("is-collapsed", !isEnabled);
+  extrasFormContent.hidden = !isEnabled;
+  extrasFormContent.querySelectorAll("input, button").forEach((control) => {
+    control.disabled = !isEnabled;
+  });
+  extrasPreviewSection.hidden = !isEnabled;
+
+  if (!isEnabled) {
+    hideExtrasHistoryDropdown();
+    return;
+  }
+
+  updateExtrasButtons();
+
   const extrasValues = getExtrasValues();
   extrasPreview.innerHTML = "";
 
@@ -4160,7 +4179,7 @@ printButton.addEventListener("click", async () => {
       savePatientToHistory(patientInput.value, patientInput),
       ...getSurgeryInputs().map((input) => saveSurgeryToHistory(input.value, input)),
       ...getManualPaymentValues().map((payment) => savePaymentToHistory(payment)),
-      ...getManualExtrasValues().map((extra) => saveExtrasToHistory(extra)),
+      ...(extrasEnabledInput.checked ? getManualExtrasValues().map((extra) => saveExtrasToHistory(extra)) : []),
       ...getManualGuidanceValues().map((guidance) => saveGuidanceToHistory(guidance)),
       ...getHospitalInputs().map((input) => saveHospitalToHistory(input.value, input)),
       saveTechnologyToHistory(),

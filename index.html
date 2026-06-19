@@ -181,35 +181,43 @@
             </label>
           </fieldset>
 
-          <fieldset>
-            <legend>Extras</legend>
+          <fieldset id="extrasFieldset" class="optional-fieldset">
+            <legend>
+              <label class="legend-checkbox">
+                <span>Extras</span>
+                <input id="extrasEnabled" name="extrasEnabled" type="checkbox" />
+              </label>
+            </legend>
 
-            <p class="extras-quick-title">Extras padrão</p>
-            <div id="extrasQuickList" class="extras-quick-list"></div>
+            <div id="extrasFormContent">
+              <p class="extras-quick-title">Extras padrão</p>
+              <div id="extrasQuickList" class="extras-quick-list"></div>
 
-            <div class="dynamic-field-group">
-              <div id="extrasList" class="extras-list">
-                <label>
-                  Extras adicionais
-                  <input
-                    id="customExtras"
-                    name="customExtras"
-                    type="text"
-                    class="extras-input"
-                    autocomplete="off"
-                  />
-                </label>
+              <div class="dynamic-field-group">
+                <div id="extrasList" class="extras-list">
+                  <label>
+                    Extras adicionais
+                    <input
+                      id="customExtras"
+                      name="customExtras"
+                      type="text"
+                      class="extras-input"
+                      autocomplete="off"
+                      disabled
+                    />
+                  </label>
+                </div>
+
+                <div class="field-actions">
+                  <button type="button" id="addExtrasButton" class="add-button" aria-label="Adicionar outro extra" disabled>
+                    +
+                  </button>
+                  <button type="button" id="removeExtrasButton" class="remove-button" aria-label="Remover último extra" disabled>
+                    -
+                  </button>
+                </div>
+                <div id="extrasHistoryDropdown" class="history-dropdown" hidden></div>
               </div>
-
-              <div class="field-actions">
-                <button type="button" id="addExtrasButton" class="add-button" aria-label="Adicionar outro extra">
-                  +
-                </button>
-                <button type="button" id="removeExtrasButton" class="remove-button" aria-label="Remover último extra">
-                  -
-                </button>
-              </div>
-              <div id="extrasHistoryDropdown" class="history-dropdown" hidden></div>
             </div>
           </fieldset>
 
@@ -354,7 +362,7 @@
                 </div>
               </section>
 
-              <section class="document-section">
+              <section id="extrasPreviewSection" class="document-section" hidden>
                 <h3>Extras</h3>
                 <ul id="extrasPreview">
                   <li>Selecione os extras desejados.</li>

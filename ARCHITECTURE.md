@@ -89,7 +89,7 @@ Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observa�
 - carregamento e renderização da tabela de implantes;
 - persistência de tecnologias com valor monetário associado;
 - renderização da equipe fixa com itens selecionáveis e valor monetário;
-- renderização da seção de extras com lista rápida reordenável e campos dinâmicos adicionais;
+- renderização opcional da seção de extras com lista rápida reordenável e campos dinâmicos adicionais;
 - renderização da seção de pagamento com campos dinâmicos e lista rápida reordenável;
 - renderização da seção de observações com lista rápida reordenável e campos dinâmicos adicionais;
 - paginação da pré-visualização do documento em páginas A4;
@@ -170,7 +170,9 @@ O campo `Valor:` usa a mesma normalização monetária de tecnologias: valores c
 
 ## Lógica de Extras
 
-A seção `Extras` é alimentada por `data/extras.json` via `/api/extras` e fica antes de `Pagamento` no formulário e no documento. No painel, `renderExtrasQuickList()` exibe as entradas salvas como `Extras padrão`, com checkboxes marcados por padrão e botão de exclusão integrado ao histórico.
+A seção `Extras` é controlada por um checkbox no próprio título. Quando o checkbox está desmarcado, o conteúdo do formulário fica oculto, os controles internos são desabilitados, o fieldset recebe `is-collapsed` e a seção não aparece no documento.
+
+Quando habilitada, a seção é alimentada por `data/extras.json` via `/api/extras` e fica antes de `Pagamento` no formulário e no documento. No painel, `renderExtrasQuickList()` exibe as entradas salvas como `Extras padrão`, com checkboxes marcados por padrão e botão de exclusão integrado ao histórico.
 
 Os `Extras adicionais` usam uma lista dinâmica de inputs com botões `+/-`. Cada input usa dropdown legado alimentado pelo mesmo histórico e permite salvar novas entradas, selecionar existentes ou excluir opções antigas.
 
