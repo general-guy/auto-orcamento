@@ -2541,6 +2541,10 @@ function isTextField(element) {
   return element.matches('input[type="date"], input[type="text"], textarea');
 }
 
+function getDynamicFieldListContainer(field) {
+  return field.closest("#surgeryList, #hospitalList, #extrasList, #paymentList, #guidanceList");
+}
+
 function focusNextTextField(currentField) {
   isInteractingWithHistoryDropdown = false;
   isInteractingWithPaymentDropdown = false;
@@ -2557,14 +2561,16 @@ function focusNextTextField(currentField) {
   hidePatientHistoryDropdown();
   hideTechnologyHistoryDropdown();
 
-  const textFields = [...form.querySelectorAll('input[type="date"], input[type="text"], textarea')]
-    .filter((field) => !field.disabled && !field.readOnly);
+  const dynamicList = getDynamicFieldListContainer(currentField);
+  const scope = dynamicList || form;
+  const textFields = [...scope.querySelectorAll('input[type="date"], input[type="text"], textarea')]
+    .filter((field) => !field.disabled && !field.readOnly && field.offsetParent !== null);
   const currentIndex = textFields.indexOf(currentField);
   const nextField = textFields[currentIndex + 1];
 
   if (nextField) {
     nextField.focus();
-  } else {
+  } else if (!dynamicList) {
     currentField.blur();
   }
 }

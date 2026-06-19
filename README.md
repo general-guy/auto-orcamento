@@ -126,6 +126,12 @@ A lista rápida aceita drag and drop para reorganizar os extras. Ao soltar um it
 
 No documento final, os extras aparecem como lista com marcadores redondos, com espaçamento de `6px` entre os itens.
 
+## Atalhos de teclado
+
+Nos campos dinâmicos de `Cirurgia`, `Hospital`, `Extras`, `Pagamento` e `Observações`, `Shift+Enter` adiciona outra linha na mesma seção. `Enter` avança apenas para a próxima linha da mesma seção; no último campo da seção, o foco permanece no lugar em vez de pular para a seção seguinte.
+
+Nos demais campos de texto, `Enter` continua avançando para o próximo campo habilitado do formulário.
+
 ## Pagamento
 
 A seção `Pagamento` reúne somente as formas de pagamento. No painel esquerdo, ela usa campos dinâmicos com botões `+/-`, seguindo o mesmo padrão da seção `Cirurgia`.

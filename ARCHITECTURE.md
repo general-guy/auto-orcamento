@@ -212,6 +212,12 @@ Quando a paginação cria mais de uma página, `updateDocumentPageCounters()` ex
 
 Durante `updatePreview()`, o app salva `scrollTop` e `scrollLeft` do painel de pré-visualização antes de redesenhar/paginar e restaura esses valores ao final da atualização, com um segundo ajuste no próximo frame.
 
+## Navegação por teclado
+
+`focusNextTextField()` avança o foco quando o usuário pressiona `Enter` em um campo de texto. Para listas dinâmicas de `Cirurgia`, `Hospital`, `Extras`, `Pagamento` e `Observações`, o escopo fica limitado ao container da seção (`#surgeryList`, `#hospitalList`, `#extrasList`, `#paymentList` ou `#guidanceList`), evitando saltos para campos de outra seção. No último campo de uma dessas listas, `Enter` não move o foco.
+
+`Shift+Enter` continua criando uma nova linha na seção correspondente. A seleção de itens no dropdown legado com `Enter` também respeita o mesmo escopo ao avançar.
+
 ## Lógica Hospitalar
 
 A seção `Hospital` é controlada por um checkbox no título, marcado por padrão no HTML para cada nova sessão do app. Quando desmarcado, o conteúdo do formulário é ocultado, os controles internos são desabilitados e o bloco de hospital no preview recebe `hidden`.
