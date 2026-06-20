@@ -1,0 +1,38 @@
+{
+  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "productName": "Auto Orçamento",
+  "version": "0.1.0",
+  "identifier": "br.com.autoorcamento",
+  "build": {
+    "frontendDist": "../dist",
+    "beforeDevCommand": "npm run copy:frontend",
+    "beforeBuildCommand": "npm run copy:frontend"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Auto Orçamento",
+        "width": 1440,
+        "height": 900,
+        "maximized": true,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}

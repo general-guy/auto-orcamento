@@ -1,7 +1,7 @@
 # Plano de migração para Tauri
 
-> **Status:** planejamento — a implementação ainda não começou.  
-> **Baseline:** `stable/node-web-v0.1.0` / tag `v0.1.0-node-web` / `docs/SNAPSHOT-node-web-v0.1.0.md`
+> **Status:** Fase 1 concluída — scaffold Tauri 2 com WebView carregando o frontend estático.  
+> **Baseline Node:** `stable/node-web-v0.1.0` / tag `v0.1.0-node-web` / `docs/SNAPSHOT-node-web-v0.1.0.md`
 
 ## Objetivo
 
@@ -47,10 +47,34 @@ Substituir a stack **Node.js + Chrome/Edge manual** por um **executável desktop
 
 ## Fases sugeridas
 
-### Fase 1 — Scaffold Tauri
-- Inicializar projeto Tauri 2 na pasta (subpasta `src-tauri/` ou monorepo).
-- Carregar `index.html` existente na WebView.
-- Validar fontes, timbrado e preview sem backend.
+### Fase 1 — Scaffold Tauri ✅
+
+- [x] Projeto Tauri 2 em `src-tauri/`
+- [x] Script `scripts/copy-frontend.cjs` copia `index.html`, `app.js`, `styles.css`, `assets/` e `data/` para `dist/`
+- [x] WebView carrega o frontend estático (sem Node em runtime)
+- [x] Janela maximizada, ícones gerados a partir do timbrado
+- [x] Build Windows: `.exe`, `.msi` e instalador NSIS
+- [ ] Históricos via `/api/*` ainda não funcionam (esperado — Fase 2)
+- [ ] PDF automático ainda não funciona (esperado — Fase 3)
+
+Comandos:
+
+```bash
+npm run tauri:dev      # desenvolvimento
+npm run tauri:build    # gera .exe e instaladores
+```
+
+Atalho Windows: `abrir-auto-orcamento-tauri.bat`
+
+Saída do build:
+
+```text
+src-tauri/target/release/auto-orcamento.exe
+src-tauri/target/release/bundle/nsis/Auto Orçamento_0.1.0_x64-setup.exe
+src-tauri/target/release/bundle/msi/Auto Orçamento_0.1.0_x64_en-US.msi
+```
+
+Requisitos de build: Node.js, Rust (via `rustup`) e WebView2 (já presente no Windows 10/11).
 
 ### Fase 2 — Persistência
 - Implementar leitura/gravação JSON equivalente a `server.js`.

@@ -57,6 +57,31 @@ git checkout stable/node-web-v0.1.0
 npm install
 ```
 
+## Versão Tauri (em desenvolvimento)
+
+A migração para Tauri está em andamento no branch `feature/tauri`. Nesta fase, o app abre em uma janela nativa (WebView2) sem precisar do Node em runtime.
+
+Desenvolvimento:
+
+```bash
+npm install
+npm run tauri:dev
+```
+
+Ou clique duas vezes em `abrir-auto-orcamento-tauri.bat`.
+
+Build do executável Windows:
+
+```bash
+npm run tauri:build
+```
+
+O `.exe` fica em `src-tauri/target/release/auto-orcamento.exe`. Instaladores NSIS e MSI são gerados em `src-tauri/target/release/bundle/`.
+
+**Requisito de build:** Rust (`winget install Rustlang.Rustup`). WebView2 já vem no Windows 10/11.
+
+Nesta fase (Fase 1), o formulário e o preview visual funcionam; históricos e PDF automático ainda dependem das fases seguintes. Detalhes em `docs/MIGRATION-tauri.md`.
+
 ## Ambiente Recomendado
 
 Para manutenção do projeto no Windows, recomenda-se usar PowerShell 7 (`pwsh`) como terminal padrão do Cursor, em vez do Windows PowerShell antigo (`powershell.exe`). O `pwsh` aceita operadores modernos como `&&` e evita diferenças de sintaxe do Windows PowerShell 5.1.
