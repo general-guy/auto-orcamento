@@ -131,12 +131,10 @@ async function handlePdfExport(request, response) {
   const createdAt = new Date();
   const filename = buildPdfFilename(patientName, createdAt);
   const outputPath = resolveUniqueOutputPath(outputDir, filename);
-  const baseUrl = `http://127.0.0.1:${port}/`;
-
   await renderPdf({
     pagesHtml: html,
     outputPath,
-    baseUrl,
+    rootDir,
   });
 
   sendJson(response, 200, {

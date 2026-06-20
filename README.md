@@ -87,7 +87,7 @@ Essa pasta não é versionada no Git. Cada arquivo usa o nome da paciente, a dat
 
 Ao clicar em `Imprimir orçamento`, o app envia o documento atual da pré-visualização ao servidor e abre a impressão do navegador em seguida. O PDF é gerado no clique, sem esperar o fim da impressão, e salvo em `output/`.
 
-O PDF usa o mesmo layout paginado da pré-visualização, incluindo papel timbrado e estilos de impressão. Se já existir um arquivo com o mesmo nome, o app acrescenta um sufixo numérico, como `(2)`.
+O PDF usa o mesmo layout paginado da pré-visualização, incluindo papel timbrado, fontes e estilos de impressão. A geração embute `styles.css`, fontes e imagens localmente, sem depender de novas requisições HTTP durante a exportação. Se já existir um arquivo com o mesmo nome, o app acrescenta um sufixo numérico, como `(2)`.
 
 ## Hospitais Com Autofill
 

@@ -97,7 +97,7 @@ Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observa�
 - redimensionamento do painel;
 - impressão, exportação automática de PDF e shutdown.
 
-`pdf-export.js` usa o Chrome ou Edge instalado localmente, via `puppeteer-core`, para renderizar o HTML paginado recebido do frontend e gravar o arquivo em `output/`. O nome do PDF combina o nome da paciente com data e horário locais; colisões recebem sufixo `(2)`, `(3)`, etc.
+`pdf-export.js` usa o Chrome ou Edge instalado localmente, via `puppeteer-core`, para renderizar o HTML paginado recebido do frontend. O CSS, fontes e imagens do timbrado são embutidos a partir dos arquivos locais do projeto em base64, evitando depender de novas requisições HTTP enquanto o servidor processa a exportação. O nome do PDF combina o nome da paciente com data e horário locais; colisões recebem sufixo `(2)`, `(3)`, etc.
 
 ## Dados
 
@@ -227,7 +227,7 @@ Durante `updatePreview()`, o app salva `scrollTop` e `scrollLeft` do painel de p
 
 Quando o usuário clica em `Imprimir orçamento`, `app.js` salva os históricos pendentes, dispara `exportPdfDocument()` e chama `window.print()`. A exportação do PDF ocorre no clique, em paralelo com a abertura da janela de impressão; o frontend envia o HTML das páginas (`#printPage` e `.generated-print-page`) para `POST /api/pdf` junto com o nome da paciente.
 
-O servidor monta um documento HTML mínimo referenciando `styles.css`, renderiza com `puppeteer-core` em modo impressão e grava o arquivo em `output/`.
+O servidor monta um documento HTML autocontido com `styles.css`, fontes e papel timbrado embutidos em base64, renderiza com `puppeteer-core` em modo impressão e grava o arquivo em `output/`.
 
 ## Lógica Hospitalar
 

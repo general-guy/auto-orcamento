@@ -1,5 +1,4 @@
 const fs = require("node:fs");
-const os = require("node:os");
 const path = require("node:path");
 const puppeteer = require("puppeteer-core");
 
@@ -12,6 +11,20 @@ const browserCandidates = [
   path.join(process.env.ProgramFiles || "", "Microsoft", "Edge", "Application", "msedge.exe"),
   path.join(process.env.LocalAppData || "", "Microsoft", "Edge", "Application", "msedge.exe"),
 ].filter(Boolean);
+
+const fontMimeTypes = {
+  ".otf": "font/otf",
+  ".ttf": "font/ttf",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+};
+
+const imageMimeTypes = {
+  ".png": "image/png",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
+  ".webp": "image/webp",
+};
 
 function getChromePath() {
   return browserCandidates.find((candidate) => fs.existsSync(candidate));
@@ -58,21 +71,80 @@ function resolveUniqueOutputPath(outputDir, filename) {
   return candidate;
 }
 
-async function renderPdf({ pagesHtml, outputPath, baseUrl }) {
+function toDataUrl(filePath) {
+  const extension = path.extname(filePath).toLowerCase();
+  const mimeType = fontMimeTypes[extension] || imageMimeTypes[extension];
+
+  if (!mimeType || !fs.existsSync(filePath)) {
+    return null;
+  }
+
+  const encoded = fs.readFileSync(filePath).toString("base64");
+  return `data:${mimeType};base64,${encoded}`;
+}
+
+function inlineStylesheetAssets(css, rootDir) {
+  return css.replace(/url\((["']?)([^"')]+)\1\)/g, (match, quote, assetUrl) => {
+    if (/^(https?:|data:|file:|blob:)/.test(assetUrl)) {
+      return match;
+    }
+
+    const absolutePath = path.resolve(rootDir, assetUrl);
+    const dataUrl = toDataUrl(absolutePath);
+    return dataUrl ? `url("${dataUrl}")` : match;
+  });
+}
+
+function loadStylesForPdf(rootDir) {
+  const stylesPath = path.join(rootDir, "styles.css");
+  const css = fs.readFileSync(stylesPath, "utf8");
+  return inlineStylesheetAssets(css, rootDir);
+}
+
+function rewritePagesHtmlAssets(pagesHtml, rootDir) {
+  return pagesHtml.replace(/\ssrc=(["'])([^"']+)\1/g, (match, quote, assetUrl) => {
+    if (/^(https?:|data:|file:|blob:)/.test(assetUrl)) {
+      return match;
+    }
+
+    const absolutePath = path.resolve(rootDir, assetUrl);
+    const dataUrl = toDataUrl(absolutePath);
+    return dataUrl ? ` src=${quote}${dataUrl}${quote}` : match;
+  });
+}
+
+function buildPdfDocumentHtml(pagesHtml, rootDir) {
+  const css = loadStylesForPdf(rootDir);
+  const normalizedPages = rewritePagesHtmlAssets(pagesHtml, rootDir);
+
+  return `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <style>${css}</style>
+  <style>
+    body {
+      background: #ffffff;
+      margin: 0;
+    }
+
+    .print-page {
+      box-shadow: none;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>${normalizedPages}</body>
+</html>`;
+}
+
+async function renderPdf({ pagesHtml, outputPath, rootDir }) {
   const chromePath = getChromePath();
   if (!chromePath) {
     throw new Error("Chrome ou Edge não encontrado para gerar PDF.");
   }
 
-  const html = `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8">
-  <link rel="stylesheet" href="/styles.css">
-</head>
-<body>${pagesHtml}</body>
-</html>`;
-
+  const html = buildPdfDocumentHtml(pagesHtml, rootDir);
   const browser = await puppeteer.launch({
     executablePath: chromePath,
     headless: true,
@@ -81,10 +153,8 @@ async function renderPdf({ pagesHtml, outputPath, baseUrl }) {
 
   try {
     const page = await browser.newPage();
-    await page.setContent(html, {
-      waitUntil: "networkidle0",
-      baseURL: baseUrl,
-    });
+    await page.setContent(html, { waitUntil: "load" });
+    await page.evaluate(() => document.fonts.ready);
     await page.emulateMediaType("print");
     await page.pdf({
       path: outputPath,
@@ -104,6 +174,7 @@ async function renderPdf({ pagesHtml, outputPath, baseUrl }) {
 
 module.exports = {
   buildPdfFilename,
+  buildPdfDocumentHtml,
   getChromePath,
   renderPdf,
   resolveUniqueOutputPath,
