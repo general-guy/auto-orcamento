@@ -541,6 +541,7 @@ function getReginaOptionMaps() {
             hours: item.tempoSalaHoras,
             optionText,
             order,
+            value: parseCurrencyValue(item.valor),
           },
         ];
       })
@@ -922,7 +923,6 @@ function autofillReginaDetails(button) {
   const packageEntries = [];
   const taxEntries = [];
   const otherEntries = [];
-  let totalPackageHours = 0;
 
   rows.forEach((row) => {
     if (row.input.value === halfHourOption?.optionText) {
@@ -931,7 +931,6 @@ function autofillReginaDetails(button) {
 
     const packageOption = reginaOptions.pacote.get(row.input.value);
     if (packageOption) {
-      totalPackageHours += packageOption.hours || 0;
       packageEntries.push({
         ...packageOption,
         multiplierValue: row.multiplier.value,
@@ -954,6 +953,10 @@ function autofillReginaDetails(button) {
     });
   });
 
+  packageEntries.sort((left, right) => right.value - left.value || left.order - right.order);
+  taxEntries.sort((left, right) => left.order - right.order);
+
+  const totalPackageHours = packageEntries.reduce((total, entry) => total + (entry.hours || 0), 0);
   const expectedHours = parseHourValue(getFieldValue("hospitalStay"));
   const missingHours = expectedHours === null ? 0 : Math.max(0, expectedHours - totalPackageHours);
   const halfHourMultiplier = Number((missingHours / 0.5).toFixed(2));
@@ -961,11 +964,7 @@ function autofillReginaDetails(button) {
     ? [{ ...halfHourOption, multiplierValue: String(halfHourMultiplier) }]
     : [];
   const orderedTaxEntries = [...taxEntries, ...excessEntries].sort((left, right) => left.order - right.order);
-  const orderedEntries = [
-    ...packageEntries.sort((left, right) => left.order - right.order),
-    ...orderedTaxEntries,
-    ...otherEntries,
-  ];
+  const orderedEntries = [...packageEntries, ...orderedTaxEntries, ...otherEntries];
 
   if (orderedEntries.length === 0) {
     orderedEntries.push({ optionText: "", multiplierValue: "1" });
@@ -980,6 +979,12 @@ function autofillReginaDetails(button) {
   getHospitalDetailRows(detailList).forEach((row, index) => {
     const entry = orderedEntries[index];
     row.input.value = entry.optionText;
+
+    if (index < packageEntries.length) {
+      row.multiplier.value = index === 0 ? "1" : index === 1 ? "0.7" : "0.5";
+      return;
+    }
+
     row.multiplier.value = entry.multiplierValue;
   });
 

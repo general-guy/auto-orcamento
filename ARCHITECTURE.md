@@ -269,11 +269,13 @@ A ordem final é: `cirurgiasPlasticasCentroCirurgico`, `cirurgiasPlasticasAmbula
 O autofill de Regina:
 
 - identifica pacotes, taxas adicionais e entradas desconhecidas;
-- ordena os pacotes na ordem de `regina.pacotesCirurgiaPlastica`;
-- soma o `tempoSalaHoras` dos pacotes selecionados;
+- ordena os pacotes por valor decrescente;
+- aplica multiplicadores automáticos nos pacotes: `1` no primeiro, `0.7` no segundo e `0.5` a partir do terceiro;
+- soma o `tempoSalaHoras` bruto dos pacotes selecionados, sem usar os multiplicadores de valor;
 - compara com `Tempo previsto de hospital`;
 - quando faltar tempo, adiciona `SALA CIRÚRGICA - MEIA HORA SUBSEQUENTE`;
 - calcula o multiplicador em unidades de meia hora;
+- mantém adicionais de sala e pernoite de recuperação fora desse fluxo de multiplicadores;
 - ordena as taxas adicionais na ordem de `regina.taxasAdicionais`.
 
 Exemplo: se faltam `6` horas, o multiplicador da taxa de meia hora é `12`.
