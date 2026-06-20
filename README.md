@@ -25,6 +25,38 @@ Depois acesse:
 http://localhost:3000
 ```
 
+## Requisitos
+
+Para **usar** o app nesta versão (stack Node.js + browser):
+
+| Recurso | Necessário |
+|---|---|
+| Node.js LTS | Sim |
+| npm | Sim (vem com Node) |
+| Google Chrome ou Microsoft Edge | Sim (janela do app e PDF automático) |
+| Internet | Só na primeira execução, se `node_modules` ainda não existir |
+
+Não são necessários Python, PowerShell nem Git para uso normal.
+
+Para migrar a pasta para outro PC: instale Node.js, copie o projeto (de preferência com `node_modules` incluído para evitar download) e execute o `.bat`.
+
+## Versão estável e migração Tauri
+
+A versão atual da stack Node.js + browser está documentada em:
+
+```text
+docs/SNAPSHOT-node-web-v0.1.0.md
+```
+
+O branch **`stable/node-web-v0.1.0`** e a tag **`v0.1.0-node-web`** preservam esse estado estável enquanto a migração para Tauri é desenvolvida na `main`. O plano da migração está em `docs/MIGRATION-tauri.md`.
+
+Para restaurar a versão Node:
+
+```bash
+git checkout stable/node-web-v0.1.0
+npm install
+```
+
 ## Ambiente Recomendado
 
 Para manutenção do projeto no Windows, recomenda-se usar PowerShell 7 (`pwsh`) como terminal padrão do Cursor, em vez do Windows PowerShell antigo (`powershell.exe`). O `pwsh` aceita operadores modernos como `&&` e evita diferenças de sintaxe do Windows PowerShell 5.1.
@@ -189,4 +221,6 @@ Detalhes sobre a origem e manutenção das tabelas hospitalares ficam em:
 docs/tabelas-hospitalares.md
 docs/tabela-implantes.md
 docs/tabela-tecnologias.md
+docs/SNAPSHOT-node-web-v0.1.0.md
+docs/MIGRATION-tauri.md
 ```

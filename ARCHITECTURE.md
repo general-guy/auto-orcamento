@@ -2,6 +2,8 @@
 
 O Auto Orçamento é um web app local servido por Node.js. A aplicação não depende de banco de dados nem de servidor externo: os arquivos estáticos, históricos e tabelas de referência ficam dentro do próprio projeto.
 
+> **Baseline estável:** branch `stable/node-web-v0.1.0`, tag `v0.1.0-node-web`. Snapshot completo em `docs/SNAPSHOT-node-web-v0.1.0.md`. Próxima evolução planejada: Tauri (`docs/MIGRATION-tauri.md`).
+
 ## Visão Geral
 
 ```text
@@ -40,6 +42,29 @@ Para forçar um navegador específico, defina a variável de ambiente `AUTO_ORCA
 No Windows, recomenda-se usar PowerShell 7 (`pwsh`) no terminal integrado do Cursor, em vez do Windows PowerShell antigo (`powershell.exe`). O projeto não depende dele para executar o app, mas ele simplifica comandos de manutenção e aceita operadores modernos como `&&`.
 
 O Windows PowerShell 5.1 também funciona para comandos básicos, mas alguns exemplos de terminal precisam ser adaptados para `;` ou executados em comandos separados.
+
+## Dependências de runtime
+
+| Componente | Papel |
+|---|---|
+| Node.js | Servidor HTTP, APIs, PDF |
+| npm | Instala `puppeteer-core` |
+| Chrome ou Edge | Modo app (`launch-app.js`) e renderização PDF (`pdf-export.js`) |
+
+Sem Node instalado, o app não inicia. Sem Chrome/Edge, o `.bat` falha ao abrir a janela e a exportação automática de PDF não funciona.
+
+## Arquivos principais
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `index.html` | Markup do formulário e preview |
+| `styles.css` | Layout, timbrado, impressão |
+| `app.js` | Lógica de UI, preview, históricos, autofill |
+| `server.js` | Servidor na porta 3000, APIs REST |
+| `pdf-export.js` | PDF via Puppeteer + Chrome/Edge |
+| `launch-app.js` | Launcher Windows (servidor + janela app) |
+| `abrir-auto-orcamento.bat` | Atalho de entrada |
+| `package.json` | Metadados; única dependência: `puppeteer-core` |
 
 ## Servidor Local
 
@@ -289,3 +314,7 @@ A ordem final é: pacotes de cirurgia plástica, taxas adicionais e, ao fim, ent
 - O estado persistente fica em JSON local.
 - Alterações no preview devem chamar `updatePreview()` quando mudarem campos programaticamente.
 - Alterações nas tabelas devem preservar o formato descrito em `docs/tabelas-hospitalares.md`.
+
+## Evolução planejada
+
+A stack descrita neste documento corresponde à versão **v0.1.0-node-web**, preservada no branch `stable/node-web-v0.1.0`. A migração para **Tauri** substituirá Node.js e o launcher manual por um executável com WebView2, mantendo o frontend atual. Detalhes em `docs/MIGRATION-tauri.md`.
