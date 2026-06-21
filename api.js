@@ -7,6 +7,10 @@
   }
 
   function isTauri() {
+    if (backendMode === "web") {
+      return false;
+    }
+
     return backendMode === "tauri" || detectTauriInvoke();
   }
 
@@ -25,16 +29,15 @@
       return backendMode;
     }
 
-    for (let attempt = 0; attempt < 30; attempt += 1) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
+    for (let attempt = 0; attempt < 100; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 50));
       if (detectTauriInvoke()) {
         backendMode = "tauri";
         return backendMode;
       }
     }
 
-    backendMode = "web";
-    return backendMode;
+    throw new Error("Backend Tauri indisponível neste ambiente.");
   }
 
   function invoke(command, payload) {

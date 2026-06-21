@@ -9,7 +9,15 @@ use tauri::{image::Image, Manager};
 pub fn run() {
   tauri::Builder::default()
     .setup(|app| {
+      app.handle().plugin(
+        tauri_plugin_log::Builder::default()
+          .level(log::LevelFilter::Info)
+          .build(),
+      )?;
+
+      let data_path = storage::writable_data_dir(app.handle())?;
       storage::ensure_data_files(app.handle())?;
+      log::info!("Diretório de dados: {}", data_path.display());
 
       if let Ok(zoom) = storage::read_zoom_level(app.handle()) {
         let _ = storage::apply_zoom(app.handle(), zoom);
@@ -20,14 +28,6 @@ pub fn run() {
         if let Ok(icon) = Image::from_path(&icon_path) {
           let _ = window.set_icon(icon);
         }
-      }
-
-      if cfg!(debug_assertions) {
-        app.handle().plugin(
-          tauri_plugin_log::Builder::default()
-            .level(log::LevelFilter::Info)
-            .build(),
-        )?;
       }
 
       Ok(())

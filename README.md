@@ -136,9 +136,11 @@ data/tabela-implantes.json       ← editável sem rebuild
 data/settings.json               ← zoom (não versionado)
 ```
 
-PDFs gerados ficam em `output/` na raiz. Em `tauri dev` e com o `.exe` na raiz (ou em `src-tauri/target/release/` dentro do repo), o app usa sempre essas pastas — não duplica dados em subpastas do build.
+PDFs gerados ficam em `output/` na raiz. Tanto `tauri dev` quanto o `.exe` na raiz (ou em `src-tauri/target/release/` dentro do repo) usam **as mesmas pastas** `data/` e `output/` — o mesmo lugar onde o `tauri dev` grava históricos e zoom.
 
-Históricos e tabelas são acessados via `AppApi` (`api.js`); tabelas usam `AppApi.loadTable("hospitalares" | "implantes")`, equivalente ao comando Rust `table_load`. Se uma tabela ainda não existir em `data/` no primeiro run, o app copia uma vez a versão embutida no build.
+O Rust resolve o caminho via `std::env::current_exe()` (não usa `%AppData%`). Ao iniciar, o log registra `Diretório de dados: ...` — deve apontar para `{repo}/data`.
+
+Históricos e tabelas são acessados via `AppApi` (`api.js`); tabelas usam `AppApi.loadTable("hospitalares" | "implantes")`. Fora do `localhost:3000`, o `api.js` **não** cai no modo Node — só invoca comandos Tauri após `waitForBackend()`.
 
 **Pendente (Fases 4–5):** validação em PC limpo e paridade final com o snapshot Node. Detalhes em `docs/MIGRATION-tauri.md`.
 

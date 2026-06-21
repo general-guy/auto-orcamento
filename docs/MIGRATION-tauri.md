@@ -116,10 +116,12 @@ Comandos expostos:
 | `table_load` | `GET data/tabelas-hospitalares.json` / `tabela-implantes.json` |
 | `export_pdf` | `POST /api/pdf` |
 
-Em desenvolvimento (`tauri dev`), `data/` e `output/` ficam na raiz do projeto. No `.exe` de release, o módulo `paths.rs` resolve:
+Em desenvolvimento (`tauri dev`), `data/` e `output/` ficam na raiz do projeto. No `.exe` de release, `paths.rs` usa `std::env::current_exe()` e resolve:
 
-1. **Repo completo:** se o `.exe` está na raiz do projeto ou em `src-tauri/target/release/`, usa `data/` e `output/` na raiz do repo.
-2. **Portátil mínimo:** senão, usa `{pasta-do-exe}/data/` e `{pasta-do-exe}/output/`.
+1. **Repo completo:** `.exe` na raiz do projeto ou em `src-tauri/target/release/` → `data/` e `output/` na raiz do repo.
+2. **Portátil mínimo:** só `{pasta-do-exe}/data/` e `{pasta-do-exe}/output/`.
+
+Não há fallback para `%AppData%`. O startup registra `Diretório de dados: ...` no log.
 
 Preferências de zoom (`settings.json`) seguem o mesmo diretório `data/`.
 
@@ -127,7 +129,7 @@ Preferências de zoom (`settings.json`) seguem o mesmo diretório `data/`.
 
 Tabelas de referência (hospitalares, implantes) são lidas de `data/` via `table_load` — na raiz do repo quando o `.exe` está dentro do projeto, ou ao lado do `.exe` em layout portátil mínimo. Se o arquivo ainda não existir no primeiro run, o app copia a versão embutida no build (seed único); depois disso, edições manuais no JSON valem sem rebuild.
 
-**Nota:** o Tauri 2 exige `app.withGlobalTauri: true` para expor `window.__TAURI__.core.invoke` ao JavaScript vanilla. O `api.js` aguarda essa API antes de carregar históricos, evitando chamadas `fetch("/api/...")` que não existem fora do Node.
+**Nota:** o Tauri 2 exige `app.withGlobalTauri: true` para expor `window.__TAURI__.core.invoke`. O `api.js` aguarda essa API em `waitForBackend()` e, fora do `localhost:3000`, **não** assume modo Node — evita históricos vazios por `fetch("/api/...")` falho no `.exe`.
 
 ### Fase 3 — PDF ✅
 
@@ -169,7 +171,8 @@ PDFs ficam em `output/` na raiz do repo (mesma regra de caminho que `data/`). Re
 | PDF com layout diferente | Baseline visual do snapshot; comparar PDFs lado a lado |
 | WebView2 ausente em Windows antigo | Win 10/11 já incluem; sem instalador bundler — instalar WebView2 Runtime manualmente se necessário |
 | `fetch` espalhado em `app.js` | Camada `api.js` (`AppApi`) abstrai HTTP vs Tauri; resolvido na Fase 2 |
-| `window.__TAURI__` indisponível no load | `withGlobalTauri: true` + `AppApi.waitForBackend()` antes do init |
+| `window.__TAURI__` indisponível no load | `withGlobalTauri: true` + `waitForBackend()`; sem fallback HTTP fora da porta 3000 |
+| `.exe` lê pasta `data/` errada | `paths.rs` usa `current_exe()`; repo root quando `.exe` está no projeto; log `Diretório de dados` no startup |
 | Regressão no autofill | Testes manuais com casos Regina/Sapiranga documentados |
 
 ## Branch strategy
