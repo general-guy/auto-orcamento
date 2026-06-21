@@ -133,6 +133,30 @@
     });
   }
 
+  async function getZoom() {
+    if (isTauri()) {
+      return invoke("zoom_get");
+    }
+
+    return 1;
+  }
+
+  async function setZoom(scale) {
+    if (isTauri()) {
+      return invoke("zoom_set", { scale });
+    }
+
+    return scale;
+  }
+
+  async function adjustZoom(delta) {
+    if (isTauri()) {
+      return invoke("zoom_adjust", { delta });
+    }
+
+    return 1;
+  }
+
   async function shutdownApp() {
     if (isTauri()) {
       await window.__TAURI__.window.getCurrentWindow().close();
@@ -156,6 +180,9 @@
     getTechnologies,
     addTechnology,
     removeTechnology,
+    getZoom,
+    setZoom,
+    adjustZoom,
     shutdownApp,
   };
 })();

@@ -84,7 +84,7 @@ O `.exe` fica em `src-tauri/target/release/auto-orcamento.exe`. Instaladores NSI
 
 **Pendente (Fase 3):** PDF automático em `output/` ao imprimir. Detalhes em `docs/MIGRATION-tauri.md`.
 
-**Zoom da interface:** na janela Tauri/WebView2, `Ctrl` + `-` / `Ctrl` + `+` **não funcionam** (não é um navegador completo). Para ver mais conteúdo na tela, use a escala do Windows (**Configurações → Sistema → Tela → Escala**) ou rode a versão Node no browser (`npm start` → `http://localhost:3000`), onde o zoom do Chrome/Edge funciona normalmente.
+**Zoom da interface (Tauri):** `Ctrl` + roda do mouse, `Ctrl` + `+` / `Ctrl` + `-` (passos de 10%, entre 50% e 200%) e `Ctrl` + `0` para voltar a 100%. O nível fica salvo em `data/settings.json` e é reaplicado ao abrir o app. Na versão Node no browser (`npm start`), o zoom nativo do Chrome/Edge continua valendo.
 
 ## Ambiente Recomendado
 

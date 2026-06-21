@@ -95,8 +95,11 @@ Comandos expostos:
 | `technologies_list` | `GET /api/tecnologias` |
 | `technologies_add` | `POST /api/tecnologias` |
 | `technologies_remove` | `DELETE /api/tecnologias` |
+| `zoom_get` / `zoom_set` / `zoom_adjust` | — (apenas Tauri; salvo em `data/settings.json`) |
 
-Em desenvolvimento (`tauri dev`), os JSON mutáveis ficam em `data/` na raiz do projeto. No `.exe` de release, ficam em `{pasta-do-exe}/data/`.
+Em desenvolvimento (`tauri dev`), os JSON mutáveis ficam em `data/` na raiz do projeto. No `.exe` de release, ficam em `{pasta-do-exe}/data/`. Preferências de zoom (`settings.json`) seguem o mesmo diretório.
+
+**Zoom nativo:** `zoom.js` escuta `Ctrl` + roda e `Ctrl` + `+`/`-`/`0`; o Rust aplica `WebviewWindow::set_zoom` e persiste o fator entre sessões.
 
 Tabelas de referência (hospitalares, implantes) continuam sendo carregadas pelo frontend via `fetch("data/...")` a partir de `dist/data/`, copiado por `scripts/copy-frontend.cjs`.
 

@@ -7,6 +7,10 @@ pub fn run() {
     .setup(|app| {
       storage::ensure_data_files(app.handle())?;
 
+      if let Ok(zoom) = storage::read_zoom_level(app.handle()) {
+        let _ = storage::apply_zoom(app.handle(), zoom);
+      }
+
       if cfg!(debug_assertions) {
         app.handle().plugin(
           tauri_plugin_log::Builder::default()
@@ -25,6 +29,9 @@ pub fn run() {
       commands::technologies_list,
       commands::technologies_add,
       commands::technologies_remove,
+      commands::zoom_get,
+      commands::zoom_set,
+      commands::zoom_adjust,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

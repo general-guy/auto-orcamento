@@ -4,8 +4,6 @@ use std::path::{Path, PathBuf};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use tauri::AppHandle;
-
-#[cfg(not(debug_assertions))]
 use tauri::Manager;
 use unicode_normalization::UnicodeNormalization;
 
@@ -291,4 +289,69 @@ pub fn remove_technology(app: &AppHandle, nome: &str) -> Result<Vec<TechnologyIt
     .collect::<Vec<_>>();
   write_json_list(&path, &json_items)?;
   Ok(next_items)
+}
+
+const ZOOM_MIN: f64 = 0.5;
+const ZOOM_MAX: f64 = 2.0;
+const ZOOM_DEFAULT: f64 = 1.0;
+
+fn settings_path(app: &AppHandle) -> Result<PathBuf, String> {
+  Ok(writable_data_dir(app)?.join("settings.json"))
+}
+
+fn clamp_zoom(zoom: f64) -> f64 {
+  if !zoom.is_finite() {
+    return ZOOM_DEFAULT;
+  }
+
+  let rounded = (zoom * 10.0).round() / 10.0;
+  rounded.clamp(ZOOM_MIN, ZOOM_MAX)
+}
+
+pub fn read_zoom_level(app: &AppHandle) -> Result<f64, String> {
+  ensure_data_files(app)?;
+  let path = settings_path(app)?;
+
+  if !path.exists() {
+    return Ok(ZOOM_DEFAULT);
+  }
+
+  let content = fs::read_to_string(&path).map_err(|error| error.to_string())?;
+  let settings = serde_json::from_str::<Value>(&content).unwrap_or(Value::Null);
+  let zoom = settings
+    .get("zoom")
+    .and_then(Value::as_f64)
+    .unwrap_or(ZOOM_DEFAULT);
+
+  Ok(clamp_zoom(zoom))
+}
+
+pub fn write_zoom_level(app: &AppHandle, zoom: f64) -> Result<f64, String> {
+  ensure_data_files(app)?;
+  let path = settings_path(app)?;
+  let clamped = clamp_zoom(zoom);
+  let settings = serde_json::json!({ "zoom": clamped });
+  let serialized = serde_json::to_string_pretty(&settings).map_err(|error| error.to_string())?;
+  fs::write(path, format!("{serialized}\n")).map_err(|error| error.to_string())?;
+  Ok(clamped)
+}
+
+pub fn apply_zoom(app: &AppHandle, zoom: f64) -> Result<f64, String> {
+  let clamped = clamp_zoom(zoom);
+  let window = app
+    .get_webview_window("main")
+    .ok_or_else(|| "Janela principal não encontrada.".to_string())?;
+
+  window.set_zoom(clamped).map_err(|error| error.to_string())?;
+  Ok(clamped)
+}
+
+pub fn set_zoom_level(app: &AppHandle, zoom: f64) -> Result<f64, String> {
+  let clamped = write_zoom_level(app, zoom)?;
+  apply_zoom(app, clamped)
+}
+
+pub fn adjust_zoom_level(app: &AppHandle, delta: f64) -> Result<f64, String> {
+  let current = read_zoom_level(app)?;
+  set_zoom_level(app, current + delta)
 }
