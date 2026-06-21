@@ -6,9 +6,6 @@ $outputPath = Join-Path $rootDir "assets/app-icon-square.png"
 $targetSize = 1024
 $circleDiameter = $targetSize
 $logoFillRatio = 0.68
-$goldRedScale = 0.82
-$goldGreenScale = 0.68
-$goldBlueScale = 0.45
 
 function New-TransparentSourceBitmap {
   param(
@@ -101,36 +98,14 @@ $graphics.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQual
 # Corners stay transparent so the taskbar shows through, like Chrome's round logo.
 $circleX = 0
 $circleY = 0
-$graphics.FillEllipse([System.Drawing.Brushes]::White, $circleX, $circleY, $circleDiameter, $circleDiameter)
+$graphics.FillEllipse([System.Drawing.Brushes]::Black, $circleX, $circleY, $circleDiameter, $circleDiameter)
 
 $scale = [Math]::Min($circleDiameter / $cropped.Width, $circleDiameter / $cropped.Height) * $logoFillRatio
 $newWidth = [int]($cropped.Width * $scale)
 $newHeight = [int]($cropped.Height * $scale)
 $x = [int](($targetSize - $newWidth) / 2)
 $y = [int](($targetSize - $newHeight) / 2)
-
-$imageAttributes = New-Object System.Drawing.Imaging.ImageAttributes
-$colorMatrix = New-Object System.Drawing.Imaging.ColorMatrix
-$colorMatrix.Matrix00 = $goldRedScale
-$colorMatrix.Matrix11 = $goldGreenScale
-$colorMatrix.Matrix22 = $goldBlueScale
-$colorMatrix.Matrix33 = 1
-$colorMatrix.Matrix44 = 1
-$imageAttributes.SetColorMatrix($colorMatrix)
-
-$destination = New-Object System.Drawing.Rectangle $x, $y, $newWidth, $newHeight
-$sourceRect = New-Object System.Drawing.Rectangle 0, 0, $cropped.Width, $cropped.Height
-$graphics.DrawImage(
-  $cropped,
-  $destination,
-  $sourceRect.X,
-  $sourceRect.Y,
-  $sourceRect.Width,
-  $sourceRect.Height,
-  [System.Drawing.GraphicsUnit]::Pixel,
-  $imageAttributes
-)
-$imageAttributes.Dispose()
+$graphics.DrawImage($cropped, $x, $y, $newWidth, $newHeight)
 
 $canvas.Save($outputPath, [System.Drawing.Imaging.ImageFormat]::Png)
 $graphics.Dispose()
