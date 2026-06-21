@@ -3,9 +3,9 @@ Add-Type -AssemblyName System.Drawing
 $rootDir = Split-Path -Parent $PSScriptRoot
 $sourcePath = Join-Path $rootDir "assets/app-icon-g.png"
 $outputPath = Join-Path $rootDir "assets/app-icon-square.png"
-$backgroundColor = [System.Drawing.Color]::FromArgb(255, 31, 41, 51)
 $targetSize = 1024
-$fillRatio = 0.94
+$circleRatio = 0.88
+$logoFillRatio = 0.68
 
 function New-TransparentSourceBitmap {
   param(
@@ -89,15 +89,23 @@ $cropGraphics.Dispose()
 
 $canvas = New-Object System.Drawing.Bitmap $targetSize, $targetSize, ([System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
 $graphics = [System.Drawing.Graphics]::FromImage($canvas)
-$graphics.Clear($backgroundColor)
+$graphics.Clear([System.Drawing.Color]::Transparent)
 $graphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
 $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
-$scale = [Math]::Min($targetSize / $cropped.Width, $targetSize / $cropped.Height) * $fillRatio
+$graphics.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
+
+$circleDiameter = [int]($targetSize * $circleRatio)
+$circleX = [int](($targetSize - $circleDiameter) / 2)
+$circleY = $circleX
+$graphics.FillEllipse([System.Drawing.Brushes]::Black, $circleX, $circleY, $circleDiameter, $circleDiameter)
+
+$scale = [Math]::Min($circleDiameter / $cropped.Width, $circleDiameter / $cropped.Height) * $logoFillRatio
 $newWidth = [int]($cropped.Width * $scale)
 $newHeight = [int]($cropped.Height * $scale)
 $x = [int](($targetSize - $newWidth) / 2)
 $y = [int](($targetSize - $newHeight) / 2)
 $graphics.DrawImage($cropped, $x, $y, $newWidth, $newHeight)
+
 $canvas.Save($outputPath, [System.Drawing.Imaging.ImageFormat]::Png)
 $graphics.Dispose()
 $canvas.Dispose()

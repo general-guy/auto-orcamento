@@ -80,7 +80,7 @@ O `.exe` fica em `src-tauri/target/release/auto-orcamento.exe`. Instaladores NSI
 
 **Requisito de build:** Rust (`winget install Rustlang.Rustup`). WebView2 já vem no Windows 10/11.
 
-**Ícone do app:** o **G** ornamental do timbrado (`assets/app-icon-g.png`) gera os ícones Tauri e o favicon do browser. O script usa fundo escuro (`#1f2933`) e remove o branco da arte para o ícone aparecer na barra de tarefas. Para regenerar: `npm run icon:generate`. **Após trocar ícones, feche o app e rode `npm run tauri:dev` de novo** (o Windows cacheia o `.exe` em debug).
+**Ícone do app:** o **G** ornamental do timbrado (`assets/app-icon-g.png`) fica inscrito num **círculo preto** (~88% do quadrado, proporção semelhante ao Chrome). Para regenerar: `npm run icon:generate`. **Após trocar ícones, feche o app e rode `npm run tauri:dev` de novo** (o Windows cacheia o `.exe` em debug).
 
 **Persistência (Fase 2):** históricos (pacientes, cirurgias, hospitais, extras, pagamento, observações, tecnologias) são lidos e gravados em `data/` via comandos Rust, acessados pelo frontend por `api.js` (`AppApi`). Em `tauri dev`, a pasta é `data/` na raiz do projeto; no `.exe`, `{pasta-do-exe}/data/`.
 
