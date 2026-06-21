@@ -4,6 +4,7 @@ $rootDir = Split-Path -Parent $PSScriptRoot
 $sourcePath = Join-Path $rootDir "assets/app-icon-g.png"
 $outputPath = Join-Path $rootDir "assets/app-icon-square.png"
 $targetSize = 1024
+$circleDiameter = $targetSize
 $logoFillRatio = 0.68
 
 function New-TransparentSourceBitmap {
@@ -93,14 +94,13 @@ $graphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::High
 $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
 $graphics.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
 
-# Chrome fills the whole icon slot; an inscribed circle leaves transparent corners
-# and looks smaller in the taskbar. Use a circumscribed circle so the square is fully black.
-$circleDiameter = [int][Math]::Ceiling($targetSize * [Math]::Sqrt(2))
-$circleX = [int](($targetSize - $circleDiameter) / 2)
-$circleY = $circleX
+# True circle on a square canvas: diameter = side length (same slot as Chrome).
+# Corners stay transparent so the taskbar shows through, like Chrome's round logo.
+$circleX = 0
+$circleY = 0
 $graphics.FillEllipse([System.Drawing.Brushes]::Black, $circleX, $circleY, $circleDiameter, $circleDiameter)
 
-$scale = [Math]::Min($targetSize / $cropped.Width, $targetSize / $cropped.Height) * $logoFillRatio
+$scale = [Math]::Min($circleDiameter / $cropped.Width, $circleDiameter / $cropped.Height) * $logoFillRatio
 $newWidth = [int]($cropped.Width * $scale)
 $newHeight = [int]($cropped.Height * $scale)
 $x = [int](($targetSize - $newWidth) / 2)
