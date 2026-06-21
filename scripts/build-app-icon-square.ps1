@@ -5,6 +5,7 @@ $sourcePath = Join-Path $rootDir "assets/app-icon-g.png"
 $outputPath = Join-Path $rootDir "assets/app-icon-square.png"
 $backgroundColor = [System.Drawing.Color]::FromArgb(255, 31, 41, 51)
 $targetSize = 1024
+$fillRatio = 0.94
 
 function New-TransparentSourceBitmap {
   param(
@@ -33,22 +34,74 @@ function New-TransparentSourceBitmap {
   return $bitmap
 }
 
+function Get-OpaqueBounds {
+  param([System.Drawing.Bitmap]$Bitmap)
+
+  $minX = $Bitmap.Width
+  $minY = $Bitmap.Height
+  $maxX = 0
+  $maxY = 0
+  $found = $false
+
+  for ($x = 0; $x -lt $Bitmap.Width; $x += 1) {
+    for ($y = 0; $y -lt $Bitmap.Height; $y += 1) {
+      if ($Bitmap.GetPixel($x, $y).A -lt 16) {
+        continue
+      }
+
+      $found = $true
+      if ($x -lt $minX) { $minX = $x }
+      if ($y -lt $minY) { $minY = $y }
+      if ($x -gt $maxX) { $maxX = $x }
+      if ($y -gt $maxY) { $maxY = $y }
+    }
+  }
+
+  if (-not $found) {
+    return $null
+  }
+
+  return @{
+    X = $minX
+    Y = $minY
+    Width = ($maxX - $minX + 1)
+    Height = ($maxY - $minY + 1)
+  }
+}
+
 $source = [System.Drawing.Image]::FromFile($sourcePath)
 $transparentSource = New-TransparentSourceBitmap -Source $source
+$bounds = Get-OpaqueBounds -Bitmap $transparentSource
+
+if ($null -eq $bounds) {
+  throw "Não foi possível detectar o contorno do logo em $sourcePath"
+}
+
+$cropped = New-Object System.Drawing.Bitmap $bounds.Width, $bounds.Height, ([System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
+$cropGraphics = [System.Drawing.Graphics]::FromImage($cropped)
+$cropGraphics.DrawImage(
+  $transparentSource,
+  (New-Object System.Drawing.Rectangle 0, 0, $bounds.Width, $bounds.Height),
+  (New-Object System.Drawing.Rectangle $bounds.X, $bounds.Y, $bounds.Width, $bounds.Height),
+  [System.Drawing.GraphicsUnit]::Pixel
+)
+$cropGraphics.Dispose()
+
 $canvas = New-Object System.Drawing.Bitmap $targetSize, $targetSize, ([System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
 $graphics = [System.Drawing.Graphics]::FromImage($canvas)
 $graphics.Clear($backgroundColor)
 $graphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
 $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
-$scale = [Math]::Min($targetSize / $transparentSource.Width, $targetSize / $transparentSource.Height) * 0.78
-$newWidth = [int]($transparentSource.Width * $scale)
-$newHeight = [int]($transparentSource.Height * $scale)
+$scale = [Math]::Min($targetSize / $cropped.Width, $targetSize / $cropped.Height) * $fillRatio
+$newWidth = [int]($cropped.Width * $scale)
+$newHeight = [int]($cropped.Height * $scale)
 $x = [int](($targetSize - $newWidth) / 2)
 $y = [int](($targetSize - $newHeight) / 2)
-$graphics.DrawImage($transparentSource, $x, $y, $newWidth, $newHeight)
+$graphics.DrawImage($cropped, $x, $y, $newWidth, $newHeight)
 $canvas.Save($outputPath, [System.Drawing.Imaging.ImageFormat]::Png)
 $graphics.Dispose()
 $canvas.Dispose()
+$cropped.Dispose()
 $transparentSource.Dispose()
 $source.Dispose()
 
