@@ -3023,20 +3023,7 @@ async function exportPdfDocument() {
   }
 
   try {
-    const response = await fetch("/api/pdf", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        patientName: getFieldValue("patientName"),
-        pagesHtml,
-      }),
-    });
-
-    const result = await response.json();
-    if (!response.ok) {
-      throw new Error(result.error || "Falha ao gerar PDF.");
-    }
-
+    const result = await AppApi.exportPdf(getFieldValue("patientName"), pagesHtml);
     console.info(`PDF salvo em ${result.path}`);
   } catch (error) {
     console.warn("Não foi possível gerar o PDF automaticamente.", error);

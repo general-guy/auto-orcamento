@@ -157,6 +157,28 @@
     return 1;
   }
 
+  async function exportPdf(patientName, pagesHtml) {
+    const html = typeof pagesHtml === "string" ? pagesHtml.trim() : "";
+    if (!html) {
+      throw new Error("Informe o conteúdo do documento para exportar.");
+    }
+
+    const documentHtml = await PdfBuild.buildPdfDocumentHtml(html);
+
+    if (isTauri()) {
+      return invoke("export_pdf", { patientName, documentHtml });
+    }
+
+    return fetchJson("/api/pdf", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        patientName,
+        pagesHtml: html,
+      }),
+    });
+  }
+
   async function shutdownApp() {
     if (isTauri()) {
       await window.__TAURI__.window.getCurrentWindow().close();
@@ -183,6 +205,7 @@
     getZoom,
     setZoom,
     adjustZoom,
+    exportPdf,
     shutdownApp,
   };
 })();

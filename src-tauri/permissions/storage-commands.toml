@@ -12,4 +12,5 @@ commands.allow = [
   "zoom_get",
   "zoom_set",
   "zoom_adjust",
+  "export_pdf",
 ]

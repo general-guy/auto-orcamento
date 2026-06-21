@@ -1,5 +1,6 @@
 use tauri::AppHandle;
 
+use crate::pdf::{export_pdf as write_pdf, PdfExportResult};
 use crate::storage::{
   add_string_item, add_technology, adjust_zoom_level, read_string_list, read_technologies,
   read_zoom_level, remove_string_item, remove_technology, replace_string_list, set_zoom_level,
@@ -54,4 +55,15 @@ pub fn zoom_set(app: AppHandle, scale: f64) -> Result<f64, String> {
 #[tauri::command]
 pub fn zoom_adjust(app: AppHandle, delta: f64) -> Result<f64, String> {
   adjust_zoom_level(&app, delta)
+}
+
+#[tauri::command]
+pub async fn export_pdf(
+  app: AppHandle,
+  patient_name: String,
+  document_html: String,
+) -> Result<PdfExportResult, String> {
+  tauri::async_runtime::spawn_blocking(move || write_pdf(&app, &patient_name, &document_html))
+    .await
+    .map_err(|error| error.to_string())?
 }

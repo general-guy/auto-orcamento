@@ -1,6 +1,6 @@
 # Plano de migração para Tauri
 
-> **Status:** Fase 2 concluída — históricos JSON via comandos Rust; PDF automático pendente (Fase 3).  
+> **Status:** Fase 3 concluída — PDF automático via `export_pdf` (Rust + Chrome/Edge headless); Fases 4–5 pendentes.  
 > **Baseline Node:** `stable/node-web-v0.1.0` / tag `v0.1.0-node-web` / `docs/SNAPSHOT-node-web-v0.1.0.md`
 
 ## Objetivo
@@ -42,7 +42,7 @@ Substituir a stack **Node.js + Chrome/Edge manual** por um **executável desktop
 | `PUT /api/pagamentos` (+ POST/DELETE) | `history_reorder` + add/remove |
 | Idem observações, extras | Mesmo padrão |
 | `GET/POST/DELETE /api/tecnologias` | `technologies_*` (objetos `{ nome, valor }`) |
-| `POST /api/pdf` | `export_pdf({ patientName, html })` |
+| `POST /api/pdf` | `export_pdf({ patientName, documentHtml })` |
 | `GET data/tabelas-hospitalares.json` | Servir via asset ou comando `load_table` |
 
 ## Fases sugeridas
@@ -82,7 +82,7 @@ Requisitos de build: Node.js, Rust (via `rustup`) e WebView2 (já presente no Wi
 - [x] Camada `api.js` com fallback HTTP para a stack Node (`AppApi`)
 - [x] `app.js` migrado para `AppApi` em todas as rotas `/api/*` de histórico
 - [x] `withGlobalTauri: true` em `tauri.conf.json` e `waitForBackend()` antes da inicialização
-- [ ] PDF automático (`/api/pdf`) — Fase 3
+- [x] PDF automático (`export_pdf`) — Fase 3
 
 Comandos expostos:
 
@@ -96,6 +96,7 @@ Comandos expostos:
 | `technologies_add` | `POST /api/tecnologias` |
 | `technologies_remove` | `DELETE /api/tecnologias` |
 | `zoom_get` / `zoom_set` / `zoom_adjust` | — (apenas Tauri; salvo em `data/settings.json`) |
+| `export_pdf` | `POST /api/pdf` |
 
 Em desenvolvimento (`tauri dev`), os JSON mutáveis ficam em `data/` na raiz do projeto. No `.exe` de release, ficam em `{pasta-do-exe}/data/`. Preferências de zoom (`settings.json`) seguem o mesmo diretório.
 
@@ -105,10 +106,14 @@ Tabelas de referência (hospitalares, implantes) continuam sendo carregadas pelo
 
 **Nota:** o Tauri 2 exige `app.withGlobalTauri: true` para expor `window.__TAURI__.core.invoke` ao JavaScript vanilla. O `api.js` aguarda essa API antes de carregar históricos, evitando chamadas `fetch("/api/...")` que não existem fora do Node.
 
-### Fase 3 — PDF
-- Replicar `pdf-export.js`: HTML autocontido + renderização.
-- Opções: `tauri-plugin-print`, crate Rust (`printpdf`, `headless_chrome` embutido), ou export via WebView.
-- Validar nomes de arquivo e colisão `(2)`, `(3)`.
+### Fase 3 — PDF ✅
+
+- [x] `pdf-build.js` monta HTML autocontido (CSS/fontes/imagens inline), igual ao `pdf-export.js`
+- [x] Comando Rust `export_pdf` em `src-tauri/src/pdf.rs` grava em `output/` com nomes e colisão `(2)`, `(3)`
+- [x] Renderização via Chrome/Edge headless (`--print-to-pdf`), sem Node/Puppeteer em runtime no Tauri
+- [x] `AppApi.exportPdf()` no frontend; stack Node continua usando `POST /api/pdf`
+
+Em desenvolvimento, PDFs ficam em `{projeto}/output/`. No `.exe`, em `{pasta-do-exe}/output/`. Requer Chrome ou Edge instalado (mesmo requisito prático da stack Node).
 
 ### Fase 4 — Empacotamento Windows
 - Build `.exe` / instalador MSI/NSIS.
@@ -127,7 +132,7 @@ Tabelas de referência (hospitalares, implantes) continuam sendo carregadas pelo
 - [ ] Autofill Regina e Sapiranga com mesmos multiplicadores e ordens.
 - [x] Históricos persistem em `data/*.json` no mesmo formato.
 - [x] Drag-and-drop de listas rápidas persiste ordem.
-- [ ] PDF automático em `output/` no clique de imprimir.
+- [x] PDF automático em `output/` no clique de imprimir (Tauri via `export_pdf`; Node via `/api/pdf`).
 - [ ] App abre offline, sem `npm install` no PC de destino.
 
 ## Riscos e mitigações

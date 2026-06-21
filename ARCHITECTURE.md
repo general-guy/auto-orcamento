@@ -328,12 +328,14 @@ abrir-auto-orcamento-tauri.bat
   -> npm run tauri:dev
       -> copy-frontend -> dist/
       -> auto-orcamento.exe (WebView2)
-          -> index.html + api.js + zoom.js + app.js
-          -> invoke history_* / technologies_* / zoom_*  ->  data/*.json + settings.json
+          -> index.html + api.js + pdf-build.js + zoom.js + app.js
+          -> invoke history_* / technologies_* / zoom_* / export_pdf  ->  data/*.json + settings.json + output/*.pdf
           -> fetch data/tabelas-*.json          ->  dist/data/
 ```
 
 - **`api.js`:** detecta Tauri vs Node; no Tauri usa `window.__TAURI__.core.invoke` (requer `withGlobalTauri: true`).
+- **`pdf-build.js`:** monta HTML autocontido para exportação (CSS/fontes inline).
 - **`zoom.js`:** atalhos `Ctrl` + roda / `Ctrl` + `+`/`-`/`0`; indicador flutuante `#zoomFlag` (%, `−`/`+`, Redefinir); persiste zoom em `data/settings.json` via `zoom_*`.
+- **`src-tauri/src/pdf.rs`:** grava PDF em `output/` via Chrome/Edge headless; comando `export_pdf`.
 - **`src-tauri/src/storage.rs`:** grava JSON mutável; em debug usa `{projeto}/data/`, em release `{exe}/data/`.
-- **PDF automático:** ainda via Node (`/api/pdf`) — pendente na Fase 3.
+- **PDF automático:** Tauri usa `export_pdf`; stack Node ainda usa `/api/pdf` + Puppeteer.

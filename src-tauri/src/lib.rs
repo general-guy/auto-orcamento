@@ -1,4 +1,5 @@
 mod commands;
+mod pdf;
 mod storage;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -32,6 +33,7 @@ pub fn run() {
       commands::zoom_get,
       commands::zoom_set,
       commands::zoom_adjust,
+      commands::export_pdf,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

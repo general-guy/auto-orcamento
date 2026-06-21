@@ -82,7 +82,9 @@ O `.exe` fica em `src-tauri/target/release/auto-orcamento.exe`. Instaladores NSI
 
 **Persistência (Fase 2):** históricos (pacientes, cirurgias, hospitais, extras, pagamento, observações, tecnologias) são lidos e gravados em `data/` via comandos Rust, acessados pelo frontend por `api.js` (`AppApi`). Em `tauri dev`, a pasta é `data/` na raiz do projeto; no `.exe`, `{pasta-do-exe}/data/`.
 
-**Pendente (Fase 3):** PDF automático em `output/` ao imprimir. Detalhes em `docs/MIGRATION-tauri.md`.
+**Pendente (Fases 4–5):** validação em PC limpo e paridade final com o snapshot Node. Detalhes em `docs/MIGRATION-tauri.md`.
+
+**PDF automático (Tauri):** ao clicar em **Imprimir orçamento**, o app grava um PDF em `output/` (mesmo fluxo da stack Node). O HTML é montado em `pdf-build.js`; o Rust invoca Chrome/Edge headless (`--print-to-pdf`). Requer Chrome ou Edge instalado.
 
 **Zoom da interface (Tauri):** `Ctrl` + roda do mouse, `Ctrl` + `+` / `Ctrl` + `-` (passos de 10%, entre 50% e 200%) e `Ctrl` + `0` para voltar a 100%. O nível fica salvo em `data/settings.json` e é reaplicado ao abrir o app. Um indicador flutuante (estilo Chrome) mostra a porcentagem atual, botões `−`/`+` e **Redefinir** quando o zoom difere de 100%. Na versão Node no browser (`npm start`), o zoom nativo do Chrome/Edge continua valendo.
 
