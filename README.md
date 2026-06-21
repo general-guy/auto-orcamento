@@ -4,6 +4,18 @@ Aplicativo local para gerar orçamentos cirúrgicos em papel timbrado, com preen
 
 ## Como Usar
 
+O projeto tem **duas stacks**. Na branch **`feature/tauri`**, use a versão desktop (`.exe`). A stack Node permanece no branch **`stable/node-web-v0.1.0`**.
+
+### Tauri — executável desktop (branch `feature/tauri`)
+
+**Na máquina de dev** (Node + Rust instalados): duplo clique em `abrir-auto-orcamento-tauri.bat`. Isso builda o app, copia `auto-orcamento.exe` para a raiz do repo e abre o app.
+
+**Em outro PC** (sem Node/Rust): copie o repositório (inclua `auto-orcamento.exe` e a pasta `data/`) e dê duplo clique em `auto-orcamento.exe` na raiz.
+
+Detalhes em [Versão Tauri](#versão-tauri-branch-featuretauri) abaixo.
+
+### Node — servidor local + browser (branch `stable/node-web-v0.1.0`)
+
 No Windows, clique duas vezes em:
 
 ```text
@@ -27,7 +39,7 @@ http://localhost:3000
 
 ## Requisitos
 
-Para **usar** o app nesta versão (stack Node.js + browser):
+### Stack Node (browser)
 
 | Recurso | Necessário |
 |---|---|
@@ -36,9 +48,17 @@ Para **usar** o app nesta versão (stack Node.js + browser):
 | Google Chrome ou Microsoft Edge | Sim (janela do app e PDF automático) |
 | Internet | Só na primeira execução, se `node_modules` ainda não existir |
 
-Não são necessários Python, PowerShell nem Git para uso normal.
+Para migrar a pasta para outro PC: instale Node.js, copie o projeto (de preferência com `node_modules` incluído) e execute `abrir-auto-orcamento.bat`.
 
-Para migrar a pasta para outro PC: instale Node.js, copie o projeto (de preferência com `node_modules` incluído para evitar download) e execute o `.bat`.
+### Stack Tauri (desktop)
+
+| Recurso | Máquina de dev | Outro PC (só uso) |
+|---|---|---|
+| Node.js + Rust | Sim (build) | Não |
+| WebView2 | Sim (Win 10/11) | Sim (Win 10/11) |
+| Chrome ou Edge | Sim (PDF) | Sim (PDF) |
+
+Não são necessários Python, PowerShell nem Git para uso normal.
 
 ## Versão estável e migração Tauri
 
@@ -48,7 +68,7 @@ A versão atual da stack Node.js + browser está documentada em:
 docs/SNAPSHOT-node-web-v0.1.0.md
 ```
 
-O branch **`stable/node-web-v0.1.0`** e a tag **`v0.1.0-node-web`** preservam esse estado estável enquanto a migração para Tauri é desenvolvida na `main`. O plano da migração está em `docs/MIGRATION-tauri.md`.
+O branch **`stable/node-web-v0.1.0`** e a tag **`v0.1.0-node-web`** preservam a stack Node. A migração Tauri é desenvolvida na **`feature/tauri`**. Plano em `docs/MIGRATION-tauri.md`.
 
 Para restaurar a versão Node:
 
@@ -61,37 +81,43 @@ npm install
 
 O app também pode rodar como **executável desktop** (WebView2), sem Node em runtime.
 
-### Desenvolvimento (só na máquina com Node + Rust)
+### Na máquina de dev (Node + Rust)
+
+Para **iterar rápido** enquanto edita código (recompila ao salvar, sem gerar o `.exe` da raiz):
 
 ```bash
 npm install
 npm run tauri:dev
 ```
 
-Ou clique duas vezes em `abrir-auto-orcamento-tauri.bat`.
+### Build, cópia do `.exe` e abrir o app
 
-### Build do executável (só na máquina de dev)
+Clique duas vezes em **`abrir-auto-orcamento-tauri.bat`**.
+
+Esse atalho:
+
+1. Roda `npm run tauri:build` (só o `.exe`, sem instaladores NSIS/MSI)
+2. Copia o resultado para **`auto-orcamento.exe`** na raiz do repo
+3. Abre o app
+
+Equivalente manual:
 
 ```bash
 npm run tauri:build
 ```
 
-Ou clique duas vezes em `build-auto-orcamento-tauri.bat`.
-
-O build gera:
+Saída:
 
 ```text
-auto-orcamento.exe                              # raiz do repo (cópia automática)
-src-tauri/target/release/auto-orcamento.exe   # artefato original do Rust
-src-tauri/target/release/bundle/nsis/...      # instalador NSIS (opcional)
-src-tauri/target/release/bundle/msi/...       # instalador MSI (opcional)
+auto-orcamento.exe                            # raiz do repo (cópia automática)
+src-tauri/target/release/auto-orcamento.exe # artefato original do Rust
 ```
 
 **Requisito de build:** Node.js, Rust (`winget install Rustlang.Rustup`). WebView2 já vem no Windows 10/11.
 
 ### Usar em outro PC (sem rebuild)
 
-1. Na máquina de dev: altere o código e rode `build-auto-orcamento-tauri.bat`.
+1. Na máquina de dev: altere o código e rode **`abrir-auto-orcamento-tauri.bat`**.
 2. Copie o **repositório completo** para o outro PC (pode omitir `node_modules/` e `src-tauri/target/` se quiser economizar espaço — mas inclua `auto-orcamento.exe` na raiz).
 3. No outro PC: duplo clique em `auto-orcamento.exe` na raiz do projeto.
 
@@ -115,7 +141,7 @@ Históricos e tabelas são acessados via `AppApi` (`api.js`); tabelas usam `AppA
 
 **Pendente (Fases 4–5):** validação em PC limpo e paridade final com o snapshot Node. Detalhes em `docs/MIGRATION-tauri.md`.
 
-**Ícone do app (Tauri):** **G** dourado inscrito num **círculo preto** do tamanho do slot do ícone (formato circular; cantos transparentes na taskbar). Configuração atual: `$logoFillRatio = 0.70` em `scripts/build-app-icon-square.ps1`. Pipeline: `npm run icon:generate`. Após trocar ícones, feche o app e rode `npm run tauri:dev` de novo — o Windows cacheia o `.exe` em debug.
+**Ícone do app (Tauri):** **G** dourado inscrito num **círculo preto** do tamanho do slot do ícone. Configuração: `$logoFillRatio = 0.70` em `scripts/build-app-icon-square.ps1`. Pipeline: `npm run icon:generate`. Após trocar ícones, rode `abrir-auto-orcamento-tauri.bat` (ou `npm run tauri:build`) para regenerar o `.exe` da raiz.
 
 **PDF automático (Tauri):** ao clicar em **Imprimir orçamento**, o app grava um PDF em `output/` (mesmo fluxo da stack Node). O HTML é montado em `pdf-build.js`; o Rust invoca Chrome/Edge headless (`--print-to-pdf`). Requer Chrome ou Edge instalado.
 
@@ -181,9 +207,12 @@ Essa pasta não é versionada no Git. Cada arquivo usa o nome da paciente, a dat
 
 ## Impressão e PDF automático
 
-Ao clicar em `Imprimir orçamento`, o app envia o documento atual da pré-visualização ao servidor e abre a impressão do navegador em seguida. O PDF é gerado no clique, sem esperar o fim da impressão, e salvo em `output/`.
+Ao clicar em `Imprimir orçamento`, o app gera um PDF em `output/` e abre a impressão em seguida. O PDF é criado no clique, sem esperar o fim da impressão.
 
-O PDF usa o mesmo layout paginado da pré-visualização, incluindo papel timbrado, fontes e estilos de impressão. A geração embute `styles.css`, fontes e imagens localmente, sem depender de novas requisições HTTP durante a exportação. Se já existir um arquivo com o mesmo nome, o app acrescenta um sufixo numérico, como `(2)`.
+- **Node:** `app.js` envia o HTML ao servidor (`POST /api/pdf`); `pdf-export.js` renderiza com Puppeteer + Chrome/Edge.
+- **Tauri:** `AppApi.exportPdf()` monta o HTML em `pdf-build.js` e o Rust invoca Chrome/Edge headless (`export_pdf`).
+
+O PDF usa o mesmo layout paginado da pré-visualização (timbrado, fontes, estilos). CSS, fontes e imagens são embutidos localmente. Colisões de nome recebem sufixo `(2)`, `(3)`, etc.
 
 ## Hospitais Com Autofill
 

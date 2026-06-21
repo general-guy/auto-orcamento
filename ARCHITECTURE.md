@@ -1,6 +1,6 @@
 # Arquitetura
 
-O Auto Orçamento é um web app local servido por Node.js. A aplicação não depende de banco de dados nem de servidor externo: os arquivos estáticos, históricos e tabelas de referência ficam dentro do próprio projeto.
+O Auto Orçamento é um app local para orçamentos cirúrgicos. A versão **Node** (`stable/node-web-v0.1.0`) usa um servidor HTTP na porta 3000; a versão **Tauri** (`feature/tauri`) roda como executável desktop com WebView2. Em ambas, históricos e tabelas ficam em JSON local — sem banco de dados nem servidor externo.
 
 > **Baseline estável:** branch `stable/node-web-v0.1.0`, tag `v0.1.0-node-web`. Snapshot completo em `docs/SNAPSHOT-node-web-v0.1.0.md`. Próxima evolução planejada: Tauri (`docs/MIGRATION-tauri.md`).
 
@@ -147,7 +147,7 @@ data/tabelas-hospitalares.json
 data/tabela-implantes.json
 ```
 
-O app carrega `data/tabelas-hospitalares.json` via `AppApi.loadTable("hospitalares")` (Tauri: `{pasta-do-exe}/data/`; Node: `fetch` na raiz do projeto) para montar as opções de Regina e Sapiranga e calcular os valores exibidos no preview.
+O app carrega `data/tabelas-hospitalares.json` via `AppApi.loadTable("hospitalares")`. Na stack Node, o arquivo vem de `data/` na raiz; no Tauri, de `data/` na raiz do repo (quando o `.exe` está na raiz ou em `src-tauri/target/release/`) ou de `{pasta-do-exe}/data/` em layout portátil mínimo.
 
 As entradas auxiliares `Reg#`/`Sap#` não usam `<datalist>` nativo (limitado no WebView2). O app monta `#hospitalProcedureDropdown` em `app.js`: lista filtrável, posicionada à direita do input com altura de viewport completa (`positionHospitalProcedureDropdown`).
 
@@ -252,9 +252,11 @@ Durante `updatePreview()`, o app salva `scrollTop` e `scrollLeft` do painel de p
 
 ## Exportação de PDF
 
-Quando o usuário clica em `Imprimir orçamento`, `app.js` salva os históricos pendentes, dispara `exportPdfDocument()` e chama `window.print()`. A exportação do PDF ocorre no clique, em paralelo com a abertura da janela de impressão; o frontend envia o HTML das páginas (`#printPage` e `.generated-print-page`) para `POST /api/pdf` junto com o nome da paciente.
+Quando o usuário clica em `Imprimir orçamento`, `app.js` salva os históricos pendentes, dispara a exportação e chama `window.print()`.
 
-O servidor monta um documento HTML autocontido com `styles.css`, fontes e papel timbrado embutidos em base64, renderiza com `puppeteer-core` em modo impressão e grava o arquivo em `output/`.
+**Stack Node:** `exportPdfDocument()` envia o HTML das páginas para `POST /api/pdf`. O servidor monta documento autocontido e renderiza com `puppeteer-core`.
+
+**Stack Tauri:** `AppApi.exportPdf()` monta o HTML via `pdf-build.js` e invoca o comando Rust `export_pdf` (Chrome/Edge headless). Grava em `output/` na raiz do repo (mesma regra de caminho que `data/`).
 
 ## Lógica Hospitalar
 
@@ -323,28 +325,23 @@ A stack descrita neste documento corresponde à versão **v0.1.0-node-web**, pre
 
 ### Stack Tauri (branch `feature/tauri`)
 
-**Desenvolvimento:**
+**Desenvolvimento rápido** (sem gerar `.exe` na raiz):
+
+```text
+npm run tauri:dev
+```
+
+**Build + abrir** (gera `auto-orcamento.exe` na raiz e inicia o app):
 
 ```text
 abrir-auto-orcamento-tauri.bat
-  -> npm run tauri:dev
-      -> copy-frontend -> dist/
-      -> WebView2 (debug)
-          -> index.html + api.js + pdf-build.js + zoom.js + app.js
-          -> invoke table_load / history_* / technologies_* / zoom_* / export_pdf
-          -> data/ e output/ na raiz do repo
-```
-
-**Build e distribuição:**
-
-```text
-build-auto-orcamento-tauri.bat
   -> npm run tauri:build
-      -> tauri build
-      -> scripts/copy-release-exe.cjs  ->  auto-orcamento.exe (raiz do repo)
+      -> tauri build (sem instaladores; bundle.active = false)
+      -> scripts/copy-release-exe.cjs  ->  auto-orcamento.exe (raiz)
+      -> start auto-orcamento.exe
 ```
 
-**Uso em outro PC:** copiar o repo (com `auto-orcamento.exe` na raiz) e abrir o `.exe`. Rebuild só na máquina de dev.
+**Uso em outro PC:** copiar o repo (com `auto-orcamento.exe` na raiz e pasta `data/`) e abrir o `.exe`. Rebuild só na máquina de dev.
 
 - **`api.js`:** detecta Tauri vs Node; no Tauri usa `window.__TAURI__.core.invoke` (requer `withGlobalTauri: true`). Expõe `AppApi.loadTable()` para tabelas hospitalares e de implantes.
 - **`pdf-build.js`:** monta HTML autocontido para exportação (CSS/fontes inline).

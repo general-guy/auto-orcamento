@@ -30,7 +30,7 @@ Substituir a stack **Node.js + Chrome/Edge manual** por um **executável desktop
 | `server.js` | Comandos Rust (`read_json`, `write_json`, handlers por recurso) |
 | `pdf-export.js` + `puppeteer-core` | PDF via WebView print, biblioteca Rust, ou plugin Tauri |
 | `launch-app.js` | Desnecessário — a janela é do próprio Tauri |
-| `abrir-auto-orcamento.bat` | `.exe` gerado pelo build Tauri |
+| `abrir-auto-orcamento.bat` | `auto-orcamento.exe` na raiz do repo (build via `abrir-auto-orcamento-tauri.bat`) |
 | `POST /api/shutdown` | Fechar janela encerra o app nativamente |
 
 ## Mapa API → comandos Tauri (rascunho)
@@ -55,34 +55,40 @@ Substituir a stack **Node.js + Chrome/Edge manual** por um **executável desktop
 - [x] Janela maximizada; ícones do app a partir do **G** ornamental (`assets/app-icon-g.png`)
 - [x] Pipeline de ícone: `scripts/build-app-icon-square.ps1` → `assets/app-icon-square.png` → `npm run icon:generate` → `src-tauri/icons/` (`.ico`, PNGs, favicon)
 - [x] Badge circular preto (diâmetro = slot do ícone; cantos transparentes); G dourado centralizado (`logoFillRatio` = `0.70` em `build-app-icon-square.ps1`)
-- [x] Build Windows: `.exe`, `.msi` e instalador NSIS
+- [x] Build `.exe` standalone (`npm run tauri:build`; `bundle.active = false`, sem NSIS/MSI)
+- [x] `abrir-auto-orcamento-tauri.bat`: build + cópia para `auto-orcamento.exe` na raiz + abrir o app
 - [x] Tabelas de referência via `table_load`, lidas de `data/` externo (seed único do build se ausentes)
 
 Comandos:
 
 ```bash
-npm run tauri:dev      # desenvolvimento
-npm run tauri:build    # gera .exe, instaladores e copia auto-orcamento.exe para a raiz
+npm run tauri:dev      # desenvolvimento rápido (debug)
+npm run tauri:build    # gera .exe release e copia auto-orcamento.exe para a raiz
 npm run icon:generate  # regenera ícones a partir de assets/app-icon-g.png
 ```
 
-Atalhos Windows:
+Atalho Windows:
 
 | Arquivo | Função |
 |---|---|
-| `abrir-auto-orcamento-tauri.bat` | Desenvolvimento (`tauri dev`) |
-| `build-auto-orcamento-tauri.bat` | Build release + cópia do `.exe` para a raiz |
+| `abrir-auto-orcamento-tauri.bat` | Build release, copia `.exe` para a raiz e abre o app |
+
+### Fluxo de distribuição (repo completo)
+
+```text
+Máquina de dev                          Outro PC
+────────────────                        ────────
+1. Editar código
+2. abrir-auto-orcamento-tauri.bat
+3. Copiar repo (auto-orcamento.exe + data/)  →  4. Duplo clique em auto-orcamento.exe
+```
 
 Saída do build:
 
 ```text
-auto-orcamento.exe
-src-tauri/target/release/auto-orcamento.exe
-src-tauri/target/release/bundle/nsis/Auto Orçamento_0.1.0_x64-setup.exe
-src-tauri/target/release/bundle/msi/Auto Orçamento_0.1.0_x64_en-US.msi
+auto-orcamento.exe                            # raiz (scripts/copy-release-exe.cjs; .gitignore)
+src-tauri/target/release/auto-orcamento.exe   # artefato Rust
 ```
-
-`auto-orcamento.exe` na raiz é gerado por `scripts/copy-release-exe.cjs` (não versionado no Git). Facilita copiar o repo para outro PC e abrir o app sem entrar em `src-tauri/target/release/`.
 
 Requisitos de build: Node.js, Rust (via `rustup`) e WebView2 (já presente no Windows 10/11).
 
@@ -119,7 +125,7 @@ Preferências de zoom (`settings.json`) seguem o mesmo diretório `data/`.
 
 **Zoom nativo:** `zoom.js` escuta `Ctrl` + roda e `Ctrl` + `+`/`-`/`0`; o Rust aplica `WebviewWindow::set_zoom` e persiste o fator entre sessões. O indicador `#zoomFlag` (canto inferior direito) espelha o popup do Chrome: porcentagem, `−`/`+` e **Redefinir**.
 
-Tabelas de referência (hospitalares, implantes) são lidas de `{pasta-do-exe}/data/` via `table_load`, no mesmo diretório dos históricos. Se o arquivo ainda não existir no primeiro run, o app copia a versão embutida no build para `data/` (seed único); depois disso, edições manuais no JSON valem sem rebuild.
+Tabelas de referência (hospitalares, implantes) são lidas de `data/` via `table_load` — na raiz do repo quando o `.exe` está dentro do projeto, ou ao lado do `.exe` em layout portátil mínimo. Se o arquivo ainda não existir no primeiro run, o app copia a versão embutida no build (seed único); depois disso, edições manuais no JSON valem sem rebuild.
 
 **Nota:** o Tauri 2 exige `app.withGlobalTauri: true` para expor `window.__TAURI__.core.invoke` ao JavaScript vanilla. O `api.js` aguarda essa API antes de carregar históricos, evitando chamadas `fetch("/api/...")` que não existem fora do Node.
 
@@ -130,16 +136,15 @@ Tabelas de referência (hospitalares, implantes) são lidas de `{pasta-do-exe}/d
 - [x] Renderização via Chrome/Edge headless (`--print-to-pdf`), sem Node/Puppeteer em runtime no Tauri
 - [x] `AppApi.exportPdf()` no frontend; stack Node continua usando `POST /api/pdf`
 
-Em desenvolvimento, PDFs ficam em `{projeto}/output/`. No `.exe`, em `{pasta-do-exe}/output/`. Requer Chrome ou Edge instalado (mesmo requisito prático da stack Node).
+PDFs ficam em `output/` na raiz do repo (mesma regra de caminho que `data/`). Requer Chrome ou Edge instalado (mesmo requisito prático da stack Node).
 
 ### Fase 4 — Empacotamento Windows (em andamento)
 
-- [x] Build `.exe` / instalador MSI/NSIS (`npm run tauri:build`)
-- [x] `build-auto-orcamento-tauri.bat` e cópia automática para `auto-orcamento.exe` na raiz
+- [x] Build `.exe` standalone sem instaladores (`bundle.active = false`)
+- [x] `abrir-auto-orcamento-tauri.bat`: build + cópia para raiz + abrir app
 - [x] `data/` e `output/` unificados na raiz do repo (`paths.rs` + `table_load`)
-- [x] Documentação de fluxo: build na máquina de dev, repo copiado para outro PC
+- [x] Documentação de fluxo e requisitos (WebView2, Chrome/Edge para PDF)
 - [ ] Testar em PC limpo (sem Node/Rust)
-- [ ] Documentar requisito WebView2 (já presente no Windows 10/11) para usuário final
 
 ### Fase 5 — Paridade e corte
 - Checklist funcional contra `docs/SNAPSHOT-node-web-v0.1.0.md`.
@@ -162,7 +167,7 @@ Em desenvolvimento, PDFs ficam em `{projeto}/output/`. No `.exe`, em `{pasta-do-
 | Risco | Mitigação |
 |---|---|
 | PDF com layout diferente | Baseline visual do snapshot; comparar PDFs lado a lado |
-| WebView2 ausente em Windows antigo | Instalador WebView2 bootstrapper no setup |
+| WebView2 ausente em Windows antigo | Win 10/11 já incluem; sem instalador bundler — instalar WebView2 Runtime manualmente se necessário |
 | `fetch` espalhado em `app.js` | Camada `api.js` (`AppApi`) abstrai HTTP vs Tauri; resolvido na Fase 2 |
 | `window.__TAURI__` indisponível no load | `withGlobalTauri: true` + `AppApi.waitForBackend()` antes do init |
 | Regressão no autofill | Testes manuais com casos Regina/Sapiranga documentados |

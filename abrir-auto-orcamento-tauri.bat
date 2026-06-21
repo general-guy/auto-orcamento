@@ -7,4 +7,8 @@ if not exist "node_modules\" (
   npm install
 )
 
-npm run tauri:dev
+npm run tauri:build
+
+if exist "auto-orcamento.exe" (
+  start "" "%~dp0auto-orcamento.exe"
+)
