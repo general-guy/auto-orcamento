@@ -359,5 +359,6 @@ O fluxo **`abrir-auto-orcamento.bat`** permanece válido na mesma branch para te
 - **`src-tauri/src/storage.rs`:** históricos, tecnologias, zoom e tabelas (`table_load` / `read_table`); seed único de tabelas a partir de `dist/data/` embutido no build.
 - **`src-tauri/src/pdf.rs`:** grava PDF em `output/` via Chrome/Edge headless; comando `export_pdf`.
 - **`scripts/copy-release-exe.cjs`:** após o build, copia `src-tauri/target/release/auto-orcamento.exe` para `auto-orcamento.exe` na raiz.
+- **`src-tauri/target/`:** cache de compilação Rust (pode ocupar vários GB). Não versionada; pode ser removida com `cargo clean` dentro de `src-tauri/` quando quiser recuperar espaço em disco — o próximo build será mais lento.
 - **Ícone do app:** `assets/app-icon-g.png` → `scripts/build-app-icon-square.ps1` (círculo preto inscrito, G recortado, `logoFillRatio` = `0.70`) → `npm run icon:generate` → `src-tauri/icons/` + `assets/favicon.png`; `lib.rs` aplica `icons/32x32.png` na janela via `set_icon` (`image-png`).
 - **PDF automático:** Tauri usa `export_pdf`; stack Node ainda usa `/api/pdf` + Puppeteer.

@@ -134,6 +134,25 @@ src-tauri/target/release/auto-orcamento.exe # artefato original do Rust
 
 **Requisito de build:** Node.js, Rust (`winget install Rustlang.Rustup`). WebView2 já vem no Windows 10/11.
 
+### Limpar cache de build (`cargo clean`)
+
+Compilar o Tauri (sobretudo com `npm run tauri:dev`) gera artefatos Rust em **`src-tauri/target/`**. Essa pasta pode crescer para **vários GB** (cache de `debug/` e `release/`). Não faz parte do código-fonte e **já está no `.gitignore`**.
+
+Para reduzir o tamanho de `src-tauri` no disco:
+
+```powershell
+cd src-tauri
+cargo clean
+```
+
+Ou apague manualmente a pasta `src-tauri\target\`.
+
+- **Seguro:** não afeta `data/`, `output/` nem o `auto-orcamento.exe` na raiz (se já existir).
+- **Efeito colateral:** o próximo `tauri:dev` ou `tauri:build` demora mais, porque recompila tudo do zero.
+- **Se der erro de arquivo em uso:** feche `auto-orcamento.exe`, pare `tauri:dev` e tente de novo (OneDrive ou antivírus também podem bloquear momentaneamente).
+
+Ao copiar o projeto para outro PC, **não** inclua `src-tauri/target/` — leve o código, `data/` e o `auto-orcamento.exe` já buildado.
+
 ### Usar em outro PC (sem rebuild)
 
 1. Na máquina de dev: altere o código e rode **`build-auto-orcamento-tauri.bat`**.

@@ -96,6 +96,8 @@ src-tauri/target/release/auto-orcamento.exe   # artefato Rust
 
 Requisitos de build: Node.js, Rust (via `rustup`) e WebView2 (já presente no Windows 10/11).
 
+**Espaço em disco:** `src-tauri/target/` acumula artefatos de compilação (vários GB após `tauri:dev` repetido). Está no `.gitignore`. Para limpar: `cd src-tauri && cargo clean`. Não copie `target/` ao mover o repo — inclua `auto-orcamento.exe` na raiz.
+
 ### Fase 2 — Persistência ✅
 
 - [x] Comandos Rust em `src-tauri/src/storage.rs` e `commands.rs` para ler/gravar `data/*.json`
