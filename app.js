@@ -84,6 +84,15 @@ let isInteractingWithPatientDropdown = false;
 let technologyHistory = [];
 let isInteractingWithTechnologyDropdown = false;
 let hospitalTables = null;
+let reginaHospitalProcedureOptions = [];
+let sapirangaHospitalProcedureOptions = [];
+let activeHospitalDetailInput = null;
+let isInteractingWithHospitalProcedureDropdown = false;
+const hospitalProcedureDropdown = document.createElement("div");
+hospitalProcedureDropdown.id = "hospitalProcedureDropdown";
+hospitalProcedureDropdown.className = "hospital-procedure-dropdown";
+hospitalProcedureDropdown.hidden = true;
+document.body.append(hospitalProcedureDropdown);
 let implantTable = null;
 
 const previewFields = {
@@ -592,40 +601,116 @@ function getSapirangaExcedenteOption() {
   };
 }
 
-function createHospitalDatalist(id, options) {
-  document.querySelector(`#${id}`)?.remove();
-
-  const datalist = document.createElement("datalist");
-  datalist.id = id;
-
-  options.forEach((optionText) => {
-    const option = document.createElement("option");
-    option.value = optionText;
-    datalist.append(option);
-  });
-
-  document.body.append(datalist);
-}
-
 function buildHospitalDatalists() {
   if (!hospitalTables) {
+    reginaHospitalProcedureOptions = [];
+    sapirangaHospitalProcedureOptions = [];
     return;
   }
 
-  const reginaOptions = [
+  reginaHospitalProcedureOptions = [
     ...hospitalTables.regina.pacotesCirurgiaPlastica.map((item) => formatReginaOption(item, "pacote")),
     ...hospitalTables.regina.taxasAdicionais.map((item) => formatReginaOption(item, "taxa")),
   ];
 
-  const sapirangaOptions = [
+  sapirangaHospitalProcedureOptions = [
     ...hospitalTables.sapiranga.cirurgiasPlasticasCentroCirurgico.map((item) => formatSapirangaOption(item, "centro")),
     ...hospitalTables.sapiranga.cirurgiasPlasticasAmbulatorio.map((item) => formatSapirangaOption(item, "ambulatorio")),
     ...(hospitalTables.sapiranga.excedente || []).map((item) => formatSapirangaOption(item, "excedente")),
     ...hospitalTables.sapiranga.diarias.map((item) => formatSapirangaOption(item, "diaria")),
   ];
 
-  createHospitalDatalist("reginaHospitalOptions", reginaOptions);
-  createHospitalDatalist("sapirangaHospitalOptions", sapirangaOptions);
+  document.querySelector("#reginaHospitalOptions")?.remove();
+  document.querySelector("#sapirangaHospitalOptions")?.remove();
+}
+
+function getHospitalProcedureOptionsForInput(input) {
+  const datalistId = input.closest(".hospital-detail-list")?.dataset.datalistId;
+
+  if (datalistId === "reginaHospitalOptions") {
+    return reginaHospitalProcedureOptions;
+  }
+
+  if (datalistId === "sapirangaHospitalOptions") {
+    return sapirangaHospitalProcedureOptions;
+  }
+
+  return [];
+}
+
+function positionHospitalProcedureDropdown(input) {
+  const rect = input.getBoundingClientRect();
+  const gap = 8;
+  const viewportMargin = 12;
+  const top = viewportMargin;
+  const height = window.innerHeight - viewportMargin * 2;
+
+  hospitalProcedureDropdown.style.top = `${top}px`;
+  hospitalProcedureDropdown.style.left = `${rect.right + gap}px`;
+  hospitalProcedureDropdown.style.height = `${height}px`;
+  hospitalProcedureDropdown.style.maxHeight = `${height}px`;
+  hospitalProcedureDropdown.style.minWidth = `${Math.max(360, rect.width)}px`;
+  hospitalProcedureDropdown.style.maxWidth = `${Math.max(360, window.innerWidth - rect.right - gap - viewportMargin)}px`;
+}
+
+function updateHospitalProcedureDropdown(query = "") {
+  if (!activeHospitalDetailInput) {
+    hospitalProcedureDropdown.hidden = true;
+    return;
+  }
+
+  const normalizedQuery = normalizeText(query);
+  const options = getHospitalProcedureOptionsForInput(activeHospitalDetailInput).filter(
+    (item) => !normalizedQuery || normalizeText(item).includes(normalizedQuery)
+  );
+
+  hospitalProcedureDropdown.innerHTML = "";
+  hospitalProcedureDropdown.hidden = options.length === 0;
+
+  if (options.length === 0) {
+    return;
+  }
+
+  options.forEach((optionText) => {
+    const option = document.createElement("div");
+    option.className = "history-option hospital-procedure-option";
+    option.dataset.value = optionText;
+    option.setAttribute("role", "option");
+    option.setAttribute("tabindex", "0");
+    option.textContent = optionText;
+    hospitalProcedureDropdown.append(option);
+  });
+
+  positionHospitalProcedureDropdown(activeHospitalDetailInput);
+}
+
+function hideHospitalProcedureDropdown() {
+  hospitalProcedureDropdown.hidden = true;
+  activeHospitalDetailInput = null;
+}
+
+function showHospitalProcedureDropdown(input) {
+  activeHospitalDetailInput = input;
+  updateHospitalProcedureDropdown(input.value);
+}
+
+function selectHospitalProcedureOption(option, shouldAdvance = false) {
+  const input = activeHospitalDetailInput;
+  if (!input) {
+    return;
+  }
+
+  input.value = option.dataset.value;
+  updatePreview();
+  isInteractingWithHospitalProcedureDropdown = false;
+  hideHospitalProcedureDropdown();
+
+  if (shouldAdvance) {
+    focusNextTextField(input);
+    return;
+  }
+
+  input.focus();
 }
 
 async function loadHospitalTables() {
@@ -693,7 +778,6 @@ function createHospitalDetailEntry(detailList, detailConfig, shouldFocus = false
   detailInput.name = `${detailConfig.name}${fieldNumber}`;
   detailInput.type = "text";
   detailInput.className = "hospital-detail-input";
-  detailInput.setAttribute("list", detailConfig.datalistId);
   detailInput.setAttribute("placeholder", detailConfig.placeholder);
   detailInput.setAttribute("aria-label", `${detailConfig.labelPrefix}${fieldNumber}`);
 
@@ -1013,6 +1097,7 @@ function getHospitalDetailConfigFromList(detailList) {
 }
 
 function syncHospitalDetailField(input) {
+  hideHospitalProcedureDropdown();
   const label = input.closest("label");
   const existingList = label.querySelector(".hospital-detail-list");
   const detailConfig = getHospitalDetailConfig(input.value);
@@ -3047,6 +3132,10 @@ form.addEventListener("input", (event) => {
     showHospitalHistoryDropdown(event.target);
   }
 
+  if (event.target.matches(".hospital-detail-input")) {
+    showHospitalProcedureDropdown(event.target);
+  }
+
   if (event.target.matches(".technology-input")) {
     showTechnologyHistoryDropdown();
   }
@@ -3079,6 +3168,10 @@ form.addEventListener("focusin", (event) => {
     }
 
     showHospitalHistoryDropdown(event.target);
+  }
+
+  if (event.target.matches(".hospital-detail-input")) {
+    showHospitalProcedureDropdown(event.target);
   }
 
   if (event.target.matches(".technology-input")) {
@@ -3297,6 +3390,16 @@ form.addEventListener("focusout", (event) => {
     }
   }
 
+  if (event.target.matches(".hospital-detail-input")) {
+    if (hospitalProcedureDropdown.contains(event.relatedTarget)) {
+      return;
+    }
+
+    if (!isInteractingWithHospitalProcedureDropdown) {
+      hideHospitalProcedureDropdown();
+    }
+  }
+
   if (event.target.matches(".technology-input, #technologyValue")) {
     if (technologyHistoryDropdown.contains(event.relatedTarget)) {
       return;
@@ -3430,6 +3533,17 @@ form.addEventListener("keydown", (event) => {
     focusDropdownOption(guidanceHistoryDropdown, 0);
     setTimeout(() => {
       isInteractingWithGuidanceDropdown = false;
+    });
+    return;
+  }
+
+  if (event.target.matches(".hospital-detail-input") && event.key === "ArrowDown") {
+    event.preventDefault();
+    showHospitalProcedureDropdown(event.target);
+    isInteractingWithHospitalProcedureDropdown = true;
+    focusDropdownOption(hospitalProcedureDropdown, 0);
+    setTimeout(() => {
+      isInteractingWithHospitalProcedureDropdown = false;
     });
     return;
   }
@@ -3885,6 +3999,55 @@ hospitalHistoryDropdown.addEventListener("keydown", (event) => {
     activeHospitalInput.focus();
   }
 });
+hospitalProcedureDropdown.addEventListener("pointerdown", (event) => {
+  isInteractingWithHospitalProcedureDropdown = true;
+  event.preventDefault();
+});
+hospitalProcedureDropdown.addEventListener("click", (event) => {
+  const option = event.target.closest(".history-option");
+  if (!option || !activeHospitalDetailInput) {
+    isInteractingWithHospitalProcedureDropdown = false;
+    return;
+  }
+
+  selectHospitalProcedureOption(option);
+});
+hospitalProcedureDropdown.addEventListener("keydown", (event) => {
+  const option = event.target.closest(".history-option");
+  if (!option || !activeHospitalDetailInput) {
+    return;
+  }
+
+  const options = getDropdownOptions(hospitalProcedureDropdown);
+  const currentIndex = options.indexOf(option);
+
+  if (event.key === "ArrowDown") {
+    event.preventDefault();
+    focusDropdownOption(hospitalProcedureDropdown, Math.min(currentIndex + 1, options.length - 1));
+  }
+
+  if (event.key === "ArrowUp") {
+    event.preventDefault();
+    if (currentIndex <= 0) {
+      activeHospitalDetailInput.focus();
+      return;
+    }
+
+    focusDropdownOption(hospitalProcedureDropdown, currentIndex - 1);
+  }
+
+  if (event.key === "Enter") {
+    event.preventDefault();
+    selectHospitalProcedureOption(option, true);
+  }
+
+  if (event.key === "Escape") {
+    event.preventDefault();
+    isInteractingWithHospitalProcedureDropdown = false;
+    hideHospitalProcedureDropdown();
+    activeHospitalDetailInput.focus();
+  }
+});
 technologyHistoryDropdown.addEventListener("pointerdown", (event) => {
   isInteractingWithTechnologyDropdown = true;
   event.preventDefault();
@@ -3958,6 +4121,8 @@ document.addEventListener("pointerdown", (event) => {
     event.target.closest("#guidanceHistoryDropdown") ||
     event.target.closest(".hospital-input") ||
     event.target.closest("#hospitalHistoryDropdown") ||
+    event.target.closest(".hospital-detail-input") ||
+    event.target.closest("#hospitalProcedureDropdown") ||
     event.target.closest(".technology-input") ||
     event.target.closest("#technologyHistoryDropdown")
   ) {
@@ -3970,7 +4135,18 @@ document.addEventListener("pointerdown", (event) => {
   hideExtrasHistoryDropdown();
   hideGuidanceHistoryDropdown();
   hideHospitalHistoryDropdown();
+  hideHospitalProcedureDropdown();
   hideTechnologyHistoryDropdown();
+});
+window.addEventListener("resize", () => {
+  if (activeHospitalDetailInput && !hospitalProcedureDropdown.hidden) {
+    positionHospitalProcedureDropdown(activeHospitalDetailInput);
+  }
+});
+document.querySelector(".form-panel")?.addEventListener("scroll", () => {
+  if (activeHospitalDetailInput && !hospitalProcedureDropdown.hidden) {
+    positionHospitalProcedureDropdown(activeHospitalDetailInput);
+  }
 });
 panelResizeHandle?.addEventListener("pointerdown", (event) => {
   event.preventDefault();

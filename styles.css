@@ -479,6 +479,31 @@ textarea {
   text-align: center;
 }
 
+.hospital-procedure-dropdown {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(31, 41, 51, 0.12);
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: fixed;
+  z-index: 40;
+}
+
+.hospital-procedure-dropdown[hidden] {
+  display: none;
+}
+
+.hospital-procedure-option {
+  white-space: nowrap;
+}
+
+.hospital-procedure-option .history-delete {
+  display: none;
+}
+
 .add-button,
 .remove-button {
   align-items: center;

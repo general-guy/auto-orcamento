@@ -147,7 +147,9 @@ data/tabelas-hospitalares.json
 data/tabela-implantes.json
 ```
 
-O frontend carrega `data/tabelas-hospitalares.json` diretamente para montar os `datalist` de Regina e Sapiranga e para calcular os valores exibidos no preview.
+O frontend carrega `data/tabelas-hospitalares.json` diretamente para montar as opções de Regina e Sapiranga e para calcular os valores exibidos no preview.
+
+As entradas auxiliares `Reg#`/`Sap#` não usam `<datalist>` nativo (limitado no WebView2). O app monta `#hospitalProcedureDropdown` em `app.js`: lista filtrável, posicionada à direita do input com altura de viewport completa (`positionHospitalProcedureDropdown`).
 
 `data/tabela-implantes.json` guarda uma tabela independente de implantes, extraída de documento `.doc`, para preenchimento opcional da seção `Implantes`. O dropdown usa `rotulo`, `modelo` e `referencia`; itens com `favorito: true` recebem uma estrela ao final da opção.
 
@@ -264,7 +266,7 @@ Cada entrada auxiliar tem:
 
 - campo de pacote/taxa;
 - campo de multiplicador, iniciado com `1`;
-- sugestões vindas das tabelas hospitalares locais.
+- dropdown customizado de procedimentos (`#hospitalProcedureDropdown`), alimentado por `data/tabelas-hospitalares.json`.
 
 O preview hospitalar é montado em três colunas:
 

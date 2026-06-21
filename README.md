@@ -84,6 +84,8 @@ O `.exe` fica em `src-tauri/target/release/auto-orcamento.exe`. Instaladores NSI
 
 **Pendente (Fase 3):** PDF automático em `output/` ao imprimir. Detalhes em `docs/MIGRATION-tauri.md`.
 
+**Zoom da interface:** na janela Tauri/WebView2, `Ctrl` + `-` / `Ctrl` + `+` **não funcionam** (não é um navegador completo). Para ver mais conteúdo na tela, use a escala do Windows (**Configurações → Sistema → Tela → Escala**) ou rode a versão Node no browser (`npm start` → `http://localhost:3000`), onde o zoom do Chrome/Edge funciona normalmente.
+
 ## Ambiente Recomendado
 
 Para manutenção do projeto no Windows, recomenda-se usar PowerShell 7 (`pwsh`) como terminal padrão do Cursor, em vez do Windows PowerShell antigo (`powershell.exe`). O `pwsh` aceita operadores modernos como `&&` e evita diferenças de sintaxe do Windows PowerShell 5.1.
@@ -157,6 +159,8 @@ O botão verde ao lado do hospital preenche e reorganiza as entradas auxiliares.
 Para Sapiranga, os pacotes de centro cirúrgico ficam no topo, ordenados do maior valor para o menor, e recebem multiplicadores progressivos. Depois vêm os pacotes de ambulatório, a hora excedente e, por último, as diárias. Diárias não entram no cálculo de tempo de sala e mantêm o multiplicador normal.
 
 Para Regina, o app ordena os pacotes por valor decrescente e aplica multiplicadores automáticos (`1`, `0.7` e `0.5`) apenas sobre o valor de cada pacote. Adicionais de sala e pernoite de recuperação ficam depois, na ordem do JSON. Se faltar tempo em relação ao tempo previsto de hospital, adiciona `SALA CIRÚRGICA - MEIA HORA SUBSEQUENTE` com multiplicador em unidades de meia hora, usando sempre o tempo bruto dos pacotes no cálculo.
+
+Nos campos auxiliares `Reg#` e `Sap#`, a busca de pacotes/taxas usa um dropdown customizado (`#hospitalProcedureDropdown`): abre **à direita** do campo, ocupa **toda a altura visível da janela**, filtra conforme a digitação e funciona igual na versão Tauri e na versão Node no browser.
 
 ## Implantes
 
