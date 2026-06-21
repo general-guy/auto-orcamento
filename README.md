@@ -124,6 +124,26 @@ src-tauri/target/release/auto-orcamento.exe # artefato original do Rust
 
 Requisitos no PC de destino: Windows 10/11 (WebView2) e Chrome ou Edge (só para PDF). **Não** precisa de Node, Rust nem `npm install`.
 
+### Windows bloqueou o `.exe` (Controlo de Aplicações Inteligentes)
+
+No **Windows 11**, o **Controlo de Aplicações Inteligentes** (*Smart App Control*) pode bloquear o `auto-orcamento.exe` porque ele é compilado localmente e **não tem assinatura digital** de editor reconhecido. Isso **não** indica problema no app nem na pasta `data/`.
+
+Não existe opção oficial de “permitir só desta aplicação” com o controlo ligado. A Microsoft recomenda [assinar a aplicação com um certificado válido](https://support.microsoft.com/pt-br/windows/perguntas-mais-frequentes-sobre-o-controlo-de-aplica%C3%A7%C3%B5es-inteligentes-285ea03d-fa88-4d56-882e-6698afdb7003#bkmk_unknown) (*Code Signing*, não e-CPF/e-CNPJ de documentos).
+
+**Desativar temporariamente, usar o app e reativar** (fluxo suportado nas versões recentes do Windows, sem instalação limpa):
+
+1. **Configurações** → **Privacidade e segurança** → **Segurança do Windows** → **Abrir Segurança do Windows**
+2. **Controlo de aplicativos e do browser** → **Configurações do Controlo de Aplicações Inteligentes**
+3. Escolha **Desativar**
+4. Abra o **`auto-orcamento.exe`** na raiz do repo
+5. Volte ao mesmo ecrã e **reative** o Controlo de Aplicações Inteligentes
+
+FAQ oficial (Microsoft): [Perguntas mais frequentes sobre o Controlo de Aplicações Inteligentes](https://support.microsoft.com/pt-br/windows/perguntas-mais-frequentes-sobre-o-controlo-de-aplica%C3%A7%C3%B5es-inteligentes-285ea03d-fa88-4d56-882e-6698afdb7003)
+
+Se a opção de reativar não aparecer, instale as **atualizações pendentes do Windows** e tente de novo. Em alguns casos (por exemplo, dados de diagnóstico opcionais desativados), ativar o controlo pela primeira vez pode exigir passos adicionais descritos no FAQ.
+
+**Propriedades → Desbloquear** no `.exe` ajuda em ficheiros descarregados da internet, mas **raramente** contorna o Controlo de Aplicações Inteligentes.
+
 ### Dados locais (Tauri)
 
 Todo JSON mutável e as tabelas de referência ficam em **`data/` na raiz do projeto**:
