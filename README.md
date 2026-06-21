@@ -6,6 +6,8 @@ Aplicativo local para gerar orçamentos cirúrgicos em papel timbrado, com preen
 
 Use **`abrir-auto-orcamento.bat`** (Node.js + browser). É o modo recomendado enquanto a migração Tauri está **estagnada**.
 
+**Pasta `src-tauri/`:** enquanto não for buildar o `.exe`, trate-a como **congelada** — edite só o web app partilhado na raiz (`app.js`, `api.js`, etc.). Evite alterar Rust/`src-tauri/` sem necessidade: qualquer `cargo check`, Rust Analyzer ou `tauri:dev` recria `src-tauri/target/` (centenas de MB). Só rode `build-auto-orcamento-tauri.bat` ou comandos Tauri quando quiser gerar o `.exe` de novo; use `cargo clean` se `target/` crescer.
+
 Alterações em `index.html`, `app.js`, `api.js`, `styles.css`, `assets/` e `data/` valem para **ambos** os deploys (Node e Tauri) quando a migração for retomada — a camada `api.js` já abstrai HTTP e comandos Rust.
 
 | Referência | Branch / tag | Documento |
