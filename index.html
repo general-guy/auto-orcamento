@@ -391,6 +391,13 @@
       </section>
     </main>
 
+    <div id="zoomFlag" class="zoom-flag" hidden aria-live="polite" aria-label="Controle de zoom">
+      <span id="zoomFlagLevel" class="zoom-flag-level">100%</span>
+      <button type="button" id="zoomFlagOut" class="zoom-flag-button" aria-label="Diminuir zoom">−</button>
+      <button type="button" id="zoomFlagIn" class="zoom-flag-button" aria-label="Aumentar zoom">+</button>
+      <button type="button" id="zoomFlagReset" class="zoom-flag-reset" hidden>Redefinir</button>
+    </div>
+
     <script src="api.js"></script>
     <script src="zoom.js"></script>
     <script src="app.js"></script>

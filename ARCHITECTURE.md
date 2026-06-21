@@ -334,6 +334,6 @@ abrir-auto-orcamento-tauri.bat
 ```
 
 - **`api.js`:** detecta Tauri vs Node; no Tauri usa `window.__TAURI__.core.invoke` (requer `withGlobalTauri: true`).
-- **`zoom.js`:** atalhos `Ctrl` + roda / `Ctrl` + `+`/`-`/`0`; persiste zoom em `data/settings.json` via `zoom_*`.
+- **`zoom.js`:** atalhos `Ctrl` + roda / `Ctrl` + `+`/`-`/`0`; indicador flutuante `#zoomFlag` (%, `−`/`+`, Redefinir); persiste zoom em `data/settings.json` via `zoom_*`.
 - **`src-tauri/src/storage.rs`:** grava JSON mutável; em debug usa `{projeto}/data/`, em release `{exe}/data/`.
 - **PDF automático:** ainda via Node (`/api/pdf`) — pendente na Fase 3.

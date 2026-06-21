@@ -84,7 +84,7 @@ O `.exe` fica em `src-tauri/target/release/auto-orcamento.exe`. Instaladores NSI
 
 **Pendente (Fase 3):** PDF automático em `output/` ao imprimir. Detalhes em `docs/MIGRATION-tauri.md`.
 
-**Zoom da interface (Tauri):** `Ctrl` + roda do mouse, `Ctrl` + `+` / `Ctrl` + `-` (passos de 10%, entre 50% e 200%) e `Ctrl` + `0` para voltar a 100%. O nível fica salvo em `data/settings.json` e é reaplicado ao abrir o app. Na versão Node no browser (`npm start`), o zoom nativo do Chrome/Edge continua valendo.
+**Zoom da interface (Tauri):** `Ctrl` + roda do mouse, `Ctrl` + `+` / `Ctrl` + `-` (passos de 10%, entre 50% e 200%) e `Ctrl` + `0` para voltar a 100%. O nível fica salvo em `data/settings.json` e é reaplicado ao abrir o app. Um indicador flutuante (estilo Chrome) mostra a porcentagem atual, botões `−`/`+` e **Redefinir** quando o zoom difere de 100%. Na versão Node no browser (`npm start`), o zoom nativo do Chrome/Edge continua valendo.
 
 ## Ambiente Recomendado
 
