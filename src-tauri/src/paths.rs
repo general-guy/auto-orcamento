@@ -1,6 +1,11 @@
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
+
+#[cfg(not(debug_assertions))]
+use std::path::Path;
 
 use tauri::AppHandle;
+
+#[cfg(not(debug_assertions))]
 use tauri::Manager;
 
 #[cfg(not(debug_assertions))]

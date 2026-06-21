@@ -349,7 +349,7 @@ build-auto-orcamento-tauri.bat
 - **`api.js`:** detecta Tauri vs Node; no Tauri usa `window.__TAURI__.core.invoke` (requer `withGlobalTauri: true`). Expõe `AppApi.loadTable()` para tabelas hospitalares e de implantes.
 - **`pdf-build.js`:** monta HTML autocontido para exportação (CSS/fontes inline).
 - **`zoom.js`:** atalhos `Ctrl` + roda / `Ctrl` + `+`/`-`/`0`; indicador flutuante `#zoomFlag` (%, `−`/`+`, Redefinir); persiste zoom em `data/settings.json` via `zoom_*`.
-- **`src-tauri/src/paths.rs`:** resolve `data/` e `output/` — em debug, raiz do repo; em release, raiz do repo quando o `.exe` está em `src-tauri/target/release/` ou na raiz do projeto, senão `{pasta-do-exe}/data/` e `{pasta-do-exe}/output/`.
+- **`src-tauri/src/paths.rs`:** resolve `data/` e `output/` — em debug, raiz do repo; em release, raiz do repo quando o `.exe` está em `src-tauri/target/release/` ou na raiz do projeto, senão `{pasta-do-exe}/data/` e `{pasta-do-exe}/output/`. Helpers de detecção do repo compilam só em release (`#[cfg(not(debug_assertions))]`), evitando warnings no `tauri dev`.
 - **`src-tauri/src/storage.rs`:** históricos, tecnologias, zoom e tabelas (`table_load` / `read_table`); seed único de tabelas a partir de `dist/data/` embutido no build.
 - **`src-tauri/src/pdf.rs`:** grava PDF em `output/` via Chrome/Edge headless; comando `export_pdf`.
 - **`scripts/copy-release-exe.cjs`:** após o build, copia `src-tauri/target/release/auto-orcamento.exe` para `auto-orcamento.exe` na raiz.
