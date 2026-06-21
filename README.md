@@ -86,7 +86,7 @@ O `.exe` fica em `src-tauri/target/release/auto-orcamento.exe`. Instaladores NSI
 npm run icon:generate
 ```
 
-Isso executa `scripts/build-app-icon-square.ps1`, depois `tauri icon` e copia o favicon para `assets/favicon.png`. Ajuste fino do tamanho do G: variável `$logoFillRatio` no script (atual `0.76`). **Após trocar ícones, feche o app e rode `npm run tauri:dev` de novo** — o Windows cacheia o `.exe` em debug.
+Isso executa `scripts/build-app-icon-square.ps1`, depois `tauri icon` e copia o favicon para `assets/favicon.png`. Ajuste fino do tamanho do G: variável `$logoFillRatio` no script (atual `0.70`). **Após trocar ícones, feche o app e rode `npm run tauri:dev` de novo** — o Windows cacheia o `.exe` em debug.
 
 **Persistência (Fase 2):** históricos (pacientes, cirurgias, hospitais, extras, pagamento, observações, tecnologias) são lidos e gravados em `data/` via comandos Rust, acessados pelo frontend por `api.js` (`AppApi`). Em `tauri dev`, a pasta é `data/` na raiz do projeto; no `.exe`, `{pasta-do-exe}/data/`.
 

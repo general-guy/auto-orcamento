@@ -54,7 +54,7 @@ Substituir a stack **Node.js + Chrome/Edge manual** por um **executável desktop
 - [x] WebView carrega o frontend estático (sem Node em runtime)
 - [x] Janela maximizada; ícones do app a partir do **G** ornamental (`assets/app-icon-g.png`)
 - [x] Pipeline de ícone: `scripts/build-app-icon-square.ps1` → `assets/app-icon-square.png` → `npm run icon:generate` → `src-tauri/icons/` (`.ico`, PNGs, favicon)
-- [x] Badge circular preto (diâmetro = slot do ícone; cantos transparentes); G dourado centralizado (`logoFillRatio` = `0.76` em `build-app-icon-square.ps1`)
+- [x] Badge circular preto (diâmetro = slot do ícone; cantos transparentes); G dourado centralizado (`logoFillRatio` = `0.70` em `build-app-icon-square.ps1`)
 - [x] Build Windows: `.exe`, `.msi` e instalador NSIS
 - [x] Tabelas estáticas (`data/tabelas-hospitalares.json`, `data/tabela-implantes.json`) servidas via `dist/data/`
 

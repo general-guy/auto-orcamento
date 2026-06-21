@@ -5,7 +5,7 @@ $sourcePath = Join-Path $rootDir "assets/app-icon-g.png"
 $outputPath = Join-Path $rootDir "assets/app-icon-square.png"
 $targetSize = 1024
 $circleDiameter = $targetSize
-$logoFillRatio = 0.76
+$logoFillRatio = 0.70
 
 function New-TransparentSourceBitmap {
   param(
