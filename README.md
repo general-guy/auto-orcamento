@@ -4,17 +4,23 @@ Aplicativo local para gerar orçamentos cirúrgicos em papel timbrado, com preen
 
 ## Como Usar
 
-O projeto tem **duas stacks**. Na branch **`feature/tauri`**, use a versão desktop (`.exe`). A stack Node permanece no branch **`stable/node-web-v0.1.0`**.
+O **mesmo web app** (`index.html`, `app.js`, `api.js`, `styles.css`, `assets/`) alimenta **dois fluxos de deploy equivalentes**. Alterações nesses arquivos valem para **ambos** — a camada `api.js` escolhe HTTP (Node) ou comandos Tauri conforme o ambiente.
 
-### Tauri — executável desktop (branch `feature/tauri`)
+| Fluxo | Atalho | Quando usar |
+|-------|--------|-------------|
+| **Node + browser** | `abrir-auto-orcamento.bat` | PC com Node.js; desenvolvimento; paridade com a stack original |
+| **Tauri (`.exe`)** | `build-auto-orcamento-tauri.bat` → `auto-orcamento.exe` | PC **sem** Node; distribuição do repo copiado |
 
-**Na máquina de dev** (Node + Rust instalados): duplo clique em `build-auto-orcamento-tauri.bat`. Isso builda o app e copia `auto-orcamento.exe` para a raiz do repo.
+Ambos leem e gravam **`data/`** e **`output/`** na raiz do repo. Históricos, tabelas e zoom são os mesmos arquivos JSON.
 
-**Em outro PC** (sem Node/Rust): copie o repositório (inclua `auto-orcamento.exe` e a pasta `data/`) e dê duplo clique em `auto-orcamento.exe` na raiz.
+**Depois de editar o código do web app:**
 
-Detalhes em [Versão Tauri](#versão-tauri-branch-featuretauri) abaixo.
+- **Node:** abra de novo com `abrir-auto-orcamento.bat` (ou `npm start`) — **não** precisa de build.
+- **Tauri:** rode `build-auto-orcamento-tauri.bat` para regenerar o `.exe` com o frontend atualizado (ou `npm run tauri:dev` para testar sem build).
 
-### Node — servidor local + browser (branch `stable/node-web-v0.1.0`)
+Na branch **`feature/tauri`**, os **dois fluxos permanecem válidos**. O fluxo Node **não** foi descontinuado.
+
+### Node — web app via `abrir-auto-orcamento.bat` (stack original)
 
 No Windows, clique duas vezes em:
 
@@ -22,20 +28,24 @@ No Windows, clique duas vezes em:
 abrir-auto-orcamento.bat
 ```
 
-Esse atalho inicia o servidor local, abre o app em uma janela do Chrome em modo app e mantém o servidor ativo enquanto essa janela estiver aberta. Ao fechar a janela do app, o processo do servidor também é encerrado.
+Requer **Node.js** instalado. O atalho instala dependências se faltar `node_modules`, inicia `server.js` na porta 3000, abre o Chrome ou Edge em modo app e encerra o servidor ao fechar a janela.
 
-Como alternativa, execute manualmente na pasta do projeto:
+Equivalente manual:
 
 ```bash
 npm install
 npm start
 ```
 
-Depois acesse:
+Depois acesse `http://localhost:3000`.
 
-```text
-http://localhost:3000
-```
+### Tauri — mesmo web app via `auto-orcamento.exe`
+
+**Build (máquina de dev, Node + Rust):** `build-auto-orcamento-tauri.bat` → gera `auto-orcamento.exe` na raiz.
+
+**Uso (outro PC, sem Node):** copie o repo (com `auto-orcamento.exe` e `data/`) e abra o `.exe`.
+
+Detalhes na seção [Versão Tauri](#versão-tauri-branch-featuretauri) abaixo (inclui Controlo de Aplicações Inteligentes no Windows 11).
 
 ## Requisitos
 
@@ -48,7 +58,9 @@ http://localhost:3000
 | Google Chrome ou Microsoft Edge | Sim (janela do app e PDF automático) |
 | Internet | Só na primeira execução, se `node_modules` ainda não existir |
 
-Para migrar a pasta para outro PC: instale Node.js, copie o projeto (de preferência com `node_modules` incluído) e execute `abrir-auto-orcamento.bat`.
+Para migrar a pasta para outro PC com **Node:** instale Node.js, copie o projeto (de preferência com `node_modules` incluído) e execute `abrir-auto-orcamento.bat`.
+
+Para **Tauri** no outro PC, veja [Usar em outro PC](#usar-em-outro-pc-sem-rebuild) — não precisa de Node, mas precisa do `.exe` buildado.
 
 ### Stack Tauri (desktop)
 
@@ -62,24 +74,30 @@ Não são necessários Python, PowerShell nem Git para uso normal.
 
 ## Versão estável e migração Tauri
 
-A versão atual da stack Node.js + browser está documentada em:
+A stack Node.js + browser de referência está documentada em `docs/SNAPSHOT-node-web-v0.1.0.md` (branch **`stable/node-web-v0.1.0`**, tag **`v0.1.0-node-web`**).
 
-```text
-docs/SNAPSHOT-node-web-v0.1.0.md
-```
+Na branch **`feature/tauri`**, o **Tauri** acrescenta o `.exe` sem Node em runtime; o fluxo **`abrir-auto-orcamento.bat`** continua **válido e equivalente** para abrir o mesmo web app. Plano em `docs/MIGRATION-tauri.md`.
 
-O branch **`stable/node-web-v0.1.0`** e a tag **`v0.1.0-node-web`** preservam a stack Node. A migração Tauri é desenvolvida na **`feature/tauri`**. Plano em `docs/MIGRATION-tauri.md`.
-
-Para restaurar a versão Node:
-
-```bash
-git checkout stable/node-web-v0.1.0
-npm install
-```
+Para a baseline Node congelada: `git checkout stable/node-web-v0.1.0` e `npm install`.
 
 ## Versão Tauri (branch `feature/tauri`)
 
-O app também pode rodar como **executável desktop** (WebView2), sem Node em runtime.
+Executável desktop (WebView2) **em paralelo** ao fluxo Node — **não** o substitui. O frontend é o **mesmo**; `api.js` (`AppApi`) abstrai `fetch("/api/...")` no Node e `invoke(...)` no Tauri.
+
+### Paridade entre deploys
+
+```text
+Código partilhado (editar aqui):
+  index.html, app.js, api.js, pdf-build.js, zoom.js, styles.css, assets/
+
+Node (abrir-auto-orcamento.bat):
+  server.js + launch-app.js  →  http://localhost:3000  →  arquivos na raiz do repo
+
+Tauri (build-auto-orcamento-tauri.bat):
+  copy-frontend → dist/  →  embutido no .exe  →  data/ e output/ na raiz do repo
+```
+
+Qualquer alteração em `app.js`, formulário, preview ou `api.js` deve ser testada nos **dois** fluxos quando possível.
 
 ### Na máquina de dev (Node + Rust)
 
@@ -136,15 +154,15 @@ Não existe opção oficial de “permitir só desta aplicação” com o contro
 2. **Controlo de aplicativos e do browser** → **Configurações do Controlo de Aplicações Inteligentes**
 3. Escolha **Desativar**
 4. Abra o **`auto-orcamento.exe`** na raiz do repo
-5. Volte ao mesmo ecrã e **reative** o Controlo de Aplicações Inteligentes
+5. Volte à mesma tela e **reative** o Controlo de Aplicações Inteligentes
 
 FAQ oficial (Microsoft): [Perguntas mais frequentes sobre o Controlo de Aplicações Inteligentes](https://support.microsoft.com/pt-br/windows/perguntas-mais-frequentes-sobre-o-controlo-de-aplica%C3%A7%C3%B5es-inteligentes-285ea03d-fa88-4d56-882e-6698afdb7003)
 
 Se a opção de reativar não aparecer, instale as **atualizações pendentes do Windows** e tente de novo. Em alguns casos (por exemplo, dados de diagnóstico opcionais desativados), ativar o controlo pela primeira vez pode exigir passos adicionais descritos no FAQ.
 
-**Propriedades → Desbloquear** no `.exe` ajuda em ficheiros descarregados da internet, mas **raramente** contorna o Controlo de Aplicações Inteligentes.
+**Propriedades → Desbloquear** no `.exe` ajuda em arquivos baixados da internet, mas **raramente** contorna o Controlo de Aplicações Inteligentes.
 
-### Dados locais (Tauri)
+### Dados locais (Node e Tauri)
 
 Todo JSON mutável e as tabelas de referência ficam em **`data/` na raiz do projeto**:
 
@@ -156,7 +174,7 @@ data/tabela-implantes.json       ← editável sem rebuild
 data/settings.json               ← zoom (não versionado)
 ```
 
-PDFs gerados ficam em `output/` na raiz. Tanto `tauri dev` quanto o `.exe` na raiz (ou em `src-tauri/target/release/` dentro do repo) usam **as mesmas pastas** `data/` e `output/` — o mesmo lugar onde o `tauri dev` grava históricos e zoom.
+PDFs gerados ficam em `output/` na raiz. **`abrir-auto-orcamento.bat`**, `tauri dev` e o `.exe` usam as **mesmas pastas** `data/` e `output/` na raiz do repo.
 
 O Rust resolve o caminho via `std::env::current_exe()` (não usa `%AppData%`). Ao iniciar, o log registra `Diretório de dados: ...` — deve apontar para `{repo}/data`.
 
@@ -218,7 +236,7 @@ data/tabelas-hospitalares.json
 data/tabela-implantes.json
 ```
 
-Esses arquivos são usados pelo app (Node ou Tauri) e são versionados no repositório como base inicial. Quando o app altera históricos como extras, pagamentos, observações ou tecnologias, essas mudanças ficam locais até serem adicionadas a um commit. As tabelas hospitalares e de implantes também podem ser editadas manualmente em `data/`; na versão Tauri, as alterações entram na próxima abertura do app, sem rebuild.
+Esses arquivos são usados pelo app (**Node ou Tauri**) e são versionados no repositório como base inicial. Quando o app altera históricos como extras, pagamentos, observações ou tecnologias, essas mudanças ficam locais até serem adicionadas a um commit. As tabelas hospitalares e de implantes também podem ser editadas manualmente em `data/`; na versão Tauri, as alterações entram na próxima abertura do app, sem rebuild.
 
 Os PDFs gerados automaticamente ficam em:
 

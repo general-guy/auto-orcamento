@@ -1,10 +1,17 @@
 # Arquitetura
 
-O Auto Orçamento é um app local para orçamentos cirúrgicos. A versão **Node** (`stable/node-web-v0.1.0`) usa um servidor HTTP na porta 3000; a versão **Tauri** (`feature/tauri`) roda como executável desktop com WebView2. Em ambas, históricos e tabelas ficam em JSON local — sem banco de dados nem servidor externo.
+O Auto Orçamento é um app local para orçamentos cirúrgicos. **Dois deploys equivalentes** partilham o **mesmo web app**; só muda o runtime (Node + browser vs Tauri + WebView2):
 
-> **Baseline estável:** branch `stable/node-web-v0.1.0`, tag `v0.1.0-node-web`. Snapshot completo em `docs/SNAPSHOT-node-web-v0.1.0.md`. Próxima evolução planejada: Tauri (`docs/MIGRATION-tauri.md`).
+| Deploy | Entrada | Backend |
+|--------|---------|---------|
+| **Node** | `abrir-auto-orcamento.bat` | `server.js` (HTTP `/api/*`) |
+| **Tauri** | `auto-orcamento.exe` | Rust (`invoke` via `api.js`) |
 
-## Visão Geral
+Históricos e tabelas ficam em **`data/`** na raiz do repo em ambos — sem banco de dados nem servidor externo.
+
+> **Baseline Node congelada:** branch `stable/node-web-v0.1.0`, tag `v0.1.0-node-web`, snapshot em `docs/SNAPSHOT-node-web-v0.1.0.md`. Na **`feature/tauri`**, Node e Tauri coexistem; ver `docs/MIGRATION-tauri.md`.
+
+## Visão Geral — deploy Node (válido em `feature/tauri` e `stable/node-web-v0.1.0`)
 
 ```text
 abrir-auto-orcamento.bat
@@ -313,34 +320,37 @@ A ordem final é: pacotes de cirurgia plástica, taxas adicionais e, ao fim, ent
 
 ## Convenções
 
-- O projeto é intencionalmente simples: HTML, CSS, JavaScript e Node nativo.
-- Não há build step.
-- O estado persistente fica em JSON local.
+- O frontend é HTML, CSS e JavaScript compartilhado; o runtime Node ou Tauri é escolhido no deploy.
+- Fluxo **Node:** sem build — `abrir-auto-orcamento.bat` serve os arquivos da raiz do repo.
+- Fluxo **Tauri:** build do `.exe` embute `dist/` (gerado por `copy-frontend`); `data/` continua externa na raiz.
+- O estado persistente fica em JSON local (`data/`, `output/`).
 - Alterações no preview devem chamar `updatePreview()` quando mudarem campos programaticamente.
 - Alterações nas tabelas devem preservar o formato descrito em `docs/tabelas-hospitalares.md`.
 
 ## Evolução planejada
 
-A stack descrita neste documento corresponde à versão **v0.1.0-node-web**, preservada no branch `stable/node-web-v0.1.0`. A migração para **Tauri** substitui Node.js e o launcher manual por um executável com WebView2, mantendo o frontend atual. Detalhes em `docs/MIGRATION-tauri.md`.
+A baseline **v0.1.0-node-web** está no branch `stable/node-web-v0.1.0`. Na **`feature/tauri`**, o Tauri acrescenta deploy via `.exe` **em paralelo** ao fluxo `abrir-auto-orcamento.bat` — mesmo web app, mesma pasta `data/`. Detalhes em `docs/MIGRATION-tauri.md`.
 
-### Stack Tauri (branch `feature/tauri`)
+### Stack Tauri (branch `feature/tauri`) — deploy alternativo, frontend idêntico
 
-**Desenvolvimento rápido** (sem gerar `.exe` na raiz):
+**Desenvolvimento rápido** (mesmo `app.js` que o Node; sem gerar `.exe` na raiz):
 
 ```text
 npm run tauri:dev
 ```
 
-**Build** (gera `auto-orcamento.exe` na raiz):
+**Build** (gera `auto-orcamento.exe` na raiz com o frontend copiado de `dist/`):
 
 ```text
 build-auto-orcamento-tauri.bat
-  -> npm run tauri:build
-      -> tauri build (sem instaladores; bundle.active = false)
-      -> scripts/copy-release-exe.cjs  ->  auto-orcamento.exe (raiz)
+  -> npm run copy:frontend   # index.html, app.js, api.js, ...
+  -> tauri build
+  -> scripts/copy-release-exe.cjs  ->  auto-orcamento.exe (raiz)
 ```
 
-**Uso em outro PC:** copiar o repo (com `auto-orcamento.exe` na raiz e pasta `data/`) e abrir o `.exe`. Rebuild só na máquina de dev.
+**Uso em outro PC:** copiar o repo (com `auto-orcamento.exe` na raiz e pasta `data/`) e abrir o `.exe`. Rebuild do `.exe` só na máquina de dev após alterar o web app.
+
+O fluxo **`abrir-auto-orcamento.bat`** permanece válido na mesma branch para testar paridade sem rebuild.
 
 - **`api.js`:** detecta Tauri vs Node; no Tauri usa `window.__TAURI__.core.invoke` (requer `withGlobalTauri: true`). Fora da porta `3000`, não faz fallback para HTTP — aguarda o Tauri em `waitForBackend()`. Expõe `AppApi.loadTable()` para tabelas hospitalares e de implantes.
 - **`pdf-build.js`:** monta HTML autocontido para exportação (CSS/fontes inline).

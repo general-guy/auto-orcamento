@@ -5,12 +5,14 @@
 
 ## Objetivo
 
-Substituir a stack **Node.js + Chrome/Edge manual** por um **executável desktop** que:
+Acrescentar um **executável desktop** (Tauri) **em paralelo** à stack Node — **sem** descontinuar `abrir-auto-orcamento.bat`. Os dois fluxos devem manter **paridade funcional** sobre o **mesmo web app** (`app.js`, `api.js`, etc.).
 
-- abre o app sem instalar Node;
-- persiste históricos e tabelas em `data/` como hoje;
-- gera PDFs em `output/` com paridade visual;
-- funciona offline após o setup inicial.
+| Capacidade | Node (`abrir-auto-orcamento.bat`) | Tauri (`auto-orcamento.exe`) |
+|---|---|---|
+| Abrir sem Node no destino | Não | Sim |
+| Persistir `data/` / `output/` | Sim | Sim |
+| PDF automático | Sim | Sim |
+| Mesmo frontend | Sim | Sim (via `dist/` no build) |
 
 ## O que reaproveitar (~90% do frontend)
 
@@ -18,20 +20,21 @@ Substituir a stack **Node.js + Chrome/Edge manual** por um **executável desktop
 |---|---|
 | `index.html` | Manter; ajustar caminhos se necessário |
 | `styles.css` | Manter |
-| `app.js` | Manter; trocar `fetch("/api/...")` por comandos Tauri |
+| `app.js` | Manter; lógica via `AppApi` (`api.js`) — HTTP no Node, `invoke` no Tauri |
 | `data/*.json` | Manter formato e localização |
 | `assets/*` | Manter |
 | Lógica de preview, paginação, autofill | Manter intacta |
 
-## O que reescrever / substituir
+## O que reescrever / substituir (só no runtime Tauri)
 
-| Item atual | Substituto Tauri |
-|---|---|
-| `server.js` | Comandos Rust (`read_json`, `write_json`, handlers por recurso) |
-| `pdf-export.js` + `puppeteer-core` | PDF via WebView print, biblioteca Rust, ou plugin Tauri |
-| `launch-app.js` | Desnecessário — a janela é do próprio Tauri |
-| `abrir-auto-orcamento.bat` | `auto-orcamento.exe` na raiz do repo (build via `build-auto-orcamento-tauri.bat`) |
-| `POST /api/shutdown` | Fechar janela encerra o app nativamente |
+| Item atual | Papel | Substituto Tauri |
+|---|---|---|
+| `server.js` | API REST no Node | Comandos Rust + `api.js` |
+| `pdf-export.js` + `puppeteer-core` | PDF no Node | `pdf-build.js` + `export_pdf` (Rust) |
+| `launch-app.js` | Abre browser + servidor | Janela Tauri nativa |
+| `POST /api/shutdown` | Encerra Node | Fechar janela |
+
+**Mantidos em ambos os deploys:** `abrir-auto-orcamento.bat`, `launch-app.js`, `server.js` (fluxo Node); `index.html`, `app.js`, `api.js`, `styles.css`, `assets/`, `data/`.
 
 ## Mapa API → comandos Tauri (rascunho)
 
@@ -71,7 +74,8 @@ Atalho Windows:
 
 | Arquivo | Função |
 |---|---|
-| `build-auto-orcamento-tauri.bat` | Build release e copia `auto-orcamento.exe` para a raiz |
+| `abrir-auto-orcamento.bat` | Web app via Node + browser (válido em `feature/tauri`) |
+| `build-auto-orcamento-tauri.bat` | Build release, copia `auto-orcamento.exe` para a raiz |
 
 ### Fluxo de distribuição (repo completo)
 
@@ -149,9 +153,9 @@ PDFs ficam em `output/` na raiz do repo (mesma regra de caminho que `data/`). Re
 - [ ] Testar em PC limpo (sem Node/Rust)
 
 ### Fase 5 — Paridade e corte
-- Checklist funcional contra `docs/SNAPSHOT-node-web-v0.1.0.md`.
+- Checklist funcional contra `docs/SNAPSHOT-node-web-v0.1.0.md` **nos dois deploys** (Node + Tauri).
 - Manter branch `stable/node-web-v0.1.0` intacta.
-- Deprecar `server.js` / `launch-app.js` na branch principal quando estável.
+- **Não** deprecar `server.js` / `abrir-auto-orcamento.bat` enquanto ambos os fluxos forem necessários; Tauri é deploy adicional, não substituto obrigatório.
 
 ## Critérios de aceite (paridade)
 
