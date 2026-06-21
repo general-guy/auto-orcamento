@@ -85,6 +85,9 @@ npm install && npm start
 | Caminho | Uso |
 |---|---|
 | `assets/papel-timbrado.png` | Fundo do documento na tela e no PDF |
+| `assets/app-icon-g.png` | **G** ornamental (fonte do ícone do app) |
+| `assets/app-icon-square.png` | Arte quadrada 1024×1024 gerada para `tauri icon` |
+| `assets/favicon.png` | Favicon do browser (32×32) |
 | `assets/papel-timbrado.pdf` | Referência do timbrado original |
 | `assets/fonts/gotham/*.otf` | Fonte principal do documento |
 | `assets/fonts/cinzel/*.ttf` | Fonte de títulos |

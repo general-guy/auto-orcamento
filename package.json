@@ -5,6 +5,7 @@
   "scripts": {
     "start": "node server.js",
     "copy:frontend": "node scripts/copy-frontend.cjs",
+    "icon:generate": "powershell -ExecutionPolicy Bypass -File scripts/build-app-icon-square.ps1 && tauri icon assets/app-icon-square.png -o src-tauri/icons",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build"

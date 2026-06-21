@@ -52,7 +52,7 @@ Substituir a stack **Node.js + Chrome/Edge manual** por um **executável desktop
 - [x] Projeto Tauri 2 em `src-tauri/`
 - [x] Script `scripts/copy-frontend.cjs` copia `index.html`, `app.js`, `styles.css`, `assets/` e `data/` para `dist/`
 - [x] WebView carrega o frontend estático (sem Node em runtime)
-- [x] Janela maximizada, ícones gerados a partir do timbrado
+- [x] Janela maximizada; ícones do app gerados a partir do **G** ornamental do timbrado (`assets/app-icon-g.png` → `npm run icon:generate`)
 - [x] Build Windows: `.exe`, `.msi` e instalador NSIS
 - [x] Tabelas estáticas (`data/tabelas-hospitalares.json`, `data/tabela-implantes.json`) servidas via `dist/data/`
 
