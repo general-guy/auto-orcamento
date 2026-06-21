@@ -1,4 +1,5 @@
 mod commands;
+mod paths;
 mod pdf;
 mod storage;
 
@@ -39,6 +40,7 @@ pub fn run() {
       commands::technologies_list,
       commands::technologies_add,
       commands::technologies_remove,
+      commands::table_load,
       commands::zoom_get,
       commands::zoom_set,
       commands::zoom_adjust,

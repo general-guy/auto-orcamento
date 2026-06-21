@@ -157,6 +157,30 @@
     return 1;
   }
 
+  async function loadTable(table) {
+    if (isTauri()) {
+      return invoke("table_load", { table });
+    }
+
+    const url =
+      table === "hospitalares"
+        ? "data/tabelas-hospitalares.json"
+        : table === "implantes"
+          ? "data/tabela-implantes.json"
+          : null;
+
+    if (!url) {
+      throw new Error(`Tabela desconhecida: ${table}`);
+    }
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Falha ao carregar ${url}`);
+    }
+
+    return response.json();
+  }
+
   async function exportPdf(patientName, pagesHtml) {
     const html = typeof pagesHtml === "string" ? pagesHtml.trim() : "";
     if (!html) {
@@ -202,6 +226,7 @@
     getTechnologies,
     addTechnology,
     removeTechnology,
+    loadTable,
     getZoom,
     setZoom,
     adjustZoom,

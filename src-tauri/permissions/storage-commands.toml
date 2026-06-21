@@ -9,6 +9,7 @@ commands.allow = [
   "technologies_list",
   "technologies_add",
   "technologies_remove",
+  "table_load",
   "zoom_get",
   "zoom_set",
   "zoom_adjust",

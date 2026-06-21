@@ -1,10 +1,12 @@
 use tauri::AppHandle;
 
 use crate::pdf::{export_pdf as write_pdf, PdfExportResult};
+use serde_json::Value;
+
 use crate::storage::{
-  add_string_item, add_technology, adjust_zoom_level, read_string_list, read_technologies,
-  read_zoom_level, remove_string_item, remove_technology, replace_string_list, set_zoom_level,
-  TechnologyItem,
+  add_string_item, add_technology, adjust_zoom_level, read_string_list, read_table,
+  read_technologies, read_zoom_level, remove_string_item, remove_technology, replace_string_list,
+  set_zoom_level, TechnologyItem,
 };
 
 #[tauri::command]
@@ -40,6 +42,11 @@ pub fn technologies_add(app: AppHandle, nome: String, valor: String) -> Result<V
 #[tauri::command]
 pub fn technologies_remove(app: AppHandle, nome: String) -> Result<Vec<TechnologyItem>, String> {
   remove_technology(&app, &nome)
+}
+
+#[tauri::command]
+pub fn table_load(app: AppHandle, table: String) -> Result<Value, String> {
+  read_table(&app, &table)
 }
 
 #[tauri::command]

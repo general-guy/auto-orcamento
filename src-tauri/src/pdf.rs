@@ -13,27 +13,10 @@ pub struct PdfExportResult {
   pub path: String,
 }
 
+use crate::paths::output_dir as resolve_output_dir;
+
 pub fn output_dir(app: &AppHandle) -> Result<PathBuf, String> {
-  #[cfg(debug_assertions)]
-  {
-    let _ = app;
-    return Ok(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..").join("output"));
-  }
-
-  #[cfg(not(debug_assertions))]
-  {
-    use tauri::Manager;
-
-    if let Ok(exe_dir) = app.path().executable_dir() {
-      return Ok(exe_dir.join("output"));
-    }
-
-    app
-      .path()
-      .app_data_dir()
-      .map(|path| path.join("output"))
-      .map_err(|error| error.to_string())
-  }
+  resolve_output_dir(app)
 }
 
 fn sanitize_filename_part(value: &str) -> String {

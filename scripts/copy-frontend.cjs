@@ -31,4 +31,7 @@ for (const directoryName of ["assets", "data"]) {
   copyDirectory(path.join(rootDir, directoryName), path.join(distDir, directoryName));
 }
 
+// data/ em dist/ serve só como cópia inicial no primeiro run do .exe (seed via table_load).
+// Em runtime, históricos e tabelas vêm de {pasta-do-exe}/data/.
+
 console.log("Frontend copied to dist/");

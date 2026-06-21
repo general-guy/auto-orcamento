@@ -7,6 +7,8 @@ use tauri::AppHandle;
 use tauri::Manager;
 use unicode_normalization::UnicodeNormalization;
 
+use crate::paths::data_dir as resolve_data_dir;
+
 const MAX_ITEMS: usize = 200;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -24,24 +26,7 @@ pub fn normalize_text(value: &str) -> String {
 }
 
 pub fn writable_data_dir(app: &AppHandle) -> Result<PathBuf, String> {
-  #[cfg(debug_assertions)]
-  {
-    let _ = app;
-    return Ok(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..").join("data"));
-  }
-
-  #[cfg(not(debug_assertions))]
-  {
-    if let Ok(exe_dir) = app.path().executable_dir() {
-      return Ok(exe_dir.join("data"));
-    }
-
-    app
-      .path()
-      .app_data_dir()
-      .map(|path| path.join("data"))
-      .map_err(|error| error.to_string())
-  }
+  resolve_data_dir(app)
 }
 
 fn file_path(data_dir: &Path, store: &str) -> Result<PathBuf, String> {
@@ -57,6 +42,53 @@ fn file_path(data_dir: &Path, store: &str) -> Result<PathBuf, String> {
   };
 
   Ok(data_dir.join(file_name))
+}
+
+fn table_file_name(table: &str) -> Result<&'static str, String> {
+  match table {
+    "hospitalares" => Ok("tabelas-hospitalares.json"),
+    "implantes" => Ok("tabela-implantes.json"),
+    _ => Err(format!("Tabela desconhecida: {table}")),
+  }
+}
+
+fn seed_table_file(app: &AppHandle, file_name: &str) -> Result<(), String> {
+  let data_dir = writable_data_dir(app)?;
+  let target = data_dir.join(file_name);
+
+  if target.exists() {
+    return Ok(());
+  }
+
+  #[cfg(not(debug_assertions))]
+  {
+    use tauri::path::BaseDirectory;
+
+    if let Ok(bundled) = app.path().resolve(
+      format!("data/{file_name}"),
+      BaseDirectory::Resource,
+    ) {
+      if bundled.exists() {
+        return fs::copy(&bundled, &target)
+          .map_err(|error| error.to_string())
+          .map(|_| ());
+      }
+    }
+  }
+
+  Err(format!(
+    "Arquivo de tabela ausente: {file_name}. Copie a pasta data/ ao lado do executável."
+  ))
+}
+
+pub fn read_table(app: &AppHandle, table: &str) -> Result<Value, String> {
+  ensure_data_files(app)?;
+  let file_name = table_file_name(table)?;
+  seed_table_file(app, file_name)?;
+
+  let path = writable_data_dir(app)?.join(file_name);
+  let content = fs::read_to_string(&path).map_err(|error| error.to_string())?;
+  serde_json::from_str(&content).map_err(|error| error.to_string())
 }
 
 pub fn ensure_data_files(app: &AppHandle) -> Result<(), String> {
@@ -76,6 +108,10 @@ pub fn ensure_data_files(app: &AppHandle) -> Result<(), String> {
     if !path.exists() {
       fs::write(&path, "[]\n").map_err(|error| error.to_string())?;
     }
+  }
+
+  for file_name in ["tabelas-hospitalares.json", "tabela-implantes.json"] {
+    let _ = seed_table_file(app, file_name);
   }
 
   Ok(())

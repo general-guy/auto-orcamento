@@ -61,7 +61,7 @@ npm install
 
 O app também pode rodar como **executável desktop** (WebView2), sem Node em runtime.
 
-Desenvolvimento:
+### Desenvolvimento (só na máquina com Node + Rust)
 
 ```bash
 npm install
@@ -70,31 +70,52 @@ npm run tauri:dev
 
 Ou clique duas vezes em `abrir-auto-orcamento-tauri.bat`.
 
-Build do executável Windows:
+### Build do executável (só na máquina de dev)
 
 ```bash
 npm run tauri:build
 ```
 
-O `.exe` fica em `src-tauri/target/release/auto-orcamento.exe`. Instaladores NSIS e MSI são gerados em `src-tauri/target/release/bundle/`.
+Ou clique duas vezes em `build-auto-orcamento-tauri.bat`.
 
-**Requisito de build:** Rust (`winget install Rustlang.Rustup`). WebView2 já vem no Windows 10/11.
+O build gera:
 
-**Ícone do app (Tauri):** **G** dourado inscrito num **círculo preto** do tamanho do slot do ícone (formato circular; cantos transparentes na taskbar). Configuração atual: `$logoFillRatio = 0.70` em `scripts/build-app-icon-square.ps1`.
-
-Pipeline:
-
-```bash
-npm run icon:generate
+```text
+auto-orcamento.exe                              # raiz do repo (cópia automática)
+src-tauri/target/release/auto-orcamento.exe   # artefato original do Rust
+src-tauri/target/release/bundle/nsis/...      # instalador NSIS (opcional)
+src-tauri/target/release/bundle/msi/...       # instalador MSI (opcional)
 ```
 
-Executa, em sequência: `scripts/build-app-icon-square.ps1` → `tauri icon assets/app-icon-square.png` → `scripts/copy-favicon.cjs` (copia `src-tauri/icons/32x32.png` para `assets/favicon.png`).
+**Requisito de build:** Node.js, Rust (`winget install Rustlang.Rustup`). WebView2 já vem no Windows 10/11.
 
-**Após trocar ícones, feche o app e rode `npm run tauri:dev` de novo** — o Windows cacheia o `.exe` em debug.
+### Usar em outro PC (sem rebuild)
 
-**Persistência (Fase 2):** históricos (pacientes, cirurgias, hospitais, extras, pagamento, observações, tecnologias) são lidos e gravados em `data/` via comandos Rust, acessados pelo frontend por `api.js` (`AppApi`). Em `tauri dev`, a pasta é `data/` na raiz do projeto; no `.exe`, `{pasta-do-exe}/data/`.
+1. Na máquina de dev: altere o código e rode `build-auto-orcamento-tauri.bat`.
+2. Copie o **repositório completo** para o outro PC (pode omitir `node_modules/` e `src-tauri/target/` se quiser economizar espaço — mas inclua `auto-orcamento.exe` na raiz).
+3. No outro PC: duplo clique em `auto-orcamento.exe` na raiz do projeto.
+
+Requisitos no PC de destino: Windows 10/11 (WebView2) e Chrome ou Edge (só para PDF). **Não** precisa de Node, Rust nem `npm install`.
+
+### Dados locais (Tauri)
+
+Todo JSON mutável e as tabelas de referência ficam em **`data/` na raiz do projeto**:
+
+```text
+data/cirurgias.json
+data/pacientes.json
+data/tabelas-hospitalares.json   ← editável sem rebuild
+data/tabela-implantes.json       ← editável sem rebuild
+data/settings.json               ← zoom (não versionado)
+```
+
+PDFs gerados ficam em `output/` na raiz. Em `tauri dev` e com o `.exe` na raiz (ou em `src-tauri/target/release/` dentro do repo), o app usa sempre essas pastas — não duplica dados em subpastas do build.
+
+Históricos e tabelas são acessados via `AppApi` (`api.js`); tabelas usam `AppApi.loadTable("hospitalares" | "implantes")`, equivalente ao comando Rust `table_load`. Se uma tabela ainda não existir em `data/` no primeiro run, o app copia uma vez a versão embutida no build.
 
 **Pendente (Fases 4–5):** validação em PC limpo e paridade final com o snapshot Node. Detalhes em `docs/MIGRATION-tauri.md`.
+
+**Ícone do app (Tauri):** **G** dourado inscrito num **círculo preto** do tamanho do slot do ícone (formato circular; cantos transparentes na taskbar). Configuração atual: `$logoFillRatio = 0.70` em `scripts/build-app-icon-square.ps1`. Pipeline: `npm run icon:generate`. Após trocar ícones, feche o app e rode `npm run tauri:dev` de novo — o Windows cacheia o `.exe` em debug.
 
 **PDF automático (Tauri):** ao clicar em **Imprimir orçamento**, o app grava um PDF em `output/` (mesmo fluxo da stack Node). O HTML é montado em `pdf-build.js`; o Rust invoca Chrome/Edge headless (`--print-to-pdf`). Requer Chrome ou Edge instalado.
 
@@ -148,7 +169,7 @@ data/tabelas-hospitalares.json
 data/tabela-implantes.json
 ```
 
-Esses arquivos são usados pelo servidor Node.js e são versionados no repositório como base inicial do app. Quando o app altera históricos como extras, pagamentos, observações ou tecnologias, essas mudanças ficam locais até serem adicionadas a um commit.
+Esses arquivos são usados pelo app (Node ou Tauri) e são versionados no repositório como base inicial. Quando o app altera históricos como extras, pagamentos, observações ou tecnologias, essas mudanças ficam locais até serem adicionadas a um commit. As tabelas hospitalares e de implantes também podem ser editadas manualmente em `data/`; na versão Tauri, as alterações entram na próxima abertura do app, sem rebuild.
 
 Os PDFs gerados automaticamente ficam em:
 

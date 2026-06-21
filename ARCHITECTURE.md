@@ -147,7 +147,7 @@ data/tabelas-hospitalares.json
 data/tabela-implantes.json
 ```
 
-O frontend carrega `data/tabelas-hospitalares.json` diretamente para montar as opções de Regina e Sapiranga e para calcular os valores exibidos no preview.
+O app carrega `data/tabelas-hospitalares.json` via `AppApi.loadTable("hospitalares")` (Tauri: `{pasta-do-exe}/data/`; Node: `fetch` na raiz do projeto) para montar as opções de Regina e Sapiranga e calcular os valores exibidos no preview.
 
 As entradas auxiliares `Reg#`/`Sap#` não usam `<datalist>` nativo (limitado no WebView2). O app monta `#hospitalProcedureDropdown` em `app.js`: lista filtrável, posicionada à direita do input com altura de viewport completa (`positionHospitalProcedureDropdown`).
 
@@ -323,20 +323,35 @@ A stack descrita neste documento corresponde à versão **v0.1.0-node-web**, pre
 
 ### Stack Tauri (branch `feature/tauri`)
 
+**Desenvolvimento:**
+
 ```text
 abrir-auto-orcamento-tauri.bat
   -> npm run tauri:dev
       -> copy-frontend -> dist/
-      -> auto-orcamento.exe (WebView2)
+      -> WebView2 (debug)
           -> index.html + api.js + pdf-build.js + zoom.js + app.js
-          -> invoke history_* / technologies_* / zoom_* / export_pdf  ->  data/*.json + settings.json + output/*.pdf
-          -> fetch data/tabelas-*.json          ->  dist/data/
+          -> invoke table_load / history_* / technologies_* / zoom_* / export_pdf
+          -> data/ e output/ na raiz do repo
 ```
 
-- **`api.js`:** detecta Tauri vs Node; no Tauri usa `window.__TAURI__.core.invoke` (requer `withGlobalTauri: true`).
+**Build e distribuição:**
+
+```text
+build-auto-orcamento-tauri.bat
+  -> npm run tauri:build
+      -> tauri build
+      -> scripts/copy-release-exe.cjs  ->  auto-orcamento.exe (raiz do repo)
+```
+
+**Uso em outro PC:** copiar o repo (com `auto-orcamento.exe` na raiz) e abrir o `.exe`. Rebuild só na máquina de dev.
+
+- **`api.js`:** detecta Tauri vs Node; no Tauri usa `window.__TAURI__.core.invoke` (requer `withGlobalTauri: true`). Expõe `AppApi.loadTable()` para tabelas hospitalares e de implantes.
 - **`pdf-build.js`:** monta HTML autocontido para exportação (CSS/fontes inline).
 - **`zoom.js`:** atalhos `Ctrl` + roda / `Ctrl` + `+`/`-`/`0`; indicador flutuante `#zoomFlag` (%, `−`/`+`, Redefinir); persiste zoom em `data/settings.json` via `zoom_*`.
+- **`src-tauri/src/paths.rs`:** resolve `data/` e `output/` — em debug, raiz do repo; em release, raiz do repo quando o `.exe` está em `src-tauri/target/release/` ou na raiz do projeto, senão `{pasta-do-exe}/data/` e `{pasta-do-exe}/output/`.
+- **`src-tauri/src/storage.rs`:** históricos, tecnologias, zoom e tabelas (`table_load` / `read_table`); seed único de tabelas a partir de `dist/data/` embutido no build.
 - **`src-tauri/src/pdf.rs`:** grava PDF em `output/` via Chrome/Edge headless; comando `export_pdf`.
-- **`src-tauri/src/storage.rs`:** grava JSON mutável; em debug usa `{projeto}/data/`, em release `{exe}/data/`.
+- **`scripts/copy-release-exe.cjs`:** após o build, copia `src-tauri/target/release/auto-orcamento.exe` para `auto-orcamento.exe` na raiz.
 - **Ícone do app:** `assets/app-icon-g.png` → `scripts/build-app-icon-square.ps1` (círculo preto inscrito, G recortado, `logoFillRatio` = `0.70`) → `npm run icon:generate` → `src-tauri/icons/` + `assets/favicon.png`; `lib.rs` aplica `icons/32x32.png` na janela via `set_icon` (`image-png`).
 - **PDF automático:** Tauri usa `export_pdf`; stack Node ainda usa `/api/pdf` + Puppeteer.

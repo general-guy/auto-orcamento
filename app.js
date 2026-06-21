@@ -715,8 +715,7 @@ function selectHospitalProcedureOption(option, shouldAdvance = false) {
 
 async function loadHospitalTables() {
   try {
-    const response = await fetch("data/tabelas-hospitalares.json");
-    hospitalTables = await response.json();
+    hospitalTables = await AppApi.loadTable("hospitalares");
     buildHospitalDatalists();
   } catch {
     hospitalTables = null;
@@ -757,8 +756,7 @@ function buildImplantOptions() {
 
 async function loadImplantTable() {
   try {
-    const response = await fetch("data/tabela-implantes.json");
-    implantTable = await response.json();
+    implantTable = await AppApi.loadTable("implantes");
     buildImplantOptions();
   } catch {
     implantTable = null;
