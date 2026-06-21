@@ -609,7 +609,8 @@ textarea {
   cursor: grabbing;
 }
 
-.history-dropdown--reorderable.is-dragging-patient {
+.history-dropdown--reorderable.is-dragging-patient,
+.history-dropdown--reorderable.is-dragging-surgery-history {
   user-select: none;
 }
 

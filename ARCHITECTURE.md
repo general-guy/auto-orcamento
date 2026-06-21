@@ -84,7 +84,7 @@ Sem Node instalado, o app não inicia. Sem Chrome/Edge, o `.bat` falha ao abrir 
 Endpoints principais:
 
 - `GET /` e arquivos estáticos: servem `index.html`, `app.js`, `styles.css`, fontes, imagens e JSONs.
-- `GET /api/cirurgias`, `POST /api/cirurgias`, `DELETE /api/cirurgias`: histórico de cirurgias.
+- `GET /api/cirurgias`, `POST /api/cirurgias`, `DELETE /api/cirurgias`, `PUT /api/cirurgias`: histórico de cirurgias e persistência da ordem manual no dropdown.
 - `GET /api/hospitais`, `POST /api/hospitais`, `DELETE /api/hospitais`: histórico de hospitais.
 - `GET /api/pacientes`, `POST /api/pacientes`, `DELETE /api/pacientes`, `PUT /api/pacientes`: histórico de pacientes e persistência da ordem manual no dropdown.
 - `GET /api/pagamentos`, `POST /api/pagamentos`, `DELETE /api/pagamentos`, `PUT /api/pagamentos`: histórico de formas de pagamento e persistência da ordem manual.
@@ -162,7 +162,9 @@ As entradas auxiliares `Reg#`/`Sap#` não usam `<datalist>` nativo (limitado no 
 
 `data/pacientes.json` guarda os nomes de pacientes usados no autocomplete. O dropdown de histórico do campo **Nome** permite reordenar entradas pelo handle `⋮⋮` (com duas ou mais opções visíveis); ao soltar, `app.js` envia a lista completa via `PUT /api/pacientes` / `AppApi.replaceHistory("pacientes", …)` e grava a ordem em `data/pacientes.json`. O menu fecha ao perder o foco do campo ou do dropdown.
 
-`data/cirurgias.json` guarda as cirurgias cadastradas no formulário. O arquivo é uma lista simples de textos, usada pelo dropdown de histórico da seção `Cirurgia`. A ordem manual dos campos no formulário não altera esse arquivo.
+`data/cirurgias.json` guarda as cirurgias cadastradas no formulário. O dropdown de histórico de **Cirurgia proposta** permite reordenar entradas pelo handle `⋮⋮` (com duas ou mais opções visíveis); ao soltar, `app.js` envia a lista via `PUT /api/cirurgias` / `AppApi.replaceHistory("cirurgias", …)` e grava em `data/cirurgias.json`. O menu fecha ao perder o foco do campo ou do dropdown.
+
+Com duas ou mais entradas no formulário, `updateSurgeryFieldStructure()` exibe outro handle `⋮⋮` à esquerda de cada **campo** (não no dropdown), reorganizando só a ordem visual no painel e no preview — sem alterar `data/cirurgias.json`.
 
 `data/tecnologias.json` guarda as tecnologias cadastradas no próprio app. Diferente dos históricos simples, cada item tem `nome` e `valor`, permitindo carregar o valor automaticamente quando a tecnologia é selecionada.
 
@@ -176,9 +178,9 @@ A pasta `output/` guarda os PDFs gerados automaticamente após a impressão. Ela
 
 ## Lógica de Cirurgia
 
-A seção `Cirurgia` usa uma lista dinâmica de inputs com botões `+/-`. Cada input usa dropdown de histórico alimentado por `data/cirurgias.json` via `/api/cirurgias`.
+A seção `Cirurgia` usa uma lista dinâmica de inputs com botões `+/-`. Cada input usa dropdown de histórico alimentado por `data/cirurgias.json` via `/api/cirurgias`, com reordenação persistente no JSON pelo drag and drop **dentro do dropdown** (handle `⋮⋮` à esquerda de cada opção, quando há duas ou mais visíveis).
 
-Com duas ou mais entradas, `updateSurgeryFieldStructure()` exibe um handle de arraste (`⋮⋮`) à esquerda de cada campo, dentro de `.surgery-field-row`, mantendo o input em flex para ocupar toda a largura do painel. O rótulo `Cirurgia proposta` permanece sempre no primeiro campo, mesmo após reordenar.
+Com duas ou mais entradas no formulário, `updateSurgeryFieldStructure()` exibe um handle de arraste (`⋮⋮`) à esquerda de cada **campo**, dentro de `.surgery-field-row`, mantendo o input em flex para ocupar toda a largura do painel. O rótulo `Cirurgia proposta` permanece sempre no primeiro campo, mesmo após reordenar.
 
 O arraste usa eventos de ponteiro apenas no handle, sem interferir na digitação. Durante o movimento, `app.js` mostra a mesma linha de encaixe usada nas listas rápidas; ao soltar, reorganiza os `<label class="surgery-field">` no DOM, chama `updatePreview()` e não persiste nada no servidor. `getSurgeryValues()` lê a ordem atual dos inputs no DOM, e essa ordem alimenta o preview do documento.
 

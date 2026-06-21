@@ -60,6 +60,8 @@ let surgeryHistory = [];
 let activeSurgeryInput = null;
 let isInteractingWithHistoryDropdown = false;
 let surgeryDragState = null;
+let surgeryDropdownDragState = null;
+let surgeryDropdownSuppressClick = false;
 let paymentHistory = [];
 let activePaymentInput = null;
 let isInteractingWithPaymentDropdown = false;
@@ -1561,9 +1563,37 @@ function showTechnologyHistoryDropdown() {
   updateTechnologyHistoryDropdown(technologyInput.value);
 }
 
+function applyHistoryDropdownOrder(history, visibleOrdered) {
+  const visibleKeys = new Set(visibleOrdered.map((item) => normalizeText(item)));
+  let inserted = false;
+  const nextHistory = [];
+
+  history.forEach((item) => {
+    if (visibleKeys.has(normalizeText(item))) {
+      if (!inserted) {
+        nextHistory.push(...visibleOrdered);
+        inserted = true;
+      }
+
+      return;
+    }
+
+    nextHistory.push(item);
+  });
+
+  if (!inserted) {
+    nextHistory.push(...visibleOrdered);
+  }
+
+  return nextHistory;
+}
+
 function updateSurgeryHistoryDropdown(query = "") {
-  if (!activeSurgeryInput) {
-    surgeryHistoryDropdown.hidden = true;
+  if (!activeSurgeryInput || surgeryDropdownDragState) {
+    if (!activeSurgeryInput) {
+      surgeryHistoryDropdown.hidden = true;
+    }
+
     return;
   }
 
@@ -1571,6 +1601,7 @@ function updateSurgeryHistoryDropdown(query = "") {
   const options = surgeryHistory
     .filter((item) => !normalizedQuery || normalizeText(item).includes(normalizedQuery))
     .slice(0, 12);
+  const showDragHandles = options.length >= 2;
 
   surgeryHistoryDropdown.innerHTML = "";
   surgeryHistoryDropdown.hidden = options.length === 0;
@@ -1582,7 +1613,13 @@ function updateSurgeryHistoryDropdown(query = "") {
     option.setAttribute("role", "button");
     option.setAttribute("tabindex", "0");
 
+    const dragHandle = document.createElement("span");
+    dragHandle.className = "history-drag-handle";
+    dragHandle.setAttribute("aria-hidden", "true");
+    dragHandle.hidden = !showDragHandles;
+
     const optionLabel = document.createElement("span");
+    optionLabel.className = "history-option-label";
     optionLabel.textContent = optionText;
 
     const deleteButton = document.createElement("button");
@@ -1591,8 +1628,7 @@ function updateSurgeryHistoryDropdown(query = "") {
     deleteButton.textContent = "x";
     deleteButton.setAttribute("aria-label", `Remover ${optionText} do histórico`);
 
-    option.append(optionLabel);
-    option.append(deleteButton);
+    option.append(dragHandle, optionLabel, deleteButton);
     surgeryHistoryDropdown.append(option);
   });
 }
@@ -2201,28 +2237,7 @@ function updateHospitalHistoryDropdown(query = "") {
 }
 
 function applyPatientDropdownOrder(visibleOrdered) {
-  const visibleKeys = new Set(visibleOrdered.map((item) => normalizeText(item)));
-  let inserted = false;
-  const nextHistory = [];
-
-  patientHistory.forEach((item) => {
-    if (visibleKeys.has(normalizeText(item))) {
-      if (!inserted) {
-        nextHistory.push(...visibleOrdered);
-        inserted = true;
-      }
-
-      return;
-    }
-
-    nextHistory.push(item);
-  });
-
-  if (!inserted) {
-    nextHistory.push(...visibleOrdered);
-  }
-
-  return nextHistory;
+  return applyHistoryDropdownOrder(patientHistory, visibleOrdered);
 }
 
 async function savePatientOrderToHistory(items) {
@@ -2319,6 +2334,102 @@ function handlePatientDropdownPointerUp(event) {
 
 function handlePatientDropdownPointerCancel() {
   endPatientDropdownDrag({ shouldCommit: false });
+}
+
+async function saveSurgeryOrderToHistory(items) {
+  try {
+    surgeryHistory = await AppApi.replaceHistory("cirurgias", items);
+    updateSurgeryHistoryDropdown(activeSurgeryInput?.value || "");
+  } catch {
+    console.warn("Não foi possível salvar a ordem das cirurgias.");
+    updateSurgeryHistoryDropdown(activeSurgeryInput?.value || "");
+  }
+}
+
+function getSurgeryDropdownRows() {
+  return Array.from(surgeryHistoryDropdown.querySelectorAll(".history-option"));
+}
+
+function createSurgeryHistoryDropIndicator() {
+  const indicator = document.createElement("div");
+  indicator.className = "history-drop-indicator";
+  return indicator;
+}
+
+function moveSurgeryHistoryDropIndicator(clientY) {
+  if (!surgeryDropdownDragState) {
+    return;
+  }
+
+  const rows = getSurgeryDropdownRows().filter((row) => row !== surgeryDropdownDragState.row);
+  const nextRow = rows.find((row) => {
+    const rect = row.getBoundingClientRect();
+    return clientY < rect.top + rect.height / 2;
+  });
+
+  surgeryHistoryDropdown.insertBefore(surgeryDropdownDragState.indicator, nextRow || null);
+}
+
+function endSurgeryDropdownDrag({ shouldCommit = true } = {}) {
+  if (!surgeryDropdownDragState) {
+    return;
+  }
+
+  const { row, handle, indicator, pointerId } = surgeryDropdownDragState;
+  const hasNewPosition = indicator.parentElement === surgeryHistoryDropdown;
+
+  row.classList.remove("is-dragging");
+  surgeryHistoryDropdown.classList.remove("is-dragging-surgery-history");
+
+  if (hasNewPosition && shouldCommit) {
+    surgeryHistoryDropdown.insertBefore(row, indicator);
+  }
+
+  indicator.remove();
+
+  if (handle.hasPointerCapture?.(pointerId)) {
+    handle.releasePointerCapture(pointerId);
+  }
+
+  handle.removeEventListener("pointermove", handleSurgeryDropdownPointerMove);
+  handle.removeEventListener("pointerup", handleSurgeryDropdownPointerUp);
+  handle.removeEventListener("pointercancel", handleSurgeryDropdownPointerCancel);
+
+  surgeryDropdownDragState = null;
+
+  if (!hasNewPosition || !shouldCommit) {
+    updateSurgeryHistoryDropdown(activeSurgeryInput?.value || "");
+    return;
+  }
+
+  surgeryDropdownSuppressClick = true;
+
+  const visibleOrdered = getSurgeryDropdownRows()
+    .map((item) => item.dataset.value)
+    .filter(Boolean);
+  const nextHistory = applyHistoryDropdownOrder(surgeryHistory, visibleOrdered);
+
+  surgeryHistory = nextHistory;
+  updateSurgeryHistoryDropdown(activeSurgeryInput?.value || "");
+  saveSurgeryOrderToHistory(nextHistory);
+}
+
+function handleSurgeryDropdownPointerMove(event) {
+  if (!surgeryDropdownDragState) {
+    return;
+  }
+
+  event.preventDefault();
+  moveSurgeryHistoryDropIndicator(event.clientY);
+}
+
+function handleSurgeryDropdownPointerUp(event) {
+  event.preventDefault();
+  endSurgeryDropdownDrag();
+}
+
+function handleSurgeryDropdownPointerCancel() {
+  endSurgeryDropdownDrag({ shouldCommit: false });
 }
 
 function updatePatientHistoryDropdown(query = "") {
@@ -3456,10 +3567,9 @@ form.addEventListener("focusout", (event) => {
       return;
     }
 
-    if (!isInteractingWithHistoryDropdown) {
-      saveSurgeryToHistory(event.target.value, event.target);
-      hideSurgeryHistoryDropdown();
-    }
+    isInteractingWithHistoryDropdown = false;
+    saveSurgeryToHistory(event.target.value, event.target);
+    hideSurgeryHistoryDropdown();
   }
 
   if (event.target.matches(".payment-input")) {
@@ -3859,10 +3969,45 @@ patientHistoryDropdown.addEventListener("keydown", (event) => {
   }
 });
 surgeryHistoryDropdown.addEventListener("pointerdown", (event) => {
+  const handle = event.target.closest(".history-drag-handle");
+  if (handle && event.button === 0) {
+    const row = handle.closest(".history-option");
+    if (!row) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    isInteractingWithHistoryDropdown = true;
+
+    surgeryDropdownDragState = {
+      row,
+      handle,
+      indicator: createSurgeryHistoryDropIndicator(),
+      pointerId: event.pointerId,
+    };
+
+    row.classList.add("is-dragging");
+    surgeryHistoryDropdown.classList.add("is-dragging-surgery-history");
+    handle.setPointerCapture(event.pointerId);
+    moveSurgeryHistoryDropIndicator(event.clientY);
+
+    handle.addEventListener("pointermove", handleSurgeryDropdownPointerMove);
+    handle.addEventListener("pointerup", handleSurgeryDropdownPointerUp);
+    handle.addEventListener("pointercancel", handleSurgeryDropdownPointerCancel);
+    return;
+  }
+
   isInteractingWithHistoryDropdown = true;
   event.preventDefault();
 });
 surgeryHistoryDropdown.addEventListener("click", (event) => {
+  if (surgeryDropdownSuppressClick) {
+    surgeryDropdownSuppressClick = false;
+    isInteractingWithHistoryDropdown = false;
+    return;
+  }
+
   const option = event.target.closest(".history-option");
   if (!option || !activeSurgeryInput) {
     isInteractingWithHistoryDropdown = false;
@@ -3882,6 +4027,23 @@ surgeryHistoryDropdown.addEventListener("click", (event) => {
   }
 
   selectSurgeryHistoryOption(option);
+});
+surgeryHistoryDropdown.addEventListener("focusout", (event) => {
+  if (surgeryHistoryDropdown.contains(event.relatedTarget)) {
+    return;
+  }
+
+  if (surgeryDropdownDragState) {
+    return;
+  }
+
+  isInteractingWithHistoryDropdown = false;
+
+  if (activeSurgeryInput) {
+    saveSurgeryToHistory(activeSurgeryInput.value, activeSurgeryInput);
+  }
+
+  hideSurgeryHistoryDropdown();
 });
 surgeryHistoryDropdown.addEventListener("keydown", (event) => {
   const option = event.target.closest(".history-option");
@@ -4299,6 +4461,7 @@ document.addEventListener("pointerdown", (event) => {
 
   isInteractingWithPatientDropdown = false;
   hidePatientHistoryDropdown();
+  isInteractingWithHistoryDropdown = false;
   hideSurgeryHistoryDropdown();
   hidePaymentHistoryDropdown();
   hideExtrasHistoryDropdown();

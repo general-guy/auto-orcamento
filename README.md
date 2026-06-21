@@ -241,7 +241,7 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 - Mostra uma pré-visualização paginada do documento final sobre o papel timbrado.
 - Permite imprimir o orçamento e, ao clicar em `Imprimir orçamento`, gera automaticamente um PDF em `output/`.
 - Guarda histórico local de pacientes, cirurgias, hospitais, extras, formas de pagamento, observações e tecnologias.
-- Permite reordenar por drag and drop o histórico de **Nome da paciente** no dropdown (ordem persistida em `data/pacientes.json`), as cirurgias propostas nos campos do formulário e as listas rápidas de extras, pagamento e observações.
+- Permite reordenar por drag and drop o histórico de **Nome da paciente** e de **Cirurgia proposta** nos dropdowns (ordem persistida em `data/pacientes.json` e `data/cirurgias.json`), as entradas de cirurgia nos campos do formulário (só visual/preview) e as listas rápidas de extras, pagamento e observações.
 - Cria múltiplas entradas de cirurgia e hospital.
 - Para Regina e Sapiranga, cria entradas auxiliares (`Reg1`, `Sap1`, etc.) com multiplicadores.
 - Usa tabelas hospitalares locais para sugerir pacotes e calcular valores auxiliares no preview.
@@ -271,7 +271,7 @@ data/tabelas-hospitalares.json
 data/tabela-implantes.json
 ```
 
-Esses arquivos são usados pelo app (**Node ou Tauri**) e são versionados no repositório como base inicial. Quando o app altera históricos como extras, pagamentos, observações ou tecnologias, essas mudanças ficam locais até serem adicionadas a um commit. A ordem do histórico de **pacientes** pode ser ajustada pelo drag and drop no dropdown do campo Nome (persiste em `data/pacientes.json`). As tabelas hospitalares e de implantes também podem ser editadas manualmente em `data/`; na versão Tauri, as alterações entram na próxima abertura do app, sem rebuild.
+Esses arquivos são usados pelo app (**Node ou Tauri**) e são versionados no repositório como base inicial. Quando o app altera históricos como extras, pagamentos, observações ou tecnologias, essas mudanças ficam locais até serem adicionadas a um commit. A ordem do histórico de **pacientes** e **cirurgias** pode ser ajustada pelo drag and drop nos dropdowns dos campos Nome e Cirurgia proposta (persiste em `data/pacientes.json` e `data/cirurgias.json`). As tabelas hospitalares e de implantes também podem ser editadas manualmente em `data/`; na versão Tauri, as alterações entram na próxima abertura do app, sem rebuild.
 
 Os PDFs gerados automaticamente ficam em:
 
@@ -330,7 +330,9 @@ No documento, a caixa de equipe mostra os itens marcados separados por ` + ` e o
 
 A seção `Cirurgia` usa campos dinâmicos com botões `+/-`, no mesmo padrão de `Hospital` e `Pagamento`. Cada entrada preenchida pode ser reaproveitada pelo dropdown de histórico e salva em `data/cirurgias.json`.
 
-Com duas ou mais cirurgias propostas, aparece um indicador `⋮⋮` à esquerda de cada caixa de texto. Esse drag and drop é só visual: reorganiza os campos no painel e a ordem exibida no preview do documento, sem alterar a ordem do histórico em `data/cirurgias.json`.
+No dropdown de histórico, com duas ou mais opções visíveis, o handle `⋮⋮` à esquerda permite reordenar o histórico; a ordem persiste em `data/cirurgias.json`. O menu fecha ao sair do campo ou do dropdown.
+
+Com duas ou mais cirurgias propostas **nos campos do formulário**, aparece outro indicador `⋮⋮` à esquerda de cada caixa de texto. Esse drag and drop é só visual: reorganiza os campos no painel e a ordem exibida no preview do documento, sem alterar a ordem do histórico em `data/cirurgias.json`.
 
 ## Extras
 

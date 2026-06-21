@@ -69,7 +69,7 @@ npm install && npm start
 
 | Arquivo | Tipo | Versionado |
 |---|---|---|
-| `data/cirurgias.json` | Histórico (lista de strings) | Sim |
+| `data/cirurgias.json` | Histórico + ordem no dropdown Cirurgia | Sim |
 | `data/hospitais.json` | Histórico | Sim |
 | `data/pacientes.json` | Histórico + ordem no dropdown Nome | Sim |
 | `data/pagamentos.json` | Histórico + ordem drag-and-drop | Sim |
@@ -96,7 +96,7 @@ npm install && npm start
 
 | Endpoint | Métodos | Corpo / resposta |
 |---|---|---|
-| `/api/cirurgias` | GET, POST, DELETE | `{ value: string }` |
+| `/api/cirurgias` | GET, POST, DELETE, PUT | POST/DELETE: `{ value }`; PUT: `{ items: string[] }` |
 | `/api/hospitais` | GET, POST, DELETE | `{ value: string }` |
 | `/api/pacientes` | GET, POST, DELETE, PUT | POST/DELETE: `{ value }`; PUT: `{ items: string[] }` |
 | `/api/pagamentos` | GET, POST, DELETE, PUT | POST/DELETE: `{ value }`; PUT: `{ items: string[] }` |
@@ -115,7 +115,7 @@ Históricos simples: máximo **200 itens** por arquivo. Duplicatas ignoradas na 
 - Pré-visualização paginada A4 com papel timbrado.
 - Impressão via `window.print()` e PDF automático em `output/` no clique de **Imprimir orçamento**.
 - Históricos locais com autocomplete e listas rápidas reordenáveis (extras, pagamento, observações).
-- Drag-and-drop visual de cirurgias propostas (sem persistir ordem no JSON).
+- Drag-and-drop no dropdown de cirurgias (ordem em `data/cirurgias.json`) e drag visual entre campos do formulário (só preview).
 - Seções opcionais com checkbox: Hospital, Implantes, Tecnologias, Extras.
 - Autofill Regina: pacotes por valor decrescente; multiplicadores `1` / `0.7` / `0.5` no preço; taxas adicionais no final; meia hora automática pelo tempo bruto.
 - Autofill Sapiranga: centro por valor decrescente; multiplicadores `1` / `0.7` / `0.6`; ambulatório, excedente e diárias na ordem do JSON.
