@@ -331,14 +331,13 @@ A stack descrita neste documento corresponde à versão **v0.1.0-node-web**, pre
 npm run tauri:dev
 ```
 
-**Build + abrir** (gera `auto-orcamento.exe` na raiz e inicia o app):
+**Build** (gera `auto-orcamento.exe` na raiz):
 
 ```text
-abrir-auto-orcamento-tauri.bat
+build-auto-orcamento-tauri.bat
   -> npm run tauri:build
       -> tauri build (sem instaladores; bundle.active = false)
       -> scripts/copy-release-exe.cjs  ->  auto-orcamento.exe (raiz)
-      -> start auto-orcamento.exe
 ```
 
 **Uso em outro PC:** copiar o repo (com `auto-orcamento.exe` na raiz e pasta `data/`) e abrir o `.exe`. Rebuild só na máquina de dev.

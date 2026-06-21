@@ -30,7 +30,7 @@ Substituir a stack **Node.js + Chrome/Edge manual** por um **executável desktop
 | `server.js` | Comandos Rust (`read_json`, `write_json`, handlers por recurso) |
 | `pdf-export.js` + `puppeteer-core` | PDF via WebView print, biblioteca Rust, ou plugin Tauri |
 | `launch-app.js` | Desnecessário — a janela é do próprio Tauri |
-| `abrir-auto-orcamento.bat` | `auto-orcamento.exe` na raiz do repo (build via `abrir-auto-orcamento-tauri.bat`) |
+| `abrir-auto-orcamento.bat` | `auto-orcamento.exe` na raiz do repo (build via `build-auto-orcamento-tauri.bat`) |
 | `POST /api/shutdown` | Fechar janela encerra o app nativamente |
 
 ## Mapa API → comandos Tauri (rascunho)
@@ -56,7 +56,7 @@ Substituir a stack **Node.js + Chrome/Edge manual** por um **executável desktop
 - [x] Pipeline de ícone: `scripts/build-app-icon-square.ps1` → `assets/app-icon-square.png` → `npm run icon:generate` → `src-tauri/icons/` (`.ico`, PNGs, favicon)
 - [x] Badge circular preto (diâmetro = slot do ícone; cantos transparentes); G dourado centralizado (`logoFillRatio` = `0.70` em `build-app-icon-square.ps1`)
 - [x] Build `.exe` standalone (`npm run tauri:build`; `bundle.active = false`, sem NSIS/MSI)
-- [x] `abrir-auto-orcamento-tauri.bat`: build + cópia para `auto-orcamento.exe` na raiz + abrir o app
+- [x] `build-auto-orcamento-tauri.bat`: build + cópia para `auto-orcamento.exe` na raiz
 - [x] Tabelas de referência via `table_load`, lidas de `data/` externo (seed único do build se ausentes)
 
 Comandos:
@@ -71,7 +71,7 @@ Atalho Windows:
 
 | Arquivo | Função |
 |---|---|
-| `abrir-auto-orcamento-tauri.bat` | Build release, copia `.exe` para a raiz e abre o app |
+| `build-auto-orcamento-tauri.bat` | Build release e copia `auto-orcamento.exe` para a raiz |
 
 ### Fluxo de distribuição (repo completo)
 
@@ -79,7 +79,7 @@ Atalho Windows:
 Máquina de dev                          Outro PC
 ────────────────                        ────────
 1. Editar código
-2. abrir-auto-orcamento-tauri.bat
+2. build-auto-orcamento-tauri.bat
 3. Copiar repo (auto-orcamento.exe + data/)  →  4. Duplo clique em auto-orcamento.exe
 ```
 
@@ -141,7 +141,7 @@ PDFs ficam em `output/` na raiz do repo (mesma regra de caminho que `data/`). Re
 ### Fase 4 — Empacotamento Windows (em andamento)
 
 - [x] Build `.exe` standalone sem instaladores (`bundle.active = false`)
-- [x] `abrir-auto-orcamento-tauri.bat`: build + cópia para raiz + abrir app
+- [x] `build-auto-orcamento-tauri.bat`: build + cópia para raiz
 - [x] `data/` e `output/` unificados na raiz do repo (`paths.rs` + `table_load`)
 - [x] Documentação de fluxo e requisitos (WebView2, Chrome/Edge para PDF)
 - [ ] Testar em PC limpo (sem Node/Rust)

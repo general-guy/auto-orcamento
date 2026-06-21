@@ -8,7 +8,7 @@ O projeto tem **duas stacks**. Na branch **`feature/tauri`**, use a versão desk
 
 ### Tauri — executável desktop (branch `feature/tauri`)
 
-**Na máquina de dev** (Node + Rust instalados): duplo clique em `abrir-auto-orcamento-tauri.bat`. Isso builda o app, copia `auto-orcamento.exe` para a raiz do repo e abre o app.
+**Na máquina de dev** (Node + Rust instalados): duplo clique em `build-auto-orcamento-tauri.bat`. Isso builda o app e copia `auto-orcamento.exe` para a raiz do repo.
 
 **Em outro PC** (sem Node/Rust): copie o repositório (inclua `auto-orcamento.exe` e a pasta `data/`) e dê duplo clique em `auto-orcamento.exe` na raiz.
 
@@ -90,15 +90,16 @@ npm install
 npm run tauri:dev
 ```
 
-### Build, cópia do `.exe` e abrir o app
+### Build e cópia do `.exe`
 
-Clique duas vezes em **`abrir-auto-orcamento-tauri.bat`**.
+Clique duas vezes em **`build-auto-orcamento-tauri.bat`**.
 
 Esse atalho:
 
 1. Roda `npm run tauri:build` (só o `.exe`, sem instaladores NSIS/MSI)
 2. Copia o resultado para **`auto-orcamento.exe`** na raiz do repo
-3. Abre o app
+
+Para usar o app após o build, abra `auto-orcamento.exe` na raiz (duplo clique).
 
 Equivalente manual:
 
@@ -117,7 +118,7 @@ src-tauri/target/release/auto-orcamento.exe # artefato original do Rust
 
 ### Usar em outro PC (sem rebuild)
 
-1. Na máquina de dev: altere o código e rode **`abrir-auto-orcamento-tauri.bat`**.
+1. Na máquina de dev: altere o código e rode **`build-auto-orcamento-tauri.bat`**.
 2. Copie o **repositório completo** para o outro PC (pode omitir `node_modules/` e `src-tauri/target/` se quiser economizar espaço — mas inclua `auto-orcamento.exe` na raiz).
 3. No outro PC: duplo clique em `auto-orcamento.exe` na raiz do projeto.
 
@@ -141,7 +142,7 @@ Históricos e tabelas são acessados via `AppApi` (`api.js`); tabelas usam `AppA
 
 **Pendente (Fases 4–5):** validação em PC limpo e paridade final com o snapshot Node. Detalhes em `docs/MIGRATION-tauri.md`.
 
-**Ícone do app (Tauri):** **G** dourado inscrito num **círculo preto** do tamanho do slot do ícone. Configuração: `$logoFillRatio = 0.70` em `scripts/build-app-icon-square.ps1`. Pipeline: `npm run icon:generate`. Após trocar ícones, rode `abrir-auto-orcamento-tauri.bat` (ou `npm run tauri:build`) para regenerar o `.exe` da raiz.
+**Ícone do app (Tauri):** **G** dourado inscrito num **círculo preto** do tamanho do slot do ícone. Configuração: `$logoFillRatio = 0.70` em `scripts/build-app-icon-square.ps1`. Pipeline: `npm run icon:generate`. Após trocar ícones, rode `build-auto-orcamento-tauri.bat` (ou `npm run tauri:build`) para regenerar o `.exe` da raiz.
 
 **PDF automático (Tauri):** ao clicar em **Imprimir orçamento**, o app grava um PDF em `output/` (mesmo fluxo da stack Node). O HTML é montado em `pdf-build.js`; o Rust invoca Chrome/Edge headless (`--print-to-pdf`). Requer Chrome ou Edge instalado.
 
