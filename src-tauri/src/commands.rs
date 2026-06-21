@@ -6,7 +6,7 @@ use serde_json::Value;
 use crate::storage::{
   add_string_item, add_technology, adjust_zoom_level, read_string_list, read_table,
   read_technologies, read_zoom_level, remove_string_item, remove_technology, replace_string_list,
-  set_zoom_level, TechnologyItem,
+  replace_technologies, set_zoom_level, TechnologyItem,
 };
 
 #[tauri::command]
@@ -42,6 +42,11 @@ pub fn technologies_add(app: AppHandle, nome: String, valor: String) -> Result<V
 #[tauri::command]
 pub fn technologies_remove(app: AppHandle, nome: String) -> Result<Vec<TechnologyItem>, String> {
   remove_technology(&app, &nome)
+}
+
+#[tauri::command]
+pub fn technologies_replace(app: AppHandle, items: Vec<TechnologyItem>) -> Result<Vec<TechnologyItem>, String> {
+  replace_technologies(&app, items)
 }
 
 #[tauri::command]

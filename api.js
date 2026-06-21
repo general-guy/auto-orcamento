@@ -136,6 +136,18 @@
     });
   }
 
+  async function replaceTechnologies(items) {
+    if (isTauri()) {
+      return invoke("technologies_replace", { items });
+    }
+
+    return fetchJson("/api/tecnologias", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items }),
+    });
+  }
+
   async function getZoom() {
     if (isTauri()) {
       return invoke("zoom_get");
@@ -229,6 +241,7 @@
     getTechnologies,
     addTechnology,
     removeTechnology,
+    replaceTechnologies,
     loadTable,
     getZoom,
     setZoom,

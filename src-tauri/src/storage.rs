@@ -327,6 +327,48 @@ pub fn remove_technology(app: &AppHandle, nome: &str) -> Result<Vec<TechnologyIt
   Ok(next_items)
 }
 
+pub fn replace_technologies(app: &AppHandle, items: Vec<TechnologyItem>) -> Result<Vec<TechnologyItem>, String> {
+  ensure_data_files(app)?;
+  let data_dir = writable_data_dir(app)?;
+  let path = file_path(&data_dir, "tecnologias")?;
+  let mut normalized_keys = std::collections::HashSet::new();
+  let mut next_items = Vec::new();
+
+  for item in items {
+    let nome = item.nome.trim();
+    if nome.is_empty() {
+      continue;
+    }
+
+    let key = normalize_text(nome);
+    if normalized_keys.contains(&key) {
+      continue;
+    }
+
+    normalized_keys.insert(key);
+    next_items.push(TechnologyItem {
+      nome: nome.to_string(),
+      valor: item.valor.trim().to_string(),
+    });
+
+    if next_items.len() >= MAX_ITEMS {
+      break;
+    }
+  }
+
+  let json_items = next_items
+    .iter()
+    .map(|entry| {
+      serde_json::json!({
+        "nome": entry.nome,
+        "valor": entry.valor,
+      })
+    })
+    .collect::<Vec<_>>();
+  write_json_list(&path, &json_items)?;
+  Ok(next_items)
+}
+
 const ZOOM_MIN: f64 = 0.5;
 const ZOOM_MAX: f64 = 2.0;
 const ZOOM_DEFAULT: f64 = 1.0;

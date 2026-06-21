@@ -70,12 +70,12 @@ npm install && npm start
 | Arquivo | Tipo | Versionado |
 |---|---|---|
 | `data/cirurgias.json` | Histórico + ordem no dropdown Cirurgia | Sim |
-| `data/hospitais.json` | Histórico | Sim |
+| `data/hospitais.json` | Histórico + ordem no dropdown Hospital | Sim |
 | `data/pacientes.json` | Histórico + ordem no dropdown Nome | Sim |
-| `data/pagamentos.json` | Histórico + ordem drag-and-drop | Sim |
-| `data/observacoes.json` | Histórico + ordem drag-and-drop | Sim |
-| `data/extras.json` | Histórico + ordem drag-and-drop | Sim |
-| `data/tecnologias.json` | Histórico (`nome` + `valor`) | Sim |
+| `data/pagamentos.json` | Histórico + ordem (dropdown e lista rápida) | Sim |
+| `data/observacoes.json` | Histórico + ordem (dropdown e lista rápida) | Sim |
+| `data/extras.json` | Histórico + ordem (dropdown e lista rápida) | Sim |
+| `data/tecnologias.json` | Histórico (`nome` + `valor`) + ordem no dropdown | Sim |
 | `data/tabelas-hospitalares.json` | Tabela Regina + Sapiranga | Sim |
 | `data/tabela-implantes.json` | Tabela de implantes | Sim |
 | `output/*.pdf` | PDFs gerados automaticamente | Não (`.gitignore`) |
@@ -97,12 +97,12 @@ npm install && npm start
 | Endpoint | Métodos | Corpo / resposta |
 |---|---|---|
 | `/api/cirurgias` | GET, POST, DELETE, PUT | POST/DELETE: `{ value }`; PUT: `{ items: string[] }` |
-| `/api/hospitais` | GET, POST, DELETE | `{ value: string }` |
+| `/api/hospitais` | GET, POST, DELETE, PUT | POST/DELETE: `{ value }`; PUT: `{ items: string[] }` |
 | `/api/pacientes` | GET, POST, DELETE, PUT | POST/DELETE: `{ value }`; PUT: `{ items: string[] }` |
 | `/api/pagamentos` | GET, POST, DELETE, PUT | POST/DELETE: `{ value }`; PUT: `{ items: string[] }` |
 | `/api/observacoes` | GET, POST, DELETE, PUT | Idem pagamentos |
 | `/api/extras` | GET, POST, DELETE, PUT | Idem pagamentos |
-| `/api/tecnologias` | GET, POST, DELETE | `{ nome, valor }` |
+| `/api/tecnologias` | GET, POST, DELETE, PUT | POST/DELETE: `{ nome, valor }`; PUT: `{ items: [{ nome, valor }] }` |
 | `/api/pdf` | POST | `{ patientName, html }` → `{ filename, path }` |
 | `/api/shutdown` | POST | Encerra o servidor |
 | `/`, `/app.js`, `/styles.css`, `/data/*.json`, assets | GET | Arquivos estáticos |
@@ -115,7 +115,7 @@ Históricos simples: máximo **200 itens** por arquivo. Duplicatas ignoradas na 
 - Pré-visualização paginada A4 com papel timbrado.
 - Impressão via `window.print()` e PDF automático em `output/` no clique de **Imprimir orçamento**.
 - Históricos locais com autocomplete e listas rápidas reordenáveis (extras, pagamento, observações).
-- Drag-and-drop no dropdown de cirurgias (ordem em `data/cirurgias.json`) e drag visual entre campos do formulário (só preview).
+- Drag-and-drop nos dropdowns de histórico (Nome, Cirurgia, Hospital, Tecnologias, Extras adicionais, Pagamento, Observações adicionais) com ordem persistida nos JSON; drag visual entre campos de cirurgia no formulário (só preview).
 - Seções opcionais com checkbox: Hospital, Implantes, Tecnologias, Extras.
 - Autofill Regina: pacotes por valor decrescente; multiplicadores `1` / `0.7` / `0.5` no preço; taxas adicionais no final; meia hora automática pelo tempo bruto.
 - Autofill Sapiranga: centro por valor decrescente; multiplicadores `1` / `0.7` / `0.6`; ambulatório, excedente e diárias na ordem do JSON.

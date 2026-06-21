@@ -85,12 +85,12 @@ Endpoints principais:
 
 - `GET /` e arquivos estáticos: servem `index.html`, `app.js`, `styles.css`, fontes, imagens e JSONs.
 - `GET /api/cirurgias`, `POST /api/cirurgias`, `DELETE /api/cirurgias`, `PUT /api/cirurgias`: histórico de cirurgias e persistência da ordem manual no dropdown.
-- `GET /api/hospitais`, `POST /api/hospitais`, `DELETE /api/hospitais`: histórico de hospitais.
+- `GET /api/hospitais`, `POST /api/hospitais`, `DELETE /api/hospitais`, `PUT /api/hospitais`: histórico de hospitais e persistência da ordem manual no dropdown.
 - `GET /api/pacientes`, `POST /api/pacientes`, `DELETE /api/pacientes`, `PUT /api/pacientes`: histórico de pacientes e persistência da ordem manual no dropdown.
 - `GET /api/pagamentos`, `POST /api/pagamentos`, `DELETE /api/pagamentos`, `PUT /api/pagamentos`: histórico de formas de pagamento e persistência da ordem manual.
 - `GET /api/observacoes`, `POST /api/observacoes`, `DELETE /api/observacoes`, `PUT /api/observacoes`: histórico de observações e persistência da ordem manual.
 - `GET /api/extras`, `POST /api/extras`, `DELETE /api/extras`, `PUT /api/extras`: histórico de extras e persistência da ordem manual.
-- `GET /api/tecnologias`, `POST /api/tecnologias`, `DELETE /api/tecnologias`: histórico de tecnologias com valor associado.
+- `GET /api/tecnologias`, `POST /api/tecnologias`, `DELETE /api/tecnologias`, `PUT /api/tecnologias`: histórico de tecnologias com valor associado e persistência da ordem manual no dropdown.
 - `POST /api/pdf`: gera um PDF do documento atual e salva em `output/`.
 - `POST /api/shutdown`: encerra o servidor quando acionado pela interface.
 
@@ -115,6 +115,7 @@ Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observa�
 
 - sincronização entre formulário e preview;
 - histórico/autocomplete de pacientes, cirurgias, hospitais, extras, pagamentos, observações e tecnologias;
+- reordenação persistente nos dropdowns de histórico (handle `⋮⋮`, classe `history-dropdown--reorderable`, helper `installReorderableHistoryDropdown()` em `app.js`);
 - campos dinâmicos e reordenáveis de cirurgia, além de hospital;
 - entradas auxiliares de Regina e Sapiranga;
 - multiplicadores de pacotes hospitalares;
@@ -166,13 +167,15 @@ As entradas auxiliares `Reg#`/`Sap#` não usam `<datalist>` nativo (limitado no 
 
 Com duas ou mais entradas no formulário, `updateSurgeryFieldStructure()` exibe outro handle `⋮⋮` à esquerda de cada **campo** (não no dropdown), reorganizando só a ordem visual no painel e no preview — sem alterar `data/cirurgias.json`.
 
-`data/tecnologias.json` guarda as tecnologias cadastradas no próprio app. Diferente dos históricos simples, cada item tem `nome` e `valor`, permitindo carregar o valor automaticamente quando a tecnologia é selecionada.
+`data/hospitais.json` guarda os nomes de hospital usados no autocomplete da seção **Hospital**. O dropdown de histórico permite reordenar entradas pelo handle `⋮⋮`; ao soltar, `app.js` envia a lista via `PUT /api/hospitais` / `AppApi.replaceHistory("hospitais", …)`.
 
-`data/pagamentos.json` guarda as formas de pagamento cadastradas no formulário. O arquivo é uma lista simples de textos, usada pelo dropdown de histórico da seção `Pagamento` e pela lista rápida reordenável.
+`data/tecnologias.json` guarda as tecnologias cadastradas no próprio app. Diferente dos históricos simples, cada item tem `nome` e `valor`, permitindo carregar o valor automaticamente quando a tecnologia é selecionada. O dropdown de histórico também permite reordenar pelo handle `⋮⋮`; ao soltar, `AppApi.replaceTechnologies()` / `PUT /api/tecnologias` / `technologies_replace` (Tauri) grava a ordem preservando `nome` e `valor` de cada item.
 
-`data/extras.json` guarda os extras padrão e adicionais cadastrados no formulário. O arquivo é uma lista simples de textos, usada pela lista rápida reordenável da seção `Extras` e pelo dropdown de histórico dos extras adicionais.
+`data/pagamentos.json` guarda as formas de pagamento cadastradas no formulário. O arquivo é usado pelo dropdown de histórico da seção `Pagamento` (reordenável pelo handle `⋮⋮`, via `PUT /api/pagamentos`) e pela lista rápida reordenável acima dos campos manuais — ambos compartilham o mesmo JSON.
 
-`data/observacoes.json` guarda as observações padrão e adicionais cadastradas no formulário. O arquivo é uma lista simples de textos, usada pela lista rápida reordenável da seção `Observações` e pelo dropdown de histórico das observações adicionais.
+`data/extras.json` guarda os extras padrão e adicionais cadastrados no formulário. A lista rápida reordenável e o dropdown de histórico dos **Extras adicionais** compartilham o mesmo arquivo; reordenar em qualquer um deles persiste via `PUT /api/extras`.
+
+`data/observacoes.json` guarda as observações padrão e adicionais cadastradas no formulário. A lista rápida reordenável e o dropdown de histórico das **Observações adicionais** compartilham o mesmo arquivo; reordenar em qualquer um deles persiste via `PUT /api/observacoes`.
 
 A pasta `output/` guarda os PDFs gerados automaticamente após a impressão. Ela é criada pelo servidor quando necessário e não entra no controle de versão.
 
@@ -197,7 +200,7 @@ Quando um item é selecionado, o preview exibe uma caixa arredondada com duas co
 
 A seção `Tecnologias` no formulário é controlada por um checkbox no próprio título. Quando o checkbox está desmarcado, os campos ficam desabilitados, o conteúdo da seção fica oculto, o espaçamento vertical do fieldset é reduzido no painel esquerdo e a seção não aparece no documento.
 
-O campo `Tecnologia` usa um dropdown de histórico alimentado por `data/tecnologias.json`. Ao selecionar uma opção, o app carrega o `valor` salvo junto com o `nome`.
+O campo `Tecnologia` usa um dropdown de histórico alimentado por `data/tecnologias.json`. Ao selecionar uma opção, o app carrega o `valor` salvo junto com o `nome`. Com duas ou mais opções visíveis, o handle `⋮⋮` reordena o histórico no JSON (via `AppApi.replaceTechnologies()`).
 
 O campo `Valor:` fica na mesma linha do input e normaliza moeda em padrão brasileiro ao sair do campo e antes de salvar. Exemplos: `10000` vira `R$ 10.000,00`; `10000,5` vira `R$ 10.000,50`.
 
@@ -217,7 +220,7 @@ A seção `Extras` é controlada por um checkbox no próprio título. Quando o c
 
 Quando habilitada, a seção é alimentada por `data/extras.json` via `/api/extras` e fica antes de `Pagamento` no formulário e no documento. O conteúdo interno usa `#extrasFormContent` com o mesmo `gap` em grid das outras seções opcionais, mantendo o espaçamento entre `Extras padrão`, a lista rápida e `Extras adicionais` alinhado ao de `Pagamento`. No painel, `renderExtrasQuickList()` exibe as entradas salvas como `Extras padrão`, com checkboxes marcados por padrão e botão de exclusão integrado ao histórico.
 
-Os `Extras adicionais` usam uma lista dinâmica de inputs com botões `+/-`. Cada input usa dropdown legado alimentado pelo mesmo histórico e permite salvar novas entradas, selecionar existentes ou excluir opções antigas.
+Os `Extras adicionais` usam uma lista dinâmica de inputs com botões `+/-`. Cada input usa dropdown de histórico alimentado pelo mesmo JSON; com duas ou mais opções visíveis, o handle `⋮⋮` reordena o histórico via `PUT /api/extras` (mesmo arquivo da lista rápida).
 
 A lista rápida de extras padrão usa eventos de ponteiro para permitir drag and drop sem interferir nos checkboxes e no botão de exclusão. Durante o arraste, `app.js` mostra uma linha de encaixe entre os itens; ao soltar, reorganiza `extrasHistory`, atualiza o preview e envia a lista completa para `PUT /api/extras`, que normaliza duplicatas e grava a nova ordem em `data/extras.json`.
 
@@ -227,7 +230,7 @@ No preview, `updateExtrasPreview()` combina os extras padrão marcados com os ad
 
 A seção `Pagamento` mantém apenas as formas de pagamento. O antigo campo `Itens Incluídos` foi removido do formulário, do preview e da lista de campos sincronizados em `app.js`.
 
-No formulário, `Pagamento` usa uma lista dinâmica de inputs com botões `+/-`, no mesmo padrão de `Cirurgia`. Cada input usa dropdown de histórico alimentado por `data/pagamentos.json` via `/api/pagamentos`.
+No formulário, `Pagamento` usa uma lista dinâmica de inputs com botões `+/-`, no mesmo padrão de `Cirurgia`. Cada input usa dropdown de histórico alimentado por `data/pagamentos.json` via `/api/pagamentos`; o dropdown também aceita reordenação pelo handle `⋮⋮` (`PUT /api/pagamentos`).
 
 As entradas salvas em `data/pagamentos.json` também são renderizadas em uma lista rápida acima do campo manual. Cada item vem marcado por padrão, pode ser desmarcado sem sair do histórico e tem um botão de exclusão que remove a entrada via `/api/pagamentos`.
 
@@ -239,7 +242,7 @@ No preview, as formas de pagamento preenchidas são renderizadas como parágrafo
 
 A seção `Observações` é alimentada por `data/observacoes.json` via `/api/observacoes`. No formulário, `renderGuidanceQuickList()` exibe as entradas salvas como `Observações padrão`, com checkboxes marcados por padrão e botão de exclusão integrado ao histórico.
 
-As `Observações adicionais` usam uma lista dinâmica de inputs com botões `+/-`. Cada input usa dropdown legado alimentado pelo mesmo histórico e permite salvar novas entradas, selecionar existentes ou excluir opções antigas.
+As `Observações adicionais` usam uma lista dinâmica de inputs com botões `+/-`. Cada input usa dropdown de histórico alimentado pelo mesmo JSON; com duas ou mais opções visíveis, o handle `⋮⋮` reordena via `PUT /api/observacoes`.
 
 A lista rápida de observações padrão usa eventos de ponteiro para permitir drag and drop sem interferir nos checkboxes e no botão de exclusão. Durante o arraste, `app.js` mostra uma linha de encaixe entre os itens; ao soltar, reorganiza `guidanceHistory`, atualiza o preview e envia a lista completa para `PUT /api/observacoes`, que normaliza duplicatas e grava a nova ordem em `data/observacoes.json`.
 
@@ -272,6 +275,8 @@ Quando o usuário clica em `Imprimir orçamento`, `app.js` salva os históricos 
 ## Lógica Hospitalar
 
 A seção `Hospital` é controlada por um checkbox no título, marcado por padrão no HTML para cada nova sessão do app. Quando desmarcado, o conteúdo do formulário é ocultado, os controles internos são desabilitados e o bloco de hospital no preview recebe `hidden`.
+
+O campo de nome do hospital usa dropdown de histórico (`data/hospitais.json`) com reordenação persistente pelo handle `⋮⋮` (`PUT /api/hospitais`).
 
 Quando o nome do hospital contém `regin`, o app cria entradas auxiliares `Reg1`, `Reg2`, etc. Quando contém `sapirang`, cria `Sap1`, `Sap2`, etc.
 

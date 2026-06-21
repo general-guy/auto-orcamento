@@ -120,6 +120,7 @@ Comandos expostos:
 | `technologies_list` | `GET /api/tecnologias` |
 | `technologies_add` | `POST /api/tecnologias` |
 | `technologies_remove` | `DELETE /api/tecnologias` |
+| `technologies_replace` | `PUT /api/tecnologias` |
 | `zoom_get` / `zoom_set` / `zoom_adjust` | — (apenas Tauri; salvo em `data/settings.json`) |
 | `table_load` | `GET data/tabelas-hospitalares.json` / `tabela-implantes.json` |
 | `export_pdf` | `POST /api/pdf` |

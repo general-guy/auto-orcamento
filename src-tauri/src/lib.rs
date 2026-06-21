@@ -40,6 +40,7 @@ pub fn run() {
       commands::technologies_list,
       commands::technologies_add,
       commands::technologies_remove,
+      commands::technologies_replace,
       commands::table_load,
       commands::zoom_get,
       commands::zoom_set,

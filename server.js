@@ -369,6 +369,42 @@ async function handleSurgeriesApi(request, response) {
   await handleHistoryApi(request, response, surgeriesFile, "uma cirurgia válida");
 }
 
+async function handleHospitalsApi(request, response) {
+  if (request.method === "PUT") {
+    const body = await collectRequestBody(request);
+    const { items } = JSON.parse(body || "{}");
+
+    if (!Array.isArray(items)) {
+      sendJson(response, 400, { error: "Informe uma lista de hospitais." });
+      return;
+    }
+
+    const normalizedKeys = new Set();
+    const nextItems = items
+      .map((item) => (typeof item === "string" ? item.trim() : ""))
+      .filter((item) => {
+        if (!item) {
+          return false;
+        }
+
+        const key = normalizeText(item);
+        if (normalizedKeys.has(key)) {
+          return false;
+        }
+
+        normalizedKeys.add(key);
+        return true;
+      })
+      .slice(0, 200);
+
+    writeJsonList(hospitalsFile, nextItems);
+    sendJson(response, 200, nextItems);
+    return;
+  }
+
+  await handleHistoryApi(request, response, hospitalsFile, "um hospital válido");
+}
+
 async function handleTechnologyApi(request, response) {
   if (request.method === "GET") {
     sendJson(response, 200, readJsonList(technologiesFile));
@@ -410,6 +446,42 @@ async function handleTechnologyApi(request, response) {
 
     const nextItems = readJsonList(technologiesFile)
       .filter((existingItem) => normalizeText(existingItem.nome || existingItem) !== normalizeText(technology));
+
+    writeJsonList(technologiesFile, nextItems);
+    sendJson(response, 200, nextItems);
+    return;
+  }
+
+  if (request.method === "PUT") {
+    const body = await collectRequestBody(request);
+    const { items } = JSON.parse(body || "{}");
+
+    if (!Array.isArray(items)) {
+      sendJson(response, 400, { error: "Informe uma lista de tecnologias." });
+      return;
+    }
+
+    const normalizedKeys = new Set();
+    const nextItems = items
+      .map((item) => {
+        const nome = typeof item?.nome === "string" ? item.nome.trim() : "";
+        const valor = typeof item?.valor === "string" ? item.valor.trim() : "";
+        return { nome, valor };
+      })
+      .filter((item) => {
+        if (!item.nome) {
+          return false;
+        }
+
+        const key = normalizeText(item.nome);
+        if (normalizedKeys.has(key)) {
+          return false;
+        }
+
+        normalizedKeys.add(key);
+        return true;
+      })
+      .slice(0, 200);
 
     writeJsonList(technologiesFile, nextItems);
     sendJson(response, 200, nextItems);
@@ -466,7 +538,7 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (request.url.startsWith("/api/hospitais")) {
-      await handleHistoryApi(request, response, hospitalsFile, "um hospital válido");
+      await handleHospitalsApi(request, response);
       return;
     }
 

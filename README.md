@@ -241,7 +241,7 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 - Mostra uma pré-visualização paginada do documento final sobre o papel timbrado.
 - Permite imprimir o orçamento e, ao clicar em `Imprimir orçamento`, gera automaticamente um PDF em `output/`.
 - Guarda histórico local de pacientes, cirurgias, hospitais, extras, formas de pagamento, observações e tecnologias.
-- Permite reordenar por drag and drop o histórico de **Nome da paciente** e de **Cirurgia proposta** nos dropdowns (ordem persistida em `data/pacientes.json` e `data/cirurgias.json`), as entradas de cirurgia nos campos do formulário (só visual/preview) e as listas rápidas de extras, pagamento e observações.
+- Permite reordenar por drag and drop os dropdowns de histórico (**Nome**, **Cirurgia**, **Hospital**, **Tecnologias**, **Extras adicionais**, **Pagamento** e **Observações adicionais**), com ordem persistida nos JSON correspondentes; reordenar entradas de cirurgia nos campos do formulário (só visual/preview); e reordenar as listas rápidas de extras, pagamento e observações.
 - Cria múltiplas entradas de cirurgia e hospital.
 - Para Regina e Sapiranga, cria entradas auxiliares (`Reg1`, `Sap1`, etc.) com multiplicadores.
 - Usa tabelas hospitalares locais para sugerir pacotes e calcular valores auxiliares no preview.
@@ -271,7 +271,7 @@ data/tabelas-hospitalares.json
 data/tabela-implantes.json
 ```
 
-Esses arquivos são usados pelo app (**Node ou Tauri**) e são versionados no repositório como base inicial. Quando o app altera históricos como extras, pagamentos, observações ou tecnologias, essas mudanças ficam locais até serem adicionadas a um commit. A ordem do histórico de **pacientes** e **cirurgias** pode ser ajustada pelo drag and drop nos dropdowns dos campos Nome e Cirurgia proposta (persiste em `data/pacientes.json` e `data/cirurgias.json`). As tabelas hospitalares e de implantes também podem ser editadas manualmente em `data/`; na versão Tauri, as alterações entram na próxima abertura do app, sem rebuild.
+Esses arquivos são usados pelo app (**Node ou Tauri**) e são versionados no repositório como base inicial. Quando o app altera históricos como extras, pagamentos, observações ou tecnologias, essas mudanças ficam locais até serem adicionadas a um commit. A ordem dos históricos pode ser ajustada pelo drag and drop nos dropdowns (handle `⋮⋮`, com duas ou mais opções visíveis) — persiste em `data/pacientes.json`, `data/cirurgias.json`, `data/hospitais.json`, `data/tecnologias.json`, `data/extras.json`, `data/pagamentos.json` e `data/observacoes.json`. As tabelas hospitalares e de implantes também podem ser editadas manualmente em `data/`; na versão Tauri, as alterações entram na próxima abertura do app, sem rebuild.
 
 Os PDFs gerados automaticamente ficam em:
 
@@ -294,6 +294,8 @@ O PDF usa o mesmo layout paginado da pré-visualização (timbrado, fontes, esti
 
 A seção `Hospital` tem checkbox no título e vem marcada por padrão a cada nova sessão do app. Quando desmarcada, o conteúdo da seção é recolhido no painel esquerdo e o bloco de hospital deixa de aparecer no documento.
 
+O dropdown de histórico do nome do hospital aceita reordenação pelo handle `⋮⋮` (ordem em `data/hospitais.json`).
+
 O botão verde ao lado do hospital preenche e reorganiza as entradas auxiliares.
 
 Para Sapiranga, os pacotes de centro cirúrgico ficam no topo, ordenados do maior valor para o menor, e recebem multiplicadores progressivos. Depois vêm os pacotes de ambulatório, a hora excedente e, por último, as diárias. Diárias não entram no cálculo de tempo de sala e mantêm o multiplicador normal.
@@ -314,7 +316,7 @@ No documento, a caixa mostra a descrição do implante à esquerda e os valores 
 
 A seção `Tecnologias` é opcional. Ao marcar o checkbox no título da seção, os campos de tecnologia e valor são exibidos e habilitados. Quando desmarcada, o conteúdo da seção fica oculto e o espaçamento vertical é reduzido no painel esquerdo para economizar espaço visual.
 
-Cada tecnologia salva o `nome` junto com seu `valor`. Ao selecionar uma tecnologia já cadastrada, o valor correspondente é carregado automaticamente. O campo de valor normaliza moeda em padrão brasileiro, por exemplo `10000` vira `R$ 10.000,00`.
+Cada tecnologia salva o `nome` junto com seu `valor`. Ao selecionar uma tecnologia já cadastrada, o valor correspondente é carregado automaticamente. O dropdown de histórico também permite reordenar entradas pelo handle `⋮⋮` (ordem em `data/tecnologias.json`). O campo de valor normaliza moeda em padrão brasileiro, por exemplo `10000` vira `R$ 10.000,00`.
 
 No documento, a tecnologia aparece em uma caixa arredondada com o nome à esquerda e o valor alinhado à direita.
 
@@ -342,7 +344,7 @@ No painel esquerdo, `Extras padrão` usa uma lista rápida alimentada por `data/
 
 A lista rápida aceita drag and drop para reorganizar os extras. Ao soltar um item em outra posição, a ordem visual, o preview do documento e o arquivo `data/extras.json` são atualizados juntos.
 
-`Extras adicionais` usa campos dinâmicos com dropdown de histórico e botões `+/-`, permitindo incluir novas entradas, reutilizar existentes ou excluir opções antigas.
+`Extras adicionais` usa campos dinâmicos com dropdown de histórico e botões `+/-`, permitindo incluir novas entradas, reutilizar existentes ou excluir opções antigas. O dropdown aceita reordenação pelo handle `⋮⋮` (mesmo JSON da lista rápida).
 
 No documento final, os extras aparecem como lista com marcadores redondos, com espaçamento de `6px` entre os itens.
 
@@ -356,7 +358,7 @@ Nos demais campos de texto, `Enter` continua avançando para o próximo campo ha
 
 A seção `Pagamento` reúne somente as formas de pagamento. No painel esquerdo, ela usa campos dinâmicos com botões `+/-`, seguindo o mesmo padrão da seção `Cirurgia`.
 
-Cada forma preenchida pode ser reaproveitada pelo dropdown de histórico, salvo em `data/pagamentos.json`. As entradas salvas também aparecem como uma lista rápida acima do campo manual, com checkboxes marcados por padrão e botão de exclusão integrado ao histórico.
+Cada forma preenchida pode ser reaproveitada pelo dropdown de histórico, salvo em `data/pagamentos.json`. O dropdown aceita reordenação pelo handle `⋮⋮` (mesmo JSON da lista rápida). As entradas salvas também aparecem como uma lista rápida acima do campo manual, com checkboxes marcados por padrão e botão de exclusão integrado ao histórico.
 
 A lista rápida aceita drag and drop para reorganizar as formas de pagamento. Ao soltar um item em outra posição, a ordem visual, o preview do documento e o arquivo `data/pagamentos.json` são atualizados juntos.
 
@@ -368,7 +370,7 @@ A seção `Observações` usa uma lista rápida de observações padrão aliment
 
 A lista rápida aceita drag and drop para reorganizar as observações. Ao soltar um item em outra posição, a ordem visual, o preview do documento e o arquivo `data/observacoes.json` são atualizados juntos.
 
-Abaixo da lista padrão, `Observações adicionais` usa campos dinâmicos com dropdown de histórico e botões `+/-`, seguindo o mesmo padrão de preenchimento de `Pagamento`.
+Abaixo da lista padrão, `Observações adicionais` usa campos dinâmicos com dropdown de histórico e botões `+/-`, seguindo o mesmo padrão de `Pagamento`. O dropdown aceita reordenação pelo handle `⋮⋮` (mesmo JSON da lista rápida).
 
 No documento final, as observações continuam como lista com marcadores, com espaçamento de `6px` entre os itens.
 
