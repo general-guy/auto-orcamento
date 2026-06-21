@@ -63,6 +63,7 @@ Comandos:
 ```bash
 npm run tauri:dev      # desenvolvimento
 npm run tauri:build    # gera .exe e instaladores
+npm run icon:generate  # regenera ícones a partir de assets/app-icon-g.png
 ```
 
 Atalho Windows: `abrir-auto-orcamento-tauri.bat`
