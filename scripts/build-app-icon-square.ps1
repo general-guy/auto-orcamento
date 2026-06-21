@@ -4,7 +4,7 @@ $rootDir = Split-Path -Parent $PSScriptRoot
 $sourcePath = Join-Path $rootDir "assets/app-icon-g.png"
 $outputPath = Join-Path $rootDir "assets/app-icon-square.png"
 $targetSize = 1024
-$circleRatio = 0.88
+$circleRatio = 1.0
 $logoFillRatio = 0.68
 
 function New-TransparentSourceBitmap {
