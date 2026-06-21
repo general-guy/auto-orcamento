@@ -241,7 +241,7 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 - Mostra uma pré-visualização paginada do documento final sobre o papel timbrado.
 - Permite imprimir o orçamento e, ao clicar em `Imprimir orçamento`, gera automaticamente um PDF em `output/`.
 - Guarda histórico local de pacientes, cirurgias, hospitais, extras, formas de pagamento, observações e tecnologias.
-- Permite reordenar por drag and drop as cirurgias propostas no formulário e as listas rápidas de extras, pagamento e observações.
+- Permite reordenar por drag and drop o histórico de **Nome da paciente** no dropdown (ordem persistida em `data/pacientes.json`), as cirurgias propostas nos campos do formulário e as listas rápidas de extras, pagamento e observações.
 - Cria múltiplas entradas de cirurgia e hospital.
 - Para Regina e Sapiranga, cria entradas auxiliares (`Reg1`, `Sap1`, etc.) com multiplicadores.
 - Usa tabelas hospitalares locais para sugerir pacotes e calcular valores auxiliares no preview.
@@ -271,7 +271,7 @@ data/tabelas-hospitalares.json
 data/tabela-implantes.json
 ```
 
-Esses arquivos são usados pelo app (**Node ou Tauri**) e são versionados no repositório como base inicial. Quando o app altera históricos como extras, pagamentos, observações ou tecnologias, essas mudanças ficam locais até serem adicionadas a um commit. As tabelas hospitalares e de implantes também podem ser editadas manualmente em `data/`; na versão Tauri, as alterações entram na próxima abertura do app, sem rebuild.
+Esses arquivos são usados pelo app (**Node ou Tauri**) e são versionados no repositório como base inicial. Quando o app altera históricos como extras, pagamentos, observações ou tecnologias, essas mudanças ficam locais até serem adicionadas a um commit. A ordem do histórico de **pacientes** pode ser ajustada pelo drag and drop no dropdown do campo Nome (persiste em `data/pacientes.json`). As tabelas hospitalares e de implantes também podem ser editadas manualmente em `data/`; na versão Tauri, as alterações entram na próxima abertura do app, sem rebuild.
 
 Os PDFs gerados automaticamente ficam em:
 

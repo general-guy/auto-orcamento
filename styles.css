@@ -565,6 +565,61 @@ textarea {
   text-align: left;
 }
 
+.history-dropdown--reorderable .history-option {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  justify-content: initial;
+}
+
+.history-drag-handle {
+  color: #9ca3af;
+  cursor: grab;
+  flex: 0 0 auto;
+  font-size: 0.92rem;
+  letter-spacing: -0.12em;
+  line-height: 1;
+  touch-action: none;
+  user-select: none;
+}
+
+.history-drag-handle::before {
+  content: "⋮⋮";
+}
+
+.history-drag-handle[hidden] {
+  display: none;
+}
+
+.history-option-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-dropdown--reorderable .history-option.is-dragging {
+  background: rgba(221, 231, 245, 0.95);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
+  cursor: grabbing;
+  opacity: 0.76;
+}
+
+.history-dropdown--reorderable .history-option.is-dragging .history-drag-handle {
+  cursor: grabbing;
+}
+
+.history-dropdown--reorderable.is-dragging-patient {
+  user-select: none;
+}
+
+.history-drop-indicator {
+  background: #2f80ed;
+  border-radius: 999px;
+  height: 2px;
+  margin: 1px 8px;
+}
+
 .history-option:hover,
 .history-option:focus {
   background: var(--primary-soft);

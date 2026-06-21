@@ -81,6 +81,8 @@ let isInteractingWithHospitalDropdown = false;
 let patientHistory = [];
 let activePatientInput = null;
 let isInteractingWithPatientDropdown = false;
+let patientDropdownDragState = null;
+let patientDropdownSuppressClick = false;
 let technologyHistory = [];
 let isInteractingWithTechnologyDropdown = false;
 let hospitalTables = null;
@@ -2198,9 +2200,133 @@ function updateHospitalHistoryDropdown(query = "") {
   });
 }
 
+function applyPatientDropdownOrder(visibleOrdered) {
+  const visibleKeys = new Set(visibleOrdered.map((item) => normalizeText(item)));
+  let inserted = false;
+  const nextHistory = [];
+
+  patientHistory.forEach((item) => {
+    if (visibleKeys.has(normalizeText(item))) {
+      if (!inserted) {
+        nextHistory.push(...visibleOrdered);
+        inserted = true;
+      }
+
+      return;
+    }
+
+    nextHistory.push(item);
+  });
+
+  if (!inserted) {
+    nextHistory.push(...visibleOrdered);
+  }
+
+  return nextHistory;
+}
+
+async function savePatientOrderToHistory(items) {
+  try {
+    patientHistory = await AppApi.replaceHistory("pacientes", items);
+    updatePatientHistoryDropdown(patientInput.value);
+  } catch {
+    console.warn("Não foi possível salvar a ordem dos pacientes.");
+    updatePatientHistoryDropdown(patientInput.value);
+  }
+}
+
+function getPatientDropdownRows() {
+  return Array.from(patientHistoryDropdown.querySelectorAll(".history-option"));
+}
+
+function createPatientDropIndicator() {
+  const indicator = document.createElement("div");
+  indicator.className = "history-drop-indicator";
+  return indicator;
+}
+
+function movePatientDropIndicator(clientY) {
+  if (!patientDropdownDragState) {
+    return;
+  }
+
+  const rows = getPatientDropdownRows().filter((row) => row !== patientDropdownDragState.row);
+  const nextRow = rows.find((row) => {
+    const rect = row.getBoundingClientRect();
+    return clientY < rect.top + rect.height / 2;
+  });
+
+  patientHistoryDropdown.insertBefore(patientDropdownDragState.indicator, nextRow || null);
+}
+
+function endPatientDropdownDrag({ shouldCommit = true } = {}) {
+  if (!patientDropdownDragState) {
+    return;
+  }
+
+  const { row, handle, indicator, pointerId } = patientDropdownDragState;
+  const hasNewPosition = indicator.parentElement === patientHistoryDropdown;
+
+  row.classList.remove("is-dragging");
+  patientHistoryDropdown.classList.remove("is-dragging-patient");
+
+  if (hasNewPosition && shouldCommit) {
+    patientHistoryDropdown.insertBefore(row, indicator);
+  }
+
+  indicator.remove();
+
+  if (handle.hasPointerCapture?.(pointerId)) {
+    handle.releasePointerCapture(pointerId);
+  }
+
+  handle.removeEventListener("pointermove", handlePatientDropdownPointerMove);
+  handle.removeEventListener("pointerup", handlePatientDropdownPointerUp);
+  handle.removeEventListener("pointercancel", handlePatientDropdownPointerCancel);
+
+  patientDropdownDragState = null;
+
+  if (!hasNewPosition || !shouldCommit) {
+    updatePatientHistoryDropdown(patientInput.value);
+    return;
+  }
+
+  patientDropdownSuppressClick = true;
+
+  const visibleOrdered = getPatientDropdownRows()
+    .map((item) => item.dataset.value)
+    .filter(Boolean);
+  const nextHistory = applyPatientDropdownOrder(visibleOrdered);
+
+  patientHistory = nextHistory;
+  updatePatientHistoryDropdown(patientInput.value);
+  savePatientOrderToHistory(nextHistory);
+}
+
+function handlePatientDropdownPointerMove(event) {
+  if (!patientDropdownDragState) {
+    return;
+  }
+
+  event.preventDefault();
+  movePatientDropIndicator(event.clientY);
+}
+
+function handlePatientDropdownPointerUp(event) {
+  event.preventDefault();
+  endPatientDropdownDrag();
+}
+
+function handlePatientDropdownPointerCancel() {
+  endPatientDropdownDrag({ shouldCommit: false });
+}
+
 function updatePatientHistoryDropdown(query = "") {
-  if (!activePatientInput) {
-    patientHistoryDropdown.hidden = true;
+  if (!activePatientInput || patientDropdownDragState) {
+    if (!activePatientInput) {
+      patientHistoryDropdown.hidden = true;
+    }
+
     return;
   }
 
@@ -2208,6 +2334,7 @@ function updatePatientHistoryDropdown(query = "") {
   const options = patientHistory
     .filter((item) => !normalizedQuery || normalizeText(item).includes(normalizedQuery))
     .slice(0, 12);
+  const showDragHandles = options.length >= 2;
 
   patientHistoryDropdown.innerHTML = "";
   patientHistoryDropdown.hidden = options.length === 0;
@@ -2219,7 +2346,13 @@ function updatePatientHistoryDropdown(query = "") {
     option.setAttribute("role", "button");
     option.setAttribute("tabindex", "0");
 
+    const dragHandle = document.createElement("span");
+    dragHandle.className = "history-drag-handle";
+    dragHandle.setAttribute("aria-hidden", "true");
+    dragHandle.hidden = !showDragHandles;
+
     const optionLabel = document.createElement("span");
+    optionLabel.className = "history-option-label";
     optionLabel.textContent = optionText;
 
     const deleteButton = document.createElement("button");
@@ -2228,8 +2361,7 @@ function updatePatientHistoryDropdown(query = "") {
     deleteButton.textContent = "x";
     deleteButton.setAttribute("aria-label", `Remover ${optionText} do histórico`);
 
-    option.append(optionLabel);
-    option.append(deleteButton);
+    option.append(dragHandle, optionLabel, deleteButton);
     patientHistoryDropdown.append(option);
   });
 }
@@ -3314,10 +3446,9 @@ form.addEventListener("focusout", (event) => {
       return;
     }
 
-    if (!isInteractingWithPatientDropdown) {
-      savePatientToHistory(event.target.value, event.target);
-      hidePatientHistoryDropdown();
-    }
+    isInteractingWithPatientDropdown = false;
+    savePatientToHistory(event.target.value, event.target);
+    hidePatientHistoryDropdown();
   }
 
   if (event.target.matches(".surgery-input")) {
@@ -3616,10 +3747,45 @@ form.addEventListener("keydown", (event) => {
   }
 });
 patientHistoryDropdown.addEventListener("pointerdown", (event) => {
+  const handle = event.target.closest(".history-drag-handle");
+  if (handle && event.button === 0) {
+    const row = handle.closest(".history-option");
+    if (!row) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    isInteractingWithPatientDropdown = true;
+
+    patientDropdownDragState = {
+      row,
+      handle,
+      indicator: createPatientDropIndicator(),
+      pointerId: event.pointerId,
+    };
+
+    row.classList.add("is-dragging");
+    patientHistoryDropdown.classList.add("is-dragging-patient");
+    handle.setPointerCapture(event.pointerId);
+    movePatientDropIndicator(event.clientY);
+
+    handle.addEventListener("pointermove", handlePatientDropdownPointerMove);
+    handle.addEventListener("pointerup", handlePatientDropdownPointerUp);
+    handle.addEventListener("pointercancel", handlePatientDropdownPointerCancel);
+    return;
+  }
+
   isInteractingWithPatientDropdown = true;
   event.preventDefault();
 });
 patientHistoryDropdown.addEventListener("click", (event) => {
+  if (patientDropdownSuppressClick) {
+    patientDropdownSuppressClick = false;
+    isInteractingWithPatientDropdown = false;
+    return;
+  }
+
   const option = event.target.closest(".history-option");
   if (!option || !activePatientInput) {
     isInteractingWithPatientDropdown = false;
@@ -3638,6 +3804,23 @@ patientHistoryDropdown.addEventListener("click", (event) => {
   }
 
   selectPatientHistoryOption(option);
+});
+patientHistoryDropdown.addEventListener("focusout", (event) => {
+  if (patientHistoryDropdown.contains(event.relatedTarget)) {
+    return;
+  }
+
+  if (patientDropdownDragState) {
+    return;
+  }
+
+  isInteractingWithPatientDropdown = false;
+
+  if (activePatientInput) {
+    savePatientToHistory(activePatientInput.value, activePatientInput);
+  }
+
+  hidePatientHistoryDropdown();
 });
 patientHistoryDropdown.addEventListener("keydown", (event) => {
   const option = event.target.closest(".history-option");
@@ -4114,6 +4297,7 @@ document.addEventListener("pointerdown", (event) => {
     return;
   }
 
+  isInteractingWithPatientDropdown = false;
   hidePatientHistoryDropdown();
   hideSurgeryHistoryDropdown();
   hidePaymentHistoryDropdown();

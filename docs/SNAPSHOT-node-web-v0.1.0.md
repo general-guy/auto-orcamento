@@ -71,7 +71,7 @@ npm install && npm start
 |---|---|---|
 | `data/cirurgias.json` | Histórico (lista de strings) | Sim |
 | `data/hospitais.json` | Histórico | Sim |
-| `data/pacientes.json` | Histórico | Sim |
+| `data/pacientes.json` | Histórico + ordem no dropdown Nome | Sim |
 | `data/pagamentos.json` | Histórico + ordem drag-and-drop | Sim |
 | `data/observacoes.json` | Histórico + ordem drag-and-drop | Sim |
 | `data/extras.json` | Histórico + ordem drag-and-drop | Sim |
@@ -98,7 +98,7 @@ npm install && npm start
 |---|---|---|
 | `/api/cirurgias` | GET, POST, DELETE | `{ value: string }` |
 | `/api/hospitais` | GET, POST, DELETE | `{ value: string }` |
-| `/api/pacientes` | GET, POST, DELETE | `{ value: string }` |
+| `/api/pacientes` | GET, POST, DELETE, PUT | POST/DELETE: `{ value }`; PUT: `{ items: string[] }` |
 | `/api/pagamentos` | GET, POST, DELETE, PUT | POST/DELETE: `{ value }`; PUT: `{ items: string[] }` |
 | `/api/observacoes` | GET, POST, DELETE, PUT | Idem pagamentos |
 | `/api/extras` | GET, POST, DELETE, PUT | Idem pagamentos |

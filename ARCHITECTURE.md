@@ -86,7 +86,7 @@ Endpoints principais:
 - `GET /` e arquivos estáticos: servem `index.html`, `app.js`, `styles.css`, fontes, imagens e JSONs.
 - `GET /api/cirurgias`, `POST /api/cirurgias`, `DELETE /api/cirurgias`: histórico de cirurgias.
 - `GET /api/hospitais`, `POST /api/hospitais`, `DELETE /api/hospitais`: histórico de hospitais.
-- `GET /api/pacientes`, `POST /api/pacientes`, `DELETE /api/pacientes`: histórico de pacientes.
+- `GET /api/pacientes`, `POST /api/pacientes`, `DELETE /api/pacientes`, `PUT /api/pacientes`: histórico de pacientes e persistência da ordem manual no dropdown.
 - `GET /api/pagamentos`, `POST /api/pagamentos`, `DELETE /api/pagamentos`, `PUT /api/pagamentos`: histórico de formas de pagamento e persistência da ordem manual.
 - `GET /api/observacoes`, `POST /api/observacoes`, `DELETE /api/observacoes`, `PUT /api/observacoes`: histórico de observações e persistência da ordem manual.
 - `GET /api/extras`, `POST /api/extras`, `DELETE /api/extras`, `PUT /api/extras`: histórico de extras e persistência da ordem manual.
@@ -159,6 +159,8 @@ O app carrega `data/tabelas-hospitalares.json` via `AppApi.loadTable("hospitalar
 As entradas auxiliares `Reg#`/`Sap#` não usam `<datalist>` nativo (limitado no WebView2). O app monta `#hospitalProcedureDropdown` em `app.js`: lista filtrável, posicionada à direita do input com altura de viewport completa (`positionHospitalProcedureDropdown`).
 
 `data/tabela-implantes.json` guarda uma tabela independente de implantes, extraída de documento `.doc`, para preenchimento opcional da seção `Implantes`. O dropdown usa `rotulo`, `modelo` e `referencia`; itens com `favorito: true` recebem uma estrela ao final da opção.
+
+`data/pacientes.json` guarda os nomes de pacientes usados no autocomplete. O dropdown de histórico do campo **Nome** permite reordenar entradas pelo handle `⋮⋮` (com duas ou mais opções visíveis); ao soltar, `app.js` envia a lista completa via `PUT /api/pacientes` / `AppApi.replaceHistory("pacientes", …)` e grava a ordem em `data/pacientes.json`. O menu fecha ao perder o foco do campo ou do dropdown.
 
 `data/cirurgias.json` guarda as cirurgias cadastradas no formulário. O arquivo é uma lista simples de textos, usada pelo dropdown de histórico da seção `Cirurgia`. A ordem manual dos campos no formulário não altera esse arquivo.
 
