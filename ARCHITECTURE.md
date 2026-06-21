@@ -317,4 +317,20 @@ A ordem final é: pacotes de cirurgia plástica, taxas adicionais e, ao fim, ent
 
 ## Evolução planejada
 
-A stack descrita neste documento corresponde à versão **v0.1.0-node-web**, preservada no branch `stable/node-web-v0.1.0`. A migração para **Tauri** substituirá Node.js e o launcher manual por um executável com WebView2, mantendo o frontend atual. Detalhes em `docs/MIGRATION-tauri.md`.
+A stack descrita neste documento corresponde à versão **v0.1.0-node-web**, preservada no branch `stable/node-web-v0.1.0`. A migração para **Tauri** substitui Node.js e o launcher manual por um executável com WebView2, mantendo o frontend atual. Detalhes em `docs/MIGRATION-tauri.md`.
+
+### Stack Tauri (branch `feature/tauri`)
+
+```text
+abrir-auto-orcamento-tauri.bat
+  -> npm run tauri:dev
+      -> copy-frontend -> dist/
+      -> auto-orcamento.exe (WebView2)
+          -> index.html + api.js + app.js
+          -> invoke history_* / technologies_*  ->  data/*.json
+          -> fetch data/tabelas-*.json          ->  dist/data/
+```
+
+- **`api.js`:** detecta Tauri vs Node; no Tauri usa `window.__TAURI__.core.invoke` (requer `withGlobalTauri: true`).
+- **`src-tauri/src/storage.rs`:** grava JSON mutável; em debug usa `{projeto}/data/`, em release `{exe}/data/`.
+- **PDF automático:** ainda via Node (`/api/pdf`) — pendente na Fase 3.

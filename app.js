@@ -1051,8 +1051,7 @@ function syncAllHospitalDetailFields() {
 
 async function loadSurgeryHistory() {
   try {
-    const response = await fetch("/api/cirurgias");
-    surgeryHistory = await response.json();
+    surgeryHistory = await AppApi.getHistory("cirurgias");
   } catch {
     surgeryHistory = [];
   }
@@ -1060,8 +1059,7 @@ async function loadSurgeryHistory() {
 
 async function loadPaymentHistory() {
   try {
-    const response = await fetch("/api/pagamentos");
-    paymentHistory = await response.json();
+    paymentHistory = await AppApi.getHistory("pagamentos");
   } catch {
     paymentHistory = [];
   }
@@ -1069,8 +1067,7 @@ async function loadPaymentHistory() {
 
 async function loadGuidanceHistory() {
   try {
-    const response = await fetch("/api/observacoes");
-    guidanceHistory = await response.json();
+    guidanceHistory = await AppApi.getHistory("observacoes");
   } catch {
     guidanceHistory = [];
   }
@@ -1078,8 +1075,7 @@ async function loadGuidanceHistory() {
 
 async function loadExtrasHistory() {
   try {
-    const response = await fetch("/api/extras");
-    extrasHistory = await response.json();
+    extrasHistory = await AppApi.getHistory("extras");
   } catch {
     extrasHistory = [];
   }
@@ -1087,8 +1083,7 @@ async function loadExtrasHistory() {
 
 async function loadHospitalHistory() {
   try {
-    const response = await fetch("/api/hospitais");
-    hospitalHistory = await response.json();
+    hospitalHistory = await AppApi.getHistory("hospitais");
   } catch {
     hospitalHistory = [];
   }
@@ -1096,8 +1091,7 @@ async function loadHospitalHistory() {
 
 async function loadPatientHistory() {
   try {
-    const response = await fetch("/api/pacientes");
-    patientHistory = await response.json();
+    patientHistory = await AppApi.getHistory("pacientes");
   } catch {
     patientHistory = [];
   }
@@ -1105,8 +1099,7 @@ async function loadPatientHistory() {
 
 async function loadTechnologyHistory() {
   try {
-    const response = await fetch("/api/tecnologias");
-    const items = await response.json();
+    const items = await AppApi.getTechnologies();
     technologyHistory = Array.isArray(items) ? items : [];
   } catch {
     technologyHistory = [];
@@ -1129,13 +1122,7 @@ async function saveSurgeryToHistory(value, sourceInput = null) {
   }
 
   try {
-    const response = await fetch("/api/cirurgias", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ value: surgery }),
-    });
-
-    surgeryHistory = await response.json();
+    surgeryHistory = await AppApi.addHistory("cirurgias", surgery);
     if (activeSurgeryInput) {
       updateSurgeryHistoryDropdown(activeSurgeryInput.value);
     }
@@ -1150,18 +1137,7 @@ async function deleteSurgeryFromHistory(value) {
   updateSurgeryHistoryDropdown(activeSurgeryInput?.value || "");
 
   try {
-    const response = await fetch("/api/cirurgias", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ value }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Falha ao remover no servidor.");
-    }
-
-    const nextHistory = await response.json();
-    surgeryHistory = Array.isArray(nextHistory) ? nextHistory : surgeryHistory;
+    surgeryHistory = await AppApi.removeHistory("cirurgias", value);
     updateSurgeryHistoryDropdown(activeSurgeryInput?.value || "");
   } catch {
     console.warn("Não foi possível remover a cirurgia do histórico local.");
@@ -1184,13 +1160,7 @@ async function savePaymentToHistory(value, sourceInput = null) {
   }
 
   try {
-    const response = await fetch("/api/pagamentos", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ value: payment }),
-    });
-
-    paymentHistory = await response.json();
+    paymentHistory = await AppApi.addHistory("pagamentos", payment);
     renderPaymentQuickList();
     if (activePaymentInput) {
       updatePaymentHistoryDropdown(activePaymentInput.value);
@@ -1208,18 +1178,7 @@ async function deletePaymentFromHistory(value) {
   updatePaymentHistoryDropdown(activePaymentInput?.value || "");
 
   try {
-    const response = await fetch("/api/pagamentos", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ value }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Falha ao remover no servidor.");
-    }
-
-    const nextHistory = await response.json();
-    paymentHistory = Array.isArray(nextHistory) ? nextHistory : paymentHistory;
+    paymentHistory = await AppApi.removeHistory("pagamentos", value);
     renderPaymentQuickList();
     updatePaymentHistoryDropdown(activePaymentInput?.value || "");
   } catch {
@@ -1243,13 +1202,7 @@ async function saveGuidanceToHistory(value, sourceInput = null) {
   }
 
   try {
-    const response = await fetch("/api/observacoes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ value: guidance }),
-    });
-
-    guidanceHistory = await response.json();
+    guidanceHistory = await AppApi.addHistory("observacoes", guidance);
     renderGuidanceQuickList();
     if (activeGuidanceInput) {
       updateGuidanceHistoryDropdown(activeGuidanceInput.value);
@@ -1267,18 +1220,7 @@ async function deleteGuidanceFromHistory(value) {
   updateGuidanceHistoryDropdown(activeGuidanceInput?.value || "");
 
   try {
-    const response = await fetch("/api/observacoes", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ value }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Falha ao remover no servidor.");
-    }
-
-    const nextHistory = await response.json();
-    guidanceHistory = Array.isArray(nextHistory) ? nextHistory : guidanceHistory;
+    guidanceHistory = await AppApi.removeHistory("observacoes", value);
     renderGuidanceQuickList();
     updateGuidanceHistoryDropdown(activeGuidanceInput?.value || "");
   } catch {
@@ -1302,13 +1244,7 @@ async function saveExtrasToHistory(value, sourceInput = null) {
   }
 
   try {
-    const response = await fetch("/api/extras", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ value: extra }),
-    });
-
-    extrasHistory = await response.json();
+    extrasHistory = await AppApi.addHistory("extras", extra);
     renderExtrasQuickList();
     if (activeExtrasInput) {
       updateExtrasHistoryDropdown(activeExtrasInput.value);
@@ -1326,18 +1262,7 @@ async function deleteExtrasFromHistory(value) {
   updateExtrasHistoryDropdown(activeExtrasInput?.value || "");
 
   try {
-    const response = await fetch("/api/extras", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ value }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Falha ao remover no servidor.");
-    }
-
-    const nextHistory = await response.json();
-    extrasHistory = Array.isArray(nextHistory) ? nextHistory : extrasHistory;
+    extrasHistory = await AppApi.removeHistory("extras", value);
     renderExtrasQuickList();
     updateExtrasHistoryDropdown(activeExtrasInput?.value || "");
   } catch {
@@ -1361,13 +1286,7 @@ async function saveHospitalToHistory(value, sourceInput = null) {
   }
 
   try {
-    const response = await fetch("/api/hospitais", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ value: hospital }),
-    });
-
-    hospitalHistory = await response.json();
+    hospitalHistory = await AppApi.addHistory("hospitais", hospital);
     updateHospitalHistoryDropdown(activeHospitalInput?.value || "");
   } catch {
     console.warn("Não foi possível salvar o hospital no histórico local.");
@@ -1380,18 +1299,7 @@ async function deleteHospitalFromHistory(value) {
   updateHospitalHistoryDropdown(activeHospitalInput?.value || "");
 
   try {
-    const response = await fetch("/api/hospitais", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ value }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Falha ao remover no servidor.");
-    }
-
-    const nextHistory = await response.json();
-    hospitalHistory = Array.isArray(nextHistory) ? nextHistory : hospitalHistory;
+    hospitalHistory = await AppApi.removeHistory("hospitais", value);
     updateHospitalHistoryDropdown(activeHospitalInput?.value || "");
   } catch {
     console.warn("Não foi possível remover o hospital do histórico local.");
@@ -1414,13 +1322,7 @@ async function savePatientToHistory(value, sourceInput = null) {
   }
 
   try {
-    const response = await fetch("/api/pacientes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ value: patient }),
-    });
-
-    patientHistory = await response.json();
+    patientHistory = await AppApi.addHistory("pacientes", patient);
     updatePatientHistoryDropdown(patientInput.value);
   } catch {
     console.warn("Não foi possível salvar o paciente no histórico local.");
@@ -1433,18 +1335,7 @@ async function deletePatientFromHistory(value) {
   updatePatientHistoryDropdown(patientInput.value);
 
   try {
-    const response = await fetch("/api/pacientes", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ value }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Falha ao remover no servidor.");
-    }
-
-    const nextHistory = await response.json();
-    patientHistory = Array.isArray(nextHistory) ? nextHistory : patientHistory;
+    patientHistory = await AppApi.removeHistory("pacientes", value);
     updatePatientHistoryDropdown(patientInput.value);
   } catch {
     console.warn("Não foi possível remover o paciente do histórico local.");
@@ -1459,16 +1350,10 @@ async function saveTechnologyToHistory() {
   normalizeTechnologyValueField();
 
   try {
-    const response = await fetch("/api/tecnologias", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nome: technology,
-        valor: technologyValueInput.value.trim(),
-      }),
-    });
-
-    technologyHistory = await response.json();
+    technologyHistory = await AppApi.addTechnology(
+      technology,
+      technologyValueInput.value.trim(),
+    );
     if (document.activeElement === technologyInput || technologyHistoryDropdown.contains(document.activeElement)) {
       updateTechnologyHistoryDropdown(technologyInput.value);
     }
@@ -1483,18 +1368,7 @@ async function deleteTechnologyFromHistory(value) {
   updateTechnologyHistoryDropdown(technologyInput.value);
 
   try {
-    const response = await fetch("/api/tecnologias", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ nome: value }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Falha ao remover no servidor.");
-    }
-
-    const nextHistory = await response.json();
-    technologyHistory = Array.isArray(nextHistory) ? nextHistory : technologyHistory;
+    technologyHistory = await AppApi.removeTechnology(value);
     updateTechnologyHistoryDropdown(technologyInput.value);
   } catch {
     console.warn("Não foi possível remover a tecnologia do histórico local.");
@@ -1844,18 +1718,7 @@ function renderExtrasQuickList() {
 
 async function savePaymentOrderToHistory(items) {
   try {
-    const response = await fetch("/api/pagamentos", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Falha ao reordenar no servidor.");
-    }
-
-    const nextHistory = await response.json();
-    paymentHistory = Array.isArray(nextHistory) ? nextHistory : paymentHistory;
+    paymentHistory = await AppApi.replaceHistory("pagamentos", items);
     renderPaymentQuickList();
     updatePaymentHistoryDropdown(activePaymentInput?.value || "");
     updatePreview();
@@ -2026,18 +1889,7 @@ function handleSurgeryFieldPointerCancel() {
 
 async function saveGuidanceOrderToHistory(items) {
   try {
-    const response = await fetch("/api/observacoes", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Falha ao reordenar no servidor.");
-    }
-
-    const nextHistory = await response.json();
-    guidanceHistory = Array.isArray(nextHistory) ? nextHistory : guidanceHistory;
+    guidanceHistory = await AppApi.replaceHistory("observacoes", items);
     renderGuidanceQuickList();
     updateGuidanceHistoryDropdown(activeGuidanceInput?.value || "");
     updatePreview();
@@ -2133,18 +1985,7 @@ function handleGuidanceQuickPointerCancel() {
 
 async function saveExtrasOrderToHistory(items) {
   try {
-    const response = await fetch("/api/extras", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Falha ao reordenar no servidor.");
-    }
-
-    const nextHistory = await response.json();
-    extrasHistory = Array.isArray(nextHistory) ? nextHistory : extrasHistory;
+    extrasHistory = await AppApi.replaceHistory("extras", items);
     renderExtrasQuickList();
     updateExtrasHistoryDropdown(activeExtrasInput?.value || "");
     updatePreview();
@@ -4236,27 +4077,32 @@ shutdownButton.addEventListener("click", async () => {
   shutdownButton.disabled = true;
   shutdownButton.textContent = "Encerrando...";
 
-  try {
-    await fetch("/api/shutdown", { method: "POST" });
-  } catch {
-    // O servidor pode encerrar antes de responder completamente.
-  }
+  await AppApi.shutdownApp();
 
-  window.close();
-  document.body.innerHTML = "<main class=\"shutdown-message\"><h1>Auto Orçamento encerrado</h1><p>Você já pode fechar esta aba.</p></main>";
+  if (!AppApi.isTauri()) {
+    document.body.innerHTML = "<main class=\"shutdown-message\"><h1>Auto Orçamento encerrado</h1><p>Você já pode fechar esta aba.</p></main>";
+  }
 });
 
-Promise.all([
-  loadPatientHistory(),
-  loadSurgeryHistory(),
-  loadPaymentHistory(),
-  loadExtrasHistory(),
-  loadGuidanceHistory(),
-  loadHospitalHistory(),
-  loadTechnologyHistory(),
-  loadHospitalTables(),
-  loadImplantTable(),
-]).then(() => {
+async function initializeApp() {
+  try {
+    await AppApi.waitForBackend();
+  } catch (error) {
+    console.error(error);
+  }
+
+  await Promise.all([
+    loadPatientHistory(),
+    loadSurgeryHistory(),
+    loadPaymentHistory(),
+    loadExtrasHistory(),
+    loadGuidanceHistory(),
+    loadHospitalHistory(),
+    loadTechnologyHistory(),
+    loadHospitalTables(),
+    loadImplantTable(),
+  ]);
+
   updatePatientHistoryDropdown();
   updateSurgeryHistoryDropdown();
   renderPaymentQuickList();
@@ -4278,4 +4124,6 @@ Promise.all([
   updateGuidanceButtons();
   updateHospitalButtons();
   updatePreview();
-});
+}
+
+void initializeApp();

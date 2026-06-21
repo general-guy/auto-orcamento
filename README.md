@@ -57,9 +57,9 @@ git checkout stable/node-web-v0.1.0
 npm install
 ```
 
-## Versão Tauri (em desenvolvimento)
+## Versão Tauri (branch `feature/tauri`)
 
-A migração para Tauri está em andamento no branch `feature/tauri`. Nesta fase, o app abre em uma janela nativa (WebView2) sem precisar do Node em runtime.
+O app também pode rodar como **executável desktop** (WebView2), sem Node em runtime.
 
 Desenvolvimento:
 
@@ -80,7 +80,9 @@ O `.exe` fica em `src-tauri/target/release/auto-orcamento.exe`. Instaladores NSI
 
 **Requisito de build:** Rust (`winget install Rustlang.Rustup`). WebView2 já vem no Windows 10/11.
 
-Nesta fase (Fase 1), o formulário e o preview visual funcionam; históricos e PDF automático ainda dependem das fases seguintes. Detalhes em `docs/MIGRATION-tauri.md`.
+**Persistência (Fase 2):** históricos (pacientes, cirurgias, hospitais, extras, pagamento, observações, tecnologias) são lidos e gravados em `data/` via comandos Rust, acessados pelo frontend por `api.js` (`AppApi`). Em `tauri dev`, a pasta é `data/` na raiz do projeto; no `.exe`, `{pasta-do-exe}/data/`.
+
+**Pendente (Fase 3):** PDF automático em `output/` ao imprimir. Detalhes em `docs/MIGRATION-tauri.md`.
 
 ## Ambiente Recomendado
 

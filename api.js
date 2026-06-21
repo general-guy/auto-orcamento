@@ -1,0 +1,161 @@
+(function () {
+  /** @type {"tauri" | "web" | null} */
+  let backendMode = null;
+
+  function detectTauriInvoke() {
+    return typeof window.__TAURI__?.core?.invoke === "function";
+  }
+
+  function isTauri() {
+    return backendMode === "tauri" || detectTauriInvoke();
+  }
+
+  async function waitForBackend() {
+    if (backendMode) {
+      return backendMode;
+    }
+
+    if (detectTauriInvoke()) {
+      backendMode = "tauri";
+      return backendMode;
+    }
+
+    if (window.location.port === "3000") {
+      backendMode = "web";
+      return backendMode;
+    }
+
+    for (let attempt = 0; attempt < 30; attempt += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      if (detectTauriInvoke()) {
+        backendMode = "tauri";
+        return backendMode;
+      }
+    }
+
+    backendMode = "web";
+    return backendMode;
+  }
+
+  function invoke(command, payload) {
+    if (!detectTauriInvoke()) {
+      throw new Error(`Comando Tauri indisponível: ${command}`);
+    }
+
+    return window.__TAURI__.core.invoke(command, payload);
+  }
+
+  async function fetchJson(url, options = {}) {
+    const response = await fetch(url, options);
+    const data = await response.json();
+
+    if (!response.ok) {
+      const message = data?.error || `Falha na requisição: ${url}`;
+      throw new Error(message);
+    }
+
+    return data;
+  }
+
+  async function getHistory(store) {
+    if (isTauri()) {
+      return invoke("history_list", { store });
+    }
+
+    return fetchJson(`/api/${store}`);
+  }
+
+  async function addHistory(store, value) {
+    if (isTauri()) {
+      return invoke("history_add", { store, value });
+    }
+
+    return fetchJson(`/api/${store}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ value }),
+    });
+  }
+
+  async function removeHistory(store, value) {
+    if (isTauri()) {
+      return invoke("history_remove", { store, value });
+    }
+
+    return fetchJson(`/api/${store}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ value }),
+    });
+  }
+
+  async function replaceHistory(store, items) {
+    if (isTauri()) {
+      return invoke("history_replace", { store, items });
+    }
+
+    return fetchJson(`/api/${store}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items }),
+    });
+  }
+
+  async function getTechnologies() {
+    if (isTauri()) {
+      return invoke("technologies_list");
+    }
+
+    return fetchJson("/api/tecnologias");
+  }
+
+  async function addTechnology(nome, valor) {
+    if (isTauri()) {
+      return invoke("technologies_add", { nome, valor });
+    }
+
+    return fetchJson("/api/tecnologias", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome, valor }),
+    });
+  }
+
+  async function removeTechnology(nome) {
+    if (isTauri()) {
+      return invoke("technologies_remove", { nome });
+    }
+
+    return fetchJson("/api/tecnologias", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome }),
+    });
+  }
+
+  async function shutdownApp() {
+    if (isTauri()) {
+      await window.__TAURI__.window.getCurrentWindow().close();
+      return;
+    }
+
+    try {
+      await fetch("/api/shutdown", { method: "POST" });
+    } catch {
+      // O servidor pode encerrar antes de responder completamente.
+    }
+  }
+
+  window.AppApi = {
+    isTauri,
+    waitForBackend,
+    getHistory,
+    addHistory,
+    removeHistory,
+    replaceHistory,
+    getTechnologies,
+    addTechnology,
+    removeTechnology,
+    shutdownApp,
+  };
+})();

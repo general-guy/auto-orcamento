@@ -23,7 +23,7 @@ function copyDirectory(sourceDir, targetDir) {
 fs.rmSync(distDir, { recursive: true, force: true });
 fs.mkdirSync(distDir, { recursive: true });
 
-for (const fileName of ["index.html", "app.js", "styles.css"]) {
+for (const fileName of ["index.html", "app.js", "api.js", "styles.css"]) {
   fs.copyFileSync(path.join(rootDir, fileName), path.join(distDir, fileName));
 }
 

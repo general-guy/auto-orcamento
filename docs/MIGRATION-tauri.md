@@ -1,6 +1,6 @@
 # Plano de migração para Tauri
 
-> **Status:** Fase 1 concluída — scaffold Tauri 2 com WebView carregando o frontend estático.  
+> **Status:** Fase 2 concluída — históricos JSON via comandos Rust; PDF automático pendente (Fase 3).  
 > **Baseline Node:** `stable/node-web-v0.1.0` / tag `v0.1.0-node-web` / `docs/SNAPSHOT-node-web-v0.1.0.md`
 
 ## Objetivo
@@ -54,8 +54,7 @@ Substituir a stack **Node.js + Chrome/Edge manual** por um **executável desktop
 - [x] WebView carrega o frontend estático (sem Node em runtime)
 - [x] Janela maximizada, ícones gerados a partir do timbrado
 - [x] Build Windows: `.exe`, `.msi` e instalador NSIS
-- [ ] Históricos via `/api/*` ainda não funcionam (esperado — Fase 2)
-- [ ] PDF automático ainda não funciona (esperado — Fase 3)
+- [x] Tabelas estáticas (`data/tabelas-hospitalares.json`, `data/tabela-implantes.json`) servidas via `dist/data/`
 
 Comandos:
 
@@ -76,10 +75,32 @@ src-tauri/target/release/bundle/msi/Auto Orçamento_0.1.0_x64_en-US.msi
 
 Requisitos de build: Node.js, Rust (via `rustup`) e WebView2 (já presente no Windows 10/11).
 
-### Fase 2 — Persistência
-- Implementar leitura/gravação JSON equivalente a `server.js`.
-- Migrar chamadas de histórico em `app.js` para `@tauri-apps/api`.
-- Testar paridade com arquivos em `data/`.
+### Fase 2 — Persistência ✅
+
+- [x] Comandos Rust em `src-tauri/src/storage.rs` e `commands.rs` para ler/gravar `data/*.json`
+- [x] Permissões IPC em `src-tauri/permissions/storage-commands.toml`
+- [x] Camada `api.js` com fallback HTTP para a stack Node (`AppApi`)
+- [x] `app.js` migrado para `AppApi` em todas as rotas `/api/*` de histórico
+- [x] `withGlobalTauri: true` em `tauri.conf.json` e `waitForBackend()` antes da inicialização
+- [ ] PDF automático (`/api/pdf`) — Fase 3
+
+Comandos expostos:
+
+| Comando Tauri | Equivalente Node |
+|---|---|
+| `history_list` | `GET /api/{store}` |
+| `history_add` | `POST /api/{store}` |
+| `history_remove` | `DELETE /api/{store}` |
+| `history_replace` | `PUT /api/{store}` |
+| `technologies_list` | `GET /api/tecnologias` |
+| `technologies_add` | `POST /api/tecnologias` |
+| `technologies_remove` | `DELETE /api/tecnologias` |
+
+Em desenvolvimento (`tauri dev`), os JSON mutáveis ficam em `data/` na raiz do projeto. No `.exe` de release, ficam em `{pasta-do-exe}/data/`.
+
+Tabelas de referência (hospitalares, implantes) continuam sendo carregadas pelo frontend via `fetch("data/...")` a partir de `dist/data/`, copiado por `scripts/copy-frontend.cjs`.
+
+**Nota:** o Tauri 2 exige `app.withGlobalTauri: true` para expor `window.__TAURI__.core.invoke` ao JavaScript vanilla. O `api.js` aguarda essa API antes de carregar históricos, evitando chamadas `fetch("/api/...")` que não existem fora do Node.
 
 ### Fase 3 — PDF
 - Replicar `pdf-export.js`: HTML autocontido + renderização.
@@ -101,8 +122,8 @@ Requisitos de build: Node.js, Rust (via `rustup`) e WebView2 (já presente no Wi
 - [ ] Todas as seções do formulário funcionam igual.
 - [ ] Preview paginado idêntico (timbrado, fontes, rodapé).
 - [ ] Autofill Regina e Sapiranga com mesmos multiplicadores e ordens.
-- [ ] Históricos persistem em `data/*.json` no mesmo formato.
-- [ ] Drag-and-drop de listas rápidas persiste ordem.
+- [x] Históricos persistem em `data/*.json` no mesmo formato.
+- [x] Drag-and-drop de listas rápidas persiste ordem.
 - [ ] PDF automático em `output/` no clique de imprimir.
 - [ ] App abre offline, sem `npm install` no PC de destino.
 
@@ -112,7 +133,8 @@ Requisitos de build: Node.js, Rust (via `rustup`) e WebView2 (já presente no Wi
 |---|---|
 | PDF com layout diferente | Baseline visual do snapshot; comparar PDFs lado a lado |
 | WebView2 ausente em Windows antigo | Instalador WebView2 bootstrapper no setup |
-| `fetch` espalhado em `app.js` | Camada fina `api.js` que abstrai HTTP vs Tauri |
+| `fetch` espalhado em `app.js` | Camada `api.js` (`AppApi`) abstrai HTTP vs Tauri; resolvido na Fase 2 |
+| `window.__TAURI__` indisponível no load | `withGlobalTauri: true` + `AppApi.waitForBackend()` antes do init |
 | Regressão no autofill | Testes manuais com casos Regina/Sapiranga documentados |
 
 ## Branch strategy

@@ -1,0 +1,12 @@
+[[permission]]
+identifier = "allow-storage-commands"
+description = "Enables history and technology JSON persistence commands."
+commands.allow = [
+  "history_list",
+  "history_add",
+  "history_remove",
+  "history_replace",
+  "technologies_list",
+  "technologies_add",
+  "technologies_remove",
+]
