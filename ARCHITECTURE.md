@@ -338,4 +338,5 @@ abrir-auto-orcamento-tauri.bat
 - **`zoom.js`:** atalhos `Ctrl` + roda / `Ctrl` + `+`/`-`/`0`; indicador flutuante `#zoomFlag` (%, `−`/`+`, Redefinir); persiste zoom em `data/settings.json` via `zoom_*`.
 - **`src-tauri/src/pdf.rs`:** grava PDF em `output/` via Chrome/Edge headless; comando `export_pdf`.
 - **`src-tauri/src/storage.rs`:** grava JSON mutável; em debug usa `{projeto}/data/`, em release `{exe}/data/`.
+- **Ícone do app:** `assets/app-icon-g.png` → `scripts/build-app-icon-square.ps1` (círculo preto inscrito + G recortado) → `npm run icon:generate` → `src-tauri/icons/`; `lib.rs` aplica `icons/32x32.png` na janela via `set_icon`.
 - **PDF automático:** Tauri usa `export_pdf`; stack Node ainda usa `/api/pdf` + Puppeteer.
