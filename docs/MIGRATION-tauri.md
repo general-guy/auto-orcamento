@@ -1,6 +1,8 @@
 # Plano de migração para Tauri
 
-> **Status:** Fase 3 concluída; Fase 4 em andamento (build, `.exe` na raiz, `data/` unificado). Fase 5 (paridade) pendente.  
+> **Status:** **ESTAGNADO** (2026-06-18) — Fases 1–3 concluídas; Fases 4–5 pendentes.  
+> **Snapshot congelado:** `stable/tauri-v0.2.0-paused` / tag `v0.2.0-tauri-paused` / `docs/SNAPSHOT-tauri-v0.2.0-paused.md`  
+> **Desenvolvimento ativo:** `abrir-auto-orcamento.bat` (Node). Alterações no web app partilhado (`app.js`, `api.js`, …) servem ambos os deploys no futuro.  
 > **Baseline Node:** `stable/node-web-v0.1.0` / tag `v0.1.0-node-web` / `docs/SNAPSHOT-node-web-v0.1.0.md`
 
 ## Objetivo
@@ -184,15 +186,25 @@ PDFs ficam em `output/` na raiz do repo (mesma regra de caminho que `data/`). Re
 ## Branch strategy
 
 ```text
-main                  -> desenvolvimento (incluirá Tauri)
-stable/node-web-v0.1.0 -> versão Node congelada (não receber Tauri)
-feature/tauri         -> opcional: trabalho isolado antes de merge em main
+main                         -> histórico; ainda sem merge completo do Tauri
+stable/node-web-v0.1.0       -> versão Node congelada (pré-migração Tauri)
+stable/tauri-v0.2.0-paused   -> migração Tauri congelada (Fases 1–3; tag v0.2.0-tauri-paused)
+feature/tauri                -> branch de trabalho: web app partilhado + código Tauri no repo
 ```
 
-Para iniciar a migração:
+**Estagnação (2026-06-18):** a migração **não** foi abandonada — foi **congelada** num snapshot. O uso diário volta ao **`abrir-auto-orcamento.bat`**. Ao retomar o Tauri, parta de `stable/tauri-v0.2.0-paused` ou continue em `feature/tauri` e rode `build-auto-orcamento-tauri.bat` / `tauri:dev`.
+
+Para restaurar só o Node pré-Tauri:
 
 ```bash
-git checkout main
-git checkout -b feature/tauri
-# seguir Fase 1
+git checkout stable/node-web-v0.1.0
+npm install
+```
+
+Para restaurar o estado Tauri congelado:
+
+```bash
+git checkout stable/tauri-v0.2.0-paused
+npm install
+npm run tauri:build   # ou build-auto-orcamento-tauri.bat
 ```

@@ -2,6 +2,18 @@
 
 Aplicativo local para gerar orçamentos cirúrgicos em papel timbrado, com preenchimento rápido, histórico de campos e pré-visualização pronta para impressão.
 
+## Fluxo ativo (desenvolvimento diário)
+
+Use **`abrir-auto-orcamento.bat`** (Node.js + browser). É o modo recomendado enquanto a migração Tauri está **estagnada**.
+
+Alterações em `index.html`, `app.js`, `api.js`, `styles.css`, `assets/` e `data/` valem para **ambos** os deploys (Node e Tauri) quando a migração for retomada — a camada `api.js` já abstrai HTTP e comandos Rust.
+
+| Referência | Branch / tag | Documento |
+|---|---|---|
+| Node pré-Tauri | `stable/node-web-v0.1.0` / `v0.1.0-node-web` | `docs/SNAPSHOT-node-web-v0.1.0.md` |
+| Tauri congelado (Fases 1–3) | `stable/tauri-v0.2.0-paused` / `v0.2.0-tauri-paused` | `docs/SNAPSHOT-tauri-v0.2.0-paused.md` |
+| Trabalho atual | `feature/tauri` | `docs/MIGRATION-tauri.md` (status **estagnado**) |
+
 ## Como Usar
 
 O **mesmo web app** (`index.html`, `app.js`, `api.js`, `styles.css`, `assets/`) alimenta **dois fluxos de deploy equivalentes**. Alterações nesses arquivos valem para **ambos** — a camada `api.js` escolhe HTTP (Node) ou comandos Tauri conforme o ambiente.
@@ -76,11 +88,15 @@ Não são necessários Python, PowerShell nem Git para uso normal.
 
 A stack Node.js + browser de referência está documentada em `docs/SNAPSHOT-node-web-v0.1.0.md` (branch **`stable/node-web-v0.1.0`**, tag **`v0.1.0-node-web`**).
 
-Na branch **`feature/tauri`**, o **Tauri** acrescenta o `.exe` sem Node em runtime; o fluxo **`abrir-auto-orcamento.bat`** continua **válido e equivalente** para abrir o mesmo web app. Plano em `docs/MIGRATION-tauri.md`.
+Na branch **`feature/tauri`**, o **Tauri** acrescenta o `.exe` sem Node em runtime; o fluxo **`abrir-auto-orcamento.bat`** continua **válido e equivalente** para abrir o mesmo web app.
+
+**Migração Tauri estagnada (2026-06-18):** Fases 1–3 concluídas; estado preservado em `stable/tauri-v0.2.0-paused`. Fases 4–5 (PC limpo, paridade final) ficam para retomada futura. Plano e snapshot em `docs/MIGRATION-tauri.md` e `docs/SNAPSHOT-tauri-v0.2.0-paused.md`.
 
 Para a baseline Node congelada: `git checkout stable/node-web-v0.1.0` e `npm install`.
 
-## Versão Tauri (branch `feature/tauri`)
+## Versão Tauri (branch `feature/tauri`) — **estagnada**
+
+> Migração **congelada** em `stable/tauri-v0.2.0-paused`. Retome com `build-auto-orcamento-tauri.bat` ou `npm run tauri:dev` quando quiser continuar. Até lá, use **`abrir-auto-orcamento.bat`**.
 
 Executável desktop (WebView2) **em paralelo** ao fluxo Node — **não** o substitui. O frontend é o **mesmo**; `api.js` (`AppApi`) abstrai `fetch("/api/...")` no Node e `invoke(...)` no Tauri.
 
@@ -199,7 +215,7 @@ O Rust resolve o caminho via `std::env::current_exe()` (não usa `%AppData%`). A
 
 Históricos e tabelas são acessados via `AppApi` (`api.js`); tabelas usam `AppApi.loadTable("hospitalares" | "implantes")`. Fora do `localhost:3000`, o `api.js` **não** cai no modo Node — só invoca comandos Tauri após `waitForBackend()`.
 
-**Pendente (Fases 4–5):** validação em PC limpo e paridade final com o snapshot Node. Detalhes em `docs/MIGRATION-tauri.md`.
+**Pendente (Fases 4–5, migração estagnada):** validação em PC limpo e paridade final com o snapshot Node. Detalhes em `docs/MIGRATION-tauri.md` e `docs/SNAPSHOT-tauri-v0.2.0-paused.md`.
 
 **Ícone do app (Tauri):** **G** dourado inscrito num **círculo preto** do tamanho do slot do ícone. Configuração: `$logoFillRatio = 0.70` em `scripts/build-app-icon-square.ps1`. Pipeline: `npm run icon:generate`. Após trocar ícones, rode `build-auto-orcamento-tauri.bat` (ou `npm run tauri:build`) para regenerar o `.exe` da raiz.
 
@@ -377,5 +393,6 @@ docs/tabelas-hospitalares.md
 docs/tabela-implantes.md
 docs/tabela-tecnologias.md
 docs/SNAPSHOT-node-web-v0.1.0.md
+docs/SNAPSHOT-tauri-v0.2.0-paused.md
 docs/MIGRATION-tauri.md
 ```

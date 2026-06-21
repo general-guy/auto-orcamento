@@ -329,7 +329,9 @@ A ordem final é: pacotes de cirurgia plástica, taxas adicionais e, ao fim, ent
 
 ## Evolução planejada
 
-A baseline **v0.1.0-node-web** está no branch `stable/node-web-v0.1.0`. Na **`feature/tauri`**, o Tauri acrescenta deploy via `.exe` **em paralelo** ao fluxo `abrir-auto-orcamento.bat` — mesmo web app, mesma pasta `data/`. Detalhes em `docs/MIGRATION-tauri.md`.
+A baseline **v0.1.0-node-web** está no branch `stable/node-web-v0.1.0`. Na **`feature/tauri`**, o Tauri acrescenta deploy via `.exe` **em paralelo** ao fluxo `abrir-auto-orcamento.bat` — mesmo web app, mesma pasta `data/`.
+
+**Migração Tauri estagnada (2026-06-18):** snapshot `stable/tauri-v0.2.0-paused` / `v0.2.0-tauri-paused` (Fases 1–3). Desenvolvimento diário via Node; código partilhado do web app preparado para retomada. Ver `docs/SNAPSHOT-tauri-v0.2.0-paused.md` e `docs/MIGRATION-tauri.md`.
 
 ### Stack Tauri (branch `feature/tauri`) — deploy alternativo, frontend idêntico
 

@@ -169,4 +169,4 @@ git checkout v0.1.0-node-web
 - `docs/tabelas-hospitalares.md` — Regina e Sapiranga
 - `docs/tabela-implantes.md` — implantes
 - `docs/tabela-tecnologias.md` — tecnologias
-- `docs/MIGRATION-tauri.md` — plano da próxima fase
+- `docs/MIGRATION-tauri.md` — plano da migração Tauri (estagnada; ver `docs/SNAPSHOT-tauri-v0.2.0-paused.md`)
