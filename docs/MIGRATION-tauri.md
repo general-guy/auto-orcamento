@@ -121,7 +121,7 @@ Comandos expostos:
 | `technologies_add` | `POST /api/tecnologias` |
 | `technologies_remove` | `DELETE /api/tecnologias` |
 | `technologies_replace` | `PUT /api/tecnologias` |
-| `zoom_get` / `zoom_set` / `zoom_adjust` | — (apenas Tauri; salvo em `data/settings.json`) |
+| `zoom_get` / `zoom_set` / `zoom_adjust` | `GET/PUT /api/settings` (`data/settings.json`) |
 | `table_load` | `GET data/tabelas-hospitalares.json` / `tabela-implantes.json` |
 | `export_pdf` | `POST /api/pdf` |
 
@@ -134,7 +134,7 @@ Não há fallback para `%AppData%`. O startup registra `Diretório de dados: ...
 
 Preferências de zoom (`settings.json`) seguem o mesmo diretório `data/`.
 
-**Zoom nativo:** `zoom.js` escuta `Ctrl` + roda e `Ctrl` + `+`/`-`/`0`; o Rust aplica `WebviewWindow::set_zoom` e persiste o fator entre sessões. O indicador `#zoomFlag` (canto inferior direito) espelha o popup do Chrome: porcentagem, `−`/`+` e **Redefinir**.
+**Zoom:** `zoom.js` escuta `Ctrl` + roda e `Ctrl` + `+`/`-`/`0`. No **Tauri**, o Rust aplica `WebviewWindow::set_zoom` e persiste em `data/settings.json`. No **Node (WebView2)**, `api.js` persiste via `/api/settings` e aplica `transform: scale()` no `body` para a interface preencher a janela em qualquer escala. O indicador `#zoomFlag` (canto inferior direito) mostra porcentagem, `−`/`+` e **Redefinir**.
 
 Tabelas de referência (hospitalares, implantes) são lidas de `data/` via `table_load` — na raiz do repo quando o `.exe` está dentro do projeto, ou ao lado do `.exe` em layout portátil mínimo. Se o arquivo ainda não existir no primeiro run, o app copia a versão embutida no build (seed único); depois disso, edições manuais no JSON valem sem rebuild.
 

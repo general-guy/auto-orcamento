@@ -4847,7 +4847,8 @@ panelResizeHandle?.addEventListener("pointerdown", (event) => {
   const startWidth = getCurrentFormPanelWidth();
 
   function handlePointerMove(moveEvent) {
-    setFormPanelWidth(startWidth + moveEvent.clientX - startX);
+    const zoom = AppApi.getWebZoomFactor();
+    setFormPanelWidth(startWidth + (moveEvent.clientX - startX) / zoom);
   }
 
   function handlePointerUp() {

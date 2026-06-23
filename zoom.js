@@ -88,10 +88,6 @@
   async function initZoomControls() {
     await AppApi.waitForBackend();
 
-    if (!AppApi.isTauri()) {
-      return;
-    }
-
     const initialZoom = await AppApi.getZoom();
     currentZoom = initialZoom;
 

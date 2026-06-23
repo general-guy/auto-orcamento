@@ -18,6 +18,11 @@ const technologiesFile = path.join(dataDir, "tecnologias.json");
 const paymentsFile = path.join(dataDir, "pagamentos.json");
 const guidanceFile = path.join(dataDir, "observacoes.json");
 const extrasFile = path.join(dataDir, "extras.json");
+const settingsFile = path.join(dataDir, "settings.json");
+
+const ZOOM_MIN = 0.5;
+const ZOOM_MAX = 2;
+const ZOOM_DEFAULT = 1;
 
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
@@ -69,6 +74,41 @@ function ensureDataFile() {
   }
 }
 
+function clampZoom(zoom) {
+  const value = Number(zoom);
+  if (!Number.isFinite(value)) {
+    return ZOOM_DEFAULT;
+  }
+
+  const rounded = Math.round(value * 10) / 10;
+  return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, rounded));
+}
+
+function readSettings() {
+  ensureDataFile();
+
+  if (!fs.existsSync(settingsFile)) {
+    return { zoom: ZOOM_DEFAULT };
+  }
+
+  try {
+    const content = fs.readFileSync(settingsFile, "utf8");
+    const settings = JSON.parse(content);
+    return {
+      zoom: clampZoom(settings?.zoom ?? ZOOM_DEFAULT),
+    };
+  } catch {
+    return { zoom: ZOOM_DEFAULT };
+  }
+}
+
+function writeSettings(settings) {
+  ensureDataFile();
+  const zoom = clampZoom(settings?.zoom ?? ZOOM_DEFAULT);
+  fs.writeFileSync(settingsFile, `${JSON.stringify({ zoom }, null, 2)}\n`, "utf8");
+  return { zoom };
+}
+
 function readJsonList(filePath) {
   ensureDataFile();
 
@@ -111,6 +151,23 @@ function collectRequestBody(request, maxBytes = 1024 * 32) {
 
 function ensureOutputDir() {
   fs.mkdirSync(outputDir, { recursive: true });
+}
+
+async function handleSettingsApi(request, response) {
+  if (request.method === "GET") {
+    sendJson(response, 200, readSettings());
+    return;
+  }
+
+  if (request.method === "PUT" || request.method === "POST") {
+    const body = await collectRequestBody(request, 4096);
+    const payload = JSON.parse(body || "{}");
+    const settings = writeSettings(payload);
+    sendJson(response, 200, settings);
+    return;
+  }
+
+  sendJson(response, 405, { error: "Método não permitido." });
 }
 
 async function handlePdfExport(request, response) {
@@ -566,6 +623,11 @@ const server = http.createServer(async (request, response) => {
 
     if (request.url.startsWith("/api/extras")) {
       await handleExtrasApi(request, response);
+      return;
+    }
+
+    if (request.url.startsWith("/api/settings")) {
+      await handleSettingsApi(request, response);
       return;
     }
 

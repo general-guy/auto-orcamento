@@ -233,7 +233,7 @@ Históricos e tabelas são acessados via `AppApi` (`api.js`); tabelas usam `AppA
 
 **PDF automático (Tauri):** ao clicar em **Imprimir orçamento**, o app grava um PDF em `output/` (mesmo fluxo da stack Node). O HTML é montado em `pdf-build.js`; o Rust invoca Chrome/Edge headless (`--print-to-pdf`). Requer Chrome ou Edge instalado.
 
-**Zoom da interface (Tauri):** `Ctrl` + roda do mouse, `Ctrl` + `+` / `Ctrl` + `-` (passos de 10%, entre 50% e 200%) e `Ctrl` + `0` para voltar a 100%. O nível fica salvo em `data/settings.json` e é reaplicado ao abrir o app. Um indicador flutuante (estilo Chrome) mostra a porcentagem atual, botões `−`/`+` e **Redefinir** quando o zoom difere de 100%. Na versão Node no browser (`npm start`), o zoom nativo do Chrome/Edge continua valendo.
+**Zoom da interface (Node WebView2 e Tauri):** `Ctrl` + roda do mouse, `Ctrl` + `+` / `Ctrl` + `-` (passos de 10%, entre 50% e 200%) e `Ctrl` + `0` para voltar a 100%. O nível fica salvo em `data/settings.json` e é reaplicado ao abrir o app. Um indicador flutuante (estilo Chrome) mostra a porcentagem atual, botões `−`/`+` e **Redefinir** quando o zoom difere de 100%. No modo Node, `api.js` aplica escala via `transform` (preenche a janela sem faixas vazias) e persiste via `GET/PUT /api/settings`; no Tauri, o Rust usa `WebviewWindow::set_zoom`. O arraste da divisória entre formulário e pré-visualização compensa o fator de zoom. No fallback `launch-app.js` (Chrome/Edge), o zoom nativo do navegador continua valendo.
 
 ## Ambiente Recomendado
 

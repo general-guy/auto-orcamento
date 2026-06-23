@@ -55,11 +55,17 @@
   box-sizing: border-box;
 }
 
+html {
+  height: 100%;
+}
+
 body {
   margin: 0;
+  min-height: 100%;
   background: var(--background);
   color: var(--text);
   font-family: Arial, Helvetica, sans-serif;
+  transform-origin: top left;
 }
 
 button,
@@ -73,7 +79,8 @@ textarea {
   display: grid;
   grid-template-columns: minmax(320px, var(--form-panel-width)) 10px minmax(640px, 1fr);
   gap: 12px;
-  height: 100vh;
+  height: 100%;
+  min-height: 100vh;
   padding: 20px;
 }
 
@@ -85,7 +92,8 @@ textarea {
 }
 
 .form-panel {
-  height: calc(100vh - 40px);
+  align-self: stretch;
+  min-height: 0;
   overflow: auto;
   padding: 24px 22px;
 }
@@ -770,6 +778,7 @@ textarea:focus {
   display: grid;
   grid-template-rows: auto 1fr;
   gap: 18px;
+  min-height: 0;
   overflow: auto;
   padding: 22px;
 }

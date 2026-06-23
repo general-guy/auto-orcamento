@@ -148,12 +148,58 @@
     });
   }
 
+  const ZOOM_MIN = 0.5;
+  const ZOOM_MAX = 2;
+  const ZOOM_DEFAULT = 1;
+
+  let webZoomFactor = 1;
+
+  function clampZoom(scale) {
+    const value = Number(scale);
+    if (!Number.isFinite(value)) {
+      return ZOOM_DEFAULT;
+    }
+
+    const rounded = Math.round(value * 10) / 10;
+    return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, rounded));
+  }
+
+  function applyWebZoom(scale) {
+    const zoom = clampZoom(scale);
+    webZoomFactor = zoom;
+    document.documentElement.style.setProperty("--ui-zoom", String(zoom));
+    document.documentElement.style.zoom = "";
+
+    if (zoom === 1) {
+      document.body.style.removeProperty("transform");
+      document.body.style.removeProperty("width");
+      document.body.style.removeProperty("height");
+    } else {
+      document.body.style.transformOrigin = "top left";
+      document.body.style.transform = `scale(${zoom})`;
+      document.body.style.width = `${100 / zoom}%`;
+      document.body.style.height = `${100 / zoom}%`;
+    }
+
+    window.dispatchEvent(new Event("resize"));
+    return zoom;
+  }
+
+  function getWebZoomFactor() {
+    if (isTauri()) {
+      return 1;
+    }
+
+    return webZoomFactor;
+  }
+
   async function getZoom() {
     if (isTauri()) {
       return invoke("zoom_get");
     }
 
-    return 1;
+    const data = await fetchJson("/api/settings");
+    return applyWebZoom(data.zoom ?? ZOOM_DEFAULT);
   }
 
   async function setZoom(scale) {
@@ -161,7 +207,13 @@
       return invoke("zoom_set", { scale });
     }
 
-    return scale;
+    const data = await fetchJson("/api/settings", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ zoom: scale }),
+    });
+
+    return applyWebZoom(data.zoom);
   }
 
   async function adjustZoom(delta) {
@@ -169,7 +221,8 @@
       return invoke("zoom_adjust", { delta });
     }
 
-    return 1;
+    const current = await getZoom();
+    return setZoom(current + Number(delta || 0));
   }
 
   async function loadTable(table) {
@@ -246,6 +299,7 @@
     getZoom,
     setZoom,
     adjustZoom,
+    getWebZoomFactor,
     exportPdf,
     shutdownApp,
   };

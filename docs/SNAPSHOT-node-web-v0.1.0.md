@@ -179,6 +179,8 @@ Na branch de trabalho atual, o fluxo Node deixou de depender do Chrome em modo `
 - `abrir-auto-orcamento.bat` → `pythonw native_launcher.py` (WebView2 via `pywebview`);
 - ícone na barra de tarefas via `assets/app-icon.ico` na janela nativa;
 - `launch-app.js` permanece como fallback (Chrome/Edge);
-- pipeline de ícones: `npm run icon:web` sincroniza assets web a partir de `src-tauri/icons/`.
+- pipeline de ícones: `npm run icon:web` sincroniza assets web a partir de `src-tauri/icons/`;
+- zoom da interface no Node: `GET/PUT /api/settings` + escala CSS (`transform`) em `api.js`/`zoom.js`, mesmo arquivo `data/settings.json` do Tauri;
+- layout dos painéis usa `height: 100%` (sem `100vh` fixo) para acompanhar redimensionamento e zoom.
 
 Este snapshot **v0.1.0** descreve o estado congelado em `stable/node-web-v0.1.0`; a tabela acima resume apenas o que mudou depois na `feature/tauri`.
