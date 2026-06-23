@@ -1,6 +1,7 @@
 output/
 node_modules/
 dist/
+__pycache__/
 auto-orcamento.exe
 data/settings.json
 src-tauri/target/

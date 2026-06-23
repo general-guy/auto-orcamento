@@ -33,10 +33,10 @@ Acrescentar um **executável desktop** (Tauri) **em paralelo** à stack Node —
 |---|---|---|
 | `server.js` | API REST no Node | Comandos Rust + `api.js` |
 | `pdf-export.js` + `puppeteer-core` | PDF no Node | `pdf-build.js` + `export_pdf` (Rust) |
-| `launch-app.js` | Abre browser + servidor | Janela Tauri nativa |
+| `launch-app.js` | Abre browser + servidor (fallback Node) | Janela Tauri nativa |
 | `POST /api/shutdown` | Encerra Node | Fechar janela |
 
-**Mantidos em ambos os deploys:** `abrir-auto-orcamento.bat`, `launch-app.js`, `server.js` (fluxo Node); `index.html`, `app.js`, `api.js`, `styles.css`, `assets/`, `data/`.
+**Mantidos em ambos os deploys:** `abrir-auto-orcamento.bat`, `native_launcher.py`, `launch-app.js`, `server.js` (fluxo Node); `index.html`, `app.js`, `api.js`, `styles.css`, `assets/`, `data/`.
 
 ## Mapa API → comandos Tauri (rascunho)
 
@@ -76,7 +76,7 @@ Atalho Windows:
 
 | Arquivo | Função |
 |---|---|
-| `abrir-auto-orcamento.bat` | Web app via Node + browser (válido em `feature/tauri`) |
+| `abrir-auto-orcamento.bat` | Web app via Node + WebView2 (`native_launcher.py`; fallback Chrome) |
 | `build-auto-orcamento-tauri.bat` | Build release, copia `auto-orcamento.exe` para a raiz |
 
 ### Fluxo de distribuição (repo completo)

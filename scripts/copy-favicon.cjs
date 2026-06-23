@@ -1,9 +1,15 @@
-const fs = require("node:fs");
+const { spawnSync } = require("node:child_process");
 const path = require("node:path");
 
 const rootDir = path.join(__dirname, "..");
-const source = path.join(rootDir, "src-tauri", "icons", "32x32.png");
-const target = path.join(rootDir, "assets", "favicon.png");
+const scriptPath = path.join(__dirname, "build-web-icons.ps1");
 
-fs.copyFileSync(source, target);
-console.log("Favicon copied to assets/favicon.png");
+const result = spawnSync(
+  "powershell",
+  ["-ExecutionPolicy", "Bypass", "-File", scriptPath],
+  { cwd: rootDir, stdio: "inherit", windowsHide: true },
+);
+
+if (result.status !== 0) {
+  process.exit(result.status ?? 1);
+}

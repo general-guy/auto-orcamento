@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node server.js",
     "copy:frontend": "node scripts/copy-frontend.cjs",
-    "icon:generate": "powershell -ExecutionPolicy Bypass -File scripts/build-app-icon-square.ps1 && tauri icon assets/app-icon-square.png -o src-tauri/icons && node scripts/copy-favicon.cjs",
+    "icon:web": "powershell -ExecutionPolicy Bypass -File scripts/sync-web-icons-from-tauri.ps1",
+    "icon:generate": "powershell -ExecutionPolicy Bypass -File scripts/extract-app-icon-g.ps1 && powershell -ExecutionPolicy Bypass -File scripts/build-app-icon-square.ps1 && powershell -ExecutionPolicy Bypass -File scripts/build-web-icons.ps1 && tauri icon assets/app-icon-square.png -o src-tauri/icons && npm run icon:web",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build && node scripts/copy-release-exe.cjs"

@@ -1,10 +1,10 @@
 # Arquitetura
 
-O Auto Orçamento é um app local para orçamentos cirúrgicos. **Dois deploys equivalentes** partilham o **mesmo web app**; só muda o runtime (Node + browser vs Tauri + WebView2):
+O Auto Orçamento é um app local para orçamentos cirúrgicos. **Dois deploys equivalentes** partilham o **mesmo web app**; só muda o runtime (Node + WebView2 vs Tauri + WebView2):
 
-| Deploy | Entrada | Backend |
-|--------|---------|---------|
-| **Node** | `abrir-auto-orcamento.bat` | `server.js` (HTTP `/api/*`) |
+| Deploy | Entrada | Shell / backend |
+|--------|---------|-----------------|
+| **Node** | `abrir-auto-orcamento.bat` | `native_launcher.py` (WebView2) + `server.js` (HTTP `/api/*`) |
 | **Tauri** | `auto-orcamento.exe` | Rust (`invoke` via `api.js`) |
 
 Históricos e tabelas ficam em **`data/`** na raiz do repo em ambos — sem banco de dados nem servidor externo.
@@ -15,34 +15,55 @@ Históricos e tabelas ficam em **`data/`** na raiz do repo em ambos — sem banc
 
 ```text
 abrir-auto-orcamento.bat
-  -> launch-app.js
-      -> server.js
-      -> Chrome em modo app
+  -> native_launcher.py (pythonw)
+      -> node server.js
+      -> janela WebView2 (pywebview) em http://localhost:3000
           -> index.html
           -> styles.css
           -> app.js
           -> data/*.json
 ```
 
-## Launcher
-
-`abrir-auto-orcamento.bat` apenas entra na pasta do projeto e executa:
+Fallback (sem `pythonw` ou se `pywebview` falhar):
 
 ```text
-node launch-app.js
+abrir-auto-orcamento.bat
+  -> launch-app.js
+      -> server.js
+      -> Chrome ou Edge em modo app
 ```
 
-`launch-app.js`:
+## Launcher
+
+`abrir-auto-orcamento.bat` instala `node_modules` se necessário e, por padrão, executa:
+
+```text
+pythonw native_launcher.py
+```
+
+`native_launcher.py`:
+
+- define `AppUserModelID` no Windows (`auto-orcamento.app`) para identidade própria na barra de tarefas;
+- inicia `server.js` com Node em subprocesso;
+- aguarda `http://localhost:3000` responder;
+- abre janela **WebView2** via `pywebview` com ícone `assets/app-icon.ico` (`webview.start(icon=...)`);
+- maximiza a janela ao carregar;
+- encerra o servidor Node ao fechar a janela.
+
+Requer `python -m pip install -r requirements.txt` (`pywebview`). O ícone na barra de tarefas vem do `.ico` nativo da janela — não do favicon do Chrome (mesmo padrão do repositório `dados-clinica`).
+
+`launch-app.js` (fallback):
 
 - inicia `server.js` com Node;
 - aguarda o servidor anunciar `http://localhost:3000`;
-- abre o navegador em modo app com `--app=http://localhost:3000`;
+- abre Chrome ou Edge em modo app com `--app=http://localhost:3000`;
 - prioriza Google Chrome e usa Microsoft Edge apenas como fallback;
 - abre a janela maximizada com `--start-maximized`;
-- usa um perfil temporário em `auto-orcamento-browser-profile`;
-- encerra o servidor quando a janela do navegador é fechada.
+- perfil em `%LOCALAPPDATA%\Auto Orcamento\browser-profile`;
+- encerra o servidor quando a janela do navegador é fechada;
+- **aviso:** ícone na barra de tarefas pode ficar borrado (limitação do modo `--app`).
 
-Para forçar um navegador específico, defina a variável de ambiente `AUTO_ORCAMENTO_BROWSER` com o caminho do executável antes de iniciar o launcher.
+Para forçar um navegador específico no fallback, defina `AUTO_ORCAMENTO_BROWSER` com o caminho do executável.
 
 ## Ambiente de Desenvolvimento
 
@@ -56,9 +77,10 @@ O Windows PowerShell 5.1 também funciona para comandos básicos, mas alguns exe
 |---|---|
 | Node.js | Servidor HTTP, APIs, PDF |
 | npm | Instala `puppeteer-core` |
-| Chrome ou Edge | Modo app (`launch-app.js`) e renderização PDF (`pdf-export.js`) |
+| Python 3 + pywebview | Janela WebView2 nativa (`native_launcher.py`) |
+| Chrome ou Edge | Fallback (`launch-app.js`) e renderização PDF (`pdf-export.js`) |
 
-Sem Node instalado, o app não inicia. Sem Chrome/Edge, o `.bat` falha ao abrir a janela e a exportação automática de PDF não funciona.
+Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `launch-app.js`. Sem Chrome/Edge, a exportação automática de PDF não funciona (e o fallback do launcher também falha).
 
 ## Arquivos principais
 
@@ -69,7 +91,9 @@ Sem Node instalado, o app não inicia. Sem Chrome/Edge, o `.bat` falha ao abrir 
 | `app.js` | Lógica de UI, preview, históricos, autofill |
 | `server.js` | Servidor na porta 3000, APIs REST |
 | `pdf-export.js` | PDF via Puppeteer + Chrome/Edge |
-| `launch-app.js` | Launcher Windows (servidor + janela app) |
+| `native_launcher.py` | Launcher Windows (servidor + janela WebView2 + ícone `.ico`) |
+| `launch-app.js` | Fallback: servidor + Chrome/Edge em modo app |
+| `requirements.txt` | `pywebview` para o launcher nativo |
 | `abrir-auto-orcamento.bat` | Atalho de entrada |
 | `package.json` | Metadados; única dependência: `puppeteer-core` |
 
@@ -371,5 +395,5 @@ O fluxo **`abrir-auto-orcamento.bat`** permanece válido na mesma branch para te
 - **`src-tauri/src/pdf.rs`:** grava PDF em `output/` via Chrome/Edge headless; comando `export_pdf`.
 - **`scripts/copy-release-exe.cjs`:** após o build, copia `src-tauri/target/release/auto-orcamento.exe` para `auto-orcamento.exe` na raiz.
 - **`src-tauri/target/`:** cache de compilação Rust (pode ocupar vários GB). Não versionada; pode ser removida com `cargo clean` dentro de `src-tauri/` quando quiser recuperar espaço em disco — o próximo build será mais lento.
-- **Ícone do app:** `assets/app-icon-g.png` → `scripts/build-app-icon-square.ps1` (círculo preto inscrito, G recortado, `logoFillRatio` = `0.70`) → `npm run icon:generate` → `src-tauri/icons/` + `assets/favicon.png`; `lib.rs` aplica `icons/32x32.png` na janela via `set_icon` (`image-png`).
+- **Ícone do app:** `assets/app-icon-g.png` → `scripts/build-app-icon-square.ps1` → `npm run icon:web` sincroniza `assets/app-icon.ico` e `favicon-*.png` a partir de `src-tauri/icons/` (mesmo ícone do `.exe`); `npm run icon:generate` regenera tudo a partir do timbrado/print.
 - **PDF automático:** Tauri usa `export_pdf`; stack Node ainda usa `/api/pdf` + Puppeteer.

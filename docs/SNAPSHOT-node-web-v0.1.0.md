@@ -87,7 +87,8 @@ npm install && npm start
 | `assets/papel-timbrado.png` | Fundo do documento na tela e no PDF |
 | `assets/app-icon-g.png` | **G** ornamental (fonte do ícone; recorte do timbrado) |
 | `assets/app-icon-square.png` | Arte 1024×1024 gerada (círculo preto + G; entrada do `tauri icon`) |
-| `assets/favicon.png` | Favicon 32×32 (cópia de `src-tauri/icons/32x32.png`) |
+| `assets/favicon.png` | Favicon principal 256×256 (web app / browser) |
+| `assets/favicon-32.png` … `favicon-512.png` | Ícones do browser em vários tamanhos (`npm run icon:web`) |
 | `assets/papel-timbrado.pdf` | Referência do timbrado original |
 | `assets/fonts/gotham/*.otf` | Fonte principal do documento |
 | `assets/fonts/cinzel/*.ttf` | Fonte de títulos |
@@ -170,3 +171,14 @@ git checkout v0.1.0-node-web
 - `docs/tabela-implantes.md` — implantes
 - `docs/tabela-tecnologias.md` — tecnologias
 - `docs/MIGRATION-tauri.md` — plano da migração Tauri (estagnada; ver `docs/SNAPSHOT-tauri-v0.2.0-paused.md`)
+
+## Evolução posterior (`feature/tauri`, após este snapshot)
+
+Na branch de trabalho atual, o fluxo Node deixou de depender do Chrome em modo `--app` como entrada principal:
+
+- `abrir-auto-orcamento.bat` → `pythonw native_launcher.py` (WebView2 via `pywebview`);
+- ícone na barra de tarefas via `assets/app-icon.ico` na janela nativa;
+- `launch-app.js` permanece como fallback (Chrome/Edge);
+- pipeline de ícones: `npm run icon:web` sincroniza assets web a partir de `src-tauri/icons/`.
+
+Este snapshot **v0.1.0** descreve o estado congelado em `stable/node-web-v0.1.0`; a tabela acima resume apenas o que mudou depois na `feature/tauri`.

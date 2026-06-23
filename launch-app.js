@@ -1,11 +1,9 @@
 const { spawn } = require("node:child_process");
 const fs = require("node:fs");
-const os = require("node:os");
 const path = require("node:path");
 
 const appUrl = "http://localhost:3000";
 const rootDir = __dirname;
-const browserProfileDir = path.join(os.tmpdir(), "auto-orcamento-browser-profile");
 
 const browserCandidates = [
   process.env.AUTO_ORCAMENTO_BROWSER,
@@ -16,6 +14,12 @@ const browserCandidates = [
   path.join(process.env.ProgramFiles || "", "Microsoft", "Edge", "Application", "msedge.exe"),
   path.join(process.env.LocalAppData || "", "Microsoft", "Edge", "Application", "msedge.exe"),
 ].filter(Boolean);
+
+const browserProfileDir = path.join(
+  process.env.LOCALAPPDATA || require("node:os").homedir(),
+  "Auto Orcamento",
+  "browser-profile"
+);
 
 let serverProcess = null;
 let browserProcess = null;
@@ -94,6 +98,9 @@ async function main() {
     console.error("Nao foi possivel encontrar Microsoft Edge ou Google Chrome.");
     process.exit(1);
   }
+
+  console.warn("Modo navegador: o icone na barra de tarefas pode ficar borrado.");
+  console.warn("Prefira abrir pelo abrir-auto-orcamento.bat (janela WebView2 nativa).");
 
   try {
     await startServer();

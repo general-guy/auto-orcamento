@@ -4,7 +4,9 @@ Aplicativo local para gerar orçamentos cirúrgicos em papel timbrado, com preen
 
 ## Fluxo ativo (desenvolvimento diário)
 
-Use **`abrir-auto-orcamento.bat`** (Node.js + browser). É o modo recomendado enquanto a migração Tauri está **estagnada**.
+Use **`abrir-auto-orcamento.bat`** (Node.js + janela WebView2 nativa). É o modo recomendado enquanto a migração Tauri está **estagnada**.
+
+O `.bat` abre uma **janela nativa** (WebView2 via `pywebview`) com o ícone `.ico` na barra de tarefas — o mesmo princípio usado no repositório `dados-clinica`, sem depender do favicon do Chrome. Requer **Node.js** e **Python** com `pywebview` (`python -m pip install -r requirements.txt`).
 
 **Pasta `src-tauri/`:** enquanto não for buildar o `.exe`, trate-a como **congelada** — edite só o web app partilhado na raiz (`app.js`, `api.js`, etc.). Evite alterar Rust/`src-tauri/` sem necessidade: qualquer `cargo check`, Rust Analyzer ou `tauri:dev` recria `src-tauri/target/` (centenas de MB). Só rode `build-auto-orcamento-tauri.bat` ou comandos Tauri quando quiser gerar o `.exe` de novo; use `cargo clean` se `target/` crescer.
 
@@ -22,7 +24,7 @@ O **mesmo web app** (`index.html`, `app.js`, `api.js`, `styles.css`, `assets/`) 
 
 | Fluxo | Atalho | Quando usar |
 |-------|--------|-------------|
-| **Node + browser** | `abrir-auto-orcamento.bat` | PC com Node.js; desenvolvimento; paridade com a stack original |
+| **Node + WebView2** | `abrir-auto-orcamento.bat` | PC com Node.js e Python; desenvolvimento; ícone nítido na barra de tarefas |
 | **Tauri (`.exe`)** | `build-auto-orcamento-tauri.bat` → `auto-orcamento.exe` | PC **sem** Node; distribuição do repo copiado |
 
 Ambos leem e gravam **`data/`** e **`output/`** na raiz do repo. Históricos, tabelas e zoom são os mesmos arquivos JSON.
@@ -42,16 +44,23 @@ No Windows, clique duas vezes em:
 abrir-auto-orcamento.bat
 ```
 
-Requer **Node.js** instalado. O atalho instala dependências se faltar `node_modules`, inicia `server.js` na porta 3000, abre o Chrome ou Edge em modo app e encerra o servidor ao fechar a janela.
+Requer **Node.js** instalado. O atalho instala dependências se faltar `node_modules`, inicia `server.js` na porta 3000 e abre a interface em janela WebView2 nativa (`native_launcher.py` via `pythonw`). O ícone na barra de tarefas vem de `assets/app-icon.ico`. Ao fechar a janela, o servidor encerra.
+
+Se `pythonw` não estiver disponível, o `.bat` cai para Chrome/Edge em modo app (`launch-app.js`) — nesse modo o ícone da barra pode ficar borrado.
 
 Equivalente manual:
 
 ```bash
 npm install
-npm start
+python -m pip install -r requirements.txt
+python native_launcher.py
 ```
 
-Depois acesse `http://localhost:3000`.
+Fallback no navegador (ícone possivelmente borrado na barra de tarefas):
+
+```bash
+node launch-app.js
+```
 
 ### Tauri — mesmo web app via `auto-orcamento.exe`
 
@@ -69,7 +78,8 @@ Detalhes na seção [Versão Tauri](#versão-tauri-branch-featuretauri) abaixo (
 |---|---|
 | Node.js LTS | Sim |
 | npm | Sim (vem com Node) |
-| Google Chrome ou Microsoft Edge | Sim (janela do app e PDF automático) |
+| Python 3 + pywebview | Sim (janela nativa WebView2; `pip install -r requirements.txt`) |
+| Google Chrome ou Microsoft Edge | Só no fallback `launch-app.js` |
 | Internet | Só na primeira execução, se `node_modules` ainda não existir |
 
 Para migrar a pasta para outro PC com **Node:** instale Node.js, copie o projeto (de preferência com `node_modules` incluído) e execute `abrir-auto-orcamento.bat`.
@@ -219,7 +229,7 @@ Históricos e tabelas são acessados via `AppApi` (`api.js`); tabelas usam `AppA
 
 **Pendente (Fases 4–5, migração estagnada):** validação em PC limpo e paridade final com o snapshot Node. Detalhes em `docs/MIGRATION-tauri.md` e `docs/SNAPSHOT-tauri-v0.2.0-paused.md`.
 
-**Ícone do app (Tauri):** **G** dourado inscrito num **círculo preto** do tamanho do slot do ícone. Configuração: `$logoFillRatio = 0.70` em `scripts/build-app-icon-square.ps1`. Pipeline: `npm run icon:generate`. Após trocar ícones, rode `build-auto-orcamento-tauri.bat` (ou `npm run tauri:build`) para regenerar o `.exe` da raiz.
+**Ícone do app:** **G** dourado inscrito num **círculo preto** (`$logoFillRatio = 0.70` em `scripts/build-app-icon-square.ps1`). **Node (WebView2):** `npm run icon:web` sincroniza `assets/app-icon.ico` e favicons a partir de `src-tauri/icons/`. **Tauri:** `npm run icon:generate` regenera ícones e o `.exe`.
 
 **PDF automático (Tauri):** ao clicar em **Imprimir orçamento**, o app grava um PDF em `output/` (mesmo fluxo da stack Node). O HTML é montado em `pdf-build.js`; o Rust invoca Chrome/Edge headless (`--print-to-pdf`). Requer Chrome ou Edge instalado.
 

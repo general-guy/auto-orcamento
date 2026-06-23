@@ -22,10 +22,12 @@ const extrasFile = path.join(dataDir, "extras.json");
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
+  ".ico": "image/x-icon",
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".pdf": "application/pdf",
   ".png": "image/png",
+  ".webmanifest": "application/manifest+json; charset=utf-8",
 };
 
 function normalizeText(value) {
