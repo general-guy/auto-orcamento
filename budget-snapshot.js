@@ -10,10 +10,8 @@
     return Boolean(document.querySelector(selector)?.checked);
   }
 
-  function collectTextInputs(selector) {
-    return [...document.querySelectorAll(selector)]
-      .map((input) => input.value.trim())
-      .filter(Boolean);
+  function collectAllTextValues(selector) {
+    return [...document.querySelectorAll(selector)].map((input) => input.value.trim());
   }
 
   function collectQuickListItems(quickListSelector, inputName) {
@@ -83,7 +81,7 @@
       form: {
         patientName: readTrimmedValue("#patientName"),
         budgetDate: readTrimmedValue("#budgetDate"),
-        surgeries: collectTextInputs("#surgeryList .surgery-input"),
+        surgeries: collectAllTextValues("#surgeryList .surgery-input"),
         hospital: collectHospitalBlock(),
         implants: collectImplantBlock(options.getImplantItem),
         technologies: {
@@ -101,15 +99,15 @@
         extras: {
           enabled: readCheckbox("#extrasEnabled"),
           quickItems: collectQuickListItems("#extrasQuickList", "extrasQuickItems"),
-          additional: collectTextInputs("#extrasList .extras-input"),
+          additional: collectAllTextValues("#extrasList .extras-input"),
         },
         payment: {
           quickItems: collectQuickListItems("#paymentQuickList", "paymentQuickItems"),
-          additional: collectTextInputs("#paymentList .payment-input"),
+          additional: collectAllTextValues("#paymentList .payment-input"),
         },
         guidance: {
           quickItems: collectQuickListItems("#guidanceQuickList", "guidanceQuickItems"),
-          additional: collectTextInputs("#guidanceList .guidance-input"),
+          additional: collectAllTextValues("#guidanceList .guidance-input"),
         },
       },
     };

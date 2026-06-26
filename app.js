@@ -3484,6 +3484,7 @@ async function exportPdfDocument() {
     }
   } catch (error) {
     console.warn("Não foi possível gerar o PDF automaticamente.", error);
+    window.alert(`Não foi possível salvar o PDF/JSON em output/.\n\n${error.message}`);
   }
 }
 
@@ -4944,7 +4945,7 @@ printButton.addEventListener("click", async () => {
       saveTechnologyToHistory(),
     ]
   );
-  void exportPdfDocument();
+  await exportPdfDocument();
   window.print();
 });
 shutdownButton.addEventListener("click", async () => {

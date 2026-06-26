@@ -101,8 +101,8 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 | `styles.css` | Layout, timbrado, impressão |
 | `app.js` | Lógica de UI, preview, históricos, autofill |
 | `server.js` | Servidor na porta 3000, APIs REST |
-| `pdf-export.js` | PDF via Puppeteer + Chrome/Edge |
 | `budget-snapshot.js` | Snapshot JSON do formulário na impressão |
+| `pdf-export.js` | PDF via Puppeteer + Chrome/Edge; grava JSON ao lado do PDF |
 | `native_launcher.py` | Launcher Windows (servidor + janela WebView2 + ícone `.ico`) |
 | `launch-hidden.vbs` | Relançamento oculto do `.bat` (sem consola visível) |
 | `launch-app.js` | Fallback: servidor + Chrome/Edge em modo app |
@@ -129,7 +129,7 @@ Endpoints principais:
 - `GET /api/extras`, `POST /api/extras`, `DELETE /api/extras`, `PUT /api/extras`: histórico de extras e persistência da ordem manual.
 - `GET /api/tecnologias`, `POST /api/tecnologias`, `DELETE /api/tecnologias`, `PUT /api/tecnologias`: histórico de tecnologias com valor associado e persistência da ordem manual no dropdown.
 - `GET /api/settings`, `PUT /api/settings`: preferências locais (zoom da interface; grava em `data/settings.json`).
-- `POST /api/pdf`: gera um PDF do documento atual e salva em `output/`.
+- `POST /api/pdf`: gera PDF em `output/` e, se enviado no corpo, grava snapshot JSON (`snapshot`) com o mesmo nome base (`.json`).
 - `POST /api/shutdown`: encerra o servidor quando acionado pela interface.
 
 Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observações são listas JSON simples, limitadas a 200 itens por tipo. O histórico de tecnologias também é limitado a 200 itens, mas cada item é um objeto com `nome` e `valor`.

@@ -255,9 +255,8 @@
       throw new Error("Informe o conteúdo do documento para exportar.");
     }
 
-    const documentHtml = await PdfBuild.buildPdfDocumentHtml(html);
-
     if (isTauri()) {
+      const documentHtml = await PdfBuild.buildPdfDocumentHtml(html);
       return invoke("export_pdf", { patientName, documentHtml });
     }
 
