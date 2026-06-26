@@ -102,7 +102,7 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 | `app.js` | Lógica de UI, preview, históricos, autofill |
 | `server.js` | Servidor na porta 3000, APIs REST |
 | `budget-snapshot.js` | Snapshot JSON do formulário na impressão e validação na importação |
-| `snapshot-open-dialog.js` | Seletor nativo de JSON no Windows (PowerShell + OpenFileDialog) |
+| `snapshot-open-dialog.js` | Invoca `scripts/open-snapshot-dialog.py` (pywebview/WebView2) ou PowerShell para seletor nativo de JSON |
 | `pdf-export.js` | PDF via Puppeteer + Chrome/Edge; grava JSON ao lado do PDF |
 | `native_launcher.py` | Launcher Windows (servidor + janela WebView2 + ícone `.ico`) |
 | `launch-hidden.vbs` | Relançamento oculto do `.bat` (sem consola visível) |
