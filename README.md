@@ -108,6 +108,8 @@ Não inclua `src-tauri/target/` ao copiar o projeto. O uso diário continua send
 
 `Ctrl` + roda do mouse, `Ctrl` + `+` / `Ctrl` + `-` (passos de 10%, entre 50% e 200%) e `Ctrl` + `0` para voltar a 100%. O nível fica salvo em `data/settings.json`. Um indicador flutuante (estilo Chrome) mostra a porcentagem, botões `−`/`+` e **Redefinir**. No fallback `launch-app.js` (Chrome/Edge), vale o zoom nativo do navegador.
 
+No **Node (WebView2)**, o zoom escala só a interface na tela (`transform: scale()` no `body`). A **impressão do navegador** (`window.print()`) ignora esse zoom: `@media print` em `styles.css` restaura dimensões A4 e anula o transform, para o papel sair igual ao PDF automático.
+
 **Ícone do app:** `npm run icon:web` sincroniza `assets/app-icon.ico` e favicons (G dourado em círculo preto).
 
 ## Ambiente Recomendado
@@ -179,6 +181,8 @@ Ao clicar em `Imprimir orçamento`:
 5. Só então abre `window.print()`.
 
 Se a exportação falhar (ex.: Chrome/Edge ausente), aparece um **alert** com a mensagem de erro.
+
+**Impressão vs PDF:** o PDF em `output/` é renderizado no servidor (HTML isolado, sem zoom da UI). O diálogo **Imprimir** usa o DOM da janela; por isso `@media print` anula o `transform` de zoom e `min-height` da shell — evita conteúdo deslocado e folha em branco extra quando o zoom não está em 100%.
 
 - **PDF:** HTML paginado da pré-visualização; timbrado, fontes e estilos embutidos no servidor (Puppeteer + Chrome/Edge).
 - **JSON:** textos, checkboxes de seções opcionais, listas rápidas (marcados e desmarcados), equipe, hospitais com detalhes/multiplicadores, implante selecionado, etc. Ex.: `Maria da Silva 2026-06-26 14-30-05.json`.

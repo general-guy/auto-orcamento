@@ -147,7 +147,7 @@ Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observa�
 - visual dos campos, botões, dropdowns e pré-visualização;
 - agrupamento visual das seções do formulário com bordas cinza discretas;
 - papel A4 com imagem de fundo do papel timbrado;
-- regras específicas de impressão.
+- regras específicas de impressão (`@media print`): oculta formulário e chrome da UI; força A4 (`210mm` × `297mm`); anula o zoom da interface (`transform: none` no `body`) e alturas mínimas (`100vh`) que distorcem o diálogo **Imprimir** no WebView2.
 
 `app.js` concentra a lógica de interação:
 
@@ -323,6 +323,8 @@ exportPdfDocument()
 
 Falhas de exportação exibem um `alert` além do log no console. Requer Chrome ou Edge instalado.
 
+**Impressão no navegador:** após a exportação, `window.print()` usa o DOM visível. O zoom da UI (Node: `transform: scale()` em `api.js`) afeta só a tela; `@media print` em `styles.css` restaura layout A4 sem escala. O PDF automático nunca passa por esse transform — `pdf-export.js` monta HTML autocontido só com as `.print-page`.
+
 **Stack Tauri (congelada):** `export_pdf` gera só PDF; não há snapshot JSON.
 
 ## Lógica Hospitalar
@@ -408,7 +410,7 @@ O repositório ainda contém `src-tauri/`, `api.js` (com detecção Tauri legada
 
 Resumo do que existia no experimento Tauri:
 - **`pdf-build.js`:** monta HTML autocontido para exportação (CSS/fontes inline).
-- **`zoom.js`:** atalhos `Ctrl` + roda / `Ctrl` + `+`/`-`/`0`; indicador flutuante `#zoomFlag` (%, `−`/`+`, Redefinir). **Tauri:** persiste em `data/settings.json` via comandos `zoom_*` e `WebviewWindow::set_zoom`. **Node (WebView2):** `AppApi` persiste via `GET/PUT /api/settings` e aplica escala com `transform: scale()` no `body` (layout preenche a janela); o arraste da divisória entre painéis usa `AppApi.getWebZoomFactor()`.
+- **`zoom.js`:** atalhos `Ctrl` + roda / `Ctrl` + `+`/`-`/`0`; indicador flutuante `#zoomFlag` (%, `−`/`+`, Redefinir). **Tauri:** persiste em `data/settings.json` via comandos `zoom_*` e `WebviewWindow::set_zoom`. **Node (WebView2):** `AppApi` persiste via `GET/PUT /api/settings` e aplica escala com `transform: scale()` no `body` (layout preenche a janela); o arraste da divisória entre painéis usa `AppApi.getWebZoomFactor()`. A impressão (`@media print`) anula esse transform para o papel coincidir com o PDF.
 - **`src-tauri/src/paths.rs`:** resolve `data/` e `output/` com `std::env::current_exe()`. Em debug, raiz do repo. Em release: raiz do repo se o `.exe` está em `src-tauri/target/release/` ou na raiz (pasta `src-tauri/` ao lado); senão `{pasta-do-exe}/data/`. Não grava em `%AppData%`. Log de startup: `Diretório de dados: ...`.
 - **`src-tauri/src/storage.rs`:** históricos, tecnologias, zoom e tabelas (`table_load` / `read_table`); seed único de tabelas a partir de `dist/data/` embutido no build.
 - **`src-tauri/src/pdf.rs`:** grava PDF em `output/` via Chrome/Edge headless; comando `export_pdf`.

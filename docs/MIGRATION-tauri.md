@@ -137,7 +137,7 @@ Não há fallback para `%AppData%`. O startup registra `Diretório de dados: ...
 
 Preferências de zoom (`settings.json`) seguem o mesmo diretório `data/`.
 
-**Zoom:** `zoom.js` escuta `Ctrl` + roda e `Ctrl` + `+`/`-`/`0`. No **Tauri**, o Rust aplica `WebviewWindow::set_zoom` e persiste em `data/settings.json`. No **Node (WebView2)**, `api.js` persiste via `/api/settings` e aplica `transform: scale()` no `body` para a interface preencher a janela em qualquer escala. O indicador `#zoomFlag` (canto inferior direito) mostra porcentagem, `−`/`+` e **Redefinir**.
+**Zoom:** `zoom.js` escuta `Ctrl` + roda e `Ctrl` + `+`/`-`/`0`. No **Tauri**, o Rust aplica `WebviewWindow::set_zoom` e persiste em `data/settings.json`. No **Node (WebView2)**, `api.js` persiste via `/api/settings` e aplica `transform: scale()` no `body` para a interface preencher a janela em qualquer escala. O indicador `#zoomFlag` (canto inferior direito) mostra porcentagem, `−`/`+` e **Redefinir**. Na impressão, `@media print` anula o transform da UI para o documento sair em A4 (igual ao PDF automático).
 
 Tabelas de referência (hospitalares, implantes) são lidas de `data/` via `table_load` — na raiz do repo quando o `.exe` está dentro do projeto, ou ao lado do `.exe` em layout portátil mínimo. Se o arquivo ainda não existir no primeiro run, o app copia a versão embutida no build (seed único); depois disso, edições manuais no JSON valem sem rebuild.
 

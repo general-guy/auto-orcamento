@@ -1163,20 +1163,32 @@ th {
 }
 
 @media print {
+  /* Zoom da UI (transform: scale no body) não deve afetar a impressão — o PDF já usa HTML isolado. */
+  html,
   body {
     background: #ffffff;
+    height: auto !important;
+    min-height: 0 !important;
+    width: auto !important;
+    transform: none !important;
+    transform-origin: initial !important;
   }
 
   .form-panel,
   .panel-resize-handle,
   .preview-toolbar,
   .zoom-flag {
-    display: none;
+    display: none !important;
   }
 
   .app-shell,
   .preview-panel {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
     display: block;
+    height: auto !important;
+    min-height: 0 !important;
     padding: 0;
   }
 
@@ -1192,6 +1204,8 @@ th {
     height: var(--paper-height);
     overflow: hidden;
     page-break-after: always;
+    position: relative;
+    width: var(--paper-width);
   }
 
   .print-page:last-child {
