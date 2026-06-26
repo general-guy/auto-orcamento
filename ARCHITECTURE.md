@@ -84,7 +84,7 @@ Usuário clica X
   -> processo pythonw termina
 ```
 
-O botão vermelho na UI também chama `POST /api/shutdown`, mas é opcional — o fluxo diário é fechar pelo X.
+O encerramento do app é fechar a janela (X) — o launcher chama `POST /api/shutdown` no `finally`.
 
 Requer `python -m pip install -r requirements.txt` (`pywebview`). O ícone na barra de tarefas vem do `.ico` nativo da janela — não do favicon do Chrome (mesmo padrão do repositório `dados-clinica`).
 
@@ -163,7 +163,7 @@ Endpoints principais:
 - `GET /api/settings`, `PUT /api/settings`: preferências locais (zoom; `lastSnapshotDir` para o botão **Abrir**; grava em `data/settings.json`).
 - `POST /api/open-snapshot`: abre seletor nativo de JSON no Windows (`pywebview`/WebView2 via `scripts/open-snapshot-dialog.py`), lê o arquivo, persiste a pasta em `lastSnapshotDir` e devolve o snapshot parseado.
 - `POST /api/pdf`: gera PDF em `output/` e, se enviado no corpo, grava snapshot JSON (`snapshot`) com o mesmo nome base (`.json`).
-- `POST /api/shutdown`: encerra o servidor quando acionado pela interface.
+- `POST /api/shutdown`: encerra o servidor ao fechar a janela (`native_launcher.py` ou fallback `launch-app.js`).
 
 Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observações são listas JSON simples, limitadas a 200 itens por tipo. O histórico de tecnologias também é limitado a 200 itens, mas cada item é um objeto com `nome` e `valor`.
 
@@ -171,8 +171,8 @@ Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observa�
 
 `index.html` define duas áreas principais:
 
-- painel esquerdo com o formulário;
-- painel direito com a pré-visualização do documento final.
+- painel esquerdo com o formulário (ações **Abrir**, **Limpar** e **Imprimir orçamento** agrupadas no rodapé);
+- painel direito com a pré-visualização do documento final (sem controles extras na toolbar).
 
 `styles.css` controla:
 
@@ -199,7 +199,7 @@ Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observa�
 - renderização da seção de observações com lista rápida reordenável e campos dinâmicos adicionais;
 - paginação da pré-visualização do documento em páginas A4;
 - redimensionamento do painel;
-- impressão, exportação automática de PDF e shutdown.
+- impressão e exportação automática de PDF + snapshot JSON.
 
 `pdf-export.js` usa o Chrome ou Edge instalado localmente, via `puppeteer-core`, para renderizar o HTML paginado recebido do frontend. O CSS, fontes e imagens do timbrado são embutidos a partir dos arquivos locais do projeto em base64, evitando depender de novas requisições HTTP enquanto o servidor processa a exportação. O nome do PDF combina o nome da paciente com data e horário locais; colisões recebem sufixo `(2)`, `(3)`, etc.
 
@@ -360,7 +360,7 @@ Falhas de exportação exibem um `alert` além do log no console. Requer Chrome 
 
 ## Importação de snapshot JSON
 
-O botão **Abrir** (`#openButton`) chama `AppApi.openSnapshot()` → `POST /api/open-snapshot`. No Windows, `scripts/open-snapshot-dialog.py` usa **pywebview** (`window.create_file_dialog`, WebView2, janela oculta) para diálogo nativo nítido em HiDPI; fallback PowerShell/tkinter. Preferência: `lastSnapshotDir`; fallback `output/`. Imprimir grava `output/` em `lastSnapshotDir`. Se a porta 3000 estiver ocupada por um Node antigo, o `server.js` libera ao subir. **Não** há fallback para `<input type="file">` na stack Node.
+O botão **Abrir** (`#openButton`, verde, ao lado de **Limpar** no rodapé do formulário) chama `AppApi.openSnapshot()` → `POST /api/open-snapshot`. No Windows, `scripts/open-snapshot-dialog.py` usa **pywebview** (`window.create_file_dialog`, WebView2, janela oculta) para diálogo nativo nítido em HiDPI; fallback PowerShell/tkinter. Preferência: `lastSnapshotDir`; fallback `output/`. Imprimir grava `output/` em `lastSnapshotDir`. Se a porta 3000 estiver ocupada por um Node antigo, o `server.js` libera ao subir. **Não** há fallback para `<input type="file">` na stack Node.
 
 **Stack Tauri (congelada):** `export_pdf` gera só PDF; não há snapshot JSON nem importação.
 

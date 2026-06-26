@@ -710,54 +710,10 @@ button:hover {
 
 .open-button {
   background: #16a34a;
-  margin-right: auto;
 }
 
 .open-button:hover {
   background: #15803d;
-}
-
-.danger-button {
-  background: #d92d20;
-  color: #ffffff;
-}
-
-.danger-button:hover {
-  background: #b42318;
-}
-
-.danger-button:disabled {
-  cursor: wait;
-  opacity: 0.8;
-}
-
-.close-button {
-  align-items: center;
-  border-radius: 10px;
-  display: inline-flex;
-  height: 32px;
-  justify-content: center;
-  padding: 0;
-  position: relative;
-  width: 32px;
-}
-
-.close-button span,
-.close-button span::after {
-  background: #ffffff;
-  border-radius: 999px;
-  content: "";
-  display: block;
-  height: 3px;
-  width: 14px;
-}
-
-.close-button span {
-  transform: rotate(45deg);
-}
-
-.close-button span::after {
-  transform: rotate(90deg);
 }
 
 button:focus-visible,
@@ -765,22 +721,6 @@ input:focus,
 select:focus,
 textarea:focus {
   box-shadow: 0 0 0 3px var(--primary-soft);
-}
-
-.shutdown-message {
-  display: grid;
-  min-height: 100vh;
-  place-content: center;
-  text-align: center;
-}
-
-.shutdown-message h1 {
-  margin: 0 0 8px;
-}
-
-.shutdown-message p {
-  color: var(--muted);
-  margin: 0;
 }
 
 .preview-panel {
@@ -796,13 +736,6 @@ textarea:focus {
   align-items: end;
   display: flex;
   justify-content: space-between;
-}
-
-.preview-actions {
-  display: grid;
-  gap: 8px;
-  justify-items: end;
-  text-align: right;
 }
 
 .print-page {

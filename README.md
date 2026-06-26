@@ -40,7 +40,7 @@ No Windows, clique duas vezes em:
 abrir-auto-orcamento.bat
 ```
 
-Requer **Node.js** instalado. O atalho instala dependências se faltar `node_modules`, **inicia o Node em background** e abre o WebView2 em paralelo (`pythonw native_launcher.py --external-server`). A janela abre **já maximizada**. O formulário aparece assim que a página carrega; históricos e tabelas continuam a carregar em seguida. **Fechar a janela (X)** encerra o servidor Node automaticamente. O botão vermelho faz o mesmo via a interface, mas é opcional.
+Requer **Node.js** instalado. O atalho instala dependências se faltar `node_modules`, **inicia o Node em background** e abre o WebView2 em paralelo (`pythonw native_launcher.py --external-server`). A janela abre **já maximizada**. O formulário aparece assim que a página carrega; históricos e tabelas continuam a carregar em seguida. **Fechar a janela (X)** encerra o servidor Node automaticamente.
 
 Pode haver um **flash breve** do CMD ao duplo clique — o Windows abre o `.bat` antes do relançamento oculto. Se o launcher nativo falhar, o fallback `launch-app.js` (Chrome/Edge) **mostra** um terminal de propósito, para facilitar diagnóstico.
 
@@ -50,7 +50,7 @@ Pode haver um **flash breve** do CMD ao duplo clique — o Windows abre o `.bat`
 |---|---|
 | **Abertura** | O `.bat` inicia `node server.js` em background (que libera a porta 3000 se necessário) e abre o WebView2 em paralelo, **maximizado desde o início**. O launcher Python aguarda até ~800 ms pelo Node antes de decidir entre o app ou o splash `assets/launcher.html`. O formulário e o preview aparecem cedo; históricos e tabelas carregam em seguida (`initializeApp()` em background). |
 | **Gargalo principal** | O **primeiro** arranque do WebView2 no dia (runtime frio no Windows) ainda pode levar alguns segundos — limitação do sistema, não do Node. Aberturas seguintes no mesmo dia tendem a ser mais rápidas. |
-| **Fechamento** | **Fechar pelo X** é o fluxo normal: a janela some na hora; o Python encerra o Node **uma vez** no `finally` (`POST /api/shutdown`). Se a API falhar, libera a porta 3000 como fallback. O botão vermelho é opcional. |
+| **Fechamento** | **Fechar pelo X** é o fluxo normal: a janela some na hora; o Python encerra o Node **uma vez** no `finally` (`POST /api/shutdown`). Se a API falhar, libera a porta 3000 como fallback. |
 
 Otimizações aplicadas na stack atual: Node e WebView2 em paralelo, liberação assíncrona da porta 3000 só no `server.js` (sem PowerShell), splash local, scripts com `defer`, `pdf-build.js` fora do caminho crítico (só Tauri), carregamento sob demanda de `pdf-export.js` e `snapshot-open-dialog.js` no servidor, e históricos carregados sem bloquear a UI.
 
@@ -153,7 +153,7 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 - Preenche os dados da paciente, cirurgia, hospital, implantes, tecnologias, equipe, extras, formas de pagamento e observações.
 - Mostra uma pré-visualização paginada do documento final sobre o papel timbrado.
 - Permite imprimir o orçamento e, ao clicar em `Imprimir orçamento`, gera automaticamente um **PDF** e um **JSON de snapshot** em `output/`.
-- Permite **reabrir** um orçamento anterior com o botão **Abrir** (JSON exportado na impressão), restaurando o formulário e a pré-visualização.
+- Permite **reabrir** um orçamento anterior com o botão **Abrir** (verde, ao lado de **Limpar**; JSON exportado na impressão), restaurando o formulário e a pré-visualização.
 - Guarda histórico local de pacientes, cirurgias, hospitais, extras, formas de pagamento, observações e tecnologias.
 - Permite reordenar por drag and drop os dropdowns de histórico (**Nome**, **Cirurgia**, **Hospital**, **Tecnologias**, **Extras adicionais**, **Pagamento** e **Observações adicionais**), com ordem persistida nos JSON correspondentes; reordenar entradas de cirurgia nos campos do formulário (só visual/preview); e reordenar as listas rápidas de extras, pagamento e observações.
 - Cria múltiplas entradas de cirurgia e hospital.
@@ -220,7 +220,7 @@ Depois de alterar código, **reabra** o app (`abrir-auto-orcamento.bat`) para ca
 
 ## Abrir orçamento salvo
 
-O botão **Abrir** (verde, à esquerda de **Limpar**) carrega um snapshot JSON gerado na impressão (ex.: `output/Maria da Silva 2026-06-26 14-30-05.json`).
+O botão **Abrir** (verde, ao lado de **Limpar**) carrega um snapshot JSON gerado na impressão (ex.: `output/Maria da Silva 2026-06-26 14-30-05.json`).
 
 1. No Windows, o servidor Node abre um **seletor nativo** via **pywebview** (WebView2, mesma stack do app; nítido em telas HiDPI), com fallback para PowerShell e tkinter.
 2. A pasta inicial é a **última usada** (`lastSnapshotDir` em `data/settings.json`), com fallback em `output/`; a raiz do perfil do usuário (`C:\Users\...`) nunca é reutilizada como pasta salva. Após imprimir, a pasta `output/` também é gravada automaticamente.

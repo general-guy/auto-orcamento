@@ -60,7 +60,7 @@
         const snippet = rawText.trim().slice(0, 160);
         if (snippet.includes("Arquivo não encontrado")) {
           throw new Error(
-            "Servidor desatualizado na porta 3000. Feche o app pelo botão vermelho, aguarde alguns segundos e abra de novo com abrir-auto-orcamento.bat.",
+            "Servidor desatualizado na porta 3000. Feche a janela (X), aguarde alguns segundos e abra de novo com abrir-auto-orcamento.bat.",
           );
         }
 
@@ -305,19 +305,6 @@
     return fetchJson("/api/open-snapshot", { method: "POST" });
   }
 
-  async function shutdownApp() {
-    if (isTauri()) {
-      await window.__TAURI__.window.getCurrentWindow().close();
-      return;
-    }
-
-    try {
-      await fetch("/api/shutdown", { method: "POST" });
-    } catch {
-      // O servidor pode encerrar antes de responder completamente.
-    }
-  }
-
   window.AppApi = {
     isTauri,
     waitForBackend,
@@ -336,6 +323,5 @@
     getWebZoomFactor,
     exportPdf,
     openSnapshot,
-    shutdownApp,
   };
 })();

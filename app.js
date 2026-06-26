@@ -3,7 +3,6 @@ const printButton = document.querySelector("#printButton");
 const openButton = document.querySelector("#openButton");
 const openSnapshotInput = document.querySelector("#openSnapshotInput");
 const clearButton = document.querySelector("#clearButton");
-const shutdownButton = document.querySelector("#shutdownButton");
 const addSurgeryButton = document.querySelector("#addSurgeryButton");
 const removeSurgeryButton = document.querySelector("#removeSurgeryButton");
 const addHospitalButton = document.querySelector("#addHospitalButton");
@@ -5155,16 +5154,6 @@ printButton.addEventListener("click", async () => {
   );
   await exportPdfDocument();
   window.print();
-});
-shutdownButton.addEventListener("click", async () => {
-  shutdownButton.disabled = true;
-  shutdownButton.textContent = "Encerrando...";
-
-  await AppApi.shutdownApp();
-
-  if (!AppApi.isTauri()) {
-    document.body.innerHTML = "<main class=\"shutdown-message\"><h1>Auto Orçamento encerrado</h1><p>Você já pode fechar esta aba.</p></main>";
-  }
 });
 
 async function initializeApp() {
