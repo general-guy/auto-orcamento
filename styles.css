@@ -708,6 +708,15 @@ button:hover {
   background: #ececec;
 }
 
+.open-button {
+  background: #16a34a;
+  margin-right: auto;
+}
+
+.open-button:hover {
+  background: #15803d;
+}
+
 .danger-button {
   background: #d92d20;
   color: #ffffff;

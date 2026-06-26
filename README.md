@@ -110,6 +110,8 @@ Não inclua `src-tauri/target/` ao copiar o projeto. O uso diário continua send
 
 No **Node (WebView2)**, o zoom escala só a interface na tela (`transform: scale()` no `body`). A **impressão do navegador** (`window.print()`) ignora esse zoom: `@media print` em `styles.css` restaura dimensões A4 e anula o transform, para o papel sair igual ao PDF automático.
 
+Preferências locais (zoom e última pasta do botão **Abrir**) ficam em `data/settings.json`.
+
 **Ícone do app:** `npm run icon:web` sincroniza `assets/app-icon.ico` e favicons (G dourado em círculo preto).
 
 ## Ambiente Recomendado
@@ -129,6 +131,7 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 - Preenche os dados da paciente, cirurgia, hospital, implantes, tecnologias, equipe, extras, formas de pagamento e observações.
 - Mostra uma pré-visualização paginada do documento final sobre o papel timbrado.
 - Permite imprimir o orçamento e, ao clicar em `Imprimir orçamento`, gera automaticamente um **PDF** e um **JSON de snapshot** em `output/`.
+- Permite **reabrir** um orçamento anterior com o botão **Abrir** (JSON exportado na impressão), restaurando o formulário e a pré-visualização.
 - Guarda histórico local de pacientes, cirurgias, hospitais, extras, formas de pagamento, observações e tecnologias.
 - Permite reordenar por drag and drop os dropdowns de histórico (**Nome**, **Cirurgia**, **Hospital**, **Tecnologias**, **Extras adicionais**, **Pagamento** e **Observações adicionais**), com ordem persistida nos JSON correspondentes; reordenar entradas de cirurgia nos campos do formulário (só visual/preview); e reordenar as listas rápidas de extras, pagamento e observações.
 - Cria múltiplas entradas de cirurgia e hospital.
@@ -192,6 +195,17 @@ Colisões de nome recebem sufixo `(2)`, `(3)`, etc. **Requisito:** Chrome ou Edg
 > **Nota:** snapshot JSON existe **apenas na stack Node**. Tauri congelado não recebe esta funcionalidade.
 
 Depois de alterar código, **reabra** o app (`abrir-auto-orcamento.bat`) para carregar o JavaScript atualizado.
+
+## Abrir orçamento salvo
+
+O botão **Abrir** (verde, à esquerda de **Limpar**) carrega um snapshot JSON gerado na impressão (ex.: `output/Maria da Silva 2026-06-26 14-30-05.json`).
+
+1. No Windows, o servidor Node abre um **seletor nativo** (`POST /api/open-snapshot`) — não o `<input type="file">` do navegador.
+2. A pasta inicial é a **última usada** (`lastSnapshotDir` em `data/settings.json`); na primeira vez, abre em `output/`.
+3. Ao escolher um arquivo, o app valida `schemaVersion: 1`, repopula o formulário e atualiza a pré-visualização.
+4. Se o diálogo nativo falhar, cai para o seletor do navegador (fallback).
+
+Campos dinâmicos (cirurgias, hospitais com entradas auxiliares, extras, pagamento, observações), checkboxes de seções opcionais, listas rápidas e equipe são restaurados. Implantes são reassociados pelo índice ou por marca/modelo/referência na tabela local.
 
 ## Hospitais Com Autofill
 

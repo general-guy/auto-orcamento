@@ -180,6 +180,7 @@ Na branch de trabalho atual, o fluxo Node deixou de depender do Chrome em modo `
 - ícone na barra de tarefas via `assets/app-icon.ico` na janela nativa;
 - launcher **sem terminais visíveis**: relançamento oculto do `.bat` + `CREATE_NO_WINDOW` no subprocesso Node;
 - **snapshot JSON na impressão** (`budget-snapshot.js` + `POST /api/pdf`): `.json` ao lado do `.pdf` em `output/`, `schemaVersion: 1`; exportação **no servidor** (`pdf-export.js`); impressão só após `await exportPdfDocument()`;
+- **importação de snapshot** (botão **Abrir**): `POST /api/open-snapshot` + diálogo nativo Windows; `lastSnapshotDir` em `data/settings.json`;
 - `launch-app.js` permanece como fallback (Chrome/Edge; terminal visível);
 - pipeline de ícones: `npm run icon:web` sincroniza assets web a partir de `src-tauri/icons/`;
 - zoom da interface no Node: `GET/PUT /api/settings` + escala CSS (`transform`) em `api.js`/`zoom.js`, arquivo `data/settings.json`;

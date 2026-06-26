@@ -101,7 +101,8 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 | `styles.css` | Layout, timbrado, impressão |
 | `app.js` | Lógica de UI, preview, históricos, autofill |
 | `server.js` | Servidor na porta 3000, APIs REST |
-| `budget-snapshot.js` | Snapshot JSON do formulário na impressão |
+| `budget-snapshot.js` | Snapshot JSON do formulário na impressão e validação na importação |
+| `snapshot-open-dialog.js` | Seletor nativo de JSON no Windows (PowerShell + OpenFileDialog) |
 | `pdf-export.js` | PDF via Puppeteer + Chrome/Edge; grava JSON ao lado do PDF |
 | `native_launcher.py` | Launcher Windows (servidor + janela WebView2 + ícone `.ico`) |
 | `launch-hidden.vbs` | Relançamento oculto do `.bat` (sem consola visível) |
@@ -128,7 +129,8 @@ Endpoints principais:
 - `GET /api/observacoes`, `POST /api/observacoes`, `DELETE /api/observacoes`, `PUT /api/observacoes`: histórico de observações e persistência da ordem manual.
 - `GET /api/extras`, `POST /api/extras`, `DELETE /api/extras`, `PUT /api/extras`: histórico de extras e persistência da ordem manual.
 - `GET /api/tecnologias`, `POST /api/tecnologias`, `DELETE /api/tecnologias`, `PUT /api/tecnologias`: histórico de tecnologias com valor associado e persistência da ordem manual no dropdown.
-- `GET /api/settings`, `PUT /api/settings`: preferências locais (zoom da interface; grava em `data/settings.json`).
+- `GET /api/settings`, `PUT /api/settings`: preferências locais (zoom; `lastSnapshotDir` para o botão **Abrir**; grava em `data/settings.json`).
+- `POST /api/open-snapshot`: abre seletor nativo de JSON no Windows, lê o arquivo, persiste a pasta escolhida em `lastSnapshotDir` e devolve o snapshot parseado.
 - `POST /api/pdf`: gera PDF em `output/` e, se enviado no corpo, grava snapshot JSON (`snapshot`) com o mesmo nome base (`.json`).
 - `POST /api/shutdown`: encerra o servidor quando acionado pela interface.
 
@@ -325,7 +327,11 @@ Falhas de exportação exibem um `alert` além do log no console. Requer Chrome 
 
 **Impressão no navegador:** após a exportação, `window.print()` usa o DOM visível. O zoom da UI (Node: `transform: scale()` em `api.js`) afeta só a tela; `@media print` em `styles.css` restaura layout A4 sem escala. O PDF automático nunca passa por esse transform — `pdf-export.js` monta HTML autocontido só com as `.print-page`.
 
-**Stack Tauri (congelada):** `export_pdf` gera só PDF; não há snapshot JSON.
+## Importação de snapshot JSON
+
+O botão **Abrir** (`#openButton`) chama `AppApi.openSnapshot()` → `POST /api/open-snapshot`. No Windows, `snapshot-open-dialog.js` usa `System.Windows.Forms.OpenFileDialog` via PowerShell (`-STA`) com `InitialDirectory` = `lastSnapshotDir` ou `output/`. Após a escolha, `server.js` grava a pasta em `data/settings.json` e devolve `{ snapshot }`. `app.js` valida com `BudgetSnapshot.normalizeForm()` e aplica via `applyBudgetSnapshot()` (campos dinâmicos, listas rápidas, hospital Reg/Sap, implantes). Fallback: `<input type="file">` se o diálogo nativo falhar.
+
+**Stack Tauri (congelada):** `export_pdf` gera só PDF; não há snapshot JSON nem importação.
 
 ## Lógica Hospitalar
 

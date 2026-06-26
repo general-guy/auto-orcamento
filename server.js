@@ -7,6 +7,7 @@ const {
   resolveUniqueOutputPath,
   writeBudgetSnapshotJson,
 } = require("./pdf-export");
+const { pickSnapshotJsonFile } = require("./snapshot-open-dialog");
 
 const port = 3000;
 const rootDir = __dirname;
@@ -85,29 +86,71 @@ function clampZoom(zoom) {
   return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, rounded));
 }
 
-function readSettings() {
+function normalizeSnapshotDir(dir) {
+  if (typeof dir !== "string" || !dir.trim()) {
+    return null;
+  }
+
+  const resolved = path.resolve(dir.trim());
+  try {
+    return fs.statSync(resolved).isDirectory() ? resolved : null;
+  } catch {
+    return null;
+  }
+}
+
+function readSettingsFile() {
   ensureDataFile();
 
   if (!fs.existsSync(settingsFile)) {
-    return { zoom: ZOOM_DEFAULT };
+    return {};
   }
 
   try {
     const content = fs.readFileSync(settingsFile, "utf8");
     const settings = JSON.parse(content);
-    return {
-      zoom: clampZoom(settings?.zoom ?? ZOOM_DEFAULT),
-    };
+    return settings && typeof settings === "object" ? settings : {};
   } catch {
-    return { zoom: ZOOM_DEFAULT };
+    return {};
   }
 }
 
-function writeSettings(settings) {
+function readSettings() {
+  const stored = readSettingsFile();
+  const settings = {
+    zoom: clampZoom(stored.zoom ?? ZOOM_DEFAULT),
+  };
+  const lastSnapshotDir = normalizeSnapshotDir(stored.lastSnapshotDir);
+
+  if (lastSnapshotDir) {
+    settings.lastSnapshotDir = lastSnapshotDir;
+  }
+
+  return settings;
+}
+
+function writeSettings(patch = {}) {
   ensureDataFile();
-  const zoom = clampZoom(settings?.zoom ?? ZOOM_DEFAULT);
-  fs.writeFileSync(settingsFile, `${JSON.stringify({ zoom }, null, 2)}\n`, "utf8");
-  return { zoom };
+  const stored = readSettingsFile();
+  const next = { ...stored };
+
+  if (patch.zoom !== undefined) {
+    next.zoom = clampZoom(patch.zoom);
+  } else {
+    next.zoom = clampZoom(next.zoom ?? ZOOM_DEFAULT);
+  }
+
+  if (patch.lastSnapshotDir !== undefined) {
+    const dir = normalizeSnapshotDir(patch.lastSnapshotDir);
+    if (dir) {
+      next.lastSnapshotDir = dir;
+    } else {
+      delete next.lastSnapshotDir;
+    }
+  }
+
+  fs.writeFileSync(settingsFile, `${JSON.stringify(next, null, 2)}\n`, "utf8");
+  return readSettings();
 }
 
 function readJsonList(filePath) {
@@ -213,6 +256,52 @@ async function handlePdfExport(request, response) {
   }
 
   sendJson(response, 200, responsePayload);
+}
+
+async function handleOpenSnapshot(request, response) {
+  if (request.method !== "POST") {
+    sendJson(response, 405, { error: "Método não permitido." });
+    return;
+  }
+
+  ensureOutputDir();
+
+  const settings = readSettings();
+  const initialDir = settings.lastSnapshotDir || outputDir;
+  let filePath;
+
+  try {
+    filePath = pickSnapshotJsonFile(initialDir);
+  } catch (error) {
+    sendJson(response, 500, { error: `Não foi possível abrir o seletor de arquivos: ${error.message}` });
+    return;
+  }
+
+  if (!filePath) {
+    sendJson(response, 200, { cancelled: true });
+    return;
+  }
+
+  if (!fs.existsSync(filePath)) {
+    sendJson(response, 400, { error: "Arquivo não encontrado." });
+    return;
+  }
+
+  let snapshot;
+  try {
+    snapshot = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  } catch {
+    sendJson(response, 400, { error: "Arquivo JSON inválido." });
+    return;
+  }
+
+  writeSettings({ lastSnapshotDir: path.dirname(filePath) });
+
+  sendJson(response, 200, {
+    cancelled: false,
+    path: filePath,
+    snapshot,
+  });
 }
 
 async function handleHistoryApi(request, response, filePath, itemLabel) {
@@ -646,6 +735,11 @@ const server = http.createServer(async (request, response) => {
 
     if (request.url.startsWith("/api/pdf")) {
       await handlePdfExport(request, response);
+      return;
+    }
+
+    if (request.url.startsWith("/api/open-snapshot")) {
+      await handleOpenSnapshot(request, response);
       return;
     }
 

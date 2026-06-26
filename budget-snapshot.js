@@ -113,8 +113,26 @@
     };
   }
 
+  function normalizeSnapshotForm(data) {
+    if (!data || typeof data !== "object") {
+      return null;
+    }
+
+    if (data.schemaVersion !== undefined && data.schemaVersion !== SCHEMA_VERSION) {
+      return null;
+    }
+
+    const form = data.form;
+    if (!form || typeof form !== "object") {
+      return null;
+    }
+
+    return form;
+  }
+
   window.BudgetSnapshot = {
     SCHEMA_VERSION,
     collect: collectBudgetSnapshot,
+    normalizeForm: normalizeSnapshotForm,
   };
 })();

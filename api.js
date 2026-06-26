@@ -271,6 +271,14 @@
     });
   }
 
+  async function openSnapshot() {
+    if (isTauri()) {
+      throw new Error("Abrir snapshot não está disponível no Tauri congelado.");
+    }
+
+    return fetchJson("/api/open-snapshot", { method: "POST" });
+  }
+
   async function shutdownApp() {
     if (isTauri()) {
       await window.__TAURI__.window.getCurrentWindow().close();
@@ -301,6 +309,7 @@
     adjustZoom,
     getWebZoomFactor,
     exportPdf,
+    openSnapshot,
     shutdownApp,
   };
 })();

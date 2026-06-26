@@ -1,5 +1,7 @@
 const form = document.querySelector("#budget-form");
 const printButton = document.querySelector("#printButton");
+const openButton = document.querySelector("#openButton");
+const openSnapshotInput = document.querySelector("#openSnapshotInput");
 const clearButton = document.querySelector("#clearButton");
 const shutdownButton = document.querySelector("#shutdownButton");
 const addSurgeryButton = document.querySelector("#addSurgeryButton");
@@ -3524,6 +3526,199 @@ function clearForm() {
   updatePreview();
 }
 
+function ensureDynamicTextFields(getInputs, createField, values) {
+  const normalizedValues = Array.isArray(values) && values.length > 0 ? values : [""];
+
+  while (getInputs().length < normalizedValues.length) {
+    createField();
+  }
+
+  while (getInputs().length > normalizedValues.length) {
+    getInputs().at(-1).closest("label").remove();
+  }
+
+  getInputs().forEach((input, index) => {
+    input.value = normalizedValues[index] ?? "";
+  });
+}
+
+function applyQuickListSelection(quickItems, deselectedSet) {
+  deselectedSet.clear();
+
+  (quickItems || []).forEach((item) => {
+    if (!item?.checked) {
+      deselectedSet.add(normalizeText(item.value));
+    }
+  });
+}
+
+function populateHospitalDetails(input, hospitalEntry) {
+  syncHospitalDetailField(input);
+
+  const detailList = input.closest("label")?.querySelector(".hospital-detail-list");
+  const details = hospitalEntry?.details || [];
+
+  if (!detailList || details.length === 0) {
+    return;
+  }
+
+  const detailConfig = getHospitalDetailConfig(input.value);
+  if (!detailConfig) {
+    return;
+  }
+
+  while (detailList.querySelectorAll(".hospital-detail-field").length < details.length) {
+    createHospitalDetailEntry(detailList, detailConfig);
+  }
+
+  while (detailList.querySelectorAll(".hospital-detail-field").length > details.length) {
+    detailList.querySelector(".hospital-detail-field:last-child")?.remove();
+  }
+
+  [...detailList.querySelectorAll(".hospital-detail-field")].forEach((field, index) => {
+    const detail = details[index] || {};
+    field.querySelector(".hospital-detail-input").value = detail.procedure || "";
+    field.querySelector(".hospital-detail-multiplier").value = detail.multiplier || "1";
+  });
+
+  updateHospitalDetailButtons(detailList);
+}
+
+function resolveImplantSelectionIndex(implantsBlock) {
+  if (!implantsBlock?.enabled) {
+    return "";
+  }
+
+  const selectionIndex = implantsBlock.selectionIndex ?? "";
+  if (selectionIndex !== "" && implantTable?.itens?.[Number(selectionIndex)]) {
+    return String(selectionIndex);
+  }
+
+  const savedItem = implantsBlock.item;
+  if (!savedItem || !Array.isArray(implantTable?.itens)) {
+    return "";
+  }
+
+  const foundIndex = implantTable.itens.findIndex(
+    (item) =>
+      item.referencia === savedItem.referencia &&
+      item.modelo === savedItem.modelo &&
+      item.marca === savedItem.marca,
+  );
+
+  return foundIndex >= 0 ? String(foundIndex) : "";
+}
+
+function applyBudgetSnapshot(snapshotForm) {
+  clearForm();
+
+  form.elements.patientName.value = snapshotForm.patientName || "";
+  form.elements.budgetDate.value = snapshotForm.budgetDate || formatDateForInput(new Date());
+
+  ensureDynamicTextFields(getSurgeryInputs, createSurgeryField, snapshotForm.surgeries);
+
+  const hospitalBlock = snapshotForm.hospital || {};
+  hospitalEnabledInput.checked = hospitalBlock.enabled !== false;
+  form.elements.hospitalStay.value = hospitalBlock.stay || "";
+
+  ensureDynamicTextFields(getHospitalInputs, createHospitalField, (hospitalBlock.hospitals || []).map((entry) => entry?.name ?? ""));
+
+  getHospitalInputs().forEach((input, index) => {
+    populateHospitalDetails(input, hospitalBlock.hospitals?.[index]);
+  });
+
+  const implantsBlock = snapshotForm.implants || {};
+  implantsEnabledInput.checked = Boolean(implantsBlock.enabled);
+  implantSelect.value = resolveImplantSelectionIndex(implantsBlock);
+
+  const technologiesBlock = snapshotForm.technologies || {};
+  technologiesEnabledInput.checked = Boolean(technologiesBlock.enabled);
+  technologyInput.value = technologiesBlock.name || "";
+  technologyValueInput.value = technologiesBlock.value || "";
+
+  const teamBlock = snapshotForm.team || {};
+  const teamItemsByValue = new Map((teamBlock.items || []).map((item) => [item.value, item.checked]));
+  form.querySelectorAll('input[name="teamItems"]').forEach((input) => {
+    if (teamItemsByValue.has(input.value)) {
+      input.checked = Boolean(teamItemsByValue.get(input.value));
+    }
+  });
+  teamValueInput.value = teamBlock.value || "";
+
+  const extrasBlock = snapshotForm.extras || {};
+  extrasEnabledInput.checked = Boolean(extrasBlock.enabled);
+  applyQuickListSelection(extrasBlock.quickItems, deselectedExtrasQuickItems);
+  renderExtrasQuickList();
+  ensureDynamicTextFields(getExtrasInputs, createExtrasField, extrasBlock.additional);
+
+  const paymentBlock = snapshotForm.payment || {};
+  applyQuickListSelection(paymentBlock.quickItems, deselectedPaymentQuickItems);
+  renderPaymentQuickList();
+  ensureDynamicTextFields(getPaymentInputs, createPaymentField, paymentBlock.additional);
+
+  const guidanceBlock = snapshotForm.guidance || {};
+  applyQuickListSelection(guidanceBlock.quickItems, deselectedGuidanceQuickItems);
+  renderGuidanceQuickList();
+  ensureDynamicTextFields(getGuidanceInputs, createGuidanceField, guidanceBlock.additional);
+
+  updateSurgeryButtons();
+  updateExtrasButtons();
+  updatePaymentButtons();
+  updateGuidanceButtons();
+  updateHospitalButtons();
+  updatePreview();
+
+  if (document.activeElement instanceof HTMLElement) {
+    document.activeElement.blur();
+  }
+}
+
+async function applySnapshotPayload(parsed) {
+  const snapshotForm = window.BudgetSnapshot?.normalizeForm(parsed);
+  if (!snapshotForm) {
+    window.alert("Arquivo inválido. Use um snapshot exportado pelo app (schemaVersion 1).");
+    return;
+  }
+
+  applyBudgetSnapshot(snapshotForm);
+}
+
+async function openBudgetSnapshotFile(file) {
+  let parsed;
+
+  try {
+    parsed = JSON.parse(await file.text());
+  } catch {
+    window.alert("Não foi possível ler o arquivo. Verifique se é um JSON válido.");
+    return;
+  }
+
+  await applySnapshotPayload(parsed);
+}
+
+async function handleOpenButtonClick() {
+  if (!AppApi.isTauri()) {
+    try {
+      const result = await AppApi.openSnapshot();
+      if (result.cancelled) {
+        return;
+      }
+
+      if (result.error) {
+        window.alert(result.error);
+        return;
+      }
+
+      await applySnapshotPayload(result.snapshot);
+      return;
+    } catch (error) {
+      console.warn("Diálogo nativo indisponível; usando seletor do navegador.", error);
+    }
+  }
+
+  openSnapshotInput.click();
+}
+
 form.elements.budgetDate.value = formatDateForInput(new Date());
 form.addEventListener("input", updatePreview);
 form.addEventListener("change", updatePreview);
@@ -4923,6 +5118,19 @@ form.addEventListener("click", (event) => {
   }
 });
 clearButton.addEventListener("click", clearForm);
+openButton.addEventListener("click", () => {
+  void handleOpenButtonClick();
+});
+openSnapshotInput.addEventListener("change", async () => {
+  const file = openSnapshotInput.files?.[0];
+  openSnapshotInput.value = "";
+
+  if (!file) {
+    return;
+  }
+
+  await openBudgetSnapshotFile(file);
+});
 addSurgeryButton.addEventListener("click", createSurgeryField);
 removeSurgeryButton.addEventListener("click", removeLastSurgeryField);
 addPaymentButton.addEventListener("click", createPaymentField);
