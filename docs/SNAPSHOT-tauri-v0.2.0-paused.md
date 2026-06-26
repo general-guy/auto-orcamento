@@ -21,20 +21,15 @@ Preservar o trabalho Tauri/Rust e a documentação associada **sem continuar a m
 - comparar paridade com a stack Node (`docs/SNAPSHOT-node-web-v0.1.0.md`);
 - auditar o que já foi implementado (comandos Rust, `api.js`, PDF, zoom, paths).
 
-## Desenvolvimento ativo (após estagnação)
+## Desenvolvimento ativo (2026-06-26)
 
-O fluxo **diário** volta a ser **`abrir-auto-orcamento.bat`** (Node + browser).
+O fluxo **diário** e **único em evolução** é **`abrir-auto-orcamento.bat`** (Node + WebView2) na branch **`main`**.
 
-Alterações em código **partilhado** do web app servem **ambos** os deploys quando a migração for retomada:
+- **Node:** reabrir o `.bat` ou `npm start` após editar código — sem build.
+- **Tauri:** congelado. O código em `src-tauri/` no repositório é legado; **não** recebe novas features.
+- **`api.js`:** ainda contém caminhos Tauri legados (`invoke`), mas o uso diário é só HTTP via `server.js`.
 
-```text
-index.html, styles.css, app.js, api.js, pdf-build.js, zoom.js, assets/, data/
-```
-
-- **Node:** basta reabrir o `.bat` ou `npm start` — sem build.
-- **Tauri (futuro):** `build-auto-orcamento-tauri.bat` ou `npm run tauri:dev` após retomar a migração.
-
-A camada `api.js` (`AppApi`) já abstrai HTTP (Node) e `invoke` (Tauri). Mantenha novas features nessa camada quando forem relevantes para os dois modos.
+Para retomar Tauri no futuro: checkout de `stable/tauri-v0.2.0-paused` e `build-auto-orcamento-tauri.bat` / `npm run tauri:dev`.
 
 ## Arquitetura Tauri neste snapshot
 

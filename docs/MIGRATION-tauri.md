@@ -1,11 +1,14 @@
 # Plano de migração para Tauri
 
-> **Status:** **ESTAGNADO** (2026-06-18) — Fases 1–3 concluídas; Fases 4–5 pendentes.  
+> **Status:** **CONGELADO** — não há desenvolvimento ativo em Rust/Tauri na `main`.  
+> **Desenvolvimento ativo:** `abrir-auto-orcamento.bat` (Node + WebView2) na branch **`main`**.  
 > **Snapshot congelado:** `stable/tauri-v0.2.0-paused` / tag `v0.2.0-tauri-paused` / `docs/SNAPSHOT-tauri-v0.2.0-paused.md`  
-> **Desenvolvimento ativo:** `abrir-auto-orcamento.bat` (Node). Alterações no web app partilhado (`app.js`, `api.js`, …) servem ambos os deploys no futuro.  
+> **Branch `feature/tauri`:** congelada em `a739f1f` (mergeada em `main`; sem novos commits).  
 > **Baseline Node:** `stable/node-web-v0.1.0` / tag `v0.1.0-node-web` / `docs/SNAPSHOT-node-web-v0.1.0.md`
 
-## Objetivo
+Este documento é **referência histórica** do experimento Tauri e guia para **retomada futura**. Novas features (ex.: snapshot JSON na impressão) implementam-se **apenas na stack Node** até decisão contrária.
+
+## Objetivo (original)
 
 Acrescentar um **executável desktop** (Tauri) **em paralelo** à stack Node — **sem** descontinuar `abrir-auto-orcamento.bat`. Os dois fluxos devem manter **paridade funcional** sobre o **mesmo web app** (`app.js`, `api.js`, etc.).
 
@@ -187,15 +190,17 @@ PDFs ficam em `output/` na raiz do repo (mesma regra de caminho que `data/`). Re
 ## Branch strategy
 
 ```text
-main                         -> desenvolvimento ativo (merge de feature/tauri em 2026-06-26)
-stable/node-web-v0.1.0       -> versão Node congelada (pré-migração Tauri)
+main                         -> desenvolvimento ativo (somente stack Node + WebView2)
+stable/node-web-v0.1.0       -> versão Node congelada (pré-WebView2 / pré-migração Tauri)
 stable/tauri-v0.2.0-paused   -> migração Tauri congelada (Fases 1–3; tag v0.2.0-tauri-paused)
-feature/tauri                -> congelada em a739f1f (não receber novos commits)
+feature/tauri                -> congelada em a739f1f (sem novos commits)
 ```
 
-**Estagnação Tauri (2026-06-18):** a migração **não** foi abandonada — foi **congelada** num snapshot. O uso diário volta ao **`abrir-auto-orcamento.bat`**. Ao retomar o Tauri, parta de `stable/tauri-v0.2.0-paused` ou do código Tauri já presente na `main` e rode `build-auto-orcamento-tauri.bat` / `tauri:dev`.
+**Estagnação Tauri (2026-06-18):** migração congelada num snapshot. Uso diário via **`abrir-auto-orcamento.bat`**.
 
-**Consolidação (2026-06-26):** `feature/tauri` foi mergeada na `main` (fast-forward). Desenvolvimento diário na `main`; `feature/tauri` permanece como referência histórica no commit `a739f1f`.
+**Consolidação (2026-06-26):** `feature/tauri` mergeada na `main` (fast-forward). `feature/tauri` permanece como referência histórica em `a739f1f`.
+
+**Decisão (2026-06-26):** Tauri **permanece congelado** — evolução só na stack Node na `main`. Não alterar `src-tauri/` nem portar novas features para o `.exe` até retomada explícita. Ao retomar, parta de `stable/tauri-v0.2.0-paused`.
 
 Para restaurar só o Node pré-Tauri:
 

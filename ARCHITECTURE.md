@@ -1,15 +1,16 @@
 # Arquitetura
 
-O Auto Orçamento é um app local para orçamentos cirúrgicos. **Dois deploys equivalentes** partilham o **mesmo web app**; só muda o runtime (Node + WebView2 vs Tauri + WebView2):
+O Auto Orçamento é um app local para orçamentos cirúrgicos, servido por **Node.js** e exibido numa janela **WebView2** nativa (`pywebview`).
 
-| Deploy | Entrada | Shell / backend |
-|--------|---------|-----------------|
-| **Node** | `abrir-auto-orcamento.bat` | `native_launcher.py` (WebView2) + `server.js` (HTTP `/api/*`) |
-| **Tauri** | `auto-orcamento.exe` | Rust (`invoke` via `api.js`) |
+| Deploy | Entrada | Backend |
+|--------|---------|---------|
+| **Node (ativo)** | `abrir-auto-orcamento.bat` | `native_launcher.py` + `server.js` (HTTP `/api/*`) |
 
-Históricos e tabelas ficam em **`data/`** na raiz do repo em ambos — sem banco de dados nem servidor externo.
+Históricos, tabelas, PDFs e snapshots JSON ficam em **`data/`** e **`output/`** na raiz do repo — sem banco de dados nem servidor externo.
 
-> **Baseline Node congelada:** branch `stable/node-web-v0.1.0`, tag `v0.1.0-node-web`, snapshot em `docs/SNAPSHOT-node-web-v0.1.0.md`. Na **`main`**, Node e Tauri coexistem; ver `docs/MIGRATION-tauri.md`.
+> **Desenvolvimento ativo:** stack Node + WebView2 na `main`.  
+> **Baseline congelada:** `stable/node-web-v0.1.0` / `v0.1.0-node-web` — `docs/SNAPSHOT-node-web-v0.1.0.md`.  
+> **Tauri congelado:** `stable/tauri-v0.2.0-paused` — código legado em `src-tauri/`; ver [Referência Tauri](#referência-tauri-congelado) no fim deste documento.
 
 ## Visão Geral — deploy Node (válido na `main` e em `stable/node-web-v0.1.0`)
 
@@ -101,6 +102,7 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 | `app.js` | Lógica de UI, preview, históricos, autofill |
 | `server.js` | Servidor na porta 3000, APIs REST |
 | `pdf-export.js` | PDF via Puppeteer + Chrome/Edge |
+| `budget-snapshot.js` | Snapshot JSON do formulário na impressão |
 | `native_launcher.py` | Launcher Windows (servidor + janela WebView2 + ícone `.ico`) |
 | `launch-hidden.vbs` | Relançamento oculto do `.bat` (sem consola visível) |
 | `launch-app.js` | Fallback: servidor + Chrome/Edge em modo app |
@@ -191,7 +193,7 @@ data/tabelas-hospitalares.json
 data/tabela-implantes.json
 ```
 
-O app carrega `data/tabelas-hospitalares.json` via `AppApi.loadTable("hospitalares")`. Na stack Node, o arquivo vem de `data/` na raiz; no Tauri, de `data/` na raiz do repo (quando o `.exe` está na raiz ou em `src-tauri/target/release/`) ou de `{pasta-do-exe}/data/` em layout portátil mínimo.
+O app carrega `data/tabelas-hospitalares.json` via `AppApi.loadTable("hospitalares")` — servido por `server.js` a partir de `data/` na raiz.
 
 As entradas auxiliares `Reg#`/`Sap#` não usam `<datalist>` nativo (limitado no WebView2). O app monta `#hospitalProcedureDropdown` em `app.js`: lista filtrável, posicionada à direita do input com altura de viewport completa (`positionHospitalProcedureDropdown`).
 
@@ -205,7 +207,7 @@ Com duas ou mais entradas no formulário, `updateSurgeryFieldStructure()` exibe 
 
 `data/hospitais.json` guarda os nomes de hospital usados no autocomplete da seção **Hospital**. O dropdown de histórico permite reordenar entradas pelo handle `⋮⋮`; ao soltar, `app.js` envia a lista via `PUT /api/hospitais` / `AppApi.replaceHistory("hospitais", …)`.
 
-`data/tecnologias.json` guarda as tecnologias cadastradas no próprio app. Diferente dos históricos simples, cada item tem `nome` e `valor`, permitindo carregar o valor automaticamente quando a tecnologia é selecionada. O dropdown de histórico também permite reordenar pelo handle `⋮⋮`; ao soltar, `AppApi.replaceTechnologies()` / `PUT /api/tecnologias` / `technologies_replace` (Tauri) grava a ordem preservando `nome` e `valor` de cada item.
+`data/tecnologias.json` guarda as tecnologias cadastradas no próprio app. Diferente dos históricos simples, cada item tem `nome` e `valor`, permitindo carregar o valor automaticamente quando a tecnologia é selecionada. O dropdown de histórico também permite reordenar pelo handle `⋮⋮`; ao soltar, `PUT /api/tecnologias` grava a ordem preservando `nome` e `valor` de cada item.
 
 `data/pagamentos.json` guarda as formas de pagamento cadastradas no formulário. O arquivo é usado pelo dropdown de histórico da seção `Pagamento` (reordenável pelo handle `⋮⋮`, via `PUT /api/pagamentos`) e pela lista rápida reordenável acima dos campos manuais — ambos compartilham o mesmo JSON.
 
@@ -304,9 +306,11 @@ Durante `updatePreview()`, o app salva `scrollTop` e `scrollLeft` do painel de p
 
 Quando o usuário clica em `Imprimir orçamento`, `app.js` salva os históricos pendentes, dispara a exportação e chama `window.print()`.
 
-**Stack Node:** `exportPdfDocument()` envia o HTML das páginas para `POST /api/pdf`. O servidor monta documento autocontido e renderiza com `puppeteer-core`.
+`budget-snapshot.js` monta um snapshot estruturado (`schemaVersion: 1`) com o estado atual do formulário: textos, checkboxes de seções opcionais, itens das listas rápidas (marcados e desmarcados), equipe, hospitais com entradas auxiliares e implante selecionado. Esse objeto acompanha a exportação do PDF.
 
-**Stack Tauri:** `AppApi.exportPdf()` monta o HTML via `pdf-build.js` e invoca o comando Rust `export_pdf` (Chrome/Edge headless). Grava em `output/` na raiz do repo (mesma regra de caminho que `data/`).
+**Stack Node (ativa):** `exportPdfDocument()` envia o HTML das páginas e o snapshot para `POST /api/pdf`. O servidor monta documento autocontido, renderiza com `puppeteer-core` e grava um `.json` ao lado do `.pdf` em `output/`.
+
+**Stack Tauri (congelada):** `export_pdf` gera só PDF; não há snapshot JSON. Retomar Tauri exigiria portar esta funcionalidade.
 
 ## Lógica Hospitalar
 
@@ -365,49 +369,36 @@ A ordem final é: pacotes de cirurgia plástica, taxas adicionais e, ao fim, ent
 
 ## Convenções
 
-- O frontend é HTML, CSS e JavaScript compartilhado; o runtime Node ou Tauri é escolhido no deploy.
-- Fluxo **Node:** sem build — `abrir-auto-orcamento.bat` serve os arquivos da raiz do repo.
-- Fluxo **Tauri:** build do `.exe` embute `dist/` (gerado por `copy-frontend`); `data/` continua externa na raiz.
+- O frontend é HTML, CSS e JavaScript servido por `server.js` na raiz do repo — **sem build step**.
+- Fluxo diário: `abrir-auto-orcamento.bat` → WebView2 + `http://localhost:3000`.
 - O estado persistente fica em JSON local (`data/`, `output/`).
 - Alterações no preview devem chamar `updatePreview()` quando mudarem campos programaticamente.
 - Alterações nas tabelas devem preservar o formato descrito em `docs/tabelas-hospitalares.md`.
+- Novas features implementam-se na stack Node; **não** portar para `src-tauri/` enquanto Tauri estiver congelado.
 
-## Evolução planejada
+## Estado do repositório
 
-A baseline **v0.1.0-node-web** está no branch `stable/node-web-v0.1.0`. Na **`main`**, o Tauri acrescenta deploy via `.exe` **em paralelo** ao fluxo `abrir-auto-orcamento.bat` — mesmo web app, mesma pasta `data/`.
+| Branch / tag | Papel |
+|---|---|
+| **`main`** | Desenvolvimento ativo (Node) |
+| `stable/node-web-v0.1.0` | Node clássico congelado |
+| `stable/tauri-v0.2.0-paused` | Tauri congelado (Fases 1–3) |
+| `feature/tauri` | Congelada em `a739f1f` |
 
-**Migração Tauri estagnada (2026-06-18):** snapshot `stable/tauri-v0.2.0-paused` / `v0.2.0-tauri-paused` (Fases 1–3). Desenvolvimento diário via Node; código partilhado do web app preparado para retomada. Ver `docs/SNAPSHOT-tauri-v0.2.0-paused.md` e `docs/MIGRATION-tauri.md`.
+**Decisão (2026-06-26):** evolução **somente Node** na `main`. Tauri e `feature/tauri` permanecem congelados.
 
-**Consolidação (2026-06-26):** `feature/tauri` mergeada na `main`; `feature/tauri` congelada em `a739f1f`.
+## Referência Tauri (congelado)
 
-### Stack Tauri — deploy alternativo, frontend idêntico
+> Documentação histórica. **Não** use no fluxo diário. Retomada futura: `docs/SNAPSHOT-tauri-v0.2.0-paused.md` e `docs/MIGRATION-tauri.md`.
 
-**Desenvolvimento rápido** (mesmo `app.js` que o Node; sem gerar `.exe` na raiz):
+O repositório ainda contém `src-tauri/`, `api.js` (com detecção Tauri legada) e scripts de build do `.exe`. Esses artefatos correspondem ao snapshot `stable/tauri-v0.2.0-paused` e **não** recebem novas features.
 
-```text
-npm run tauri:dev
-```
-
-**Build** (gera `auto-orcamento.exe` na raiz com o frontend copiado de `dist/`):
-
-```text
-build-auto-orcamento-tauri.bat
-  -> npm run copy:frontend   # index.html, app.js, api.js, ...
-  -> tauri build
-  -> scripts/copy-release-exe.cjs  ->  auto-orcamento.exe (raiz)
-```
-
-**Uso em outro PC:** copiar o repo (com `auto-orcamento.exe` na raiz e pasta `data/`) e abrir o `.exe`. Rebuild do `.exe` só na máquina de dev após alterar o web app.
-
-O fluxo **`abrir-auto-orcamento.bat`** permanece válido na mesma branch para testar paridade sem rebuild.
-
-- **`api.js`:** detecta Tauri vs Node; no Tauri usa `window.__TAURI__.core.invoke` (requer `withGlobalTauri: true`). Fora da porta `3000`, não faz fallback para HTTP — aguarda o Tauri em `waitForBackend()`. Expõe `AppApi.loadTable()` para tabelas hospitalares e de implantes.
+Resumo do que existia no experimento Tauri:
 - **`pdf-build.js`:** monta HTML autocontido para exportação (CSS/fontes inline).
 - **`zoom.js`:** atalhos `Ctrl` + roda / `Ctrl` + `+`/`-`/`0`; indicador flutuante `#zoomFlag` (%, `−`/`+`, Redefinir). **Tauri:** persiste em `data/settings.json` via comandos `zoom_*` e `WebviewWindow::set_zoom`. **Node (WebView2):** `AppApi` persiste via `GET/PUT /api/settings` e aplica escala com `transform: scale()` no `body` (layout preenche a janela); o arraste da divisória entre painéis usa `AppApi.getWebZoomFactor()`.
 - **`src-tauri/src/paths.rs`:** resolve `data/` e `output/` com `std::env::current_exe()`. Em debug, raiz do repo. Em release: raiz do repo se o `.exe` está em `src-tauri/target/release/` ou na raiz (pasta `src-tauri/` ao lado); senão `{pasta-do-exe}/data/`. Não grava em `%AppData%`. Log de startup: `Diretório de dados: ...`.
 - **`src-tauri/src/storage.rs`:** históricos, tecnologias, zoom e tabelas (`table_load` / `read_table`); seed único de tabelas a partir de `dist/data/` embutido no build.
 - **`src-tauri/src/pdf.rs`:** grava PDF em `output/` via Chrome/Edge headless; comando `export_pdf`.
 - **`scripts/copy-release-exe.cjs`:** após o build, copia `src-tauri/target/release/auto-orcamento.exe` para `auto-orcamento.exe` na raiz.
-- **`src-tauri/target/`:** cache de compilação Rust (pode ocupar vários GB). Não versionada; pode ser removida com `cargo clean` dentro de `src-tauri/` quando quiser recuperar espaço em disco — o próximo build será mais lento.
-- **Ícone do app:** `assets/app-icon-g.png` → `scripts/build-app-icon-square.ps1` → `npm run icon:web` sincroniza `assets/app-icon.ico` e `favicon-*.png` a partir de `src-tauri/icons/` (mesmo ícone do `.exe`); `npm run icon:generate` regenera tudo a partir do timbrado/print.
-- **PDF automático:** Tauri usa `export_pdf`; stack Node ainda usa `/api/pdf` + Puppeteer.
+- **`src-tauri/target/`:** cache Rust (`.gitignore`); limpar com `cargo clean` dentro de `src-tauri/`.
+- **PDF no Tauri congelado:** `export_pdf` via Chrome/Edge headless — **sem** snapshot JSON (feature só na stack Node).

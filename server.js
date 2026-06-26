@@ -5,6 +5,7 @@ const {
   buildPdfFilename,
   renderPdf,
   resolveUniqueOutputPath,
+  writeBudgetSnapshotJson,
 } = require("./pdf-export");
 
 const port = 3000;
@@ -177,7 +178,7 @@ async function handlePdfExport(request, response) {
   }
 
   const body = await collectRequestBody(request, 1024 * 1024 * 8);
-  const { patientName, pagesHtml } = JSON.parse(body || "{}");
+  const { patientName, pagesHtml, snapshot } = JSON.parse(body || "{}");
   const html = typeof pagesHtml === "string" ? pagesHtml.trim() : "";
 
   if (!html) {
@@ -196,10 +197,22 @@ async function handlePdfExport(request, response) {
     rootDir,
   });
 
-  sendJson(response, 200, {
+  let jsonPath = null;
+  if (snapshot && typeof snapshot === "object") {
+    jsonPath = writeBudgetSnapshotJson(outputPath, snapshot);
+  }
+
+  const responsePayload = {
     filename: path.basename(outputPath),
     path: path.relative(rootDir, outputPath).replace(/\\/g, "/"),
-  });
+  };
+
+  if (jsonPath) {
+    responsePayload.jsonFilename = path.basename(jsonPath);
+    responsePayload.jsonPath = path.relative(rootDir, jsonPath).replace(/\\/g, "/");
+  }
+
+  sendJson(response, 200, responsePayload);
 }
 
 async function handleHistoryApi(request, response, filePath, itemLabel) {

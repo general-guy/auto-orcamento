@@ -172,6 +172,16 @@ async function renderPdf({ pagesHtml, outputPath, rootDir }) {
   }
 }
 
+function writeBudgetSnapshotJson(outputPath, snapshot) {
+  if (!snapshot || typeof snapshot !== "object") {
+    return null;
+  }
+
+  const jsonPath = outputPath.replace(/\.pdf$/i, ".json");
+  fs.writeFileSync(jsonPath, `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
+  return jsonPath;
+}
+
 module.exports = {
   buildPdfFilename,
   buildPdfDocumentHtml,
@@ -179,4 +189,5 @@ module.exports = {
   renderPdf,
   resolveUniqueOutputPath,
   sanitizeFilenamePart,
+  writeBudgetSnapshotJson,
 };

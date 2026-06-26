@@ -3472,9 +3472,16 @@ async function exportPdfDocument() {
     return;
   }
 
+  const snapshot = window.BudgetSnapshot?.collect({
+    getImplantItem: getSelectedImplant,
+  });
+
   try {
-    const result = await AppApi.exportPdf(getFieldValue("patientName"), pagesHtml);
+    const result = await AppApi.exportPdf(getFieldValue("patientName"), pagesHtml, snapshot);
     console.info(`PDF salvo em ${result.path}`);
+    if (result.jsonPath) {
+      console.info(`JSON salvo em ${result.jsonPath}`);
+    }
   } catch (error) {
     console.warn("Não foi possível gerar o PDF automaticamente.", error);
   }

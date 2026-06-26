@@ -249,7 +249,7 @@
     return response.json();
   }
 
-  async function exportPdf(patientName, pagesHtml) {
+  async function exportPdf(patientName, pagesHtml, snapshot) {
     const html = typeof pagesHtml === "string" ? pagesHtml.trim() : "";
     if (!html) {
       throw new Error("Informe o conteúdo do documento para exportar.");
@@ -267,6 +267,7 @@
       body: JSON.stringify({
         patientName,
         pagesHtml: html,
+        snapshot: snapshot && typeof snapshot === "object" ? snapshot : undefined,
       }),
     });
   }
