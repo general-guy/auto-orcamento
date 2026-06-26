@@ -187,13 +187,15 @@ PDFs ficam em `output/` na raiz do repo (mesma regra de caminho que `data/`). Re
 ## Branch strategy
 
 ```text
-main                         -> histórico; ainda sem merge completo do Tauri
+main                         -> desenvolvimento ativo (merge de feature/tauri em 2026-06-26)
 stable/node-web-v0.1.0       -> versão Node congelada (pré-migração Tauri)
 stable/tauri-v0.2.0-paused   -> migração Tauri congelada (Fases 1–3; tag v0.2.0-tauri-paused)
-feature/tauri                -> branch de trabalho: web app partilhado + código Tauri no repo
+feature/tauri                -> congelada em a739f1f (não receber novos commits)
 ```
 
-**Estagnação (2026-06-18):** a migração **não** foi abandonada — foi **congelada** num snapshot. O uso diário volta ao **`abrir-auto-orcamento.bat`**. Ao retomar o Tauri, parta de `stable/tauri-v0.2.0-paused` ou continue em `feature/tauri` e rode `build-auto-orcamento-tauri.bat` / `tauri:dev`.
+**Estagnação Tauri (2026-06-18):** a migração **não** foi abandonada — foi **congelada** num snapshot. O uso diário volta ao **`abrir-auto-orcamento.bat`**. Ao retomar o Tauri, parta de `stable/tauri-v0.2.0-paused` ou do código Tauri já presente na `main` e rode `build-auto-orcamento-tauri.bat` / `tauri:dev`.
+
+**Consolidação (2026-06-26):** `feature/tauri` foi mergeada na `main` (fast-forward). Desenvolvimento diário na `main`; `feature/tauri` permanece como referência histórica no commit `a739f1f`.
 
 Para restaurar só o Node pré-Tauri:
 

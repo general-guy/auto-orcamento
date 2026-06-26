@@ -16,7 +16,8 @@ Alterações em `index.html`, `app.js`, `api.js`, `styles.css`, `assets/` e `dat
 |---|---|---|
 | Node pré-Tauri | `stable/node-web-v0.1.0` / `v0.1.0-node-web` | `docs/SNAPSHOT-node-web-v0.1.0.md` |
 | Tauri congelado (Fases 1–3) | `stable/tauri-v0.2.0-paused` / `v0.2.0-tauri-paused` | `docs/SNAPSHOT-tauri-v0.2.0-paused.md` |
-| Trabalho atual | `feature/tauri` | `docs/MIGRATION-tauri.md` (status **estagnado**) |
+| Trabalho atual | `main` | `docs/MIGRATION-tauri.md` (Tauri **estagnado**) |
+| `feature/tauri` (congelada) | `a739f1f` | mergeada em `main` em 2026-06-26; não receber novos commits |
 
 ## Como Usar
 
@@ -34,7 +35,7 @@ Ambos leem e gravam **`data/`** e **`output/`** na raiz do repo. Históricos, ta
 - **Node:** abra de novo com `abrir-auto-orcamento.bat` (ou `npm start`) — **não** precisa de build.
 - **Tauri:** rode `build-auto-orcamento-tauri.bat` para regenerar o `.exe` com o frontend atualizado (ou `npm run tauri:dev` para testar sem build).
 
-Na branch **`feature/tauri`**, os **dois fluxos permanecem válidos**. O fluxo Node **não** foi descontinuado.
+Na **`main`**, os **dois fluxos permanecem válidos**. O fluxo Node **não** foi descontinuado.
 
 ### Node — web app via `abrir-auto-orcamento.bat` (stack original)
 
@@ -100,13 +101,13 @@ Não são necessários Python, PowerShell nem Git para uso normal.
 
 A stack Node.js + browser de referência está documentada em `docs/SNAPSHOT-node-web-v0.1.0.md` (branch **`stable/node-web-v0.1.0`**, tag **`v0.1.0-node-web`**).
 
-Na branch **`feature/tauri`**, o **Tauri** acrescenta o `.exe` sem Node em runtime; o fluxo **`abrir-auto-orcamento.bat`** continua **válido e equivalente** para abrir o mesmo web app.
+Na **`main`**, o **Tauri** acrescenta o `.exe` sem Node em runtime; o fluxo **`abrir-auto-orcamento.bat`** continua **válido e equivalente** para abrir o mesmo web app.
 
 **Migração Tauri estagnada (2026-06-18):** Fases 1–3 concluídas; estado preservado em `stable/tauri-v0.2.0-paused`. Fases 4–5 (PC limpo, paridade final) ficam para retomada futura. Plano e snapshot em `docs/MIGRATION-tauri.md` e `docs/SNAPSHOT-tauri-v0.2.0-paused.md`.
 
 Para a baseline Node congelada: `git checkout stable/node-web-v0.1.0` e `npm install`.
 
-## Versão Tauri (branch `feature/tauri`) — **estagnada**
+## Versão Tauri — **estagnada** (código em `main`, branch `feature/tauri` congelada)
 
 > Migração **congelada** em `stable/tauri-v0.2.0-paused`. Retome com `build-auto-orcamento-tauri.bat` ou `npm run tauri:dev` quando quiser continuar. Até lá, use **`abrir-auto-orcamento.bat`**.
 

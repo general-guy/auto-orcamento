@@ -9,9 +9,9 @@ O Auto Orçamento é um app local para orçamentos cirúrgicos. **Dois deploys e
 
 Históricos e tabelas ficam em **`data/`** na raiz do repo em ambos — sem banco de dados nem servidor externo.
 
-> **Baseline Node congelada:** branch `stable/node-web-v0.1.0`, tag `v0.1.0-node-web`, snapshot em `docs/SNAPSHOT-node-web-v0.1.0.md`. Na **`feature/tauri`**, Node e Tauri coexistem; ver `docs/MIGRATION-tauri.md`.
+> **Baseline Node congelada:** branch `stable/node-web-v0.1.0`, tag `v0.1.0-node-web`, snapshot em `docs/SNAPSHOT-node-web-v0.1.0.md`. Na **`main`**, Node e Tauri coexistem; ver `docs/MIGRATION-tauri.md`.
 
-## Visão Geral — deploy Node (válido em `feature/tauri` e `stable/node-web-v0.1.0`)
+## Visão Geral — deploy Node (válido na `main` e em `stable/node-web-v0.1.0`)
 
 ```text
 abrir-auto-orcamento.bat
@@ -363,11 +363,13 @@ A ordem final é: pacotes de cirurgia plástica, taxas adicionais e, ao fim, ent
 
 ## Evolução planejada
 
-A baseline **v0.1.0-node-web** está no branch `stable/node-web-v0.1.0`. Na **`feature/tauri`**, o Tauri acrescenta deploy via `.exe` **em paralelo** ao fluxo `abrir-auto-orcamento.bat` — mesmo web app, mesma pasta `data/`.
+A baseline **v0.1.0-node-web** está no branch `stable/node-web-v0.1.0`. Na **`main`**, o Tauri acrescenta deploy via `.exe` **em paralelo** ao fluxo `abrir-auto-orcamento.bat` — mesmo web app, mesma pasta `data/`.
 
 **Migração Tauri estagnada (2026-06-18):** snapshot `stable/tauri-v0.2.0-paused` / `v0.2.0-tauri-paused` (Fases 1–3). Desenvolvimento diário via Node; código partilhado do web app preparado para retomada. Ver `docs/SNAPSHOT-tauri-v0.2.0-paused.md` e `docs/MIGRATION-tauri.md`.
 
-### Stack Tauri (branch `feature/tauri`) — deploy alternativo, frontend idêntico
+**Consolidação (2026-06-26):** `feature/tauri` mergeada na `main`; `feature/tauri` congelada em `a739f1f`.
+
+### Stack Tauri — deploy alternativo, frontend idêntico
 
 **Desenvolvimento rápido** (mesmo `app.js` que o Node; sem gerar `.exe` na raiz):
 
