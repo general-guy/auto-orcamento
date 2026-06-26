@@ -15,13 +15,14 @@ Históricos e tabelas ficam em **`data/`** na raiz do repo em ambos — sem banc
 
 ```text
 abrir-auto-orcamento.bat
-  -> native_launcher.py (pythonw)
-      -> node server.js
-      -> janela WebView2 (pywebview) em http://localhost:3000
-          -> index.html
-          -> styles.css
-          -> app.js
-          -> data/*.json
+  -> launch-hidden.vbs (relançamento oculto, sem consola)
+      -> native_launcher.py (pythonw)
+          -> node server.js (CREATE_NO_WINDOW)
+          -> janela WebView2 (pywebview) em http://localhost:3000
+              -> index.html
+              -> styles.css
+              -> app.js
+              -> data/*.json
 ```
 
 Fallback (sem `pythonw` ou se `pywebview` falhar):
@@ -35,22 +36,31 @@ abrir-auto-orcamento.bat
 
 ## Launcher
 
-`abrir-auto-orcamento.bat` instala `node_modules` se necessário e, por padrão, executa:
+`abrir-auto-orcamento.bat` instala `node_modules` se necessário. No duplo clique, relança-se em modo oculto via `launch-hidden.vbs` (argumento interno `__hidden__`) e só então executa:
 
 ```text
 pythonw native_launcher.py
 ```
 
+Assim o utilizador vê apenas a janela WebView2 — sem terminais CMD ou Node persistentes. Pode haver um flash breve do CMD na primeira linha do `.bat`, antes do relançamento oculto.
+
+`launch-hidden.vbs`:
+
+- recebe o caminho completo do `.bat`;
+- executa `abrir-auto-orcamento.bat __hidden__` com estilo de janela `0` (oculto) via `WScript.Shell.Run`.
+
 `native_launcher.py`:
 
 - define `AppUserModelID` no Windows (`auto-orcamento.app`) para identidade própria na barra de tarefas;
-- inicia `server.js` com Node em subprocesso;
+- inicia `server.js` com Node em subprocesso (`CREATE_NO_WINDOW` no Windows);
 - aguarda `http://localhost:3000` responder;
 - abre janela **WebView2** via `pywebview` com ícone `assets/app-icon.ico` (`webview.start(icon=...)`);
 - maximiza a janela ao carregar;
 - encerra o servidor Node ao fechar a janela.
 
 Requer `python -m pip install -r requirements.txt` (`pywebview`). O ícone na barra de tarefas vem do `.ico` nativo da janela — não do favicon do Chrome (mesmo padrão do repositório `dados-clinica`).
+
+Para debug com terminal visível, rode `python native_launcher.py` ou `abrir-auto-orcamento.bat __hidden__` a partir de um CMD já aberto (sem passar pelo relançamento VBS).
 
 `launch-app.js` (fallback):
 
@@ -92,6 +102,7 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 | `server.js` | Servidor na porta 3000, APIs REST |
 | `pdf-export.js` | PDF via Puppeteer + Chrome/Edge |
 | `native_launcher.py` | Launcher Windows (servidor + janela WebView2 + ícone `.ico`) |
+| `launch-hidden.vbs` | Relançamento oculto do `.bat` (sem consola visível) |
 | `launch-app.js` | Fallback: servidor + Chrome/Edge em modo app |
 | `requirements.txt` | `pywebview` para o launcher nativo |
 | `abrir-auto-orcamento.bat` | Atalho de entrada |

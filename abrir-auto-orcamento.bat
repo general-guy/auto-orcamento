@@ -1,6 +1,11 @@
 @echo off
 setlocal
 
+if /I not "%~1"=="__hidden__" (
+  wscript.exe //nologo "%~dp0launch-hidden.vbs" "%~f0"
+  exit /b 0
+)
+
 cd /d "%~dp0"
 
 if not exist "node_modules\" (

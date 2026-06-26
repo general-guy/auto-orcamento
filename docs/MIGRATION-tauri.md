@@ -36,7 +36,7 @@ Acrescentar um **executável desktop** (Tauri) **em paralelo** à stack Node —
 | `launch-app.js` | Abre browser + servidor (fallback Node) | Janela Tauri nativa |
 | `POST /api/shutdown` | Encerra Node | Fechar janela |
 
-**Mantidos em ambos os deploys:** `abrir-auto-orcamento.bat`, `native_launcher.py`, `launch-app.js`, `server.js` (fluxo Node); `index.html`, `app.js`, `api.js`, `styles.css`, `assets/`, `data/`.
+**Mantidos em ambos os deploys:** `abrir-auto-orcamento.bat`, `launch-hidden.vbs`, `native_launcher.py`, `launch-app.js`, `server.js` (fluxo Node); `index.html`, `app.js`, `api.js`, `styles.css`, `assets/`, `data/`.
 
 ## Mapa API → comandos Tauri (rascunho)
 

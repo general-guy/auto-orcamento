@@ -6,7 +6,7 @@ Aplicativo local para gerar orçamentos cirúrgicos em papel timbrado, com preen
 
 Use **`abrir-auto-orcamento.bat`** (Node.js + janela WebView2 nativa). É o modo recomendado enquanto a migração Tauri está **estagnada**.
 
-O `.bat` abre uma **janela nativa** (WebView2 via `pywebview`) com o ícone `.ico` na barra de tarefas — o mesmo princípio usado no repositório `dados-clinica`, sem depender do favicon do Chrome. Requer **Node.js** e **Python** com `pywebview` (`python -m pip install -r requirements.txt`).
+O `.bat` abre **sem janelas de terminal visíveis**: relança-se em modo oculto via `launch-hidden.vbs` e o servidor Node arranca com `CREATE_NO_WINDOW`. Só aparece a janela do app — WebView2 via `pywebview`, com ícone `.ico` nítido na barra de tarefas (mesmo padrão do repositório `dados-clinica`, sem favicon borrado do Chrome). Requer **Node.js** e **Python** com `pywebview` (`python -m pip install -r requirements.txt`).
 
 **Pasta `src-tauri/`:** enquanto não for buildar o `.exe`, trate-a como **congelada** — edite só o web app partilhado na raiz (`app.js`, `api.js`, etc.). Evite alterar Rust/`src-tauri/` sem necessidade: qualquer `cargo check`, Rust Analyzer ou `tauri:dev` recria `src-tauri/target/` (centenas de MB). Só rode `build-auto-orcamento-tauri.bat` ou comandos Tauri quando quiser gerar o `.exe` de novo; use `cargo clean` se `target/` crescer.
 
@@ -45,11 +45,13 @@ No Windows, clique duas vezes em:
 abrir-auto-orcamento.bat
 ```
 
-Requer **Node.js** instalado. O atalho instala dependências se faltar `node_modules`, inicia `server.js` na porta 3000 e abre a interface em janela WebView2 nativa (`native_launcher.py` via `pythonw`). O ícone na barra de tarefas vem de `assets/app-icon.ico`. Ao fechar a janela, o servidor encerra.
+Requer **Node.js** instalado. O atalho instala dependências se faltar `node_modules`, relança-se em modo oculto (`launch-hidden.vbs`), inicia `server.js` na porta 3000 (sem consola visível) e abre a interface em janela WebView2 nativa (`native_launcher.py` via `pythonw`). O ícone na barra de tarefas vem de `assets/app-icon.ico`. Ao fechar a janela, o servidor encerra.
 
-Se `pythonw` não estiver disponível, o `.bat` cai para Chrome/Edge em modo app (`launch-app.js`) — nesse modo o ícone da barra pode ficar borrado.
+Pode haver um **flash breve** do CMD ao duplo clique — o Windows abre o `.bat` antes do relançamento oculto. Se o launcher nativo falhar, o fallback `launch-app.js` (Chrome/Edge) **mostra** um terminal de propósito, para facilitar diagnóstico.
 
-Equivalente manual:
+Se `pythonw` não estiver disponível, o `.bat` cai para Chrome/Edge em modo app (`launch-app.js`) — nesse modo o ícone da barra pode ficar borrado e um terminal permanece visível.
+
+Equivalente manual (com terminal visível, útil para debug):
 
 ```bash
 npm install
@@ -120,7 +122,7 @@ Código partilhado (editar aqui):
   index.html, app.js, api.js, pdf-build.js, zoom.js, styles.css, assets/
 
 Node (abrir-auto-orcamento.bat):
-  server.js + launch-app.js  →  http://localhost:3000  →  arquivos na raiz do repo
+  launch-hidden.vbs + native_launcher.py + server.js  →  http://localhost:3000  →  arquivos na raiz do repo
 
 Tauri (build-auto-orcamento-tauri.bat):
   copy-frontend → dist/  →  embutido no .exe  →  data/ e output/ na raiz do repo

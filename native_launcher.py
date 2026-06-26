@@ -66,12 +66,15 @@ def find_node_executable() -> str:
 
 def start_node_server() -> subprocess.Popen[str]:
     node_path = find_node_executable()
-    return subprocess.Popen(
-        [node_path, "server.js"],
-        cwd=PROJECT_ROOT,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
+    popen_kwargs: dict = {
+        "cwd": PROJECT_ROOT,
+        "stdout": subprocess.DEVNULL,
+        "stderr": subprocess.DEVNULL,
+    }
+    if sys.platform == "win32":
+        popen_kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW
+
+    return subprocess.Popen([node_path, "server.js"], **popen_kwargs)
 
 
 def stop_node_server(server_process: subprocess.Popen[str] | None) -> None:
