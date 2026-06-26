@@ -130,7 +130,7 @@ Endpoints principais:
 - `GET /api/extras`, `POST /api/extras`, `DELETE /api/extras`, `PUT /api/extras`: histórico de extras e persistência da ordem manual.
 - `GET /api/tecnologias`, `POST /api/tecnologias`, `DELETE /api/tecnologias`, `PUT /api/tecnologias`: histórico de tecnologias com valor associado e persistência da ordem manual no dropdown.
 - `GET /api/settings`, `PUT /api/settings`: preferências locais (zoom; `lastSnapshotDir` para o botão **Abrir**; grava em `data/settings.json`).
-- `POST /api/open-snapshot`: abre seletor nativo de JSON no Windows, lê o arquivo, persiste a pasta escolhida em `lastSnapshotDir` e devolve o snapshot parseado.
+- `POST /api/open-snapshot`: abre seletor nativo de JSON no Windows (`pywebview`/WebView2 via `scripts/open-snapshot-dialog.py`), lê o arquivo, persiste a pasta em `lastSnapshotDir` e devolve o snapshot parseado.
 - `POST /api/pdf`: gera PDF em `output/` e, se enviado no corpo, grava snapshot JSON (`snapshot`) com o mesmo nome base (`.json`).
 - `POST /api/shutdown`: encerra o servidor quando acionado pela interface.
 
@@ -329,7 +329,7 @@ Falhas de exportação exibem um `alert` além do log no console. Requer Chrome 
 
 ## Importação de snapshot JSON
 
-O botão **Abrir** (`#openButton`) chama `AppApi.openSnapshot()` → `POST /api/open-snapshot`. No Windows, `scripts/open-snapshot-dialog.py` (tkinter, preferencial) ou `scripts/open-snapshot-dialog.ps1` (fallback) abre o seletor nativo com pasta inicial absoluta. Preferência: `lastSnapshotDir` em `data/settings.json`, ignorando `USERPROFILE`; fallback `output/`. Imprimir com JSON também atualiza `lastSnapshotDir`. **Não** há fallback para `<input type="file">` na stack Node — o seletor do WebView2 abriria sempre na pasta pessoal. Após a escolha, `applyBudgetSnapshot()` restaura o formulário.
+O botão **Abrir** (`#openButton`) chama `AppApi.openSnapshot()` → `POST /api/open-snapshot`. No Windows, `scripts/open-snapshot-dialog.py` usa **pywebview** (`window.create_file_dialog`, WebView2, janela oculta) para diálogo nativo nítido em HiDPI; fallback PowerShell/tkinter. Preferência: `lastSnapshotDir`; fallback `output/`. Imprimir grava `output/` em `lastSnapshotDir`. O launcher (`native_launcher.py`, `port-utils.js`) libera a porta 3000 antes de subir o Node. **Não** há fallback para `<input type="file">` na stack Node.
 
 **Stack Tauri (congelada):** `export_pdf` gera só PDF; não há snapshot JSON nem importação.
 

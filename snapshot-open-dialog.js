@@ -53,10 +53,15 @@ function findPythonExecutable() {
     }
 
     try {
-      execFileSync(candidate, ["-c", "import tkinter"], { stdio: "ignore", windowsHide: true });
+      execFileSync(candidate, ["-c", "import webview"], { stdio: "ignore", windowsHide: true });
       return candidate;
     } catch {
-      // try next
+      try {
+        execFileSync(candidate, ["-c", "import tkinter"], { stdio: "ignore", windowsHide: true });
+        return candidate;
+      } catch {
+        // try next
+      }
     }
   }
 

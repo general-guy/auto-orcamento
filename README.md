@@ -200,7 +200,7 @@ Depois de alterar código, **reabra** o app (`abrir-auto-orcamento.bat`) para ca
 
 O botão **Abrir** (verde, à esquerda de **Limpar**) carrega um snapshot JSON gerado na impressão (ex.: `output/Maria da Silva 2026-06-26 14-30-05.json`).
 
-1. No Windows, o servidor Node abre um **seletor nativo** via Python (`tkinter`, preferencial) ou PowerShell — **não** o seletor do navegador (que sempre abre na pasta pessoal).
+1. No Windows, o servidor Node abre um **seletor nativo** via **pywebview** (WebView2, mesma stack do app; nítido em telas HiDPI), com fallback para PowerShell e tkinter.
 2. A pasta inicial é a **última usada** (`lastSnapshotDir` em `data/settings.json`), com fallback em `output/`; a raiz do perfil do usuário (`C:\Users\...`) nunca é reutilizada como pasta salva. Após imprimir, a pasta `output/` também é gravada automaticamente.
 3. Ao escolher um arquivo, o app valida `schemaVersion: 1`, repopula o formulário e atualiza a pré-visualização.
 4. Se ambos os seletores nativos falharem, aparece um **alert** com o erro (sem fallback silencioso para o navegador).
