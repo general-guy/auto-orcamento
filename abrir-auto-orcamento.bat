@@ -12,24 +12,21 @@ if not exist "node_modules\" (
   npm install
 )
 
+rem Libera a porta 3000 se um servidor antigo ficou preso.
+node -e "require('./port-utils').freeTcpPortSync(3000)" >nul 2>&1
+
+rem Node sobe em paralelo enquanto o Python/WebView2 arrancam.
+start "" /B node server.js
+
 where pythonw >nul 2>&1
 if errorlevel 1 (
-  echo pythonw nao encontrado. Abrindo pelo Chrome/Edge...
-  node launch-app.js
+  node launch-app.js --external-server
   exit /b %ERRORLEVEL%
 )
 
-pythonw "%~dp0native_launcher.py"
+pythonw "%~dp0native_launcher.py" --external-server
 if errorlevel 1 (
-  echo.
-  echo O launcher nativo falhou. Verifique:
-  echo python -m pip install -r requirements.txt
-  echo.
-  echo Para ver o erro no terminal, rode:
-  echo python native_launcher.py
-  echo.
-  echo Tentando Chrome/Edge como alternativa...
-  node launch-app.js
+  node launch-app.js --external-server
 )
 
 exit /b %ERRORLEVEL%

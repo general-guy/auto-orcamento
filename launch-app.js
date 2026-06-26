@@ -1,11 +1,13 @@
 const { spawn } = require("node:child_process");
 const fs = require("node:fs");
+const http = require("node:http");
 const path = require("node:path");
-const { freeTcpPort } = require("./port-utils");
+const { freeTcpPortSync } = require("./port-utils");
 
-const appUrl = "http://localhost:3000";
+const appUrl = "http://127.0.0.1:3000";
 const appPort = 3000;
 const rootDir = __dirname;
+const externalServer = process.argv.includes("--external-server");
 
 const browserCandidates = [
   process.env.AUTO_ORCAMENTO_BROWSER,
@@ -20,7 +22,7 @@ const browserCandidates = [
 const browserProfileDir = path.join(
   process.env.LOCALAPPDATA || require("node:os").homedir(),
   "Auto Orcamento",
-  "browser-profile"
+  "browser-profile",
 );
 
 let serverProcess = null;
@@ -31,12 +33,62 @@ function getBrowserPath() {
   return browserCandidates.find((candidate) => fs.existsSync(candidate));
 }
 
+function waitForServer(timeoutMs = 20000) {
+  const deadline = Date.now() + timeoutMs;
+
+  return new Promise((resolve, reject) => {
+    const attempt = () => {
+      const request = http.get(`${appUrl}/api/settings`, (response) => {
+        response.resume();
+        if (response.statusCode && response.statusCode < 500) {
+          resolve();
+          return;
+        }
+
+        retry();
+      });
+
+      request.on("error", retry);
+      request.setTimeout(250, () => {
+        request.destroy();
+        retry();
+      });
+    };
+
+    const retry = () => {
+      if (Date.now() >= deadline) {
+        reject(new Error("Servidor local nao respondeu a tempo."));
+        return;
+      }
+
+      setTimeout(attempt, 40);
+    };
+
+    attempt();
+  });
+}
+
+async function shutdownExternalServer() {
+  try {
+    await fetch(`${appUrl}/api/shutdown`, { method: "POST" });
+  } catch {
+    // server may already be stopping
+  }
+}
+
 function shutdown(exitCode = 0) {
   if (isShuttingDown) {
     return;
   }
 
   isShuttingDown = true;
+
+  if (externalServer) {
+    void shutdownExternalServer().finally(() => {
+      process.exit(exitCode);
+    });
+    return;
+  }
 
   if (serverProcess && !serverProcess.killed) {
     serverProcess.kill();
@@ -58,7 +110,7 @@ function openBrowserApp(browserPath) {
     {
       stdio: "ignore",
       windowsHide: false,
-    }
+    },
   );
 
   browserProcess.on("exit", () => shutdown(0));
@@ -105,8 +157,13 @@ async function main() {
   console.warn("Prefira abrir pelo abrir-auto-orcamento.bat (janela WebView2 nativa).");
 
   try {
-    freeTcpPort(appPort);
-    await startServer();
+    if (externalServer) {
+      await waitForServer();
+    } else {
+      freeTcpPortSync(appPort);
+      await startServer();
+    }
+
     openBrowserApp(browserPath);
   } catch (error) {
     console.error(error.message);

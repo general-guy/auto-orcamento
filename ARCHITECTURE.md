@@ -17,13 +17,11 @@ Históricos, tabelas, PDFs e snapshots JSON ficam em **`data/`** e **`output/`**
 ```text
 abrir-auto-orcamento.bat
   -> launch-hidden.vbs (relançamento oculto, sem consola)
-      -> native_launcher.py (pythonw)
-          -> node server.js (CREATE_NO_WINDOW)
-          -> janela WebView2 (pywebview) em http://localhost:3000
-              -> index.html
-              -> styles.css
-              -> app.js
-              -> data/*.json
+      -> node server.js em background (paralelo)
+      -> native_launcher.py --external-server (pythonw)
+          -> janela WebView2 (pywebview)
+              -> http://127.0.0.1:3000 ou assets/launcher.html
+              -> styles.css / app.js / data/*.json
 ```
 
 Fallback (sem `pythonw` ou se `pywebview` falhar):
@@ -37,13 +35,13 @@ abrir-auto-orcamento.bat
 
 ## Launcher
 
-`abrir-auto-orcamento.bat` instala `node_modules` se necessário. No duplo clique, relança-se em modo oculto via `launch-hidden.vbs` (argumento interno `__hidden__`) e só então executa:
+`abrir-auto-orcamento.bat` instala `node_modules` se necessário, libera a porta 3000 se estiver ocupada, **inicia `node server.js` em background** e só então chama `pythonw native_launcher.py --external-server`. Assim o Node e o Python/WebView2 arrancam em paralelo. No duplo clique, relança-se em modo oculto via `launch-hidden.vbs` (argumento interno `__hidden__`).
 
 ```text
-pythonw native_launcher.py
+pythonw native_launcher.py --external-server
 ```
 
-Assim o utilizador vê apenas a janela WebView2 — sem terminais CMD ou Node persistentes. Pode haver um flash breve do CMD na primeira linha do `.bat`, antes do relançamento oculto.
+O servidor Node **não** é iniciado pelo Python neste fluxo — o `.bat` já o lançou. Ao fechar a janela (X), o launcher encerra o Node **depois** que o WebView2 termina — a janela fecha sem esperar; o cleanup roda no `finally`.
 
 `launch-hidden.vbs`:
 
@@ -53,11 +51,40 @@ Assim o utilizador vê apenas a janela WebView2 — sem terminais CMD ou Node pe
 `native_launcher.py`:
 
 - define `AppUserModelID` no Windows (`auto-orcamento.app`) para identidade própria na barra de tarefas;
-- inicia `server.js` com Node em subprocesso (`CREATE_NO_WINDOW` no Windows);
-- aguarda `http://localhost:3000` responder;
-- abre janela **WebView2** via `pywebview` com ícone `assets/app-icon.ico` (`webview.start(icon=...)`);
-- maximiza a janela ao carregar;
-- encerra o servidor Node ao fechar a janela.
+- libera a porta 3000 só se estiver ocupada (sondagem TCP rápida);
+- **não** inicia o Node (`--external-server`); abre o WebView2 sem espera bloqueante pelo servidor;
+- importa `pywebview` depois de arrancar;
+- se `127.0.0.1:3000` já responde, abre o app direto; senão `assets/launcher.html` (splash) até redirecionar;
+- encerra o Node ao fechar a janela (X): `ensure_server_stopped()` roda **uma vez** no `finally` (`POST /api/shutdown`); se a API falhar, `free_tcp_port(3000)` como fallback. **Não** bloqueia o fechamento da janela com handlers no evento `closing`.
+
+Pode haver um flash breve do CMD na primeira linha do `.bat`, antes do relançamento oculto. O **primeiro** arranque do WebView2 no dia (runtime frio) ainda pode levar alguns segundos — limitação do Windows, não do Node. Aberturas seguintes no mesmo dia tendem a ser mais rápidas.
+
+### Startup paralelo
+
+```text
+abrir-auto-orcamento.bat (__hidden__)
+  -> freeTcpPortSync(3000)
+  -> start /B node server.js          (background)
+  -> pythonw native_launcher.py --external-server
+      -> resolve_startup_url()
+          -> http://127.0.0.1:3000     (se /api/settings responde)
+          -> file:///.../launcher.html (senão; poll até redirecionar)
+```
+
+`server.js` carrega `pdf-export.js` e `snapshot-open-dialog.js` **sob demanda** (primeira impressão ou **Abrir**). `app.js` chama `updatePreview()` cedo e carrega históricos/tabelas em `Promise.all` sem bloquear a shell.
+
+### Encerramento
+
+```text
+Usuário clica X
+  -> webview.start() retorna
+  -> finally: ensure_server_stopped()
+      -> POST /api/shutdown (timeout 1s)
+      -> se falhar: free_tcp_port(3000)
+  -> processo pythonw termina
+```
+
+O botão vermelho na UI também chama `POST /api/shutdown`, mas é opcional — o fluxo diário é fechar pelo X.
 
 Requer `python -m pip install -r requirements.txt` (`pywebview`). O ícone na barra de tarefas vem do `.ico` nativo da janela — não do favicon do Chrome (mesmo padrão do repositório `dados-clinica`).
 
@@ -65,7 +92,8 @@ Para debug com terminal visível, rode `python native_launcher.py` ou `abrir-aut
 
 `launch-app.js` (fallback):
 
-- inicia `server.js` com Node;
+- com `--external-server`: assume Node já rodando (mesmo modo do `.bat`); encerra via `POST /api/shutdown` ao fechar o navegador;
+- sem `--external-server`: inicia `server.js` com Node;
 - aguarda o servidor anunciar `http://localhost:3000`;
 - abre Chrome ou Edge em modo app com `--app=http://localhost:3000`;
 - prioriza Google Chrome e usa Microsoft Edge apenas como fallback;
@@ -104,6 +132,8 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 | `budget-snapshot.js` | Snapshot JSON do formulário na impressão e validação na importação |
 | `snapshot-open-dialog.js` | Invoca `scripts/open-snapshot-dialog.py` (pywebview/WebView2) ou PowerShell para seletor nativo de JSON |
 | `pdf-export.js` | PDF via Puppeteer + Chrome/Edge; grava JSON ao lado do PDF |
+| `assets/launcher.html` | Splash local; detecta servidor e redireciona para o app |
+| `port-utils.js` | Liberação rápida da porta 3000 (sondagem TCP antes de `netstat`) |
 | `native_launcher.py` | Launcher Windows (servidor + janela WebView2 + ícone `.ico`) |
 | `launch-hidden.vbs` | Relançamento oculto do `.bat` (sem consola visível) |
 | `launch-app.js` | Fallback: servidor + Chrome/Edge em modo app |
@@ -117,7 +147,8 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 
 - `http` para servir a aplicação;
 - `fs` e `path` para ler e gravar arquivos locais;
-- porta fixa `3000`.
+- porta fixa `3000`, bind em `127.0.0.1`;
+- `pdf-export.js` e `snapshot-open-dialog.js` carregados **sob demanda** (startup mais rápido).
 
 Endpoints principais:
 
@@ -401,7 +432,7 @@ A ordem final é: pacotes de cirurgia plástica, taxas adicionais e, ao fim, ent
 
 | Branch / tag | Papel |
 |---|---|
-| **`main`** | Desenvolvimento ativo (Node) |
+| **`main`** | Desenvolvimento ativo (Node + WebView2) — startup paralelo, snapshot JSON, botão **Abrir** |
 | `stable/node-web-v0.1.0` | Node clássico congelado |
 | `stable/tauri-v0.2.0-paused` | Tauri congelado (Fases 1–3) |
 | `feature/tauri` | Congelada em `a739f1f` |

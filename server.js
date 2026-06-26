@@ -1,14 +1,7 @@
 const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
-const {
-  buildPdfFilename,
-  renderPdf,
-  resolveUniqueOutputPath,
-  writeBudgetSnapshotJson,
-} = require("./pdf-export");
-const { pickSnapshotJsonFile } = require("./snapshot-open-dialog");
-const { freeTcpPort } = require("./port-utils");
+const { freeTcpPortSync } = require("./port-utils");
 
 const port = 3000;
 const rootDir = __dirname;
@@ -26,6 +19,25 @@ const settingsFile = path.join(dataDir, "settings.json");
 const ZOOM_MIN = 0.5;
 const ZOOM_MAX = 2;
 const ZOOM_DEFAULT = 1;
+
+let pdfExportModule = null;
+let snapshotOpenDialogModule = null;
+
+function getPdfExportModule() {
+  if (!pdfExportModule) {
+    pdfExportModule = require("./pdf-export");
+  }
+
+  return pdfExportModule;
+}
+
+function getSnapshotOpenDialogModule() {
+  if (!snapshotOpenDialogModule) {
+    snapshotOpenDialogModule = require("./snapshot-open-dialog");
+  }
+
+  return snapshotOpenDialogModule;
+}
 
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
@@ -263,6 +275,8 @@ async function handlePdfExport(request, response) {
 
   ensureOutputDir();
 
+  const { buildPdfFilename, renderPdf, resolveUniqueOutputPath, writeBudgetSnapshotJson } =
+    getPdfExportModule();
   const createdAt = new Date();
   const filename = buildPdfFilename(patientName, createdAt);
   const outputPath = resolveUniqueOutputPath(outputDir, filename);
@@ -303,7 +317,7 @@ async function handleOpenSnapshot(request, response) {
   let filePath;
 
   try {
-    filePath = pickSnapshotJsonFile(initialDir);
+    filePath = getSnapshotOpenDialogModule().pickSnapshotJsonFile(initialDir);
   } catch (error) {
     console.error(`Falha ao abrir seletor (pasta inicial: ${initialDir}):`, error);
     sendJson(response, 500, { error: `Não foi possível abrir o seletor de arquivos: ${error.message}` });
@@ -792,7 +806,7 @@ const server = http.createServer(async (request, response) => {
 
 ensureDataFile();
 ensureOutputDir();
-freeTcpPort(port);
-server.listen(port, () => {
-  console.log(`Auto Orçamento disponível em http://localhost:${port}`);
+freeTcpPortSync(port);
+server.listen(port, "127.0.0.1", () => {
+  console.log(`Auto Orçamento disponível em http://127.0.0.1:${port}`);
 });

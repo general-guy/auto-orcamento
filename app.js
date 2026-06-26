@@ -5174,7 +5174,9 @@ async function initializeApp() {
     console.error(error);
   }
 
-  await Promise.all([
+  updatePreview();
+
+  void Promise.all([
     loadPatientHistory(),
     loadSurgeryHistory(),
     loadPaymentHistory(),
@@ -5184,8 +5186,10 @@ async function initializeApp() {
     loadTechnologyHistory(),
     loadHospitalTables(),
     loadImplantTable(),
-  ]);
+  ]).then(refreshAppDataViews);
+}
 
+function refreshAppDataViews() {
   updatePatientHistoryDropdown();
   updateSurgeryHistoryDropdown();
   renderPaymentQuickList();
