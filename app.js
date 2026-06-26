@@ -3710,10 +3710,10 @@ async function handleOpenButtonClick() {
       }
 
       await applySnapshotPayload(result.snapshot);
-      return;
     } catch (error) {
-      console.warn("Diálogo nativo indisponível; usando seletor do navegador.", error);
+      window.alert(`Não foi possível abrir o seletor de arquivos.\n\n${error.message}`);
     }
+    return;
   }
 
   openSnapshotInput.click();

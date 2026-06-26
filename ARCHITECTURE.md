@@ -329,7 +329,7 @@ Falhas de exportação exibem um `alert` além do log no console. Requer Chrome 
 
 ## Importação de snapshot JSON
 
-O botão **Abrir** (`#openButton`) chama `AppApi.openSnapshot()` → `POST /api/open-snapshot`. No Windows, `snapshot-open-dialog.js` usa `System.Windows.Forms.OpenFileDialog` via PowerShell (`-STA`) com `InitialDirectory` = `lastSnapshotDir` ou `output/`. Após a escolha, `server.js` grava a pasta em `data/settings.json` e devolve `{ snapshot }`. `app.js` valida com `BudgetSnapshot.normalizeForm()` e aplica via `applyBudgetSnapshot()` (campos dinâmicos, listas rápidas, hospital Reg/Sap, implantes). Fallback: `<input type="file">` se o diálogo nativo falhar.
+O botão **Abrir** (`#openButton`) chama `AppApi.openSnapshot()` → `POST /api/open-snapshot`. No Windows, `scripts/open-snapshot-dialog.py` (tkinter, preferencial) ou `scripts/open-snapshot-dialog.ps1` (fallback) abre o seletor nativo com pasta inicial absoluta. Preferência: `lastSnapshotDir` em `data/settings.json`, ignorando `USERPROFILE`; fallback `output/`. Imprimir com JSON também atualiza `lastSnapshotDir`. **Não** há fallback para `<input type="file">` na stack Node — o seletor do WebView2 abriria sempre na pasta pessoal. Após a escolha, `applyBudgetSnapshot()` restaura o formulário.
 
 **Stack Tauri (congelada):** `export_pdf` gera só PDF; não há snapshot JSON nem importação.
 

@@ -1,8 +1,10 @@
 const { spawn } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
+const { freeTcpPort } = require("./port-utils");
 
 const appUrl = "http://localhost:3000";
+const appPort = 3000;
 const rootDir = __dirname;
 
 const browserCandidates = [
@@ -103,6 +105,7 @@ async function main() {
   console.warn("Prefira abrir pelo abrir-auto-orcamento.bat (janela WebView2 nativa).");
 
   try {
+    freeTcpPort(appPort);
     await startServer();
     openBrowserApp(browserPath);
   } catch (error) {

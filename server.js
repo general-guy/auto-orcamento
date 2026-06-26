@@ -8,6 +8,7 @@ const {
   writeBudgetSnapshotJson,
 } = require("./pdf-export");
 const { pickSnapshotJsonFile } = require("./snapshot-open-dialog");
+const { freeTcpPort } = require("./port-utils");
 
 const port = 3000;
 const rootDir = __dirname;
@@ -99,6 +100,37 @@ function normalizeSnapshotDir(dir) {
   }
 }
 
+function isUserHomeDirectory(dir) {
+  const resolved = path.resolve(dir);
+  const home = process.env.USERPROFILE || process.env.HOME;
+
+  return Boolean(home && resolved === path.resolve(home));
+}
+
+function getPreferredSnapshotDir() {
+  const stored = readSettingsFile();
+  const savedDir = normalizeSnapshotDir(stored.lastSnapshotDir);
+
+  if (savedDir && !isUserHomeDirectory(savedDir)) {
+    return savedDir;
+  }
+
+  return null;
+}
+
+function resolveSnapshotDialogDir(preferredDir) {
+  ensureOutputDir();
+
+  for (const candidate of [preferredDir, outputDir, rootDir]) {
+    const normalized = normalizeSnapshotDir(candidate);
+    if (normalized) {
+      return normalized;
+    }
+  }
+
+  return outputDir;
+}
+
 function readSettingsFile() {
   ensureDataFile();
 
@@ -120,7 +152,7 @@ function readSettings() {
   const settings = {
     zoom: clampZoom(stored.zoom ?? ZOOM_DEFAULT),
   };
-  const lastSnapshotDir = normalizeSnapshotDir(stored.lastSnapshotDir);
+  const lastSnapshotDir = getPreferredSnapshotDir();
 
   if (lastSnapshotDir) {
     settings.lastSnapshotDir = lastSnapshotDir;
@@ -253,6 +285,7 @@ async function handlePdfExport(request, response) {
   if (jsonPath) {
     responsePayload.jsonFilename = path.basename(jsonPath);
     responsePayload.jsonPath = path.relative(rootDir, jsonPath).replace(/\\/g, "/");
+    writeSettings({ lastSnapshotDir: path.dirname(jsonPath) });
   }
 
   sendJson(response, 200, responsePayload);
@@ -266,13 +299,13 @@ async function handleOpenSnapshot(request, response) {
 
   ensureOutputDir();
 
-  const settings = readSettings();
-  const initialDir = settings.lastSnapshotDir || outputDir;
+  const initialDir = resolveSnapshotDialogDir(getPreferredSnapshotDir());
   let filePath;
 
   try {
     filePath = pickSnapshotJsonFile(initialDir);
   } catch (error) {
+    console.error(`Falha ao abrir seletor (pasta inicial: ${initialDir}):`, error);
     sendJson(response, 500, { error: `Não foi possível abrir o seletor de arquivos: ${error.message}` });
     return;
   }
@@ -743,6 +776,14 @@ const server = http.createServer(async (request, response) => {
       return;
     }
 
+    const apiPath = new URL(request.url, "http://localhost").pathname;
+    if (apiPath.startsWith("/api/")) {
+      sendJson(response, 404, {
+        error: "Endpoint não encontrado. Reinicie o app com abrir-auto-orcamento.bat.",
+      });
+      return;
+    }
+
     serveStaticFile(request, response);
   } catch (error) {
     sendJson(response, 500, { error: error.message });
@@ -751,6 +792,7 @@ const server = http.createServer(async (request, response) => {
 
 ensureDataFile();
 ensureOutputDir();
+freeTcpPort(port);
 server.listen(port, () => {
   console.log(`Auto Orçamento disponível em http://localhost:${port}`);
 });

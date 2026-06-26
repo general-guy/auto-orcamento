@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import sys
 import time
+import os
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -20,6 +21,7 @@ except ImportError:
 PROJECT_ROOT = Path(__file__).resolve().parent
 ICON_PATH = PROJECT_ROOT / "assets" / "app-icon.ico"
 APP_URL = "http://localhost:3000"
+APP_PORT = 3000
 APP_USER_MODEL_ID = "auto-orcamento.app"
 DEFAULT_WIDTH = 1280
 DEFAULT_HEIGHT = 900
@@ -64,6 +66,40 @@ def find_node_executable() -> str:
     raise FileNotFoundError("Node.js nao encontrado. Instale Node.js ou use launch-app.js.")
 
 
+def free_tcp_port(port: int) -> None:
+    if sys.platform != "win32":
+        return
+
+    try:
+        output = subprocess.check_output(
+            ["netstat", "-ano", "-p", "tcp"],
+            text=True,
+            errors="replace",
+        )
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return
+
+    current_pid = str(os.getpid())
+
+    for line in output.splitlines():
+        if f":{port}" not in line or "LISTENING" not in line.upper():
+            continue
+
+        parts = line.split()
+        if not parts:
+            continue
+
+        pid = parts[-1]
+        if not pid.isdigit() or pid == current_pid:
+            continue
+
+        subprocess.run(
+            ["taskkill", "/F", "/PID", pid],
+            capture_output=True,
+            check=False,
+        )
+
+
 def start_node_server() -> subprocess.Popen[str]:
     node_path = find_node_executable()
     popen_kwargs: dict = {
@@ -99,6 +135,7 @@ def main() -> int:
     server_process: subprocess.Popen[str] | None = None
 
     try:
+        free_tcp_port(APP_PORT)
         server_process = start_node_server()
         wait_for_url(APP_URL)
 

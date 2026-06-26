@@ -200,10 +200,11 @@ Depois de alterar código, **reabra** o app (`abrir-auto-orcamento.bat`) para ca
 
 O botão **Abrir** (verde, à esquerda de **Limpar**) carrega um snapshot JSON gerado na impressão (ex.: `output/Maria da Silva 2026-06-26 14-30-05.json`).
 
-1. No Windows, o servidor Node abre um **seletor nativo** (`POST /api/open-snapshot`) — não o `<input type="file">` do navegador.
-2. A pasta inicial é a **última usada** (`lastSnapshotDir` em `data/settings.json`); na primeira vez, abre em `output/`.
+1. No Windows, o servidor Node abre um **seletor nativo** via Python (`tkinter`, preferencial) ou PowerShell — **não** o seletor do navegador (que sempre abre na pasta pessoal).
+2. A pasta inicial é a **última usada** (`lastSnapshotDir` em `data/settings.json`), com fallback em `output/`; a raiz do perfil do usuário (`C:\Users\...`) nunca é reutilizada como pasta salva. Após imprimir, a pasta `output/` também é gravada automaticamente.
 3. Ao escolher um arquivo, o app valida `schemaVersion: 1`, repopula o formulário e atualiza a pré-visualização.
-4. Se o diálogo nativo falhar, cai para o seletor do navegador (fallback).
+4. Se ambos os seletores nativos falharem, aparece um **alert** com o erro (sem fallback silencioso para o navegador).
+5. Se aparecer erro de **servidor desatualizado**, feche pelo **botão vermelho** e reabra o `.bat` — o launcher libera a porta 3000 antes de iniciar o Node atualizado.
 
 Campos dinâmicos (cirurgias, hospitais com entradas auxiliares, extras, pagamento, observações), checkboxes de seções opcionais, listas rápidas e equipe são restaurados. Implantes são reassociados pelo índice ou por marca/modelo/referência na tabela local.
 

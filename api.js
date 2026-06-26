@@ -50,7 +50,23 @@
 
   async function fetchJson(url, options = {}) {
     const response = await fetch(url, options);
-    const data = await response.json();
+    const rawText = await response.text();
+    let data = {};
+
+    if (rawText) {
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        const snippet = rawText.trim().slice(0, 160);
+        if (snippet.includes("Arquivo não encontrado")) {
+          throw new Error(
+            "Servidor desatualizado na porta 3000. Feche o app pelo botão vermelho, aguarde alguns segundos e abra de novo com abrir-auto-orcamento.bat.",
+          );
+        }
+
+        throw new Error(snippet ? `Resposta inválida do servidor: ${snippet}` : `Falha na requisição: ${url}`);
+      }
+    }
 
     if (!response.ok) {
       const message = data?.error || `Falha na requisição: ${url}`;
