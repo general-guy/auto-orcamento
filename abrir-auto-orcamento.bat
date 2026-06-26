@@ -12,10 +12,8 @@ if not exist "node_modules\" (
   npm install
 )
 
-rem Libera a porta 3000 se um servidor antigo ficou preso.
-node -e "require('./port-utils').freeTcpPortSync(3000)" >nul 2>&1
-
 rem Node sobe em paralelo enquanto o Python/WebView2 arrancam.
+rem A liberação da porta 3000 ocorre dentro de server.js (evita spawn extra de Node aqui).
 start "" /B node server.js
 
 where pythonw >nul 2>&1

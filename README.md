@@ -40,7 +40,7 @@ No Windows, clique duas vezes em:
 abrir-auto-orcamento.bat
 ```
 
-Requer **Node.js** instalado. O atalho instala dependências se faltar `node_modules`, libera a porta 3000, **inicia o Node em background** e abre o WebView2 em paralelo (`pythonw native_launcher.py --external-server`). O formulário aparece assim que a página carrega; históricos e tabelas continuam a carregar em seguida. **Fechar a janela (X)** encerra o servidor Node automaticamente. O botão vermelho faz o mesmo via a interface, mas é opcional.
+Requer **Node.js** instalado. O atalho instala dependências se faltar `node_modules`, **inicia o Node em background** e abre o WebView2 em paralelo (`pythonw native_launcher.py --external-server`). A janela abre **já maximizada**. O formulário aparece assim que a página carrega; históricos e tabelas continuam a carregar em seguida. **Fechar a janela (X)** encerra o servidor Node automaticamente. O botão vermelho faz o mesmo via a interface, mas é opcional.
 
 Pode haver um **flash breve** do CMD ao duplo clique — o Windows abre o `.bat` antes do relançamento oculto. Se o launcher nativo falhar, o fallback `launch-app.js` (Chrome/Edge) **mostra** um terminal de propósito, para facilitar diagnóstico.
 
@@ -48,21 +48,21 @@ Pode haver um **flash breve** do CMD ao duplo clique — o Windows abre o `.bat`
 
 | Fase | Comportamento |
 |---|---|
-| **Abertura** | O `.bat` libera a porta 3000, inicia `node server.js` em background e abre o WebView2 em paralelo. Se o Node ainda não responde, aparece `assets/launcher.html` (“Carregando…”) até redirecionar. O formulário e o preview aparecem cedo; históricos e tabelas carregam em seguida (`initializeApp()` em background). |
+| **Abertura** | O `.bat` inicia `node server.js` em background (que libera a porta 3000 se necessário) e abre o WebView2 em paralelo, **maximizado desde o início**. O launcher Python aguarda até ~800 ms pelo Node antes de decidir entre o app ou o splash `assets/launcher.html`. O formulário e o preview aparecem cedo; históricos e tabelas carregam em seguida (`initializeApp()` em background). |
 | **Gargalo principal** | O **primeiro** arranque do WebView2 no dia (runtime frio no Windows) ainda pode levar alguns segundos — limitação do sistema, não do Node. Aberturas seguintes no mesmo dia tendem a ser mais rápidas. |
 | **Fechamento** | **Fechar pelo X** é o fluxo normal: a janela some na hora; o Python encerra o Node **uma vez** no `finally` (`POST /api/shutdown`). Se a API falhar, libera a porta 3000 como fallback. O botão vermelho é opcional. |
 
-Otimizações aplicadas na stack atual: Node e WebView2 em paralelo, splash local, carregamento sob demanda de `pdf-export.js` e `snapshot-open-dialog.js` no servidor, e históricos carregados sem bloquear a UI.
+Otimizações aplicadas na stack atual: Node e WebView2 em paralelo, liberação assíncrona da porta 3000 só no `server.js` (sem PowerShell), splash local, scripts com `defer`, `pdf-build.js` fora do caminho crítico (só Tauri), carregamento sob demanda de `pdf-export.js` e `snapshot-open-dialog.js` no servidor, e históricos carregados sem bloquear a UI.
 
 ### Evolução recente na `main` (desde `stable/node-web-v0.1.0`)
 
 | Área | Mudança |
 |---|---|
-| Launcher | Janela **WebView2 nativa** (`pywebview` + `native_launcher.py`), consola oculta (`launch-hidden.vbs`), ícone `.ico` na barra de tarefas |
-| Startup | Node em background + `--external-server`; splash `assets/launcher.html`; módulos pesados lazy no servidor |
+| Launcher | Janela **WebView2 nativa** (`pywebview` + `native_launcher.py`), **maximizada ao abrir**, consola oculta (`launch-hidden.vbs`), ícone `.ico` na barra de tarefas |
+| Startup | Node em background + `--external-server`; poll breve pelo Node; splash `assets/launcher.html`; módulos pesados lazy no servidor; scripts com `defer` |
 | Impressão | `@media print` anula zoom da UI — papel alinhado ao PDF automático |
 | Snapshot | Exportação JSON na impressão + botão **Abrir** com seletor nativo HiDPI (pywebview/WebView2) |
-| Robustez | Liberação da porta 3000 antes de subir o Node; encerramento confiável ao fechar pelo X |
+| Robustez | Liberação da porta 3000 no arranque do `server.js`; encerramento confiável ao fechar pelo X |
 
 Detalhes técnicos: `ARCHITECTURE.md`. Baseline congelada pré-WebView2: `docs/SNAPSHOT-node-web-v0.1.0.md`.
 
@@ -226,7 +226,7 @@ O botão **Abrir** (verde, à esquerda de **Limpar**) carrega um snapshot JSON g
 2. A pasta inicial é a **última usada** (`lastSnapshotDir` em `data/settings.json`), com fallback em `output/`; a raiz do perfil do usuário (`C:\Users\...`) nunca é reutilizada como pasta salva. Após imprimir, a pasta `output/` também é gravada automaticamente.
 3. Ao escolher um arquivo, o app valida `schemaVersion: 1`, repopula o formulário e atualiza a pré-visualização.
 4. Se ambos os seletores nativos falharem, aparece um **alert** com o erro (sem fallback silencioso para o navegador).
-5. Se aparecer erro de **servidor desatualizado**, feche a janela (X) e reabra o `.bat` — o launcher libera a porta 3000 antes de iniciar o Node atualizado.
+5. Se aparecer erro de **servidor desatualizado**, feche a janela (X) e reabra o `.bat` — o `server.js` libera a porta 3000 ao subir e carrega o código atualizado.
 
 Campos dinâmicos (cirurgias, hospitais com entradas auxiliares, extras, pagamento, observações), checkboxes de seções opcionais, listas rápidas e equipe são restaurados. Implantes são reassociados pelo índice ou por marca/modelo/referência na tabela local.
 

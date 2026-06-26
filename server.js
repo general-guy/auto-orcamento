@@ -1,7 +1,7 @@
 const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
-const { freeTcpPortSync } = require("./port-utils");
+const { freeTcpPort } = require("./port-utils");
 
 const port = 3000;
 const rootDir = __dirname;
@@ -804,9 +804,13 @@ const server = http.createServer(async (request, response) => {
   }
 });
 
-ensureDataFile();
-ensureOutputDir();
-freeTcpPortSync(port);
-server.listen(port, "127.0.0.1", () => {
-  console.log(`Auto Orçamento disponível em http://127.0.0.1:${port}`);
-});
+async function startServer() {
+  ensureDataFile();
+  ensureOutputDir();
+  await freeTcpPort(port);
+  server.listen(port, "127.0.0.1", () => {
+    console.log(`Auto Orçamento disponível em http://127.0.0.1:${port}`);
+  });
+}
+
+void startServer();

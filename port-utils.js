@@ -1,4 +1,4 @@
-const { execSync } = require("node:child_process");
+const { execSync, spawnSync } = require("node:child_process");
 const net = require("node:net");
 
 function isPortInUse(port, host = "127.0.0.1") {
@@ -16,6 +16,24 @@ function isPortInUse(port, host = "127.0.0.1") {
     socket.once("error", () => finish(false));
     socket.connect(port, host);
   });
+}
+
+function isPortInUseSync(port, host = "127.0.0.1", timeoutMs = 200) {
+  const script = [
+    "const n=require('net');",
+    `const p=${port};const h='${host}';`,
+    `const t=setTimeout(()=>process.exit(2),${timeoutMs});`,
+    "const s=n.connect({port:p,host:h},()=>{clearTimeout(t);process.exit(0)});",
+    "s.on('error',()=>{clearTimeout(t);process.exit(1)});",
+  ].join("");
+
+  const result = spawnSync(process.execPath, ["-e", script], {
+    stdio: "ignore",
+    windowsHide: true,
+    timeout: timeoutMs + 150,
+  });
+
+  return result.status === 0;
 }
 
 function killProcessOnPort(port) {
@@ -68,12 +86,7 @@ function freeTcpPortSync(port) {
     return;
   }
 
-  try {
-    execSync(
-      `powershell -NoProfile -Command "$c=New-Object Net.Sockets.TcpClient; try{$c.Connect('127.0.0.1',${port});$c.Close();exit 0}catch{exit 1}"`,
-      { stdio: "ignore", windowsHide: true, timeout: 500 },
-    );
-  } catch {
+  if (!isPortInUseSync(port)) {
     return;
   }
 
@@ -84,4 +97,5 @@ module.exports = {
   freeTcpPort,
   freeTcpPortSync,
   isPortInUse,
+  isPortInUseSync,
 };

@@ -272,6 +272,16 @@
     }
 
     if (isTauri()) {
+      if (!window.PdfBuild) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = "pdf-build.js";
+          script.onload = resolve;
+          script.onerror = () => reject(new Error("Não foi possível carregar pdf-build.js."));
+          document.head.appendChild(script);
+        });
+      }
+
       const documentHtml = await PdfBuild.buildPdfDocumentHtml(html);
       return invoke("export_pdf", { patientName, documentHtml });
     }

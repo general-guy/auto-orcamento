@@ -35,7 +35,7 @@ abrir-auto-orcamento.bat
 
 ## Launcher
 
-`abrir-auto-orcamento.bat` instala `node_modules` se necessário, libera a porta 3000 se estiver ocupada, **inicia `node server.js` em background** e só então chama `pythonw native_launcher.py --external-server`. Assim o Node e o Python/WebView2 arrancam em paralelo. No duplo clique, relança-se em modo oculto via `launch-hidden.vbs` (argumento interno `__hidden__`).
+`abrir-auto-orcamento.bat` instala `node_modules` se necessário, **inicia `node server.js` em background** e só então chama `pythonw native_launcher.py --external-server`. Assim o Node e o Python/WebView2 arrancam em paralelo. A liberação da porta 3000 ocorre **dentro do `server.js`** (sondagem TCP assíncrona, sem PowerShell). No duplo clique, relança-se em modo oculto via `launch-hidden.vbs` (argumento interno `__hidden__`).
 
 ```text
 pythonw native_launcher.py --external-server
@@ -51,10 +51,10 @@ O servidor Node **não** é iniciado pelo Python neste fluxo — o `.bat` já o 
 `native_launcher.py`:
 
 - define `AppUserModelID` no Windows (`auto-orcamento.app`) para identidade própria na barra de tarefas;
-- libera a porta 3000 só se estiver ocupada (sondagem TCP rápida);
 - **não** inicia o Node (`--external-server`); abre o WebView2 sem espera bloqueante pelo servidor;
 - importa `pywebview` depois de arrancar;
-- se `127.0.0.1:3000` já responde, abre o app direto; senão `assets/launcher.html` (splash) até redirecionar;
+- abre a janela com `maximized=True` (sem redimensionar após o `loaded`);
+- aguarda até ~800 ms pelo Node (`resolve_startup_url`) e abre `http://127.0.0.1:3000` direto quando possível; senão `assets/launcher.html` (splash) até redirecionar;
 - encerra o Node ao fechar a janela (X): `ensure_server_stopped()` roda **uma vez** no `finally` (`POST /api/shutdown`); se a API falhar, `free_tcp_port(3000)` como fallback. **Não** bloqueia o fechamento da janela com handlers no evento `closing`.
 
 Pode haver um flash breve do CMD na primeira linha do `.bat`, antes do relançamento oculto. O **primeiro** arranque do WebView2 no dia (runtime frio) ainda pode levar alguns segundos — limitação do Windows, não do Node. Aberturas seguintes no mesmo dia tendem a ser mais rápidas.
@@ -63,15 +63,15 @@ Pode haver um flash breve do CMD na primeira linha do `.bat`, antes do relançam
 
 ```text
 abrir-auto-orcamento.bat (__hidden__)
-  -> freeTcpPortSync(3000)
-  -> start /B node server.js          (background)
+  -> start /B node server.js          (background; libera porta 3000 se ocupada)
   -> pythonw native_launcher.py --external-server
-      -> resolve_startup_url()
+      -> resolve_startup_url()        (poll até ~800 ms)
           -> http://127.0.0.1:3000     (se /api/settings responde)
           -> file:///.../launcher.html (senão; poll até redirecionar)
+      -> webview.start(maximized=True)
 ```
 
-`server.js` carrega `pdf-export.js` e `snapshot-open-dialog.js` **sob demanda** (primeira impressão ou **Abrir**). `app.js` chama `updatePreview()` cedo e carrega históricos/tabelas em `Promise.all` sem bloquear a shell.
+`server.js` carrega `pdf-export.js` e `snapshot-open-dialog.js` **sob demanda** (primeira impressão ou **Abrir**). `index.html` usa `defer` nos scripts; `pdf-build.js` só carrega no Tauri congelado (`api.js`). `app.js` chama `updatePreview()` cedo e carrega históricos/tabelas em `Promise.all` sem bloquear a shell.
 
 ### Encerramento
 
@@ -133,7 +133,7 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 | `snapshot-open-dialog.js` | Invoca `scripts/open-snapshot-dialog.py` (pywebview/WebView2) ou PowerShell para seletor nativo de JSON |
 | `pdf-export.js` | PDF via Puppeteer + Chrome/Edge; grava JSON ao lado do PDF |
 | `assets/launcher.html` | Splash local; detecta servidor e redireciona para o app |
-| `port-utils.js` | Liberação rápida da porta 3000 (sondagem TCP antes de `netstat`) |
+| `port-utils.js` | Liberação da porta 3000 (sondagem TCP assíncrona; fallback `netstat`/`taskkill` no Windows) |
 | `native_launcher.py` | Launcher Windows (servidor + janela WebView2 + ícone `.ico`) |
 | `launch-hidden.vbs` | Relançamento oculto do `.bat` (sem consola visível) |
 | `launch-app.js` | Fallback: servidor + Chrome/Edge em modo app |
@@ -352,7 +352,7 @@ exportPdfDocument()
   -> output/{nome}.pdf + output/{nome}.json
 ```
 
-`pdf-build.js` permanece no projeto para referência do Tauri congelado; na stack Node ativa, a montagem do HTML autocontido ocorre **no servidor** (`pdf-export.js`).
+`pdf-build.js` permanece no projeto para referência do Tauri congelado (carregado sob demanda por `api.js` no modo Tauri); na stack Node ativa, a montagem do HTML autocontido ocorre **no servidor** (`pdf-export.js`).
 
 Falhas de exportação exibem um `alert` além do log no console. Requer Chrome ou Edge instalado.
 
@@ -360,7 +360,7 @@ Falhas de exportação exibem um `alert` além do log no console. Requer Chrome 
 
 ## Importação de snapshot JSON
 
-O botão **Abrir** (`#openButton`) chama `AppApi.openSnapshot()` → `POST /api/open-snapshot`. No Windows, `scripts/open-snapshot-dialog.py` usa **pywebview** (`window.create_file_dialog`, WebView2, janela oculta) para diálogo nativo nítido em HiDPI; fallback PowerShell/tkinter. Preferência: `lastSnapshotDir`; fallback `output/`. Imprimir grava `output/` em `lastSnapshotDir`. O launcher (`native_launcher.py`, `port-utils.js`) libera a porta 3000 antes de subir o Node. **Não** há fallback para `<input type="file">` na stack Node.
+O botão **Abrir** (`#openButton`) chama `AppApi.openSnapshot()` → `POST /api/open-snapshot`. No Windows, `scripts/open-snapshot-dialog.py` usa **pywebview** (`window.create_file_dialog`, WebView2, janela oculta) para diálogo nativo nítido em HiDPI; fallback PowerShell/tkinter. Preferência: `lastSnapshotDir`; fallback `output/`. Imprimir grava `output/` em `lastSnapshotDir`. Se a porta 3000 estiver ocupada por um Node antigo, o `server.js` libera ao subir. **Não** há fallback para `<input type="file">` na stack Node.
 
 **Stack Tauri (congelada):** `export_pdf` gera só PDF; não há snapshot JSON nem importação.
 

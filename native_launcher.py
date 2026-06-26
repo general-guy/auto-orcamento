@@ -8,6 +8,7 @@ import shutil
 import socket
 import subprocess
 import sys
+import time
 import urllib.error
 import urllib.request
 from pathlib import Path
@@ -156,7 +157,14 @@ def is_server_ready() -> bool:
         return False
 
 
-def resolve_startup_url() -> str:
+def resolve_startup_url(external_server: bool) -> str:
+    if external_server:
+        deadline = time.monotonic() + 0.8
+        while time.monotonic() < deadline:
+            if is_server_ready():
+                return APP_URL
+            time.sleep(0.04)
+
     if is_server_ready():
         return APP_URL
 
@@ -205,12 +213,12 @@ def main() -> int:
 
         window = webview.create_window(
             "Auto Orçamento",
-            resolve_startup_url(),
+            resolve_startup_url(args.external_server),
             width=DEFAULT_WIDTH,
             height=DEFAULT_HEIGHT,
             resizable=True,
+            maximized=True,
         )
-        window.events.loaded += lambda: window.maximize()
 
         icon = str(ICON_PATH.resolve()) if ICON_PATH.exists() else None
         webview.start(icon=icon)
