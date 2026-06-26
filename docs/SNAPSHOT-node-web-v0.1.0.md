@@ -179,11 +179,10 @@ Na branch de trabalho atual, o fluxo Node deixou de depender do Chrome em modo `
 - `abrir-auto-orcamento.bat` → `launch-hidden.vbs` → `pythonw native_launcher.py` (WebView2 via `pywebview`);
 - ícone na barra de tarefas via `assets/app-icon.ico` na janela nativa;
 - launcher **sem terminais visíveis**: relançamento oculto do `.bat` + `CREATE_NO_WINDOW` no subprocesso Node;
-- **snapshot JSON na impressão** (`budget-snapshot.js` + `POST /api/pdf`): `.json` ao lado do `.pdf` em `output/`, `schemaVersion: 1`;
+- **snapshot JSON na impressão** (`budget-snapshot.js` + `POST /api/pdf`): `.json` ao lado do `.pdf` em `output/`, `schemaVersion: 1`; exportação **no servidor** (`pdf-export.js`); impressão só após `await exportPdfDocument()`;
 - `launch-app.js` permanece como fallback (Chrome/Edge; terminal visível);
 - pipeline de ícones: `npm run icon:web` sincroniza assets web a partir de `src-tauri/icons/`;
 - zoom da interface no Node: `GET/PUT /api/settings` + escala CSS (`transform`) em `api.js`/`zoom.js`, arquivo `data/settings.json`;
-- **snapshot JSON na impressão** (`budget-snapshot.js` + `POST /api/pdf`): `.json` ao lado do `.pdf` em `output/`, `schemaVersion: 1` — **somente stack Node**;
 - layout dos painéis usa `height: 100%` (sem `100vh` fixo) para acompanhar redimensionamento e zoom.
 
 Este snapshot **v0.1.0** descreve o estado congelado em `stable/node-web-v0.1.0`; a lista acima resume apenas o que mudou depois na `main`.

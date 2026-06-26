@@ -170,14 +170,24 @@ Essa pasta não é versionada no Git. Cada exportação usa o nome da paciente, 
 
 ## Impressão, PDF e snapshot JSON
 
-Ao clicar em `Imprimir orçamento`, o app gera um **PDF** e um **JSON de snapshot** em `output/` e abre a impressão em seguida. Ambos são criados no clique, sem esperar o fim da impressão.
+Ao clicar em `Imprimir orçamento`:
 
-- **PDF:** HTML da pré-visualização renderizado via `POST /api/pdf` + `pdf-export.js` (Puppeteer + Chrome/Edge).
-- **JSON:** estado do formulário (`budget-snapshot.js`) — textos, checkboxes de seções opcionais, itens das listas rápidas (marcados e desmarcados), equipe, hospitais com detalhes/multiplicadores, implante selecionado, etc. Mesmo nome base do PDF, extensão `.json` (ex.: `Maria da Silva 2026-06-26 14-30-05.json`). `schemaVersion: 1` para reconstrução futura.
+1. `app.js` salva históricos pendentes.
+2. `budget-snapshot.js` monta o snapshot do formulário (`schemaVersion: 1`).
+3. `AppApi.exportPdf()` envia `pagesHtml` + `snapshot` para `POST /api/pdf` (sem montar PDF no browser — isso fica no servidor).
+4. `server.js` + `pdf-export.js` gravam **PDF** e **JSON** em `output/` (mesmo nome base).
+5. Só então abre `window.print()`.
 
-O PDF usa o mesmo layout paginado da pré-visualização (timbrado, fontes, estilos). Colisões de nome recebem sufixo `(2)`, `(3)`, etc.
+Se a exportação falhar (ex.: Chrome/Edge ausente), aparece um **alert** com a mensagem de erro.
 
-> **Nota:** exportação de snapshot JSON existe **apenas na stack Node**. O build Tauri congelado não recebe esta funcionalidade.
+- **PDF:** HTML paginado da pré-visualização; timbrado, fontes e estilos embutidos no servidor (Puppeteer + Chrome/Edge).
+- **JSON:** textos, checkboxes de seções opcionais, listas rápidas (marcados e desmarcados), equipe, hospitais com detalhes/multiplicadores, implante selecionado, etc. Ex.: `Maria da Silva 2026-06-26 14-30-05.json`.
+
+Colisões de nome recebem sufixo `(2)`, `(3)`, etc. **Requisito:** Chrome ou Edge instalado (mesmo do PDF automático).
+
+> **Nota:** snapshot JSON existe **apenas na stack Node**. Tauri congelado não recebe esta funcionalidade.
+
+Depois de alterar código, **reabra** o app (`abrir-auto-orcamento.bat`) para carregar o JavaScript atualizado.
 
 ## Hospitais Com Autofill
 

@@ -148,7 +148,7 @@ Tabelas de referência (hospitalares, implantes) são lidas de `data/` via `tabl
 - [x] `pdf-build.js` monta HTML autocontido (CSS/fontes/imagens inline), igual ao `pdf-export.js`
 - [x] Comando Rust `export_pdf` em `src-tauri/src/pdf.rs` grava em `output/` com nomes e colisão `(2)`, `(3)`
 - [x] Renderização via Chrome/Edge headless (`--print-to-pdf`), sem Node/Puppeteer em runtime no Tauri
-- [x] `AppApi.exportPdf()` no frontend; stack Node continua usando `POST /api/pdf`
+- [x] `AppApi.exportPdf()` no frontend; stack Node envia `pagesHtml` + `snapshot` para `POST /api/pdf` (montagem do PDF no servidor, não no browser)
 
 PDFs ficam em `output/` na raiz do repo (mesma regra de caminho que `data/`). Requer Chrome ou Edge instalado (mesmo requisito prático da stack Node).
 

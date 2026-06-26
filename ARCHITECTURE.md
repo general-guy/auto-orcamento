@@ -215,7 +215,7 @@ Com duas ou mais entradas no formulário, `updateSurgeryFieldStructure()` exibe 
 
 `data/observacoes.json` guarda as observações padrão e adicionais cadastradas no formulário. A lista rápida reordenável e o dropdown de histórico das **Observações adicionais** compartilham o mesmo arquivo; reordenar em qualquer um deles persiste via `PUT /api/observacoes`.
 
-A pasta `output/` guarda os PDFs gerados automaticamente após a impressão. Ela é criada pelo servidor quando necessário e não entra no controle de versão.
+A pasta `output/` guarda os PDFs e snapshots JSON gerados ao clicar em **Imprimir orçamento**. Ela é criada pelo servidor quando necessário e não entra no controle de versão. Cada par usa o mesmo nome base (`.pdf` e `.json`).
 
 ## Lógica de Cirurgia
 
@@ -302,15 +302,28 @@ Durante `updatePreview()`, o app salva `scrollTop` e `scrollLeft` do painel de p
 
 `Shift+Enter` continua criando uma nova linha na seção correspondente. A seleção de itens no dropdown legado com `Enter` também respeita o mesmo escopo ao avançar.
 
-## Exportação de PDF
+## Exportação de PDF e snapshot JSON
 
-Quando o usuário clica em `Imprimir orçamento`, `app.js` salva os históricos pendentes, dispara a exportação e chama `window.print()`.
+Quando o usuário clica em `Imprimir orçamento`, `app.js` salva os históricos pendentes, **aguarda** a exportação (`await exportPdfDocument()`) e só então chama `window.print()`.
 
-`budget-snapshot.js` monta um snapshot estruturado (`schemaVersion: 1`) com o estado atual do formulário: textos, checkboxes de seções opcionais, itens das listas rápidas (marcados e desmarcados), equipe, hospitais com entradas auxiliares e implante selecionado. Esse objeto acompanha a exportação do PDF.
+`budget-snapshot.js` monta um snapshot estruturado (`schemaVersion: 1`) com o estado atual do formulário: textos (incluindo linhas vazias nos campos dinâmicos), checkboxes de seções opcionais, itens das listas rápidas (marcados e desmarcados), equipe, hospitais com entradas auxiliares e implante selecionado.
 
-**Stack Node (ativa):** `exportPdfDocument()` envia o HTML das páginas e o snapshot para `POST /api/pdf`. O servidor monta documento autocontido, renderiza com `puppeteer-core` e grava um `.json` ao lado do `.pdf` em `output/`.
+**Stack Node (ativa):**
 
-**Stack Tauri (congelada):** `export_pdf` gera só PDF; não há snapshot JSON. Retomar Tauri exigiria portar esta funcionalidade.
+```text
+exportPdfDocument()
+  -> BudgetSnapshot.collect()
+  -> AppApi.exportPdf()  // envia pagesHtml + snapshot; NÃO usa PdfBuild no browser
+  -> POST /api/pdf
+  -> pdf-export.js: buildPdfDocumentHtml + puppeteer-core
+  -> output/{nome}.pdf + output/{nome}.json
+```
+
+`pdf-build.js` permanece no projeto para referência do Tauri congelado; na stack Node ativa, a montagem do HTML autocontido ocorre **no servidor** (`pdf-export.js`).
+
+Falhas de exportação exibem um `alert` além do log no console. Requer Chrome ou Edge instalado.
+
+**Stack Tauri (congelada):** `export_pdf` gera só PDF; não há snapshot JSON.
 
 ## Lógica Hospitalar
 
