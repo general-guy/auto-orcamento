@@ -1,4 +1,5 @@
 const fs = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
 const puppeteer = require("puppeteer-core");
 
@@ -27,7 +28,72 @@ const imageMimeTypes = {
 };
 
 function getChromePath() {
-  return browserCandidates.find((candidate) => fs.existsSync(candidate));
+  return getBrowserPaths()[0] || null;
+}
+
+function getBrowserPaths() {
+  const seen = new Set();
+
+  return browserCandidates.filter((candidate) => {
+    if (!candidate || seen.has(candidate) || !fs.existsSync(candidate)) {
+      return false;
+    }
+
+    seen.add(candidate);
+    return true;
+  });
+}
+
+function createBrowserProfileDir() {
+  return fs.mkdtempSync(path.join(os.tmpdir(), "auto-orcamento-pdf-"));
+}
+
+function removeBrowserProfileDir(profileDir) {
+  if (!profileDir) {
+    return;
+  }
+
+  try {
+    fs.rmSync(profileDir, { recursive: true, force: true });
+  } catch {
+    // profile may still be locked briefly after browser.close()
+  }
+}
+
+async function launchPdfBrowser() {
+  const browserPaths = getBrowserPaths();
+  if (browserPaths.length === 0) {
+    throw new Error("Chrome ou Edge não encontrado para gerar PDF.");
+  }
+
+  let lastError = null;
+
+  for (const executablePath of browserPaths) {
+    const profileDir = createBrowserProfileDir();
+
+    try {
+      const browser = await puppeteer.launch({
+        executablePath,
+        headless: "shell",
+        userDataDir: profileDir,
+        args: [
+          "--disable-dev-shm-usage",
+          "--no-first-run",
+          "--no-default-browser-check",
+          "--disable-extensions",
+        ],
+      });
+
+      return { browser, profileDir };
+    } catch (error) {
+      removeBrowserProfileDir(profileDir);
+      lastError = error;
+    }
+  }
+
+  throw new Error(
+    `Não foi possível iniciar o Chrome/Edge para gerar o PDF.${lastError?.message ? ` ${lastError.message}` : ""}`,
+  );
 }
 
 function sanitizeFilenamePart(value) {
@@ -39,8 +105,9 @@ function sanitizeFilenamePart(value) {
     .trim();
 }
 
-function buildPdfFilename(patientName, createdAt = new Date()) {
+function buildPdfFilename(patientName, createdAt = new Date(), surgeryName = "") {
   const safePatient = sanitizeFilenamePart(patientName) || "Paciente";
+  const safeSurgery = sanitizeFilenamePart(surgeryName);
   const date = [
     createdAt.getFullYear(),
     String(createdAt.getMonth() + 1).padStart(2, "0"),
@@ -54,7 +121,10 @@ function buildPdfFilename(patientName, createdAt = new Date()) {
     .map((part) => String(part).padStart(2, "0"))
     .join("-");
 
-  return `${safePatient} ${date} ${time}.pdf`;
+  const dateTime = `${date} ${time}`;
+  const namePart = safeSurgery ? `${safePatient} - ${safeSurgery}` : safePatient;
+
+  return `${namePart} ${dateTime}.pdf`;
 }
 
 function resolveUniqueOutputPath(outputDir, filename) {
@@ -139,17 +209,8 @@ function buildPdfDocumentHtml(pagesHtml, rootDir) {
 }
 
 async function renderPdf({ pagesHtml, outputPath, rootDir }) {
-  const chromePath = getChromePath();
-  if (!chromePath) {
-    throw new Error("Chrome ou Edge não encontrado para gerar PDF.");
-  }
-
   const html = buildPdfDocumentHtml(pagesHtml, rootDir);
-  const browser = await puppeteer.launch({
-    executablePath: chromePath,
-    headless: true,
-    args: ["--disable-dev-shm-usage", "--no-first-run", "--no-default-browser-check"],
-  });
+  const { browser, profileDir } = await launchPdfBrowser();
 
   try {
     const page = await browser.newPage();
@@ -169,6 +230,7 @@ async function renderPdf({ pagesHtml, outputPath, rootDir }) {
     });
   } finally {
     await browser.close();
+    removeBrowserProfileDir(profileDir);
   }
 }
 
@@ -185,6 +247,7 @@ function writeBudgetSnapshotJson(outputPath, snapshot) {
 module.exports = {
   buildPdfFilename,
   buildPdfDocumentHtml,
+  getBrowserPaths,
   getChromePath,
   renderPdf,
   resolveUniqueOutputPath,

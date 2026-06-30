@@ -201,7 +201,7 @@ Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observa�
 - redimensionamento do painel;
 - impressão e exportação automática de PDF + snapshot JSON.
 
-`pdf-export.js` usa o Chrome ou Edge instalado localmente, via `puppeteer-core`, para renderizar o HTML paginado recebido do frontend. O CSS, fontes e imagens do timbrado são embutidos a partir dos arquivos locais do projeto em base64, evitando depender de novas requisições HTTP enquanto o servidor processa a exportação. O nome do PDF combina o nome da paciente com data e horário locais; colisões recebem sufixo `(2)`, `(3)`, etc.
+`pdf-export.js` usa o Chrome ou Edge instalado localmente, via `puppeteer-core`, para renderizar o HTML paginado recebido do frontend. O CSS, fontes e imagens do timbrado são embutidos a partir dos arquivos locais do projeto em base64, evitando depender de novas requisições HTTP enquanto o servidor processa a exportação. O nome do PDF segue `{paciente} - {cirurgia} {data} {hora}` (sem cirurgia: só `{paciente} {data} {hora}`); a cirurgia é a primeira linha preenchida em `snapshot.form.surgeries`. O launcher do navegador usa perfil temporário, tenta Chrome e depois Edge, e roda em `headless: "shell"`. Colisões de nome recebem sufixo `(2)`, `(3)`, etc.
 
 ## Dados
 
@@ -248,7 +248,7 @@ Com duas ou mais entradas no formulário, `updateSurgeryFieldStructure()` exibe 
 
 `data/observacoes.json` guarda as observações padrão e adicionais cadastradas no formulário. A lista rápida reordenável e o dropdown de histórico das **Observações adicionais** compartilham o mesmo arquivo; reordenar em qualquer um deles persiste via `PUT /api/observacoes`.
 
-A pasta `output/` guarda os PDFs e snapshots JSON gerados ao clicar em **Imprimir orçamento**. Ela é criada pelo servidor quando necessário e não entra no controle de versão. Cada par usa o mesmo nome base (`.pdf` e `.json`).
+A pasta `output/` guarda os PDFs e snapshots JSON gerados ao clicar em **Imprimir orçamento**. Ela é criada pelo servidor quando necessário e não entra no controle de versão. Cada par usa o mesmo nome base (`.pdf` e `.json`), no formato `{paciente} - {cirurgia} {AAAA-MM-DD HH-mm-ss}` — a primeira cirurgia preenchida no formulário vem do snapshot enviado na impressão.
 
 ## Lógica de Cirurgia
 
@@ -348,8 +348,8 @@ exportPdfDocument()
   -> BudgetSnapshot.collect()
   -> AppApi.exportPdf()  // envia pagesHtml + snapshot; NÃO usa PdfBuild no browser
   -> POST /api/pdf
-  -> pdf-export.js: buildPdfDocumentHtml + puppeteer-core
-  -> output/{nome}.pdf + output/{nome}.json
+  -> pdf-export.js: buildPdfFilename + buildPdfDocumentHtml + puppeteer-core
+  -> output/{paciente} - {cirurgia} {data} {hora}.pdf + .json
 ```
 
 `pdf-build.js` permanece no projeto para referência do Tauri congelado (carregado sob demanda por `api.js` no modo Tauri); na stack Node ativa, a montagem do HTML autocontido ocorre **no servidor** (`pdf-export.js`).

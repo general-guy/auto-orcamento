@@ -193,7 +193,7 @@ Os PDFs gerados automaticamente ficam em:
 output/
 ```
 
-Essa pasta não é versionada no Git. Cada exportação usa o nome da paciente, a data e o horário, por exemplo `Maria da Silva 2026-06-18 14-30-05.pdf` e `Maria da Silva 2026-06-18 14-30-05.json`.
+Essa pasta não é versionada no Git. Cada exportação usa o nome da paciente, ` - `, a **primeira cirurgia proposta** (se preenchida) e a data/hora, por exemplo `Maria da Silva - Abdominoplastia 2026-06-18 14-30-05.pdf` e o `.json` com o mesmo nome base.
 
 ## Impressão, PDF e snapshot JSON
 
@@ -205,12 +205,12 @@ Ao clicar em `Imprimir orçamento`:
 4. `server.js` + `pdf-export.js` gravam **PDF** e **JSON** em `output/` (mesmo nome base).
 5. Só então abre `window.print()`.
 
-Se a exportação falhar (ex.: Chrome/Edge ausente), aparece um **alert** com a mensagem de erro.
+Se a exportação falhar (ex.: Chrome/Edge ausente ou bloqueado pelo sistema), aparece um **alert** com a mensagem de erro.
 
 **Impressão vs PDF:** o PDF em `output/` é renderizado no servidor (HTML isolado, sem zoom da UI). O diálogo **Imprimir** usa o DOM da janela; por isso `@media print` anula o `transform` de zoom e `min-height` da shell — evita conteúdo deslocado e folha em branco extra quando o zoom não está em 100%.
 
 - **PDF:** HTML paginado da pré-visualização; timbrado, fontes e estilos embutidos no servidor (Puppeteer + Chrome/Edge).
-- **JSON:** textos, checkboxes de seções opcionais, listas rápidas (marcados e desmarcados), equipe, hospitais com detalhes/multiplicadores, implante selecionado, etc. Ex.: `Maria da Silva 2026-06-26 14-30-05.json`.
+- **JSON:** textos, checkboxes de seções opcionais, listas rápidas (marcados e desmarcados), equipe, hospitais com detalhes/multiplicadores, implante selecionado, etc. Ex.: `Maria da Silva - Abdominoplastia 2026-06-26 14-30-05.json`.
 
 Colisões de nome recebem sufixo `(2)`, `(3)`, etc. **Requisito:** Chrome ou Edge instalado (mesmo do PDF automático).
 
@@ -220,7 +220,7 @@ Depois de alterar código, **reabra** o app (`abrir-auto-orcamento.bat`) para ca
 
 ## Abrir orçamento salvo
 
-O botão **Abrir** (verde, ao lado de **Limpar**) carrega um snapshot JSON gerado na impressão (ex.: `output/Maria da Silva 2026-06-26 14-30-05.json`).
+O botão **Abrir** (verde, ao lado de **Limpar**) carrega um snapshot JSON gerado na impressão (ex.: `output/Maria da Silva - Abdominoplastia 2026-06-26 14-30-05.json`).
 
 1. No Windows, o servidor Node abre um **seletor nativo** via **pywebview** (WebView2, mesma stack do app; nítido em telas HiDPI), com fallback para PowerShell e tkinter.
 2. A pasta inicial é a **última usada** (`lastSnapshotDir` em `data/settings.json`), com fallback em `output/`; a raiz do perfil do usuário (`C:\Users\...`) nunca é reutilizada como pasta salva. Após imprimir, a pasta `output/` também é gravada automaticamente.

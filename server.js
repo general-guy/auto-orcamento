@@ -278,7 +278,10 @@ async function handlePdfExport(request, response) {
   const { buildPdfFilename, renderPdf, resolveUniqueOutputPath, writeBudgetSnapshotJson } =
     getPdfExportModule();
   const createdAt = new Date();
-  const filename = buildPdfFilename(patientName, createdAt);
+  const firstSurgery = Array.isArray(snapshot?.form?.surgeries)
+    ? snapshot.form.surgeries.map((item) => String(item).trim()).find(Boolean) || ""
+    : "";
+  const filename = buildPdfFilename(patientName, createdAt, firstSurgery);
   const outputPath = resolveUniqueOutputPath(outputDir, filename);
   await renderPdf({
     pagesHtml: html,
