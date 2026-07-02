@@ -5,6 +5,9 @@ O Auto Orçamento é um app local para orçamentos cirúrgicos, servido por **No
 | Deploy | Entrada | Backend |
 |--------|---------|---------|
 | **Node (ativo)** | `abrir-auto-orcamento.bat` | `native_launcher.py` + `server.js` (HTTP `/api/*`) |
+| **Remoto (Funnel)** | `iniciar-acesso-remoto.bat` | `remote-access-host.js` + `auth.js` + Tailscale Funnel |
+
+Guia operacional: `docs/acesso-remoto.md`.
 
 Históricos, tabelas, PDFs e snapshots JSON ficam em **`data/`** e **`output/`** na raiz do repo — sem banco de dados nem servidor externo.
 
@@ -55,7 +58,9 @@ O servidor Node **não** é iniciado pelo Python neste fluxo — o `.bat` já o 
 - importa `pywebview` depois de arrancar;
 - abre a janela com `maximized=True` (sem redimensionar após o `loaded`);
 - aguarda até ~800 ms pelo Node (`resolve_startup_url`) e abre `http://127.0.0.1:3000` direto quando possível; senão `assets/launcher.html` (splash) até redirecionar;
-- encerra o Node ao fechar a janela (X): `ensure_server_stopped()` roda **uma vez** no `finally` (`POST /api/shutdown`); se a API falhar, `free_tcp_port(3000)` como fallback. **Não** bloqueia o fechamento da janela com handlers no evento `closing`.
+- encerra o Node ao fechar a janela (X): `ensure_server_stopped()` roda **uma vez** no `finally` (`POST /api/shutdown`); se a API falhar, `free_tcp_port(3000)` como fallback. **Não** bloqueia o fechamento da janela com handlers no evento `closing`. Com `--keep-server` (servidor remoto já ativo), **não** encerra o Node.
+
+`native_launcher.py` também aceita `--keep-server` para o fluxo `iniciar-acesso-remoto.bat` + `abrir-auto-orcamento.bat`.
 
 Pode haver um flash breve do CMD na primeira linha do `.bat`, antes do relançamento oculto. O **primeiro** arranque do WebView2 no dia (runtime frio) ainda pode levar alguns segundos — limitação do Windows, não do Node. Aberturas seguintes no mesmo dia tendem a ser mais rápidas.
 
@@ -92,7 +97,7 @@ Para debug com terminal visível, rode `python native_launcher.py` ou `abrir-aut
 
 `launch-app.js` (fallback):
 
-- com `--external-server`: assume Node já rodando (mesmo modo do `.bat`); encerra via `POST /api/shutdown` ao fechar o navegador;
+- com `--external-server`: assume Node já rodando (mesmo modo do `.bat`); encerra via `POST /api/shutdown` ao fechar o navegador, exceto com `--keep-server`;
 - sem `--external-server`: inicia `server.js` com Node;
 - aguarda o servidor anunciar `http://localhost:3000`;
 - abre Chrome ou Edge em modo app com `--app=http://localhost:3000`;
@@ -103,6 +108,23 @@ Para debug com terminal visível, rode `python native_launcher.py` ou `abrir-aut
 - **aviso:** ícone na barra de tarefas pode ficar borrado (limitação do modo `--app`).
 
 Para forçar um navegador específico no fallback, defina `AUTO_ORCAMENTO_BROWSER` com o caminho do executável.
+
+## Acesso remoto (Tailscale Funnel)
+
+Fluxo opcional documentado em `docs/acesso-remoto.md`.
+
+```text
+iniciar-acesso-remoto.bat
+  -> scripts/remote-access-host.js
+      -> node server.js (AUTH_ENABLED=1)
+      -> tailscale funnel --bg 3000
+      -> pythonw native_launcher.py --external-server --keep-server
+      -> aguarda Q no terminal (cleanup: funnel reset + encerra servidor)
+```
+
+`auth.js` distingue requisições **locais** (sem headers do Funnel) de **remotas** (`x-forwarded-proto` / `x-forwarded-for`). Locais usam o app sem login e podem criar tokens; remotos autenticam com token de uso único (sessão 12 h via cookie).
+
+`abrir-auto-orcamento.bat` reutiliza servidor ativo na porta 3000 (`--keep-server`) sem reiniciar nem encerrar o modo remoto ao fechar a janela.
 
 ## Ambiente de Desenvolvimento
 
@@ -128,7 +150,11 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 | `index.html` | Markup do formulário e preview |
 | `styles.css` | Layout, timbrado, impressão |
 | `app.js` | Lógica de UI, preview, históricos, autofill |
-| `server.js` | Servidor na porta 3000, APIs REST |
+| `server.js` | Servidor na porta 3000, APIs REST; integra `auth.js` quando `AUTH_ENABLED=1` |
+| `auth.js` | Sessões, tokens de convidado, middleware local/remoto |
+| `auth-admin.js` | UI de criação/cópia de token (modo remoto, acesso local) |
+| `login.html` / `login.js` | Login remoto por token |
+| `scripts/remote-access-host.js` | Supervisor do `iniciar-acesso-remoto.bat` |
 | `budget-snapshot.js` | Snapshot JSON do formulário na impressão e validação na importação |
 | `snapshot-open-dialog.js` | Invoca `scripts/open-snapshot-dialog.py` (pywebview/WebView2) ou PowerShell para seletor nativo de JSON |
 | `pdf-export.js` | PDF via Puppeteer + Chrome/Edge; grava JSON ao lado do PDF |
@@ -163,7 +189,9 @@ Endpoints principais:
 - `GET /api/settings`, `PUT /api/settings`: preferências locais (zoom; `lastSnapshotDir` para o botão **Abrir**; grava em `data/settings.json`).
 - `POST /api/open-snapshot`: abre seletor nativo de JSON no Windows (`pywebview`/WebView2 via `scripts/open-snapshot-dialog.py`), lê o arquivo, persiste a pasta em `lastSnapshotDir` e devolve o snapshot parseado.
 - `POST /api/pdf`: gera PDF em `output/` e, se enviado no corpo, grava snapshot JSON (`snapshot`) com o mesmo nome base (`.json`).
-- `POST /api/shutdown`: encerra o servidor ao fechar a janela (`native_launcher.py` ou fallback `launch-app.js`).
+- `POST /api/shutdown`: encerra o servidor ao fechar a janela (`native_launcher.py` ou fallback `launch-app.js`); bloqueado para visitantes remotos; ignorado com `--keep-server`.
+- `GET /api/auth/status`, `POST /api/auth/login`, `POST /api/auth/logout`: autenticação remota por token (`auth.js`; ativo só com `AUTH_ENABLED=1`).
+- `GET/POST/DELETE /api/auth/guests`: criar e revogar tokens (somente requisição local).
 
 Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observações são listas JSON simples, limitadas a 200 itens por tipo. O histórico de tecnologias também é limitado a 200 itens, mas cada item é um objeto com `nome` e `valor`.
 

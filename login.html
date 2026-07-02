@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Entrar — Auto Orçamento</title>
+    <link rel="icon" href="assets/app-icon.ico" sizes="any" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="login-page">
+    <main class="login-card" aria-labelledby="login-title">
+      <p class="eyebrow">Auto Orçamento</p>
+      <h1 id="login-title">Acesso remoto</h1>
+      <p class="login-lead">Cole o token de acesso fornecido pelo consultório.</p>
+
+      <form id="login-form" class="login-form">
+        <label>
+          Token de acesso
+          <input
+            id="loginToken"
+            name="token"
+            type="text"
+            class="login-token-input"
+            autocomplete="one-time-code"
+            spellcheck="false"
+            required
+          />
+        </label>
+
+        <p id="loginError" class="login-error" hidden></p>
+
+        <button type="submit" class="primary-button login-submit">Entrar</button>
+      </form>
+    </main>
+
+    <script src="api.js" defer></script>
+    <script src="login.js" defer></script>
+  </body>
+</html>

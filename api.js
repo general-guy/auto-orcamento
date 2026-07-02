@@ -69,6 +69,12 @@
     }
 
     if (!response.ok) {
+      if (response.status === 401 && data?.authRequired && !window.location.pathname.endsWith("/login.html")) {
+        const next = encodeURIComponent(`${window.location.pathname}${window.location.search}`);
+        window.location.replace(`/login.html?next=${next}`);
+        throw new Error("Autenticação necessária.");
+      }
+
       const message = data?.error || `Falha na requisição: ${url}`;
       throw new Error(message);
     }
@@ -305,6 +311,48 @@
     return fetchJson("/api/open-snapshot", { method: "POST" });
   }
 
+  async function getAuthStatus() {
+    if (isTauri()) {
+      return { authRequired: false, localAccess: false, authenticated: true, user: null };
+    }
+
+    return fetchJson("/api/auth/status");
+  }
+
+  async function login(token) {
+    return fetchJson("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    });
+  }
+
+  async function logout() {
+    if (isTauri()) {
+      return { ok: true };
+    }
+
+    return fetchJson("/api/auth/logout", { method: "POST" });
+  }
+
+  async function listGuests() {
+    return fetchJson("/api/auth/guests");
+  }
+
+  async function createGuest(label, expiresInHours) {
+    return fetchJson("/api/auth/guests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ label, expiresInHours }),
+    });
+  }
+
+  async function revokeGuest(guestId) {
+    return fetchJson(`/api/auth/guests/${encodeURIComponent(guestId)}`, {
+      method: "DELETE",
+    });
+  }
+
   window.AppApi = {
     isTauri,
     waitForBackend,
@@ -323,5 +371,11 @@
     getWebZoomFactor,
     exportPdf,
     openSnapshot,
+    getAuthStatus,
+    login,
+    logout,
+    listGuests,
+    createGuest,
+    revokeGuest,
   };
 })();

@@ -8,6 +8,7 @@ const appUrl = "http://127.0.0.1:3000";
 const appPort = 3000;
 const rootDir = __dirname;
 const externalServer = process.argv.includes("--external-server");
+const keepServer = process.argv.includes("--keep-server");
 
 const browserCandidates = [
   process.env.AUTO_ORCAMENTO_BROWSER,
@@ -84,6 +85,11 @@ function shutdown(exitCode = 0) {
   isShuttingDown = true;
 
   if (externalServer) {
+    if (keepServer) {
+      process.exit(exitCode);
+      return;
+    }
+
     void shutdownExternalServer().finally(() => {
       process.exit(exitCode);
     });

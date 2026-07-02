@@ -177,6 +177,7 @@ def resolve_startup_url(external_server: bool) -> str:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("--external-server", action="store_true")
+    parser.add_argument("--keep-server", action="store_true")
     return parser.parse_args()
 
 
@@ -190,11 +191,12 @@ def main() -> int:
 
     server_process: subprocess.Popen[str] | None = None
     owns_server = not args.external_server
+    keep_server = args.keep_server
     server_stopped = False
 
     def stop_server() -> None:
         nonlocal server_stopped
-        if server_stopped:
+        if server_stopped or keep_server:
             return
         server_stopped = True
         ensure_server_stopped(owns_server, server_process)

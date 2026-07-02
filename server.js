@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
+const auth = require("./auth");
 const { freeTcpPort } = require("./port-utils");
 
 const port = 3000;
@@ -713,6 +714,25 @@ function serveStaticFile(request, response) {
     return;
   }
 
+  const relativePath = path.relative(rootDir, filePath).replace(/\\/g, "/");
+  if (auth.isAuthEnabled()) {
+    if (relativePath.startsWith("output/")) {
+      response.writeHead(403);
+      response.end("Acesso negado.");
+      return;
+    }
+
+    if (
+      relativePath.startsWith("data/") &&
+      relativePath !== "data/tabelas-hospitalares.json" &&
+      relativePath !== "data/tabela-implantes.json"
+    ) {
+      response.writeHead(403);
+      response.end("Acesso negado.");
+      return;
+    }
+  }
+
   fs.readFile(filePath, (error, content) => {
     if (error) {
       response.writeHead(404);
@@ -730,9 +750,24 @@ function serveStaticFile(request, response) {
 
 const server = http.createServer(async (request, response) => {
   try {
+    const authHandled = await auth.handleRequest(request, response, {
+      dataDir,
+      sendJson,
+      collectRequestBody,
+    });
+
+    if (authHandled) {
+      return;
+    }
+
     if (request.url.startsWith("/api/shutdown")) {
       if (request.method !== "POST") {
         sendJson(response, 405, { error: "Método não permitido." });
+        return;
+      }
+
+      if (!auth.canShutdown(request)) {
+        sendJson(response, 403, { error: "Apenas o administrador pode encerrar o servidor." });
         return;
       }
 
@@ -810,9 +845,14 @@ const server = http.createServer(async (request, response) => {
 async function startServer() {
   ensureDataFile();
   ensureOutputDir();
+  auth.ensureBootstrapAdmin(dataDir);
   await freeTcpPort(port);
   server.listen(port, "127.0.0.1", () => {
     console.log(`Auto Orçamento disponível em http://127.0.0.1:${port}`);
+
+    if (auth.isAuthEnabled()) {
+      console.log("Acesso remoto com autenticação ativado (AUTH_ENABLED).");
+    }
   });
 }
 

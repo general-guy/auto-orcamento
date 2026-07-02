@@ -4,5 +4,6 @@ dist/
 __pycache__/
 auto-orcamento.exe
 data/settings.json
+data/auth-users.json
 src-tauri/target/
 src-tauri/gen/

@@ -26,7 +26,10 @@ O web app (`index.html`, `app.js`, `api.js`, `styles.css`, `assets/`, `data/`) r
 | Fluxo | Atalho | Quando usar |
 |-------|--------|-------------|
 | **Node + WebView2** | `abrir-auto-orcamento.bat` | Uso diário e desenvolvimento |
+| **Acesso remoto** | `iniciar-acesso-remoto.bat` | Consultório remoto via Tailscale Funnel + token |
 | ~~Tauri (`.exe`)~~ | congelado | ver `stable/tauri-v0.2.0-paused` para retomada futura |
+
+Detalhes do acesso remoto: [`docs/acesso-remoto.md`](docs/acesso-remoto.md).
 
 Históricos, tabelas, PDFs e snapshots JSON ficam em **`data/`** e **`output/`** na raiz do repo.
 
@@ -41,6 +44,8 @@ abrir-auto-orcamento.bat
 ```
 
 Requer **Node.js** instalado. O atalho instala dependências se faltar `node_modules`, **inicia o Node em background** e abre o WebView2 em paralelo (`pythonw native_launcher.py --external-server`). A janela abre **já maximizada**. O formulário aparece assim que a página carrega; históricos e tabelas continuam a carregar em seguida. **Fechar a janela (X)** encerra o servidor Node automaticamente.
+
+Se o servidor remoto já estiver ativo (`iniciar-acesso-remoto.bat`), o `.bat` **só abre a janela** e não reinicia nem encerra o servidor (`--keep-server`).
 
 Pode haver um **flash breve** do CMD ao duplo clique — o Windows abre o `.bat` antes do relançamento oculto. Se o launcher nativo falhar, o fallback `launch-app.js` (Chrome/Edge) **mostra** um terminal de propósito, para facilitar diagnóstico.
 
@@ -58,6 +63,7 @@ Otimizações aplicadas na stack atual: Node e WebView2 em paralelo, liberação
 
 | Área | Mudança |
 |---|---|
+| Acesso remoto | Tailscale Funnel + tokens de uso único; `iniciar-acesso-remoto.bat` + `docs/acesso-remoto.md` |
 | Launcher | Janela **WebView2 nativa** (`pywebview` + `native_launcher.py`), **maximizada ao abrir**, consola oculta (`launch-hidden.vbs`), ícone `.ico` na barra de tarefas |
 | Startup | Node em background + `--external-server`; poll breve pelo Node; splash `assets/launcher.html`; módulos pesados lazy no servidor; scripts com `defer` |
 | Impressão | `@media print` anula zoom da UI — papel alinhado ao PDF automático |
@@ -68,7 +74,28 @@ Detalhes técnicos: `ARCHITECTURE.md`. Baseline congelada pré-WebView2: `docs/S
 
 Se `pythonw` não estiver disponível, o `.bat` cai para Chrome/Edge em modo app (`launch-app.js`) — nesse modo o ícone da barra pode ficar borrado e um terminal permanece visível.
 
-Equivalente manual (com terminal visível, útil para debug):
+### `iniciar-acesso-remoto.bat`
+
+Expõe o app na internet via **Tailscale Funnel**, com login por **token de uso único** (128 bits, Base64). Requer Tailscale no PC servidor, HTTPS habilitado no tailnet e execução **como Administrador**.
+
+```text
+iniciar-acesso-remoto.bat
+```
+
+O script (`scripts/remote-access-host.js`):
+
+1. Sobe `server.js` com `AUTH_ENABLED=1`
+2. Ativa `tailscale funnel` na porta 3000
+3. Abre o WebView2 local (barra **PC local** + **Criar acesso**)
+4. Aguarda **`Q`** no terminal para encerrar servidor e Funnel
+
+No PC remoto: acesse a URL `https://…ts.net`, cole o token e use o app (sessão de 12 h).
+
+**Fechar a janela do app não encerra o servidor.** Use **`Q`** no terminal para desligar tudo (forma mais confiável que fechar o terminal pelo X).
+
+Guia completo: [`docs/acesso-remoto.md`](docs/acesso-remoto.md).
+
+### Equivalente manual (debug local)
 
 ```bash
 npm install
@@ -92,6 +119,7 @@ node launch-app.js
 | npm | Sim (vem com Node) |
 | Python 3 + pywebview | Sim (janela nativa WebView2; `pip install -r requirements.txt`) |
 | Google Chrome ou Microsoft Edge | Sim (PDF automático e fallback `launch-app.js`) |
+| Tailscale | Só para `iniciar-acesso-remoto.bat` (PC servidor) |
 | Internet | Só na primeira execução, se `node_modules` ainda não existir |
 
 Para migrar a pasta para outro PC: instale Node.js e Python, copie o projeto (de preferência com `node_modules` incluído) e execute `abrir-auto-orcamento.bat`.

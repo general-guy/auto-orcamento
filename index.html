@@ -17,8 +17,38 @@
     <main class="app-shell">
       <section class="panel form-panel" aria-labelledby="form-title">
         <div class="panel-header">
-          <p class="eyebrow">Auto Orçamento</p>
-          <h1 id="form-title">Gerador de Orçamento Cirúrgico</h1>
+          <div class="panel-header-main">
+            <p class="eyebrow">Auto Orçamento</p>
+            <h1 id="form-title">Gerador de Orçamento Cirúrgico</h1>
+          </div>
+          <div id="authAdminBar" class="auth-admin-bar" hidden>
+            <span id="authUserLabel" class="auth-user-label"></span>
+            <button type="button" id="createGuestButton" class="secondary-button auth-admin-button">Criar acesso</button>
+            <button type="button" id="logoutButton" class="secondary-button auth-admin-button">Sair</button>
+          </div>
+        </div>
+
+        <div id="guestCredentialsPanel" class="guest-credentials-panel" hidden>
+          <p class="guest-credentials-title">Token de acesso criado</p>
+          <p class="guest-credentials-hint">Copie e envie agora. O token não será exibido novamente.</p>
+          <dl class="guest-credentials-list">
+            <div>
+              <dt>Token</dt>
+              <dd id="guestAccessToken" class="guest-access-token"></dd>
+            </div>
+            <div>
+              <dt>Validade do token</dt>
+              <dd id="guestCredentialExpiry"></dd>
+            </div>
+            <div>
+              <dt>Sessão após entrar</dt>
+              <dd>12 horas</dd>
+            </div>
+          </dl>
+          <div class="guest-credentials-actions">
+            <button type="button" id="copyGuestTokenButton" class="primary-button">Copiar token</button>
+            <button type="button" id="dismissGuestCredentialsButton" class="secondary-button">Fechar</button>
+          </div>
         </div>
 
         <form id="budget-form" class="budget-form">
@@ -402,6 +432,7 @@
     </div>
 
     <script src="api.js" defer></script>
+    <script src="auth-admin.js" defer></script>
     <script src="budget-snapshot.js" defer></script>
     <script src="zoom.js" defer></script>
     <script src="app.js" defer></script>
