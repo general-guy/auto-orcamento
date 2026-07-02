@@ -21,11 +21,12 @@ Na raiz ficam só os **atalhos de uso** e o **mínimo para o app Node** rodar:
 | `abrir-auto-orcamento.bat` | Uso local (duplo clique) |
 | `iniciar-acesso-remoto.bat` | Acesso remoto via Tailscale |
 | `package.json` / `package-lock.json` | Dependências npm |
-| `server.js`, `index.html`, `app.js`, … | Web app + API local |
 | `README.md` | Este guia |
 
 | Pasta | Função |
 |---|---|
+| `web/` | Frontend: HTML, CSS e JavaScript do app |
+| `server/` | Backend Node: HTTP, APIs, PDF e diálogos |
 | `launcher/` | WebView2, fallback navegador e consola oculta |
 | `tauri-fase_legado/` | `.exe`, build Tauri e `src-tauri/` (congelado) |
 | `assets/`, `data/`, `output/` | Recursos, JSONs e PDFs |
@@ -41,7 +42,7 @@ Na raiz ficam só os **atalhos de uso** e o **mínimo para o app Node** rodar:
 
 ## Como Usar
 
-O web app (`index.html`, `app.js`, `api.js`, `styles.css`, `assets/`, `data/`) roda via **Node + WebView2**. Novas funcionalidades devem ser implementadas nessa stack — **sem depender de Rust/Tauri**.
+O web app (`web/index.html`, `web/app.js`, `web/api.js`, `web/styles.css`, `assets/`, `data/`) roda via **Node + WebView2**. Novas funcionalidades devem ser implementadas nessa stack — **sem depender de Rust/Tauri**.
 
 | Fluxo | Atalho | Quando usar |
 |-------|--------|-------------|
@@ -73,11 +74,11 @@ Pode haver um **flash breve** do CMD ao duplo clique — o Windows abre o `.bat`
 
 | Fase | Comportamento |
 |---|---|
-| **Abertura** | O `.bat` inicia `node server.js` em background (que libera a porta 3000 se necessário) e abre o WebView2 em paralelo, **maximizado desde o início**. O launcher Python aguarda até ~800 ms pelo Node antes de decidir entre o app ou o splash `assets/launcher.html`. O formulário e o preview aparecem cedo; históricos e tabelas carregam em seguida (`initializeApp()` em background). |
+| **Abertura** | O `.bat` inicia `node server/server.js` em background (que libera a porta 3000 se necessário) e abre o WebView2 em paralelo, **maximizado desde o início**. O launcher Python aguarda até ~800 ms pelo Node antes de decidir entre o app ou o splash `assets/launcher.html`. O formulário e o preview aparecem cedo; históricos e tabelas carregam em seguida (`initializeApp()` em background). |
 | **Gargalo principal** | O **primeiro** arranque do WebView2 no dia (runtime frio no Windows) ainda pode levar alguns segundos — limitação do sistema, não do Node. Aberturas seguintes no mesmo dia tendem a ser mais rápidas. |
 | **Fechamento** | **Fechar pelo X** é o fluxo normal: a janela some na hora; o Python encerra o Node **uma vez** no `finally` (`POST /api/shutdown`). Se a API falhar, libera a porta 3000 como fallback. |
 
-Otimizações aplicadas na stack atual: Node e WebView2 em paralelo, liberação assíncrona da porta 3000 só no `server.js` (sem PowerShell), splash local, scripts com `defer`, `pdf-build.js` fora do caminho crítico (só Tauri), carregamento sob demanda de `pdf-export.js` e `snapshot-open-dialog.js` no servidor, e históricos carregados sem bloquear a UI.
+Otimizações aplicadas na stack atual: Node e WebView2 em paralelo, liberação assíncrona da porta 3000 só no `server/server.js` (sem PowerShell), splash local, scripts com `defer`, `web/pdf-build.js` fora do caminho crítico (só Tauri), carregamento sob demanda de `server/pdf-export.js` e `server/snapshot-open-dialog.js` no servidor, e históricos carregados sem bloquear a UI.
 
 ### Evolução recente na `main` (desde `stable/node-web-v0.1.0`)
 
@@ -88,7 +89,7 @@ Otimizações aplicadas na stack atual: Node e WebView2 em paralelo, liberação
 | Startup | Node em background + `--external-server`; poll breve pelo Node; splash `assets/launcher.html`; módulos pesados lazy no servidor; scripts com `defer` |
 | Impressão | `@media print` anula zoom da UI — papel alinhado ao PDF automático |
 | Snapshot | Exportação JSON na impressão + botão **Abrir** com seletor nativo HiDPI (pywebview/WebView2) |
-| Robustez | Liberação da porta 3000 no arranque do `server.js`; encerramento confiável ao fechar pelo X |
+| Robustez | Liberação da porta 3000 no arranque do `server/server.js`; encerramento confiável ao fechar pelo X |
 
 Detalhes técnicos: `docs/ARCHITECTURE.md`. Baseline congelada pré-WebView2: `docs/SNAPSHOT-node-web-v0.1.0.md`.
 
@@ -104,7 +105,7 @@ iniciar-acesso-remoto.bat
 
 O script (`scripts/remote-access-host.js`):
 
-1. Sobe `server.js` com `AUTH_ENABLED=1`
+1. Sobe `server/server.js` com `AUTH_ENABLED=1`
 2. Ativa `tailscale funnel` na porta 3000
 3. Abre o WebView2 local (barra **PC local** + **Criar acesso**)
 4. Aguarda **`Q`** no terminal para encerrar servidor e Funnel
@@ -250,7 +251,7 @@ Ao clicar em `Imprimir orçamento`:
 1. `app.js` salva históricos pendentes.
 2. `budget-snapshot.js` monta o snapshot do formulário (`schemaVersion: 1`).
 3. `AppApi.exportPdf()` envia `pagesHtml` + `snapshot` para `POST /api/pdf` (sem montar PDF no browser — isso fica no servidor).
-4. `server.js` + `pdf-export.js` gravam **PDF** e **JSON** em `output/` (mesmo nome base).
+4. `server/server.js` + `server/pdf-export.js` gravam **PDF** e **JSON** em `output/` (mesmo nome base).
 5. Só então abre `window.print()`.
 
 Se a exportação falhar (ex.: Chrome/Edge ausente ou bloqueado pelo sistema), aparece um **alert** com a mensagem de erro.
@@ -274,7 +275,7 @@ O botão **Abrir** (verde, ao lado de **Limpar**) carrega um snapshot JSON gerad
 2. A pasta inicial é a **última usada** (`lastSnapshotDir` em `data/settings.json`), com fallback em `output/`; a raiz do perfil do usuário (`C:\Users\...`) nunca é reutilizada como pasta salva. Após imprimir, a pasta `output/` também é gravada automaticamente.
 3. Ao escolher um arquivo, o app valida `schemaVersion: 1`, repopula o formulário e atualiza a pré-visualização.
 4. Se ambos os seletores nativos falharem, aparece um **alert** com o erro (sem fallback silencioso para o navegador).
-5. Se aparecer erro de **servidor desatualizado**, feche a janela (X) e reabra o `.bat` — o `server.js` libera a porta 3000 ao subir e carrega o código atualizado.
+5. Se aparecer erro de **servidor desatualizado**, feche a janela (X) e reabra o `.bat` — o `server/server.js` libera a porta 3000 ao subir e carrega o código atualizado.
 
 Campos dinâmicos (cirurgias, hospitais com entradas auxiliares, extras, pagamento, observações), checkboxes de seções opcionais, listas rápidas e equipe são restaurados. Implantes são reassociados pelo índice ou por marca/modelo/referência na tabela local.
 

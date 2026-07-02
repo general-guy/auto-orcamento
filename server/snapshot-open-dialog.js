@@ -2,8 +2,9 @@ const { execFileSync, execSync } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
 
-const pythonDialogScriptPath = path.join(__dirname, "scripts", "open-snapshot-dialog.py");
-const powershellDialogScriptPath = path.join(__dirname, "scripts", "open-snapshot-dialog.ps1");
+const repoRoot = path.join(__dirname, "..");
+const pythonDialogScriptPath = path.join(repoRoot, "scripts", "open-snapshot-dialog.py");
+const powershellDialogScriptPath = path.join(repoRoot, "scripts", "open-snapshot-dialog.ps1");
 
 function getPowerShellPath() {
   if (process.env.SystemRoot) {

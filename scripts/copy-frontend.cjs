@@ -2,6 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const rootDir = path.join(__dirname, "..");
+const webDir = path.join(rootDir, "web");
 const distDir = path.join(rootDir, "dist");
 
 function copyDirectory(sourceDir, targetDir) {
@@ -24,7 +25,7 @@ fs.rmSync(distDir, { recursive: true, force: true });
 fs.mkdirSync(distDir, { recursive: true });
 
 for (const fileName of ["index.html", "app.js", "api.js", "pdf-build.js", "zoom.js", "styles.css"]) {
-  fs.copyFileSync(path.join(rootDir, fileName), path.join(distDir, fileName));
+  fs.copyFileSync(path.join(webDir, fileName), path.join(distDir, fileName));
 }
 
 for (const directoryName of ["assets", "data"]) {

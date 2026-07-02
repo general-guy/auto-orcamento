@@ -1,6 +1,6 @@
 # Snapshot — stack Node.js + browser (v0.1.0)
 
-> **Nota:** este documento descreve a baseline **congelada** em `stable/node-web-v0.1.0`. A branch **`main`** evoluiu desde então (WebView2 nativo, snapshot JSON, botão **Abrir**, startup paralelo, etc.) — use `README.md` e `docs/ARCHITECTURE.md` para o estado atual. O launcher atual está em `launcher/`.
+> **Nota:** este documento descreve a baseline **congelada** em `stable/node-web-v0.1.0`. A branch **`main`** evoluiu desde então (WebView2 nativo, snapshot JSON, botão **Abrir**, startup paralelo, etc.) — use `README.md` e `docs/ARCHITECTURE.md` para o estado atual. Código atual: `launcher/`, `web/`, `server/`.
 
 Este documento registra o estado estável do **Auto Orçamento** antes da migração para Tauri.
 

@@ -5,9 +5,10 @@ const auth = require("./auth");
 const { freeTcpPort } = require("./port-utils");
 
 const port = 3000;
-const rootDir = __dirname;
-const dataDir = path.join(rootDir, "data");
-const outputDir = path.join(rootDir, "output");
+const repoRoot = path.join(__dirname, "..");
+const webDir = path.join(repoRoot, "web");
+const dataDir = path.join(repoRoot, "data");
+const outputDir = path.join(repoRoot, "output");
 const surgeriesFile = path.join(dataDir, "cirurgias.json");
 const hospitalsFile = path.join(dataDir, "hospitais.json");
 const patientsFile = path.join(dataDir, "pacientes.json");
@@ -134,7 +135,7 @@ function getPreferredSnapshotDir() {
 function resolveSnapshotDialogDir(preferredDir) {
   ensureOutputDir();
 
-  for (const candidate of [preferredDir, outputDir, rootDir]) {
+  for (const candidate of [preferredDir, outputDir, repoRoot]) {
     const normalized = normalizeSnapshotDir(candidate);
     if (normalized) {
       return normalized;
@@ -287,7 +288,8 @@ async function handlePdfExport(request, response) {
   await renderPdf({
     pagesHtml: html,
     outputPath,
-    rootDir,
+    webDir,
+    assetRoot: repoRoot,
   });
 
   let jsonPath = null;
@@ -297,12 +299,12 @@ async function handlePdfExport(request, response) {
 
   const responsePayload = {
     filename: path.basename(outputPath),
-    path: path.relative(rootDir, outputPath).replace(/\\/g, "/"),
+    path: path.relative(repoRoot, outputPath).replace(/\\/g, "/"),
   };
 
   if (jsonPath) {
     responsePayload.jsonFilename = path.basename(jsonPath);
-    responsePayload.jsonPath = path.relative(rootDir, jsonPath).replace(/\\/g, "/");
+    responsePayload.jsonPath = path.relative(repoRoot, jsonPath).replace(/\\/g, "/");
     writeSettings({ lastSnapshotDir: path.dirname(jsonPath) });
   }
 
@@ -703,29 +705,68 @@ async function handleTechnologyApi(request, response) {
   sendJson(response, 405, { error: "Método não permitido." });
 }
 
+function resolveStaticPath(requestedPath) {
+  const cleanPath = requestedPath.replace(/^\/+/, "").replace(/\\/g, "/");
+  const normalized = path.normalize(cleanPath).replace(/^(\.\.(\/|\\|$))+/, "");
+
+  if (normalized.startsWith("assets/") || normalized === "assets") {
+    const filePath = path.normalize(path.join(repoRoot, normalized));
+    if (!filePath.startsWith(repoRoot)) {
+      return null;
+    }
+
+    return { filePath, urlPath: normalized };
+  }
+
+  if (normalized.startsWith("data/") || normalized === "data") {
+    const filePath = path.normalize(path.join(repoRoot, normalized));
+    if (!filePath.startsWith(repoRoot)) {
+      return null;
+    }
+
+    return { filePath, urlPath: normalized };
+  }
+
+  if (normalized.startsWith("output/") || normalized === "output") {
+    const filePath = path.normalize(path.join(repoRoot, normalized));
+    if (!filePath.startsWith(repoRoot)) {
+      return null;
+    }
+
+    return { filePath, urlPath: normalized };
+  }
+
+  const filePath = path.normalize(path.join(webDir, normalized));
+  if (!filePath.startsWith(webDir)) {
+    return null;
+  }
+
+  return { filePath, urlPath: normalized };
+}
+
 function serveStaticFile(request, response) {
   const url = new URL(request.url, `http://${request.headers.host}`);
   const requestedPath = decodeURIComponent(url.pathname === "/" ? "/index.html" : url.pathname);
-  const filePath = path.normalize(path.join(rootDir, requestedPath));
+  const resolved = resolveStaticPath(requestedPath);
 
-  if (!filePath.startsWith(rootDir)) {
+  if (!resolved) {
     response.writeHead(403);
     response.end("Acesso negado.");
     return;
   }
 
-  const relativePath = path.relative(rootDir, filePath).replace(/\\/g, "/");
+  const { filePath, urlPath } = resolved;
   if (auth.isAuthEnabled()) {
-    if (relativePath.startsWith("output/")) {
+    if (urlPath.startsWith("output/")) {
       response.writeHead(403);
       response.end("Acesso negado.");
       return;
     }
 
     if (
-      relativePath.startsWith("data/") &&
-      relativePath !== "data/tabelas-hospitalares.json" &&
-      relativePath !== "data/tabela-implantes.json"
+      urlPath.startsWith("data/") &&
+      urlPath !== "data/tabelas-hospitalares.json" &&
+      urlPath !== "data/tabela-implantes.json"
     ) {
       response.writeHead(403);
       response.end("Acesso negado.");

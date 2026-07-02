@@ -3,7 +3,7 @@ const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
 const rootDir = path.join(__dirname, "..");
-const { freeTcpPortSync } = require(path.join(rootDir, "port-utils"));
+const { freeTcpPortSync } = require(path.join(rootDir, "server", "port-utils"));
 
 const appUrl = "http://127.0.0.1:3000";
 const appPort = 3000;
@@ -124,7 +124,7 @@ function openBrowserApp(browserPath) {
 
 function startServer() {
   return new Promise((resolve, reject) => {
-    serverProcess = spawn(process.execPath, ["server.js"], {
+    serverProcess = spawn(process.execPath, [path.join(rootDir, "server", "server.js")], {
       cwd: rootDir,
       stdio: ["ignore", "pipe", "pipe"],
       windowsHide: false,

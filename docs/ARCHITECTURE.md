@@ -4,7 +4,7 @@ O Auto Orçamento é um app local para orçamentos cirúrgicos, servido por **No
 
 | Deploy | Entrada | Backend |
 |--------|---------|---------|
-| **Node (ativo)** | `abrir-auto-orcamento.bat` | `launcher/native_launcher.py` + `server.js` (HTTP `/api/*`) |
+| **Node (ativo)** | `abrir-auto-orcamento.bat` | `launcher/native_launcher.py` + `server/server.js` (HTTP `/api/*`) |
 | **Remoto (Funnel)** | `iniciar-acesso-remoto.bat` | `remote-access-host.js` + `auth.js` + Tailscale Funnel |
 
 Guia operacional: `docs/acesso-remoto.md`.
@@ -20,7 +20,7 @@ Históricos, tabelas, PDFs e snapshots JSON ficam em **`data/`** e **`output/`**
 ```text
 abrir-auto-orcamento.bat
   -> launcher/launch-hidden.vbs (relançamento oculto, sem consola)
-      -> node server.js em background (paralelo)
+      -> node server/server.js em background (paralelo)
       -> launcher/native_launcher.py --external-server (pythonw)
           -> janela WebView2 (pywebview)
               -> http://127.0.0.1:3000 ou assets/launcher.html
@@ -32,13 +32,13 @@ Fallback (sem `pythonw` ou se `pywebview` falhar):
 ```text
 abrir-auto-orcamento.bat
   -> launcher/launch-app.js
-      -> server.js
+      -> server/server.js
       -> Chrome ou Edge em modo app
 ```
 
 ## Launcher
 
-`abrir-auto-orcamento.bat` instala `node_modules` se necessário, **inicia `node server.js` em background** e só então chama `pythonw launcher/native_launcher.py --external-server`. Assim o Node e o Python/WebView2 arrancam em paralelo. A liberação da porta 3000 ocorre **dentro do `server.js`** (sondagem TCP assíncrona, sem PowerShell). No duplo clique, relança-se em modo oculto via `launcher/launch-hidden.vbs` (argumento interno `__hidden__`).
+`abrir-auto-orcamento.bat` instala `node_modules` se necessário, **inicia `node server/server.js` em background** e só então chama `pythonw launcher/native_launcher.py --external-server`. Assim o Node e o Python/WebView2 arrancam em paralelo. A liberação da porta 3000 ocorre **dentro do `server/server.js`** (sondagem TCP assíncrona, sem PowerShell). No duplo clique, relança-se em modo oculto via `launcher/launch-hidden.vbs` (argumento interno `__hidden__`).
 
 ```text
 pythonw launcher/native_launcher.py --external-server
@@ -68,7 +68,7 @@ Pode haver um flash breve do CMD na primeira linha do `.bat`, antes do relançam
 
 ```text
 abrir-auto-orcamento.bat (__hidden__)
-  -> start /B node server.js          (background; libera porta 3000 se ocupada)
+  -> start /B node server/server.js          (background; libera porta 3000 se ocupada)
   -> pythonw launcher/native_launcher.py --external-server
       -> resolve_startup_url()        (poll até ~800 ms)
           -> http://127.0.0.1:3000     (se /api/settings responde)
@@ -76,7 +76,7 @@ abrir-auto-orcamento.bat (__hidden__)
       -> webview.start(maximized=True)
 ```
 
-`server.js` carrega `pdf-export.js` e `snapshot-open-dialog.js` **sob demanda** (primeira impressão ou **Abrir**). `index.html` usa `defer` nos scripts; `pdf-build.js` só carrega no Tauri congelado (`api.js`). `app.js` chama `updatePreview()` cedo e carrega históricos/tabelas em `Promise.all` sem bloquear a shell.
+`server/server.js` carrega `server/pdf-export.js` e `server/snapshot-open-dialog.js` **sob demanda** (primeira impressão ou **Abrir**). `web/index.html` usa `defer` nos scripts; `web/pdf-build.js` só carrega no Tauri congelado (`web/api.js`). `web/app.js` chama `updatePreview()` cedo e carrega históricos/tabelas em `Promise.all` sem bloquear a shell.
 
 ### Encerramento
 
@@ -98,7 +98,7 @@ Para debug com terminal visível, rode `python launcher/native_launcher.py` ou `
 `launcher/launch-app.js` (fallback):
 
 - com `--external-server`: assume Node já rodando (mesmo modo do `.bat`); encerra via `POST /api/shutdown` ao fechar o navegador, exceto com `--keep-server`;
-- sem `--external-server`: inicia `server.js` com Node;
+- sem `--external-server`: inicia `server/server.js` com Node;
 - aguarda o servidor anunciar `http://localhost:3000`;
 - abre Chrome ou Edge em modo app com `--app=http://localhost:3000`;
 - prioriza Google Chrome e usa Microsoft Edge apenas como fallback;
@@ -139,7 +139,7 @@ O Windows PowerShell 5.1 também funciona para comandos básicos, mas alguns exe
 | Node.js | Servidor HTTP, APIs, PDF |
 | npm | Instala `puppeteer-core` |
 | Python 3 + pywebview | Janela WebView2 nativa (`launcher/native_launcher.py`) |
-| Chrome ou Edge | Fallback (`launcher/launch-app.js`) e renderização PDF (`pdf-export.js`) |
+| Chrome ou Edge | Fallback (`launcher/launch-app.js`) e renderização PDF (`server/pdf-export.js`) |
 
 Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `launcher/launch-app.js`. Sem Chrome/Edge, a exportação automática de PDF não funciona (e o fallback do launcher também falha).
 
@@ -147,19 +147,19 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 
 | Arquivo | Responsabilidade |
 |---|---|
-| `index.html` | Markup do formulário e preview |
-| `styles.css` | Layout, timbrado, impressão |
-| `app.js` | Lógica de UI, preview, históricos, autofill |
-| `server.js` | Servidor na porta 3000, APIs REST; integra `auth.js` quando `AUTH_ENABLED=1` |
-| `auth.js` | Sessões, tokens de convidado, middleware local/remoto |
-| `auth-admin.js` | UI de criação/cópia de token (modo remoto, acesso local) |
-| `login.html` / `login.js` | Login remoto por token |
+| `web/index.html` | Markup do formulário e preview |
+| `web/styles.css` | Layout, timbrado, impressão |
+| `web/app.js` | Lógica de UI, preview, históricos, autofill |
+| `server/server.js` | Servidor na porta 3000, APIs REST; integra `server/auth.js` quando `AUTH_ENABLED=1` |
+| `server/auth.js` | Sessões, tokens de convidado, middleware local/remoto |
+| `web/auth-admin.js` | UI de criação/cópia de token (modo remoto, acesso local) |
+| `web/login.html` / `web/login.js` | Login remoto por token |
 | `scripts/remote-access-host.js` | Supervisor do `iniciar-acesso-remoto.bat` |
-| `budget-snapshot.js` | Snapshot JSON do formulário na impressão e validação na importação |
-| `snapshot-open-dialog.js` | Invoca `scripts/open-snapshot-dialog.py` (pywebview/WebView2) ou PowerShell para seletor nativo de JSON |
-| `pdf-export.js` | PDF via Puppeteer + Chrome/Edge; grava JSON ao lado do PDF |
+| `web/budget-snapshot.js` | Snapshot JSON do formulário na impressão e validação na importação |
+| `server/snapshot-open-dialog.js` | Invoca `scripts/open-snapshot-dialog.py` (pywebview/WebView2) ou PowerShell para seletor nativo de JSON |
+| `server/pdf-export.js` | PDF via Puppeteer + Chrome/Edge; grava JSON ao lado do PDF |
 | `assets/launcher.html` | Splash local; detecta servidor e redireciona para o app |
-| `port-utils.js` | Liberação da porta 3000 (sondagem TCP assíncrona; fallback `netstat`/`taskkill` no Windows) |
+| `server/port-utils.js` | Liberação da porta 3000 (sondagem TCP assíncrona; fallback `netstat`/`taskkill` no Windows) |
 | `launcher/native_launcher.py` | Launcher Windows (servidor + janela WebView2 + ícone `.ico`) |
 | `launcher/launch-hidden.vbs` | Relançamento oculto do `.bat` (sem consola visível) |
 | `launcher/launch-app.js` | Fallback: servidor + Chrome/Edge em modo app |
@@ -169,12 +169,12 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 
 ## Servidor Local
 
-`server.js` usa apenas módulos nativos do Node:
+`server/server.js` usa apenas módulos nativos do Node:
 
-- `http` para servir a aplicação;
+- `http` para servir a aplicação (`web/` na raiz das URLs; `assets/`, `data/` e `output/` na raiz do repo);
 - `fs` e `path` para ler e gravar arquivos locais;
 - porta fixa `3000`, bind em `127.0.0.1`;
-- `pdf-export.js` e `snapshot-open-dialog.js` carregados **sob demanda** (startup mais rápido).
+- `server/pdf-export.js` e `server/snapshot-open-dialog.js` carregados **sob demanda** (startup mais rápido).
 
 Endpoints principais:
 
@@ -449,7 +449,7 @@ A ordem final é: pacotes de cirurgia plástica, taxas adicionais e, ao fim, ent
 
 ## Convenções
 
-- O frontend é HTML, CSS e JavaScript servido por `server.js` na raiz do repo — **sem build step**.
+- O frontend é HTML, CSS e JavaScript em `web/`, servido por `server/server.js` — **sem build step**.
 - Fluxo diário: `abrir-auto-orcamento.bat` → WebView2 + `http://localhost:3000`.
 - O estado persistente fica em JSON local (`data/`, `output/`).
 - Alterações no preview devem chamar `updatePreview()` quando mudarem campos programaticamente.

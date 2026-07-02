@@ -111,7 +111,7 @@ def start_node_server() -> subprocess.Popen[str]:
     if sys.platform == "win32":
         popen_kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW
 
-    return subprocess.Popen([node_path, "server.js"], **popen_kwargs)
+    return subprocess.Popen([node_path, "server/server.js"], **popen_kwargs)
 
 
 def stop_node_server(server_process: subprocess.Popen[str] | None) -> None:

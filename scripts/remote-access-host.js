@@ -3,7 +3,7 @@ const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
 const readline = require("node:readline");
-const { freeTcpPortSync, isPortInUseSync } = require("../port-utils");
+const { freeTcpPortSync, isPortInUseSync } = require("../server/port-utils");
 
 const rootDir = path.join(__dirname, "..");
 const appPort = 3000;
@@ -66,7 +66,7 @@ function startServer() {
     freeTcpPortSync(appPort);
   }
 
-  serverProcess = spawn(process.execPath, ["server.js"], {
+  serverProcess = spawn(process.execPath, [path.join(rootDir, "server", "server.js")], {
     cwd: rootDir,
     env: {
       ...process.env,

@@ -165,27 +165,27 @@ function inlineStylesheetAssets(css, rootDir) {
   });
 }
 
-function loadStylesForPdf(rootDir) {
-  const stylesPath = path.join(rootDir, "styles.css");
+function loadStylesForPdf(webDir, assetRoot) {
+  const stylesPath = path.join(webDir, "styles.css");
   const css = fs.readFileSync(stylesPath, "utf8");
-  return inlineStylesheetAssets(css, rootDir);
+  return inlineStylesheetAssets(css, assetRoot);
 }
 
-function rewritePagesHtmlAssets(pagesHtml, rootDir) {
+function rewritePagesHtmlAssets(pagesHtml, assetRoot) {
   return pagesHtml.replace(/\ssrc=(["'])([^"']+)\1/g, (match, quote, assetUrl) => {
     if (/^(https?:|data:|file:|blob:)/.test(assetUrl)) {
       return match;
     }
 
-    const absolutePath = path.resolve(rootDir, assetUrl);
+    const absolutePath = path.resolve(assetRoot, assetUrl);
     const dataUrl = toDataUrl(absolutePath);
     return dataUrl ? ` src=${quote}${dataUrl}${quote}` : match;
   });
 }
 
-function buildPdfDocumentHtml(pagesHtml, rootDir) {
-  const css = loadStylesForPdf(rootDir);
-  const normalizedPages = rewritePagesHtmlAssets(pagesHtml, rootDir);
+function buildPdfDocumentHtml(pagesHtml, webDir, assetRoot) {
+  const css = loadStylesForPdf(webDir, assetRoot);
+  const normalizedPages = rewritePagesHtmlAssets(pagesHtml, assetRoot);
 
   return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -208,8 +208,8 @@ function buildPdfDocumentHtml(pagesHtml, rootDir) {
 </html>`;
 }
 
-async function renderPdf({ pagesHtml, outputPath, rootDir }) {
-  const html = buildPdfDocumentHtml(pagesHtml, rootDir);
+async function renderPdf({ pagesHtml, outputPath, webDir, assetRoot }) {
+  const html = buildPdfDocumentHtml(pagesHtml, webDir, assetRoot);
   const { browser, profileDir } = await launchPdfBrowser();
 
   try {

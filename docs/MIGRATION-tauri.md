@@ -1,4 +1,4 @@
-> **Nota (2026-07):** o código Tauri foi movido para `tauri-fase_legado/`. Referências abaixo a `src-tauri/` na raiz equivalem a `tauri-fase_legado/src-tauri/`; o `.exe` fica em `tauri-fase_legado/auto-orcamento.exe`.
+> **Nota (2026-07):** frontend em `web/`; backend Node em `server/`. URLs do browser continuam na raiz (`/app.js`, `/index.html`, etc.).
 
 # Plano de migração para Tauri
 
@@ -60,7 +60,7 @@ Acrescentar um **executável desktop** (Tauri) **em paralelo** à stack Node —
 ### Fase 1 — Scaffold Tauri ✅
 
 - [x] Projeto Tauri 2 em `src-tauri/`
-- [x] Script `scripts/copy-frontend.cjs` copia `index.html`, `app.js`, `styles.css`, `assets/` e `data/` para `dist/`
+- [x] Script `scripts/copy-frontend.cjs` copia `web/` (`index.html`, `app.js`, `styles.css`, etc.), `assets/` e `data/` para `dist/`
 - [x] WebView carrega o frontend estático (sem Node em runtime)
 - [x] Janela maximizada; ícones do app a partir do **G** ornamental (`assets/app-icon-g.png`)
 - [x] Pipeline de ícone: `scripts/build-app-icon-square.ps1` → `assets/app-icon-square.png` → `npm run icon:generate` → `src-tauri/icons/` (`.ico`, PNGs, favicon)
