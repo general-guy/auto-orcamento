@@ -2,6 +2,25 @@ const form = document.querySelector("#budget-form");
 const printButton = document.querySelector("#printButton");
 const openButton = document.querySelector("#openButton");
 const openSnapshotInput = document.querySelector("#openSnapshotInput");
+
+// Acesso remoto (Tailscale Funnel): operações nativas do servidor (seletor de
+// arquivo e geração de PDF em output/) não fazem sentido no PC cliente, então
+// usamos os equivalentes do navegador (upload e window.print()).
+let isRemoteSession = false;
+
+async function detectAccessMode() {
+  if (AppApi.isTauri()) {
+    isRemoteSession = false;
+    return;
+  }
+
+  try {
+    const status = await AppApi.getAuthStatus();
+    isRemoteSession = Boolean(status.authRequired) && !status.localAccess;
+  } catch {
+    isRemoteSession = false;
+  }
+}
 const clearButton = document.querySelector("#clearButton");
 const addSurgeryButton = document.querySelector("#addSurgeryButton");
 const removeSurgeryButton = document.querySelector("#removeSurgeryButton");
@@ -3696,6 +3715,14 @@ async function openBudgetSnapshotFile(file) {
 }
 
 async function handleOpenButtonClick() {
+  // No acesso remoto usamos a caixa dedicada (somente leitura de output/), que
+  // não expõe o sistema de arquivos do servidor.
+  if (isRemoteSession) {
+    await openSnapshotPicker();
+    return;
+  }
+
+  // Local (WebView2): seletor nativo do sistema, com acesso total do dono do PC.
   if (!AppApi.isTauri()) {
     try {
       const result = await AppApi.openSnapshot();
@@ -3716,6 +3743,127 @@ async function handleOpenButtonClick() {
   }
 
   openSnapshotInput.click();
+}
+
+const snapshotPicker = document.querySelector("#snapshotPicker");
+const snapshotPickerList = document.querySelector("#snapshotPickerList");
+const snapshotPickerSearch = document.querySelector("#snapshotPickerSearch");
+const snapshotPickerStatus = document.querySelector("#snapshotPickerStatus");
+let snapshotPickerFiles = [];
+
+function setSnapshotPickerStatus(message) {
+  if (!snapshotPickerStatus) {
+    return;
+  }
+
+  if (!message) {
+    snapshotPickerStatus.hidden = true;
+    snapshotPickerStatus.textContent = "";
+    return;
+  }
+
+  snapshotPickerStatus.hidden = false;
+  snapshotPickerStatus.textContent = message;
+}
+
+function formatSnapshotDate(isoDate) {
+  if (!isoDate) {
+    return "";
+  }
+
+  const date = new Date(isoDate);
+  return Number.isNaN(date.getTime()) ? "" : date.toLocaleString("pt-BR");
+}
+
+function renderSnapshotPickerList() {
+  const filter = normalizeText(snapshotPickerSearch?.value || "");
+  const files = snapshotPickerFiles.filter((file) => normalizeText(file.name).includes(filter));
+
+  snapshotPickerList.innerHTML = "";
+
+  if (!snapshotPickerFiles.length) {
+    setSnapshotPickerStatus("Nenhum orçamento salvo em output/.");
+    return;
+  }
+
+  if (!files.length) {
+    setSnapshotPickerStatus("Nenhum arquivo corresponde ao filtro.");
+    return;
+  }
+
+  setSnapshotPickerStatus("");
+
+  for (const file of files) {
+    const item = document.createElement("li");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "snapshot-picker-item";
+    button.dataset.snapshotName = file.name;
+
+    const name = document.createElement("span");
+    name.className = "snapshot-picker-item-name";
+    name.textContent = file.name.replace(/\.json$/i, "");
+
+    const meta = document.createElement("span");
+    meta.className = "snapshot-picker-item-meta";
+    meta.textContent = formatSnapshotDate(file.modifiedAt);
+
+    button.append(name, meta);
+    item.appendChild(button);
+    snapshotPickerList.appendChild(item);
+  }
+}
+
+function closeSnapshotPicker() {
+  if (!snapshotPicker) {
+    return;
+  }
+
+  snapshotPicker.hidden = true;
+  document.removeEventListener("keydown", handleSnapshotPickerKeydown);
+}
+
+function handleSnapshotPickerKeydown(event) {
+  if (event.key === "Escape") {
+    closeSnapshotPicker();
+  }
+}
+
+async function openSnapshotPicker() {
+  if (!snapshotPicker) {
+    return;
+  }
+
+  snapshotPicker.hidden = false;
+  document.addEventListener("keydown", handleSnapshotPickerKeydown);
+  snapshotPickerFiles = [];
+  snapshotPickerList.innerHTML = "";
+  setSnapshotPickerStatus("Carregando…");
+
+  if (snapshotPickerSearch) {
+    snapshotPickerSearch.value = "";
+  }
+
+  try {
+    const result = await AppApi.listSnapshots();
+    snapshotPickerFiles = Array.isArray(result.files) ? result.files : [];
+    renderSnapshotPickerList();
+    snapshotPickerSearch?.focus();
+  } catch (error) {
+    setSnapshotPickerStatus(`Não foi possível listar os arquivos.\n${error.message}`);
+  }
+}
+
+async function loadSnapshotFromServer(name) {
+  setSnapshotPickerStatus("Abrindo…");
+
+  try {
+    const result = await AppApi.loadSnapshot(name);
+    await applySnapshotPayload(result.snapshot);
+    closeSnapshotPicker();
+  } catch (error) {
+    setSnapshotPickerStatus(`Não foi possível abrir o arquivo.\n${error.message}`);
+  }
 }
 
 form.elements.budgetDate.value = formatDateForInput(new Date());
@@ -5130,6 +5278,20 @@ openSnapshotInput.addEventListener("change", async () => {
 
   await openBudgetSnapshotFile(file);
 });
+if (snapshotPicker) {
+  snapshotPicker.addEventListener("click", (event) => {
+    if (event.target.closest("[data-snapshot-close]")) {
+      closeSnapshotPicker();
+      return;
+    }
+
+    const item = event.target.closest(".snapshot-picker-item");
+    if (item?.dataset.snapshotName) {
+      void loadSnapshotFromServer(item.dataset.snapshotName);
+    }
+  });
+  snapshotPickerSearch?.addEventListener("input", renderSnapshotPickerList);
+}
 addSurgeryButton.addEventListener("click", createSurgeryField);
 removeSurgeryButton.addEventListener("click", removeLastSurgeryField);
 addPaymentButton.addEventListener("click", createPaymentField);
@@ -5152,7 +5314,12 @@ printButton.addEventListener("click", async () => {
       saveTechnologyToHistory(),
     ]
   );
-  await exportPdfDocument();
+  // No acesso remoto, a exportação de PDF gravaria em output/ do servidor
+  // (inútil para o cliente); o cliente usa "Salvar como PDF" da impressão.
+  if (!isRemoteSession) {
+    await exportPdfDocument();
+  }
+
   window.print();
 });
 
@@ -5162,6 +5329,8 @@ async function initializeApp() {
   } catch (error) {
     console.error(error);
   }
+
+  await detectAccessMode();
 
   updatePreview();
 

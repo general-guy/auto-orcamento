@@ -51,13 +51,38 @@ Fechar **só a janela do app** não encerra o servidor nem o Funnel.
 
 Se o modo remoto já estiver ativo, `abrir-auto-orcamento.bat` abre outra janela do app **sem derrubar** o servidor.
 
+## Abrir e Imprimir no acesso remoto
+
+O diálogo nativo de arquivos (`POST /api/open-snapshot`) **não** é usado remotamente — ele abriria janelas no PC servidor e daria acesso ao sistema de arquivos. Em vez disso:
+
+| Ação | PC local (servidor) | PC remoto (cliente) |
+|------|---------------------|---------------------|
+| **Abrir** | Seletor nativo do Windows (qualquer pasta) | **Caixa dedicada** com os `.json` de `output/` (somente leitura) |
+| **Imprimir** | Gera PDF + JSON em `output/` + diálogo de impressão | Só `window.print()` no navegador do cliente (use “Salvar como PDF” se quiser arquivo) |
+
+### Caixa dedicada de orçamentos (`output/`)
+
+No cliente remoto, **Abrir** abre um modal que:
+
+- lista apenas arquivos `.json` em `output/` no servidor;
+- permite filtrar por nome;
+- **não** permite navegar em outras pastas, editar nem apagar arquivos.
+
+APIs (autenticadas, somente leitura):
+
+- `GET /api/snapshots` — lista `{ name, modifiedAt, size }`
+- `GET /api/snapshots/:nome` — lê um snapshot (validação estrita: só `output/`, só `.json`, sem `..`)
+
+`POST /api/open-snapshot` retorna **403** para requisições remotas.
+
 ## Segurança
 
 - Apenas **guests** entram pelo Funnel (token). Não há login de administrador remoto.
 - Gerar tokens e revogar convites só funciona no **PC local** (`127.0.0.1`).
 - Tokens são armazenados como hash (`scrypt`); o valor em texto aparece **uma vez** na criação.
 - `data/auth-users.json` não é versionado (`.gitignore`).
-- Arquivos em `data/` (exceto tabelas de referência) e `output/` ficam bloqueados para visitantes não autenticados.
+- Arquivos em `data/` (exceto tabelas de referência) ficam bloqueados para visitantes não autenticados.
+- `output/` não é servido como arquivo estático; o remoto acessa snapshots **só** via `/api/snapshots`.
 
 ## Arquivos envolvidos
 
@@ -65,16 +90,11 @@ Se o modo remoto já estiver ativo, `abrir-auto-orcamento.bat` abre outra janela
 |---------|--------|
 | `iniciar-acesso-remoto.bat` | Atalho; chama o supervisor |
 | `scripts/remote-access-host.js` | Sobe servidor, Funnel, WebView2; aguarda `Q` |
-| `auth.js` | Sessões, tokens, middleware local/remoto |
-| `login.html` / `login.js` | Tela de login remoto |
-| `auth-admin.js` | **Criar acesso** e **Copiar token** (só modo local) |
+| `server/auth.js` | Sessões, tokens, middleware local/remoto |
+| `web/login.html` / `web/login.js` | Tela de login remoto |
+| `web/auth-admin.js` | **Criar acesso** e **Copiar token** (só modo local) |
+| `web/app.js` | Detecção de sessão remota; modal de snapshots |
 | `data/auth-users.json` | Convites (criado em runtime) |
-
-## Limitações no acesso remoto
-
-- **Abrir** snapshot: o seletor de arquivo nativo abre no **servidor**, não no PC remoto
-- PDFs gerados ficam em `output/` no **servidor**
-- `window.print()` imprime no PC remoto
 
 ## Solução de problemas
 
@@ -85,3 +105,5 @@ Se o modo remoto já estiver ativo, `abrir-auto-orcamento.bat` abre outra janela
 | `Arquivo não encontrado` na URL | URL incompleta (ex.: `/l` no final) | Usar só `https://…ts.net` |
 | Token inválido | Token já usado ou expirado | Gerar novo token no PC local |
 | Botão **Criar acesso** sempre visível | CSS antigo em cache | Recarregar ou reiniciar o app |
+| **Abrir** abre janelas no servidor | Versão antiga sem caixa dedicada | Reiniciar servidor com código atual |
+| Lista de orçamentos vazia | Nenhum JSON em `output/` ainda | Imprimir um orçamento no servidor antes |

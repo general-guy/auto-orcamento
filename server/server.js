@@ -247,6 +247,96 @@ function ensureOutputDir() {
   fs.mkdirSync(outputDir, { recursive: true });
 }
 
+// Resolve um nome de arquivo para dentro de output/, rejeitando travessia de
+// diretórios e qualquer coisa que não seja um .json na própria pasta.
+function resolveOutputSnapshotPath(rawName) {
+  if (typeof rawName !== "string" || !rawName) {
+    return null;
+  }
+
+  const name = path.basename(rawName);
+  if (name !== rawName || name.includes("/") || name.includes("\\") || name.includes("..")) {
+    return null;
+  }
+
+  if (path.extname(name).toLowerCase() !== ".json") {
+    return null;
+  }
+
+  const resolved = path.resolve(outputDir, name);
+  const base = path.resolve(outputDir);
+  if (resolved !== path.join(base, name) || !resolved.startsWith(base + path.sep)) {
+    return null;
+  }
+
+  return resolved;
+}
+
+function listOutputSnapshots() {
+  ensureOutputDir();
+
+  let entries;
+  try {
+    entries = fs.readdirSync(outputDir, { withFileTypes: true });
+  } catch {
+    return [];
+  }
+
+  return entries
+    .filter((entry) => entry.isFile() && path.extname(entry.name).toLowerCase() === ".json")
+    .map((entry) => {
+      const fullPath = path.join(outputDir, entry.name);
+      let modifiedAt = null;
+      let size = 0;
+      try {
+        const stats = fs.statSync(fullPath);
+        modifiedAt = stats.mtime.toISOString();
+        size = stats.size;
+      } catch {
+        // arquivo removido entre readdir e stat
+      }
+
+      return { name: entry.name, modifiedAt, size };
+    })
+    .sort((left, right) => String(right.modifiedAt).localeCompare(String(left.modifiedAt)));
+}
+
+async function handleSnapshotsApi(request, response, pathname) {
+  if (request.method !== "GET") {
+    sendJson(response, 405, { error: "Método não permitido." });
+    return;
+  }
+
+  if (pathname === "/api/snapshots") {
+    sendJson(response, 200, { files: listOutputSnapshots() });
+    return;
+  }
+
+  const match = pathname.match(/^\/api\/snapshots\/(.+)$/);
+  const requestedName = match ? decodeURIComponent(match[1]) : "";
+  const filePath = resolveOutputSnapshotPath(requestedName);
+
+  if (!filePath) {
+    sendJson(response, 400, { error: "Nome de arquivo inválido." });
+    return;
+  }
+
+  if (!fs.existsSync(filePath)) {
+    sendJson(response, 404, { error: "Arquivo não encontrado em output/." });
+    return;
+  }
+
+  let snapshot;
+  try {
+    snapshot = JSON.parse(fs.readFileSync(filePath, "utf8"));
+  } catch {
+    sendJson(response, 400, { error: "Arquivo JSON inválido." });
+    return;
+  }
+
+  sendJson(response, 200, { name: path.basename(filePath), snapshot });
+}
+
 async function handleSettingsApi(request, response) {
   if (request.method === "GET") {
     sendJson(response, 200, readSettings());
@@ -850,7 +940,23 @@ const server = http.createServer(async (request, response) => {
       return;
     }
 
+    if (request.url.startsWith("/api/snapshots")) {
+      // Lista/leitura somente-leitura de output/ (seguro para acesso remoto).
+      const snapshotsPath = new URL(request.url, "http://localhost").pathname;
+      await handleSnapshotsApi(request, response, snapshotsPath);
+      return;
+    }
+
     if (request.url.startsWith("/api/open-snapshot")) {
+      // O seletor nativo abre no PC servidor; nunca deve ser disparado por um
+      // cliente remoto (Funnel). O frontend remoto usa a caixa dedicada de output/.
+      if (auth.isAuthEnabled() && auth.isRemoteRequest(request)) {
+        sendJson(response, 403, {
+          error: "Seletor nativo indisponível no acesso remoto. Use a lista de orçamentos salvos.",
+        });
+        return;
+      }
+
       await handleOpenSnapshot(request, response);
       return;
     }

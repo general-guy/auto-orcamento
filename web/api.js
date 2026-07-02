@@ -311,6 +311,14 @@
     return fetchJson("/api/open-snapshot", { method: "POST" });
   }
 
+  async function listSnapshots() {
+    return fetchJson("/api/snapshots");
+  }
+
+  async function loadSnapshot(name) {
+    return fetchJson(`/api/snapshots/${encodeURIComponent(name)}`);
+  }
+
   async function getAuthStatus() {
     if (isTauri()) {
       return { authRequired: false, localAccess: false, authenticated: true, user: null };
@@ -371,6 +379,8 @@
     getWebZoomFactor,
     exportPdf,
     openSnapshot,
+    listSnapshots,
+    loadSnapshot,
     getAuthStatus,
     login,
     logout,

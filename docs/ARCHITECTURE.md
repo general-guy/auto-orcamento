@@ -122,7 +122,9 @@ iniciar-acesso-remoto.bat
       -> aguarda Q no terminal (cleanup: funnel reset + encerra servidor)
 ```
 
-`auth.js` distingue requisições **locais** (sem headers do Funnel) de **remotas** (`x-forwarded-proto` / `x-forwarded-for`). Locais usam o app sem login e podem criar tokens; remotos autenticam com token de uso único (sessão 12 h via cookie).
+`server/auth.js` distingue requisições **locais** (sem headers do Funnel) de **remotas** (`x-forwarded-proto` / `x-forwarded-for`). Locais usam o app sem login e podem criar tokens; remotos autenticam com token de uso único (sessão 12 h via cookie).
+
+No remoto, **Abrir** usa uma caixa dedicada (`GET /api/snapshots`) que lista só `.json` de `output/`; **Imprimir** não grava PDF no servidor — só `window.print()` no cliente. `POST /api/open-snapshot` (seletor nativo) fica bloqueado para visitantes remotos.
 
 `abrir-auto-orcamento.bat` reutiliza servidor ativo na porta 3000 (`--keep-server`) sem reiniciar nem encerrar o modo remoto ao fechar a janela.
 
@@ -202,7 +204,9 @@ Endpoints principais:
 - `GET /api/extras`, `POST /api/extras`, `DELETE /api/extras`, `PUT /api/extras`: histórico de extras e persistência da ordem manual.
 - `GET /api/tecnologias`, `POST /api/tecnologias`, `DELETE /api/tecnologias`, `PUT /api/tecnologias`: histórico de tecnologias com valor associado e persistência da ordem manual no dropdown.
 - `GET /api/settings`, `PUT /api/settings`: preferências locais (zoom; `lastSnapshotDir` para o botão **Abrir**; grava em `data/settings.json`).
-- `POST /api/open-snapshot`: abre seletor nativo de JSON no Windows (`pywebview`/WebView2 via `scripts/open-snapshot-dialog.py`), lê o arquivo, persiste a pasta em `lastSnapshotDir` e devolve o snapshot parseado.
+- `POST /api/open-snapshot`: abre seletor nativo de JSON no Windows (`pywebview`/WebView2 via `scripts/open-snapshot-dialog.py`), lê o arquivo, persiste a pasta em `lastSnapshotDir` e devolve o snapshot parseado. **Bloqueado** para requisições remotas (Funnel).
+- `GET /api/snapshots`: lista snapshots `.json` em `output/` (nome, data, tamanho). Somente leitura; seguro para acesso remoto.
+- `GET /api/snapshots/:nome`: lê um snapshot de `output/` com validação estrita de caminho (sem travessia de diretório; só `.json`).
 - `POST /api/pdf`: gera PDF em `output/` e, se enviado no corpo, grava snapshot JSON (`snapshot`) com o mesmo nome base (`.json`).
 - `POST /api/shutdown`: encerra o servidor ao fechar a janela (`launcher/native_launcher.py` ou fallback `launcher/launch-app.js`); bloqueado para visitantes remotos; ignorado com `--keep-server`.
 - `GET /api/auth/status`, `POST /api/auth/login`, `POST /api/auth/logout`: autenticação remota por token (`auth.js`; ativo só com `AUTH_ENABLED=1`).
@@ -403,7 +407,10 @@ Falhas de exportação exibem um `alert` além do log no console. Requer Chrome 
 
 ## Importação de snapshot JSON
 
-O botão **Abrir** (`#openButton`, verde, ao lado de **Limpar** no rodapé do formulário) chama `AppApi.openSnapshot()` → `POST /api/open-snapshot`. No Windows, `scripts/open-snapshot-dialog.py` usa **pywebview** (`window.create_file_dialog`, WebView2, janela oculta) para diálogo nativo nítido em HiDPI; fallback PowerShell/tkinter. Preferência: `lastSnapshotDir`; fallback `output/`. Imprimir grava `output/` em `lastSnapshotDir`. Se a porta 3000 estiver ocupada por um Node antigo, o `server.js` libera ao subir. **Não** há fallback para `<input type="file">` na stack Node.
+O botão **Abrir** (`#openButton`, verde, ao lado de **Limpar** no rodapé do formulário) restaura um snapshot JSON no formulário:
+
+- **Uso local:** `AppApi.openSnapshot()` → `POST /api/open-snapshot`. No Windows, `scripts/open-snapshot-dialog.py` usa **pywebview** para diálogo nativo nítido em HiDPI; fallback PowerShell/tkinter. Preferência: `lastSnapshotDir`; fallback `output/`.
+- **Acesso remoto (Funnel):** modal `#snapshotPicker` lista `GET /api/snapshots` e carrega `GET /api/snapshots/:nome`. Somente leitura de `output/`; não expõe o sistema de arquivos do servidor.
 
 **Stack Tauri (congelada):** `export_pdf` gera só PDF; não há snapshot JSON nem importação.
 

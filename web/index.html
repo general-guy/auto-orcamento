@@ -431,6 +431,31 @@
       <button type="button" id="zoomFlagReset" class="zoom-flag-reset" hidden>Redefinir</button>
     </div>
 
+    <div id="snapshotPicker" class="snapshot-picker" hidden>
+      <div class="snapshot-picker-backdrop" data-snapshot-close></div>
+      <div
+        class="snapshot-picker-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="snapshotPickerTitle"
+      >
+        <div class="snapshot-picker-header">
+          <h2 id="snapshotPickerTitle">Abrir orçamento salvo</h2>
+          <button type="button" id="snapshotPickerClose" class="snapshot-picker-close" aria-label="Fechar" data-snapshot-close>×</button>
+        </div>
+        <p class="snapshot-picker-hint">Arquivos salvos em <code>output/</code> no computador servidor (somente leitura).</p>
+        <input
+          type="search"
+          id="snapshotPickerSearch"
+          class="snapshot-picker-search"
+          placeholder="Filtrar por nome…"
+          autocomplete="off"
+        />
+        <ul id="snapshotPickerList" class="snapshot-picker-list"></ul>
+        <p id="snapshotPickerStatus" class="snapshot-picker-status" hidden></p>
+      </div>
+    </div>
+
     <script src="api.js" defer></script>
     <script src="auth-admin.js" defer></script>
     <script src="budget-snapshot.js" defer></script>
