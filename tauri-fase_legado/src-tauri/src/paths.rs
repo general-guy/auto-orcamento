@@ -35,13 +35,23 @@ fn repo_root_from_target_exe(exe_dir: &Path) -> Option<PathBuf> {
     return None;
   }
 
-  Some(src_tauri_dir.parent()?.to_path_buf())
+  let mut root = src_tauri_dir.parent()?.to_path_buf();
+
+  if root.file_name()?.to_str()? == "tauri-fase_legado" {
+    root = root.parent()?.to_path_buf();
+  }
+
+  Some(root)
 }
 
 #[cfg(any(not(debug_assertions), test))]
 fn project_root_from_exe_dir(exe_dir: &Path) -> Option<PathBuf> {
   if let Some(repo_root) = repo_root_from_target_exe(exe_dir) {
     return Some(repo_root);
+  }
+
+  if exe_dir.file_name()?.to_str()? == "tauri-fase_legado" {
+    return exe_dir.parent().map(|path| path.to_path_buf());
   }
 
   if exe_dir.join("src-tauri").is_dir() {
@@ -63,7 +73,10 @@ fn resolve_subdir(exe_dir: &Path, subdir: &str) -> PathBuf {
 pub fn data_dir(_app: &AppHandle) -> Result<PathBuf, String> {
   #[cfg(debug_assertions)]
   {
-    return Ok(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..").join("data"));
+    return Ok(PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+      .join("..")
+      .join("..")
+      .join("data"));
   }
 
   #[cfg(not(debug_assertions))]
@@ -76,7 +89,10 @@ pub fn data_dir(_app: &AppHandle) -> Result<PathBuf, String> {
 pub fn output_dir(_app: &AppHandle) -> Result<PathBuf, String> {
   #[cfg(debug_assertions)]
   {
-    return Ok(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..").join("output"));
+    return Ok(PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+      .join("..")
+      .join("..")
+      .join("output"));
   }
 
   #[cfg(not(debug_assertions))]

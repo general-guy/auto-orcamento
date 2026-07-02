@@ -13,7 +13,7 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 ICON_PATH = PROJECT_ROOT / "assets" / "app-icon.ico"
 LAUNCHER_PAGE = PROJECT_ROOT / "assets" / "launcher.html"
 APP_HOST = "127.0.0.1"
@@ -210,7 +210,7 @@ def main() -> int:
             import webview
         except ImportError:
             print("Dependencia ausente: pywebview")
-            print("Instale com: python -m pip install -r requirements.txt")
+            print("Instale com: python -m pip install -r launcher/requirements.txt")
             return 1
 
         window = webview.create_window(

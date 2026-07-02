@@ -1,7 +1,7 @@
 @echo off
 setlocal
 
-cd /d "%~dp0"
+cd /d "%~dp0\.."
 
 if not exist "node_modules\" (
   npm install
@@ -9,6 +9,8 @@ if not exist "node_modules\" (
 
 npm run tauri:build
 
-if exist "auto-orcamento.exe" (
+if exist "%~dp0auto-orcamento.exe" (
   start "" "%~dp0auto-orcamento.exe"
 )
+
+exit /b %ERRORLEVEL%

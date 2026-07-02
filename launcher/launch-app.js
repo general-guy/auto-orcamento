@@ -2,11 +2,11 @@ const { spawn } = require("node:child_process");
 const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
-const { freeTcpPortSync } = require("./port-utils");
+const rootDir = path.join(__dirname, "..");
+const { freeTcpPortSync } = require(path.join(rootDir, "port-utils"));
 
 const appUrl = "http://127.0.0.1:3000";
 const appPort = 3000;
-const rootDir = __dirname;
 const externalServer = process.argv.includes("--external-server");
 const keepServer = process.argv.includes("--keep-server");
 

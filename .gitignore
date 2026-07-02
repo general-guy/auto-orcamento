@@ -3,7 +3,8 @@ node_modules/
 dist/
 __pycache__/
 auto-orcamento.exe
+tauri-fase_legado/auto-orcamento.exe
 data/settings.json
 data/auth-users.json
-src-tauri/target/
-src-tauri/gen/
+tauri-fase_legado/src-tauri/target/
+tauri-fase_legado/src-tauri/gen/

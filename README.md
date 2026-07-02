@@ -6,11 +6,31 @@ Aplicativo local para gerar orçamentos cirúrgicos em papel timbrado, com preen
 
 Use **`abrir-auto-orcamento.bat`** (Node.js + janela WebView2 nativa). Esta é a **única stack em evolução** na `main`.
 
-A migração **Tauri está congelada** — não há desenvolvimento ativo em Rust, `src-tauri/` nem no branch `feature/tauri`. O código Tauri no repositório permanece só como referência histórica (`stable/tauri-v0.2.0-paused`).
+A migração **Tauri está congelada** — não há desenvolvimento ativo em Rust nem no branch `feature/tauri`. O código Tauri permanece em **`tauri-fase_legado/`** só como referência histórica (`stable/tauri-v0.2.0-paused`).
 
-O `.bat` abre **sem janelas de terminal visíveis**: relança-se em modo oculto via `launch-hidden.vbs` e o servidor Node arranca com `CREATE_NO_WINDOW`. Só aparece a janela do app — WebView2 via `pywebview`, com ícone `.ico` nítido na barra de tarefas. Requer **Node.js** e **Python** com `pywebview` (`python -m pip install -r requirements.txt`).
+O `.bat` abre **sem janelas de terminal visíveis**: relança-se em modo oculto via `launcher/launch-hidden.vbs` e o servidor Node arranca com `CREATE_NO_WINDOW`. Só aparece a janela do app — WebView2 via `pywebview`, com ícone `.ico` nítido na barra de tarefas. Requer **Node.js** e **Python** com `pywebview` (`python -m pip install -r launcher/requirements.txt`).
 
-**Não edite `src-tauri/`** no fluxo diário — evita `cargo check`, Rust Analyzer e `tauri:dev`, que recriam `src-tauri/target/` (centenas de MB). Para retomar Tauri no futuro, parta de `stable/tauri-v0.2.0-paused` e de `docs/MIGRATION-tauri.md`.
+**Não edite `tauri-fase_legado/`** no fluxo diário — evita `cargo check`, Rust Analyzer e `tauri:dev`, que recriam `tauri-fase_legado/src-tauri/target/` (centenas de MB). Para retomar Tauri no futuro, parta de `stable/tauri-v0.2.0-paused` e de `docs/MIGRATION-tauri.md`.
+
+## Estrutura da raiz
+
+Na raiz ficam só os **atalhos de uso** e o **mínimo para o app Node** rodar:
+
+| Na raiz | Função |
+|---|---|
+| `abrir-auto-orcamento.bat` | Uso local (duplo clique) |
+| `iniciar-acesso-remoto.bat` | Acesso remoto via Tailscale |
+| `package.json` / `package-lock.json` | Dependências npm |
+| `server.js`, `index.html`, `app.js`, … | Web app + API local |
+| `README.md` | Este guia |
+
+| Pasta | Função |
+|---|---|
+| `launcher/` | WebView2, fallback navegador e consola oculta |
+| `tauri-fase_legado/` | `.exe`, build Tauri e `src-tauri/` (congelado) |
+| `assets/`, `data/`, `output/` | Recursos, JSONs e PDFs |
+| `docs/` | Arquitetura e snapshots |
+| `scripts/` | Utilitários de build e acesso remoto |
 
 | Referência | Branch / tag | Documento |
 |---|---|---|
@@ -43,11 +63,11 @@ No Windows, clique duas vezes em:
 abrir-auto-orcamento.bat
 ```
 
-Requer **Node.js** instalado. O atalho instala dependências se faltar `node_modules`, **inicia o Node em background** e abre o WebView2 em paralelo (`pythonw native_launcher.py --external-server`). A janela abre **já maximizada**. O formulário aparece assim que a página carrega; históricos e tabelas continuam a carregar em seguida. **Fechar a janela (X)** encerra o servidor Node automaticamente.
+Requer **Node.js** instalado. O atalho instala dependências se faltar `node_modules`, **inicia o Node em background** e abre o WebView2 em paralelo (`pythonw launcher/native_launcher.py --external-server`). A janela abre **já maximizada**. O formulário aparece assim que a página carrega; históricos e tabelas continuam a carregar em seguida. **Fechar a janela (X)** encerra o servidor Node automaticamente.
 
 Se o servidor remoto já estiver ativo (`iniciar-acesso-remoto.bat`), o `.bat` **só abre a janela** e não reinicia nem encerra o servidor (`--keep-server`).
 
-Pode haver um **flash breve** do CMD ao duplo clique — o Windows abre o `.bat` antes do relançamento oculto. Se o launcher nativo falhar, o fallback `launch-app.js` (Chrome/Edge) **mostra** um terminal de propósito, para facilitar diagnóstico.
+Pode haver um **flash breve** do CMD ao duplo clique — o Windows abre o `.bat` antes do relançamento oculto. Se o launcher nativo falhar, o fallback `launcher/launch-app.js` (Chrome/Edge) **mostra** um terminal de propósito, para facilitar diagnóstico.
 
 ### Desempenho de abertura e fechamento
 
@@ -64,15 +84,15 @@ Otimizações aplicadas na stack atual: Node e WebView2 em paralelo, liberação
 | Área | Mudança |
 |---|---|
 | Acesso remoto | Tailscale Funnel + tokens de uso único; `iniciar-acesso-remoto.bat` + `docs/acesso-remoto.md` |
-| Launcher | Janela **WebView2 nativa** (`pywebview` + `native_launcher.py`), **maximizada ao abrir**, consola oculta (`launch-hidden.vbs`), ícone `.ico` na barra de tarefas |
+| Launcher | Janela **WebView2 nativa** (`launcher/native_launcher.py`), **maximizada ao abrir**, consola oculta (`launcher/launch-hidden.vbs`), ícone `.ico` na barra de tarefas |
 | Startup | Node em background + `--external-server`; poll breve pelo Node; splash `assets/launcher.html`; módulos pesados lazy no servidor; scripts com `defer` |
 | Impressão | `@media print` anula zoom da UI — papel alinhado ao PDF automático |
 | Snapshot | Exportação JSON na impressão + botão **Abrir** com seletor nativo HiDPI (pywebview/WebView2) |
 | Robustez | Liberação da porta 3000 no arranque do `server.js`; encerramento confiável ao fechar pelo X |
 
-Detalhes técnicos: `ARCHITECTURE.md`. Baseline congelada pré-WebView2: `docs/SNAPSHOT-node-web-v0.1.0.md`.
+Detalhes técnicos: `docs/ARCHITECTURE.md`. Baseline congelada pré-WebView2: `docs/SNAPSHOT-node-web-v0.1.0.md`.
 
-Se `pythonw` não estiver disponível, o `.bat` cai para Chrome/Edge em modo app (`launch-app.js`) — nesse modo o ícone da barra pode ficar borrado e um terminal permanece visível.
+Se `pythonw` não estiver disponível, o `.bat` cai para Chrome/Edge em modo app (`launcher/launch-app.js`) — nesse modo o ícone da barra pode ficar borrado e um terminal permanece visível.
 
 ### `iniciar-acesso-remoto.bat`
 
@@ -99,14 +119,14 @@ Guia completo: [`docs/acesso-remoto.md`](docs/acesso-remoto.md).
 
 ```bash
 npm install
-python -m pip install -r requirements.txt
-python native_launcher.py
+python -m pip install -r launcher/requirements.txt
+python launcher/native_launcher.py
 ```
 
 Fallback no navegador (ícone possivelmente borrado na barra de tarefas):
 
 ```bash
-node launch-app.js
+node launcher/launch-app.js
 ```
 
 ## Requisitos
@@ -117,8 +137,8 @@ node launch-app.js
 |---|---|
 | Node.js LTS | Sim |
 | npm | Sim (vem com Node) |
-| Python 3 + pywebview | Sim (janela nativa WebView2; `pip install -r requirements.txt`) |
-| Google Chrome ou Microsoft Edge | Sim (PDF automático e fallback `launch-app.js`) |
+| Python 3 + pywebview | Sim (janela nativa WebView2; `pip install -r launcher/requirements.txt`) |
+| Google Chrome ou Microsoft Edge | Sim (PDF automático e fallback `launcher/launch-app.js`) |
 | Tailscale | Só para `iniciar-acesso-remoto.bat` (PC servidor) |
 | Internet | Só na primeira execução, se `node_modules` ainda não existir |
 
@@ -141,22 +161,22 @@ Para a baseline Node antiga: `git checkout stable/node-web-v0.1.0` e `npm instal
 
 ## Tauri congelado (referência histórica)
 
-> **Não use no dia a dia.** O código Tauri/Rust em `src-tauri/` permanece no repositório como referência; **não recebe novas features** na `main`.
+> **Não use no dia a dia.** O código Tauri/Rust em `tauri-fase_legado/` permanece no repositório como referência; **não recebe novas features** na `main`.
 
-O experimento Tauri (executável `.exe` via WebView2 + Rust) parou nas Fases 1–3. Estado preservado em `stable/tauri-v0.2.0-paused`. Instruções de build, paridade e retomada futura estão em `docs/SNAPSHOT-tauri-v0.2.0-paused.md` e `docs/MIGRATION-tauri.md`.
+O experimento Tauri (executável `.exe` via WebView2 + Rust) parou nas Fases 1–3. Estado preservado em `stable/tauri-v0.2.0-paused`. Build: `tauri-fase_legado/build-auto-orcamento-tauri.bat`. Instruções de paridade e retomada futura estão em `docs/SNAPSHOT-tauri-v0.2.0-paused.md` e `docs/MIGRATION-tauri.md`.
 
-**Cache Rust:** `src-tauri/target/` pode ocupar centenas de MB ou GB após builds antigos. Está no `.gitignore`. Para liberar espaço:
+**Cache Rust:** `tauri-fase_legado/src-tauri/target/` pode ocupar centenas de MB ou GB após builds antigos. Está no `.gitignore`. Para liberar espaço:
 
 ```powershell
-cd src-tauri
+cd tauri-fase_legado/src-tauri
 cargo clean
 ```
 
-Não inclua `src-tauri/target/` ao copiar o projeto. O uso diário continua sendo **`abrir-auto-orcamento.bat`**.
+Não inclua `tauri-fase_legado/src-tauri/target/` ao copiar o projeto. O uso diário continua sendo **`abrir-auto-orcamento.bat`**.
 
 ## Zoom da interface
 
-`Ctrl` + roda do mouse, `Ctrl` + `+` / `Ctrl` + `-` (passos de 10%, entre 50% e 200%) e `Ctrl` + `0` para voltar a 100%. O nível fica salvo em `data/settings.json`. Um indicador flutuante (estilo Chrome) mostra a porcentagem, botões `−`/`+` e **Redefinir**. No fallback `launch-app.js` (Chrome/Edge), vale o zoom nativo do navegador.
+`Ctrl` + roda do mouse, `Ctrl` + `+` / `Ctrl` + `-` (passos de 10%, entre 50% e 200%) e `Ctrl` + `0` para voltar a 100%. O nível fica salvo em `data/settings.json`. Um indicador flutuante (estilo Chrome) mostra a porcentagem, botões `−`/`+` e **Redefinir**. No fallback `launcher/launch-app.js` (Chrome/Edge), vale o zoom nativo do navegador.
 
 No **Node (WebView2)**, o zoom escala só a interface na tela (`transform: scale()` no `body`). A **impressão do navegador** (`window.print()`) ignora esse zoom: `@media print` em `styles.css` restaura dimensões A4 e anula o transform, para o papel sair igual ao PDF automático.
 
@@ -355,7 +375,7 @@ Ao editar campos, o painel de pré-visualização preserva a posição de rolage
 Detalhes de arquitetura, arquivos principais, endpoints locais e fluxo do launcher ficam em:
 
 ```text
-ARCHITECTURE.md
+docs/ARCHITECTURE.md
 ```
 
 Detalhes sobre a origem e manutenção das tabelas hospitalares ficam em:

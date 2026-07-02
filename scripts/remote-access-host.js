@@ -118,8 +118,8 @@ function showFunnelStatus() {
 }
 
 function openAppWindow() {
-  const launcherScript = path.join(rootDir, "native_launcher.py");
-  const launchAppScript = path.join(rootDir, "launch-app.js");
+  const launcherScript = path.join(rootDir, "launcher", "native_launcher.py");
+  const launchAppScript = path.join(rootDir, "launcher", "launch-app.js");
   const pythonw = runCommand("where", ["pythonw"], { stdio: ["ignore", "pipe", "ignore"] });
 
   if (pythonw.status === 0 && fs.existsSync(launcherScript)) {

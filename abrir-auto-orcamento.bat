@@ -2,7 +2,7 @@
 setlocal
 
 if /I not "%~1"=="__hidden__" (
-  wscript.exe //nologo "%~dp0launch-hidden.vbs" "%~f0"
+  wscript.exe //nologo "%~dp0launcher\launch-hidden.vbs" "%~f0"
   exit /b 0
 )
 
@@ -28,13 +28,13 @@ if defined AO_KEEP_SERVER set LAUNCHER_ARGS=%LAUNCHER_ARGS% --keep-server
 
 where pythonw >nul 2>&1
 if errorlevel 1 (
-  node launch-app.js %LAUNCHER_ARGS%
+  node launcher\launch-app.js %LAUNCHER_ARGS%
   exit /b %ERRORLEVEL%
 )
 
-pythonw "%~dp0native_launcher.py" %LAUNCHER_ARGS%
+pythonw "%~dp0launcher\native_launcher.py" %LAUNCHER_ARGS%
 if errorlevel 1 (
-  node launch-app.js %LAUNCHER_ARGS%
+  node launcher\launch-app.js %LAUNCHER_ARGS%
 )
 
 exit /b %ERRORLEVEL%

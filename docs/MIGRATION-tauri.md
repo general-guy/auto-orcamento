@@ -1,3 +1,5 @@
+> **Nota (2026-07):** o código Tauri foi movido para `tauri-fase_legado/`. Referências abaixo a `src-tauri/` na raiz equivalem a `tauri-fase_legado/src-tauri/`; o `.exe` fica em `tauri-fase_legado/auto-orcamento.exe`.
+
 # Plano de migração para Tauri
 
 > **Status:** **CONGELADO** — não há desenvolvimento ativo em Rust/Tauri na `main`.  

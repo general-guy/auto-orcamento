@@ -1,7 +1,7 @@
 Add-Type -AssemblyName System.Drawing
 
 $rootDir = Split-Path -Parent $PSScriptRoot
-$tauriIconsDir = Join-Path $rootDir "src-tauri/icons"
+$tauriIconsDir = Join-Path $rootDir "tauri-fase_legado/src-tauri/icons"
 $assetsDir = Join-Path $rootDir "assets"
 $sizes = @(16, 32, 48, 64, 128, 256, 512)
 
@@ -40,4 +40,4 @@ foreach ($size in $sizes) {
 $source.Dispose()
 
 Copy-Item -Path (Join-Path $assetsDir "favicon-256.png") -Destination (Join-Path $assetsDir "favicon.png") -Force
-Write-Output "Web icons sincronizados a partir de src-tauri/icons (mesmo ícone do .exe)"
+Write-Output "Web icons sincronizados a partir de tauri-fase_legado/src-tauri/icons (mesmo ícone do .exe)"

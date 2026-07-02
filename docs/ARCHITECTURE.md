@@ -4,7 +4,7 @@ O Auto Orçamento é um app local para orçamentos cirúrgicos, servido por **No
 
 | Deploy | Entrada | Backend |
 |--------|---------|---------|
-| **Node (ativo)** | `abrir-auto-orcamento.bat` | `native_launcher.py` + `server.js` (HTTP `/api/*`) |
+| **Node (ativo)** | `abrir-auto-orcamento.bat` | `launcher/native_launcher.py` + `server.js` (HTTP `/api/*`) |
 | **Remoto (Funnel)** | `iniciar-acesso-remoto.bat` | `remote-access-host.js` + `auth.js` + Tailscale Funnel |
 
 Guia operacional: `docs/acesso-remoto.md`.
@@ -13,15 +13,15 @@ Históricos, tabelas, PDFs e snapshots JSON ficam em **`data/`** e **`output/`**
 
 > **Desenvolvimento ativo:** stack Node + WebView2 na `main`.  
 > **Baseline congelada:** `stable/node-web-v0.1.0` / `v0.1.0-node-web` — `docs/SNAPSHOT-node-web-v0.1.0.md`.  
-> **Tauri congelado:** `stable/tauri-v0.2.0-paused` — código legado em `src-tauri/`; ver [Referência Tauri](#referência-tauri-congelado) no fim deste documento.
+> **Tauri congelado:** `stable/tauri-v0.2.0-paused` — código legado em `tauri-fase_legado/`; ver [Referência Tauri](#referência-tauri-congelado) no fim deste documento.
 
 ## Visão Geral — deploy Node (válido na `main` e em `stable/node-web-v0.1.0`)
 
 ```text
 abrir-auto-orcamento.bat
-  -> launch-hidden.vbs (relançamento oculto, sem consola)
+  -> launcher/launch-hidden.vbs (relançamento oculto, sem consola)
       -> node server.js em background (paralelo)
-      -> native_launcher.py --external-server (pythonw)
+      -> launcher/native_launcher.py --external-server (pythonw)
           -> janela WebView2 (pywebview)
               -> http://127.0.0.1:3000 ou assets/launcher.html
               -> styles.css / app.js / data/*.json
@@ -31,27 +31,27 @@ Fallback (sem `pythonw` ou se `pywebview` falhar):
 
 ```text
 abrir-auto-orcamento.bat
-  -> launch-app.js
+  -> launcher/launch-app.js
       -> server.js
       -> Chrome ou Edge em modo app
 ```
 
 ## Launcher
 
-`abrir-auto-orcamento.bat` instala `node_modules` se necessário, **inicia `node server.js` em background** e só então chama `pythonw native_launcher.py --external-server`. Assim o Node e o Python/WebView2 arrancam em paralelo. A liberação da porta 3000 ocorre **dentro do `server.js`** (sondagem TCP assíncrona, sem PowerShell). No duplo clique, relança-se em modo oculto via `launch-hidden.vbs` (argumento interno `__hidden__`).
+`abrir-auto-orcamento.bat` instala `node_modules` se necessário, **inicia `node server.js` em background** e só então chama `pythonw launcher/native_launcher.py --external-server`. Assim o Node e o Python/WebView2 arrancam em paralelo. A liberação da porta 3000 ocorre **dentro do `server.js`** (sondagem TCP assíncrona, sem PowerShell). No duplo clique, relança-se em modo oculto via `launcher/launch-hidden.vbs` (argumento interno `__hidden__`).
 
 ```text
-pythonw native_launcher.py --external-server
+pythonw launcher/native_launcher.py --external-server
 ```
 
 O servidor Node **não** é iniciado pelo Python neste fluxo — o `.bat` já o lançou. Ao fechar a janela (X), o launcher encerra o Node **depois** que o WebView2 termina — a janela fecha sem esperar; o cleanup roda no `finally`.
 
-`launch-hidden.vbs`:
+`launcher/launch-hidden.vbs`:
 
 - recebe o caminho completo do `.bat`;
 - executa `abrir-auto-orcamento.bat __hidden__` com estilo de janela `0` (oculto) via `WScript.Shell.Run`.
 
-`native_launcher.py`:
+`launcher/native_launcher.py`:
 
 - define `AppUserModelID` no Windows (`auto-orcamento.app`) para identidade própria na barra de tarefas;
 - **não** inicia o Node (`--external-server`); abre o WebView2 sem espera bloqueante pelo servidor;
@@ -60,7 +60,7 @@ O servidor Node **não** é iniciado pelo Python neste fluxo — o `.bat` já o 
 - aguarda até ~800 ms pelo Node (`resolve_startup_url`) e abre `http://127.0.0.1:3000` direto quando possível; senão `assets/launcher.html` (splash) até redirecionar;
 - encerra o Node ao fechar a janela (X): `ensure_server_stopped()` roda **uma vez** no `finally` (`POST /api/shutdown`); se a API falhar, `free_tcp_port(3000)` como fallback. **Não** bloqueia o fechamento da janela com handlers no evento `closing`. Com `--keep-server` (servidor remoto já ativo), **não** encerra o Node.
 
-`native_launcher.py` também aceita `--keep-server` para o fluxo `iniciar-acesso-remoto.bat` + `abrir-auto-orcamento.bat`.
+`launcher/native_launcher.py` também aceita `--keep-server` para o fluxo `iniciar-acesso-remoto.bat` + `abrir-auto-orcamento.bat`.
 
 Pode haver um flash breve do CMD na primeira linha do `.bat`, antes do relançamento oculto. O **primeiro** arranque do WebView2 no dia (runtime frio) ainda pode levar alguns segundos — limitação do Windows, não do Node. Aberturas seguintes no mesmo dia tendem a ser mais rápidas.
 
@@ -69,7 +69,7 @@ Pode haver um flash breve do CMD na primeira linha do `.bat`, antes do relançam
 ```text
 abrir-auto-orcamento.bat (__hidden__)
   -> start /B node server.js          (background; libera porta 3000 se ocupada)
-  -> pythonw native_launcher.py --external-server
+  -> pythonw launcher/native_launcher.py --external-server
       -> resolve_startup_url()        (poll até ~800 ms)
           -> http://127.0.0.1:3000     (se /api/settings responde)
           -> file:///.../launcher.html (senão; poll até redirecionar)
@@ -91,11 +91,11 @@ Usuário clica X
 
 O encerramento do app é fechar a janela (X) — o launcher chama `POST /api/shutdown` no `finally`.
 
-Requer `python -m pip install -r requirements.txt` (`pywebview`). O ícone na barra de tarefas vem do `.ico` nativo da janela — não do favicon do Chrome (mesmo padrão do repositório `dados-clinica`).
+Requer `python -m pip install -r launcher/requirements.txt` (`pywebview`). O ícone na barra de tarefas vem do `.ico` nativo da janela — não do favicon do Chrome (mesmo padrão do repositório `dados-clinica`).
 
-Para debug com terminal visível, rode `python native_launcher.py` ou `abrir-auto-orcamento.bat __hidden__` a partir de um CMD já aberto (sem passar pelo relançamento VBS).
+Para debug com terminal visível, rode `python launcher/native_launcher.py` ou `abrir-auto-orcamento.bat __hidden__` a partir de um CMD já aberto (sem passar pelo relançamento VBS).
 
-`launch-app.js` (fallback):
+`launcher/launch-app.js` (fallback):
 
 - com `--external-server`: assume Node já rodando (mesmo modo do `.bat`); encerra via `POST /api/shutdown` ao fechar o navegador, exceto com `--keep-server`;
 - sem `--external-server`: inicia `server.js` com Node;
@@ -118,7 +118,7 @@ iniciar-acesso-remoto.bat
   -> scripts/remote-access-host.js
       -> node server.js (AUTH_ENABLED=1)
       -> tailscale funnel --bg 3000
-      -> pythonw native_launcher.py --external-server --keep-server
+      -> pythonw launcher/native_launcher.py --external-server --keep-server
       -> aguarda Q no terminal (cleanup: funnel reset + encerra servidor)
 ```
 
@@ -138,10 +138,10 @@ O Windows PowerShell 5.1 também funciona para comandos básicos, mas alguns exe
 |---|---|
 | Node.js | Servidor HTTP, APIs, PDF |
 | npm | Instala `puppeteer-core` |
-| Python 3 + pywebview | Janela WebView2 nativa (`native_launcher.py`) |
-| Chrome ou Edge | Fallback (`launch-app.js`) e renderização PDF (`pdf-export.js`) |
+| Python 3 + pywebview | Janela WebView2 nativa (`launcher/native_launcher.py`) |
+| Chrome ou Edge | Fallback (`launcher/launch-app.js`) e renderização PDF (`pdf-export.js`) |
 
-Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `launch-app.js`. Sem Chrome/Edge, a exportação automática de PDF não funciona (e o fallback do launcher também falha).
+Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `launcher/launch-app.js`. Sem Chrome/Edge, a exportação automática de PDF não funciona (e o fallback do launcher também falha).
 
 ## Arquivos principais
 
@@ -160,10 +160,10 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 | `pdf-export.js` | PDF via Puppeteer + Chrome/Edge; grava JSON ao lado do PDF |
 | `assets/launcher.html` | Splash local; detecta servidor e redireciona para o app |
 | `port-utils.js` | Liberação da porta 3000 (sondagem TCP assíncrona; fallback `netstat`/`taskkill` no Windows) |
-| `native_launcher.py` | Launcher Windows (servidor + janela WebView2 + ícone `.ico`) |
-| `launch-hidden.vbs` | Relançamento oculto do `.bat` (sem consola visível) |
-| `launch-app.js` | Fallback: servidor + Chrome/Edge em modo app |
-| `requirements.txt` | `pywebview` para o launcher nativo |
+| `launcher/native_launcher.py` | Launcher Windows (servidor + janela WebView2 + ícone `.ico`) |
+| `launcher/launch-hidden.vbs` | Relançamento oculto do `.bat` (sem consola visível) |
+| `launcher/launch-app.js` | Fallback: servidor + Chrome/Edge em modo app |
+| `launcher/requirements.txt` | `pywebview` para o launcher nativo |
 | `abrir-auto-orcamento.bat` | Atalho de entrada |
 | `package.json` | Metadados; única dependência: `puppeteer-core` |
 
@@ -189,7 +189,7 @@ Endpoints principais:
 - `GET /api/settings`, `PUT /api/settings`: preferências locais (zoom; `lastSnapshotDir` para o botão **Abrir**; grava em `data/settings.json`).
 - `POST /api/open-snapshot`: abre seletor nativo de JSON no Windows (`pywebview`/WebView2 via `scripts/open-snapshot-dialog.py`), lê o arquivo, persiste a pasta em `lastSnapshotDir` e devolve o snapshot parseado.
 - `POST /api/pdf`: gera PDF em `output/` e, se enviado no corpo, grava snapshot JSON (`snapshot`) com o mesmo nome base (`.json`).
-- `POST /api/shutdown`: encerra o servidor ao fechar a janela (`native_launcher.py` ou fallback `launch-app.js`); bloqueado para visitantes remotos; ignorado com `--keep-server`.
+- `POST /api/shutdown`: encerra o servidor ao fechar a janela (`launcher/native_launcher.py` ou fallback `launcher/launch-app.js`); bloqueado para visitantes remotos; ignorado com `--keep-server`.
 - `GET /api/auth/status`, `POST /api/auth/login`, `POST /api/auth/logout`: autenticação remota por token (`auth.js`; ativo só com `AUTH_ENABLED=1`).
 - `GET/POST/DELETE /api/auth/guests`: criar e revogar tokens (somente requisição local).
 
@@ -454,7 +454,7 @@ A ordem final é: pacotes de cirurgia plástica, taxas adicionais e, ao fim, ent
 - O estado persistente fica em JSON local (`data/`, `output/`).
 - Alterações no preview devem chamar `updatePreview()` quando mudarem campos programaticamente.
 - Alterações nas tabelas devem preservar o formato descrito em `docs/tabelas-hospitalares.md`.
-- Novas features implementam-se na stack Node; **não** portar para `src-tauri/` enquanto Tauri estiver congelado.
+- Novas features implementam-se na stack Node; **não** portar para `tauri-fase_legado/` enquanto Tauri estiver congelado.
 
 ## Estado do repositório
 
@@ -471,14 +471,14 @@ A ordem final é: pacotes de cirurgia plástica, taxas adicionais e, ao fim, ent
 
 > Documentação histórica. **Não** use no fluxo diário. Retomada futura: `docs/SNAPSHOT-tauri-v0.2.0-paused.md` e `docs/MIGRATION-tauri.md`.
 
-O repositório ainda contém `src-tauri/`, `api.js` (com detecção Tauri legada) e scripts de build do `.exe`. Esses artefatos correspondem ao snapshot `stable/tauri-v0.2.0-paused` e **não** recebem novas features.
+O repositório ainda contém `tauri-fase_legado/` (Rust + `.exe`), `api.js` (com detecção Tauri legada) e scripts de build. Esses artefatos correspondem ao snapshot `stable/tauri-v0.2.0-paused` e **não** recebem novas features.
 
 Resumo do que existia no experimento Tauri:
 - **`pdf-build.js`:** monta HTML autocontido para exportação (CSS/fontes inline).
 - **`zoom.js`:** atalhos `Ctrl` + roda / `Ctrl` + `+`/`-`/`0`; indicador flutuante `#zoomFlag` (%, `−`/`+`, Redefinir). **Tauri:** persiste em `data/settings.json` via comandos `zoom_*` e `WebviewWindow::set_zoom`. **Node (WebView2):** `AppApi` persiste via `GET/PUT /api/settings` e aplica escala com `transform: scale()` no `body` (layout preenche a janela); o arraste da divisória entre painéis usa `AppApi.getWebZoomFactor()`. A impressão (`@media print`) anula esse transform para o papel coincidir com o PDF.
-- **`src-tauri/src/paths.rs`:** resolve `data/` e `output/` com `std::env::current_exe()`. Em debug, raiz do repo. Em release: raiz do repo se o `.exe` está em `src-tauri/target/release/` ou na raiz (pasta `src-tauri/` ao lado); senão `{pasta-do-exe}/data/`. Não grava em `%AppData%`. Log de startup: `Diretório de dados: ...`.
-- **`src-tauri/src/storage.rs`:** históricos, tecnologias, zoom e tabelas (`table_load` / `read_table`); seed único de tabelas a partir de `dist/data/` embutido no build.
-- **`src-tauri/src/pdf.rs`:** grava PDF em `output/` via Chrome/Edge headless; comando `export_pdf`.
-- **`scripts/copy-release-exe.cjs`:** após o build, copia `src-tauri/target/release/auto-orcamento.exe` para `auto-orcamento.exe` na raiz.
-- **`src-tauri/target/`:** cache Rust (`.gitignore`); limpar com `cargo clean` dentro de `src-tauri/`.
+- **`tauri-fase_legado/src-tauri/src/paths.rs`:** resolve `data/` e `output/` com `std::env::current_exe()`. Em debug, raiz do repo. Em release: raiz do repo se o `.exe` está em `tauri-fase_legado/src-tauri/target/release/` ou em `tauri-fase_legado/`; senão `{pasta-do-exe}/data/`. Não grava em `%AppData%`. Log de startup: `Diretório de dados: ...`.
+- **`tauri-fase_legado/src-tauri/src/storage.rs`:** históricos, tecnologias, zoom e tabelas (`table_load` / `read_table`); seed único de tabelas a partir de `dist/data/` embutido no build.
+- **`tauri-fase_legado/src-tauri/src/pdf.rs`:** grava PDF em `output/` via Chrome/Edge headless; comando `export_pdf`.
+- **`tauri-fase_legado/scripts/copy-release-exe.cjs`:** após o build, copia o release para `tauri-fase_legado/auto-orcamento.exe`.
+- **`tauri-fase_legado/src-tauri/target/`:** cache Rust (`.gitignore`); limpar com `cargo clean` dentro de `tauri-fase_legado/src-tauri/`.
 - **PDF no Tauri congelado:** `export_pdf` via Chrome/Edge headless — **sem** snapshot JSON (feature só na stack Node).

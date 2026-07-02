@@ -1,10 +1,10 @@
 {
-  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+  "$schema": "../../../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Auto Orçamento",
   "version": "0.1.0",
   "identifier": "br.com.autoorcamento",
   "build": {
-    "frontendDist": "../dist",
+    "frontendDist": "../../dist",
     "beforeDevCommand": "npm run copy:frontend",
     "beforeBuildCommand": "npm run copy:frontend"
   },

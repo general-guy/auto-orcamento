@@ -1,3 +1,5 @@
+> **Nota (2026-07):** o código Tauri foi movido para `tauri-fase_legado/`. Referências abaixo a `src-tauri/` na raiz equivalem a `tauri-fase_legado/src-tauri/`; build via `tauri-fase_legado/build-auto-orcamento-tauri.bat`.
+
 # Snapshot — migração Tauri estagnada (v0.2.0-paused)
 
 Este documento registra o estado **congelado** da migração Tauri antes de retomar o desenvolvimento diário via **Node.js** (`abrir-auto-orcamento.bat`).

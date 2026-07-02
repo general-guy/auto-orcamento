@@ -6,10 +6,10 @@
     "start": "node server.js",
     "copy:frontend": "node scripts/copy-frontend.cjs",
     "icon:web": "powershell -ExecutionPolicy Bypass -File scripts/sync-web-icons-from-tauri.ps1",
-    "icon:generate": "powershell -ExecutionPolicy Bypass -File scripts/extract-app-icon-g.ps1 && powershell -ExecutionPolicy Bypass -File scripts/build-app-icon-square.ps1 && powershell -ExecutionPolicy Bypass -File scripts/build-web-icons.ps1 && tauri icon assets/app-icon-square.png -o src-tauri/icons && npm run icon:web",
+    "icon:generate": "powershell -ExecutionPolicy Bypass -File scripts/extract-app-icon-g.ps1 && powershell -ExecutionPolicy Bypass -File scripts/build-app-icon-square.ps1 && powershell -ExecutionPolicy Bypass -File scripts/build-web-icons.ps1 && tauri icon assets/app-icon-square.png -o tauri-fase_legado/src-tauri/icons && npm run icon:web",
     "tauri": "tauri",
-    "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build && node scripts/copy-release-exe.cjs"
+    "tauri:dev": "tauri dev --config tauri-fase_legado/src-tauri/tauri.conf.json",
+    "tauri:build": "tauri build --config tauri-fase_legado/src-tauri/tauri.conf.json && node tauri-fase_legado/scripts/copy-release-exe.cjs"
   },
   "dependencies": {
     "puppeteer-core": "^24.36.1"
