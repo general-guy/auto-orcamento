@@ -33,6 +33,8 @@ Na raiz ficam só os **atalhos de uso** e o **mínimo para o app Node** rodar:
 | `docs/` | Arquitetura e snapshots |
 | `scripts/` | Utilitários de build e acesso remoto |
 
+**URLs no browser:** o código-fonte fica em `web/` e `server/`, mas o app continua abrindo em `http://localhost:3000` com caminhos na raiz (`/app.js`, `/styles.css`, `/assets/papel-timbrado.png`, `/data/*.json`). O `server/server.js` mapeia o primeiro segmento da URL: `assets/`, `data/` e `output/` vêm da raiz do repo; o restante vem de `web/`.
+
 | Referência | Branch / tag | Documento |
 |---|---|---|
 | **Desenvolvimento ativo** | `main` | este README |

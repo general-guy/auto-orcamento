@@ -171,14 +171,29 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 
 `server/server.js` usa apenas módulos nativos do Node:
 
-- `http` para servir a aplicação (`web/` na raiz das URLs; `assets/`, `data/` e `output/` na raiz do repo);
+- `http` para servir a aplicação;
 - `fs` e `path` para ler e gravar arquivos locais;
 - porta fixa `3000`, bind em `127.0.0.1`;
 - `server/pdf-export.js` e `server/snapshot-open-dialog.js` carregados **sob demanda** (startup mais rápido).
 
+### Arquivos estáticos
+
+O frontend vive em `web/`, mas as URLs no browser **não** incluem `/web/` — o servidor expõe tudo na raiz de `http://localhost:3000`, como antes da reorganização.
+
+| URL (exemplos) | Pasta no disco | Conteúdo |
+|---|---|---|
+| `/`, `/index.html`, `/app.js`, `/styles.css` | `web/` | HTML, CSS e JS do app |
+| `/assets/papel-timbrado.png`, `/assets/fonts/...` | `assets/` (raiz do repo) | Timbrado, fontes, ícones |
+| `/data/*.json` | `data/` | Históricos e tabelas |
+| `/output/*.pdf` | `output/` | PDFs gerados |
+
+`resolveStaticPath()` em `server/server.js` decide a pasta pelo **primeiro segmento** da URL (`assets`, `data`, `output` → raiz do repo; demais → `web/`). A normalização usa `path.posix` para manter barras `/` no Windows — `path.normalize` nativo converteria `assets/...` em `assets\...` e quebraria o roteamento (timbrado e fontes retornavam 404).
+
+Tipos MIME relevantes: `.otf`/`.ttf`/`.woff`/`.woff2` para fontes; `.png` para o papel timbrado.
+
 Endpoints principais:
 
-- `GET /` e arquivos estáticos: servem `index.html`, `app.js`, `styles.css`, fontes, imagens e JSONs.
+- `GET /` e arquivos estáticos: `web/` (HTML/JS/CSS), `assets/` (timbrado, fontes, ícones), `data/` e `output/` conforme tabela acima.
 - `GET /api/cirurgias`, `POST /api/cirurgias`, `DELETE /api/cirurgias`, `PUT /api/cirurgias`: histórico de cirurgias e persistência da ordem manual no dropdown.
 - `GET /api/hospitais`, `POST /api/hospitais`, `DELETE /api/hospitais`, `PUT /api/hospitais`: histórico de hospitais e persistência da ordem manual no dropdown.
 - `GET /api/pacientes`, `POST /api/pacientes`, `DELETE /api/pacientes`, `PUT /api/pacientes`: histórico de pacientes e persistência da ordem manual no dropdown.
@@ -197,7 +212,7 @@ Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observa�
 
 ## Frontend
 
-`index.html` define duas áreas principais:
+`web/index.html` define duas áreas principais:
 
 - painel esquerdo com o formulário (ações **Abrir**, **Limpar** e **Imprimir orçamento** agrupadas no rodapé);
 - painel direito com a pré-visualização do documento final (sem controles extras na toolbar).

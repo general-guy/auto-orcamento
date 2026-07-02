@@ -49,6 +49,10 @@ const contentTypes = {
   ".json": "application/json; charset=utf-8",
   ".pdf": "application/pdf",
   ".png": "image/png",
+  ".otf": "font/otf",
+  ".ttf": "font/ttf",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
   ".webmanifest": "application/manifest+json; charset=utf-8",
 };
 
@@ -705,43 +709,25 @@ async function handleTechnologyApi(request, response) {
   sendJson(response, 405, { error: "Método não permitido." });
 }
 
+const repoRootUrlPrefixes = ["assets", "data", "output"];
+
 function resolveStaticPath(requestedPath) {
   const cleanPath = requestedPath.replace(/^\/+/, "").replace(/\\/g, "/");
-  const normalized = path.normalize(cleanPath).replace(/^(\.\.(\/|\\|$))+/, "");
+  const urlPath = path
+    .posix
+    .normalize(cleanPath)
+    .replace(/^(\.\.(\/|$))+/, "")
+    .replace(/^\/+/, "");
 
-  if (normalized.startsWith("assets/") || normalized === "assets") {
-    const filePath = path.normalize(path.join(repoRoot, normalized));
-    if (!filePath.startsWith(repoRoot)) {
-      return null;
-    }
+  const topSegment = urlPath.split("/")[0];
+  const baseDir = repoRootUrlPrefixes.includes(topSegment) ? repoRoot : webDir;
+  const filePath = path.normalize(path.join(baseDir, urlPath));
 
-    return { filePath, urlPath: normalized };
-  }
-
-  if (normalized.startsWith("data/") || normalized === "data") {
-    const filePath = path.normalize(path.join(repoRoot, normalized));
-    if (!filePath.startsWith(repoRoot)) {
-      return null;
-    }
-
-    return { filePath, urlPath: normalized };
-  }
-
-  if (normalized.startsWith("output/") || normalized === "output") {
-    const filePath = path.normalize(path.join(repoRoot, normalized));
-    if (!filePath.startsWith(repoRoot)) {
-      return null;
-    }
-
-    return { filePath, urlPath: normalized };
-  }
-
-  const filePath = path.normalize(path.join(webDir, normalized));
-  if (!filePath.startsWith(webDir)) {
+  if (!filePath.startsWith(baseDir)) {
     return null;
   }
 
-  return { filePath, urlPath: normalized };
+  return { filePath, urlPath };
 }
 
 function serveStaticFile(request, response) {
