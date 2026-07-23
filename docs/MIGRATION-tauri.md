@@ -52,6 +52,7 @@ Acrescentar um **executável desktop** (Tauri) **em paralelo** à stack Node —
 | `PUT /api/pagamentos` (+ POST/DELETE) | `history_reorder` + add/remove |
 | Idem observações, extras | Mesmo padrão |
 | `GET/POST/DELETE /api/tecnologias` | `technologies_*` (objetos `{ nome, valor }`) |
+| `GET/POST/DELETE/PUT /api/unimed-n` | `unimed_n_*` (objetos `{ nome, valor }`) |
 | `POST /api/pdf` | `export_pdf({ patientName, documentHtml })` |
 | `GET data/tabelas-hospitalares.json` | `table_load({ table: "hospitalares" })` |
 
@@ -126,6 +127,10 @@ Comandos expostos:
 | `technologies_add` | `POST /api/tecnologias` |
 | `technologies_remove` | `DELETE /api/tecnologias` |
 | `technologies_replace` | `PUT /api/tecnologias` |
+| `unimed_n_list` | `GET /api/unimed-n` |
+| `unimed_n_add` | `POST /api/unimed-n` |
+| `unimed_n_remove` | `DELETE /api/unimed-n` |
+| `unimed_n_replace` | `PUT /api/unimed-n` |
 | `zoom_get` / `zoom_set` / `zoom_adjust` | `GET/PUT /api/settings` (`data/settings.json`) |
 | `table_load` | `GET data/tabelas-hospitalares.json` / `tabela-implantes.json` |
 | `export_pdf` | `POST /api/pdf` |

@@ -478,20 +478,33 @@ textarea {
   grid-template-columns: auto minmax(0, 1fr) auto 56px;
 }
 
+.hospital-detail-field--valued {
+  grid-template-columns: auto minmax(0, 1fr) auto minmax(7.5rem, 9.5rem);
+}
+
 .hospital-detail-field span {
   color: #4b5563;
   font-weight: 700;
 }
 
-.hospital-detail-field .hospital-detail-multiplier-label {
+.hospital-detail-field .hospital-detail-multiplier-label,
+.hospital-detail-field .hospital-detail-value-label {
   font-size: 0.8rem;
   font-weight: 600;
 }
 
-.hospital-detail-multiplier {
+.hospital-detail-multiplier,
+.hospital-detail-value {
+  box-sizing: border-box;
+  min-width: 0;
   padding-left: 8px;
   padding-right: 8px;
   text-align: center;
+  width: 100%;
+}
+
+.hospital-detail-value {
+  text-align: right;
 }
 
 .hospital-procedure-dropdown {

@@ -170,6 +170,50 @@
     });
   }
 
+  async function getUnimedNProcedures() {
+    if (isTauri()) {
+      return invoke("unimed_n_list");
+    }
+
+    return fetchJson("/api/unimed-n");
+  }
+
+  async function addUnimedNProcedure(nome, valor) {
+    if (isTauri()) {
+      return invoke("unimed_n_add", { nome, valor });
+    }
+
+    return fetchJson("/api/unimed-n", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome, valor }),
+    });
+  }
+
+  async function removeUnimedNProcedure(nome) {
+    if (isTauri()) {
+      return invoke("unimed_n_remove", { nome });
+    }
+
+    return fetchJson("/api/unimed-n", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome }),
+    });
+  }
+
+  async function replaceUnimedNProcedures(items) {
+    if (isTauri()) {
+      return invoke("unimed_n_replace", { items });
+    }
+
+    return fetchJson("/api/unimed-n", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items }),
+    });
+  }
+
   const ZOOM_MIN = 0.5;
   const ZOOM_MAX = 2;
   const ZOOM_DEFAULT = 1;
@@ -372,6 +416,10 @@
     addTechnology,
     removeTechnology,
     replaceTechnologies,
+    getUnimedNProcedures,
+    addUnimedNProcedure,
+    removeUnimedNProcedure,
+    replaceUnimedNProcedures,
     loadTable,
     getZoom,
     setZoom,

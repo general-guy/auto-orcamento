@@ -208,8 +208,9 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 - Guarda histórico local de pacientes, cirurgias, hospitais, extras, formas de pagamento, observações e tecnologias.
 - Permite reordenar por drag and drop os dropdowns de histórico (**Nome**, **Cirurgia**, **Hospital**, **Tecnologias**, **Extras adicionais**, **Pagamento** e **Observações adicionais**), com ordem persistida nos JSON correspondentes; reordenar entradas de cirurgia nos campos do formulário (só visual/preview); e reordenar as listas rápidas de extras, pagamento e observações.
 - Cria múltiplas entradas de cirurgia e hospital.
-- Para Regina e Sapiranga, cria entradas auxiliares (`Reg1`, `Sap1`, etc.) com multiplicadores.
-- Usa tabelas hospitalares locais para sugerir pacotes e calcular valores auxiliares no preview.
+- Para Regina e Sapiranga, cria entradas auxiliares (`Reg1`, `Sap1`, etc.) com multiplicadores e tabelas locais.
+- Para hospitais cujo nome contém `Unimed N`, cria entradas auxiliares (`Uni1`, `Uni2`, etc.) com valor monetário editável em `data/unimed-n.json`.
+- Usa tabelas hospitalares locais (Regina/Sapiranga) para sugerir pacotes e calcular valores auxiliares no preview.
 - Permite incluir uma seção opcional de implantes, alimentada por `data/tabela-implantes.json`.
 - Permite incluir uma seção opcional de tecnologias, com nome e valor salvos em `data/tecnologias.json`.
 - Mantém uma seção fixa de equipe com itens pré-marcados e valor normalizado em moeda brasileira.
@@ -227,6 +228,7 @@ data/extras.json
 data/pagamentos.json
 data/observacoes.json
 data/tecnologias.json
+data/unimed-n.json
 ```
 
 As tabelas de referência estruturadas ficam em:
@@ -236,7 +238,7 @@ data/tabelas-hospitalares.json
 data/tabela-implantes.json
 ```
 
-Esses arquivos são usados pelo servidor Node e são versionados no repositório como base inicial. Quando o app altera históricos como extras, pagamentos, observações ou tecnologias, essas mudanças ficam locais até serem adicionadas a um commit. A ordem dos históricos pode ser ajustada pelo drag and drop nos dropdowns (handle `⋮⋮`, com duas ou mais opções visíveis) — persiste nos JSON correspondentes. As tabelas hospitalares e de implantes podem ser editadas manualmente em `data/`; basta reabrir o app para carregar as alterações.
+Esses arquivos são usados pelo servidor Node e são versionados no repositório como base inicial. Quando o app altera históricos como extras, pagamentos, observações, tecnologias ou procedimentos Unimed N, essas mudanças ficam locais até serem adicionadas a um commit. A ordem dos históricos pode ser ajustada pelo drag and drop nos dropdowns (handle `⋮⋮`, com duas ou mais opções visíveis) — persiste nos JSON correspondentes. As tabelas hospitalares e de implantes podem ser editadas manualmente em `data/`; basta reabrir o app para carregar as alterações.
 
 Os PDFs gerados automaticamente ficam em:
 
@@ -285,11 +287,13 @@ No PC cliente, **Abrir** abre uma **caixa dedicada** com os orçamentos salvos e
 
 Campos dinâmicos (cirurgias, hospitais com entradas auxiliares, extras, pagamento, observações), checkboxes de seções opcionais, listas rápidas e equipe são restaurados. Implantes são reassociados pelo índice ou por marca/modelo/referência na tabela local.
 
-## Hospitais Com Autofill
+## Hospitais Com Entradas Auxiliares
 
 A seção `Hospital` tem checkbox no título e vem marcada por padrão a cada nova sessão do app. Quando desmarcada, o conteúdo da seção é recolhido no painel esquerdo e o bloco de hospital deixa de aparecer no documento.
 
 O dropdown de histórico do nome do hospital aceita reordenação pelo handle `⋮⋮` (ordem em `data/hospitais.json`).
+
+### Regina e Sapiranga (tabela + autofill)
 
 O botão verde ao lado do hospital preenche e reorganiza as entradas auxiliares.
 
@@ -297,7 +301,15 @@ Para Sapiranga, os pacotes de centro cirúrgico ficam no topo, ordenados do maio
 
 Para Regina, o app ordena os pacotes por valor decrescente e aplica multiplicadores automáticos (`1`, `0.7` e `0.5`) apenas sobre o valor de cada pacote. Adicionais de sala e pernoite de recuperação ficam depois, na ordem do JSON. Se faltar tempo em relação ao tempo previsto de hospital, adiciona `SALA CIRÚRGICA - MEIA HORA SUBSEQUENTE` com multiplicador em unidades de meia hora, usando sempre o tempo bruto dos pacotes no cálculo.
 
-Nos campos auxiliares `Reg#` e `Sap#`, a busca de pacotes/taxas usa um dropdown customizado (`#hospitalProcedureDropdown`): abre **à direita** do campo, ocupa **toda a altura visível da janela** e filtra conforme a digitação.
+Nos campos auxiliares `Reg#` e `Sap#`, a busca de pacotes/taxas usa um dropdown customizado (`#hospitalProcedureDropdown`): abre **à direita** do campo, ocupa **toda a altura visível da janela** e filtra conforme a digitação. Fonte: `data/tabelas-hospitalares.json`.
+
+### Unimed N (histórico editável)
+
+Quando o nome do hospital contém `Unimed N` (ex.: `Unimed Novo Hamburgo`), o app cria entradas `Uni1`, `Uni2`, etc., com campo de procedimento e caixa de valor (`R$` ao lado; número dentro do input). Não há botão verde de autofill.
+
+Os procedimentos ficam em `data/unimed-n.json` (`{ nome, valor }`), editáveis pelo uso do app (salvar ao sair do campo, remover pelo `x` no dropdown). Detalhes em `docs/unimed-n.md`.
+
+Nos campos `Uni#`, o mesmo `#hospitalProcedureDropdown` lista o histórico Unimed N.
 
 ## Implantes
 
@@ -389,6 +401,7 @@ Detalhes sobre a origem e manutenção das tabelas hospitalares ficam em:
 
 ```text
 docs/tabelas-hospitalares.md
+docs/unimed-n.md
 docs/tabela-implantes.md
 docs/tabela-tecnologias.md
 docs/SNAPSHOT-node-web-v0.1.0.md

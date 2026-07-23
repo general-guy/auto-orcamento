@@ -38,6 +38,7 @@ fn file_path(data_dir: &Path, store: &str) -> Result<PathBuf, String> {
     "observacoes" => "observacoes.json",
     "extras" => "extras.json",
     "tecnologias" => "tecnologias.json",
+    "unimed-n" => "unimed-n.json",
     _ => return Err(format!("Histórico desconhecido: {store}")),
   };
 
@@ -103,6 +104,7 @@ pub fn ensure_data_files(app: &AppHandle) -> Result<(), String> {
     "observacoes",
     "extras",
     "tecnologias",
+    "unimed-n",
   ] {
     let path = file_path(&data_dir, store)?;
     if !path.exists() {
@@ -238,9 +240,9 @@ fn technology_name(item: &Value) -> String {
     .to_string()
 }
 
-pub fn read_technologies(app: &AppHandle) -> Result<Vec<TechnologyItem>, String> {
+fn read_named_value_items(app: &AppHandle, store: &str) -> Result<Vec<TechnologyItem>, String> {
   ensure_data_files(app)?;
-  let path = file_path(&writable_data_dir(app)?, "tecnologias")?;
+  let path = file_path(&writable_data_dir(app)?, store)?;
   let items = read_json_list(&path)?;
 
   Ok(
@@ -266,21 +268,27 @@ pub fn read_technologies(app: &AppHandle) -> Result<Vec<TechnologyItem>, String>
   )
 }
 
-pub fn add_technology(app: &AppHandle, nome: &str, valor: &str) -> Result<Vec<TechnologyItem>, String> {
+fn add_named_value_item(
+  app: &AppHandle,
+  store: &str,
+  nome: &str,
+  valor: &str,
+  empty_error: &str,
+) -> Result<Vec<TechnologyItem>, String> {
   let name = nome.trim();
   if name.is_empty() {
-    return Err("Informe uma tecnologia válida.".to_string());
+    return Err(empty_error.to_string());
   }
 
   ensure_data_files(app)?;
   let data_dir = writable_data_dir(app)?;
-  let path = file_path(&data_dir, "tecnologias")?;
+  let path = file_path(&data_dir, store)?;
   let item = TechnologyItem {
     nome: name.to_string(),
     valor: valor.trim().to_string(),
   };
   let target = normalize_text(&item.nome);
-  let mut next_items = read_technologies(app)?
+  let mut next_items = read_named_value_items(app, store)?
     .into_iter()
     .filter(|existing| normalize_text(&existing.nome) != target)
     .collect::<Vec<_>>();
@@ -300,17 +308,22 @@ pub fn add_technology(app: &AppHandle, nome: &str, valor: &str) -> Result<Vec<Te
   Ok(next_items)
 }
 
-pub fn remove_technology(app: &AppHandle, nome: &str) -> Result<Vec<TechnologyItem>, String> {
+fn remove_named_value_item(
+  app: &AppHandle,
+  store: &str,
+  nome: &str,
+  empty_error: &str,
+) -> Result<Vec<TechnologyItem>, String> {
   let name = nome.trim();
   if name.is_empty() {
-    return Err("Informe uma tecnologia válida.".to_string());
+    return Err(empty_error.to_string());
   }
 
   ensure_data_files(app)?;
   let data_dir = writable_data_dir(app)?;
-  let path = file_path(&data_dir, "tecnologias")?;
+  let path = file_path(&data_dir, store)?;
   let target = normalize_text(name);
-  let next_items = read_technologies(app)?
+  let next_items = read_named_value_items(app, store)?
     .into_iter()
     .filter(|existing| normalize_text(&existing.nome) != target)
     .collect::<Vec<_>>();
@@ -327,10 +340,14 @@ pub fn remove_technology(app: &AppHandle, nome: &str) -> Result<Vec<TechnologyIt
   Ok(next_items)
 }
 
-pub fn replace_technologies(app: &AppHandle, items: Vec<TechnologyItem>) -> Result<Vec<TechnologyItem>, String> {
+fn replace_named_value_items(
+  app: &AppHandle,
+  store: &str,
+  items: Vec<TechnologyItem>,
+) -> Result<Vec<TechnologyItem>, String> {
   ensure_data_files(app)?;
   let data_dir = writable_data_dir(app)?;
-  let path = file_path(&data_dir, "tecnologias")?;
+  let path = file_path(&data_dir, store)?;
   let mut normalized_keys = std::collections::HashSet::new();
   let mut next_items = Vec::new();
 
@@ -367,6 +384,38 @@ pub fn replace_technologies(app: &AppHandle, items: Vec<TechnologyItem>) -> Resu
     .collect::<Vec<_>>();
   write_json_list(&path, &json_items)?;
   Ok(next_items)
+}
+
+pub fn read_technologies(app: &AppHandle) -> Result<Vec<TechnologyItem>, String> {
+  read_named_value_items(app, "tecnologias")
+}
+
+pub fn add_technology(app: &AppHandle, nome: &str, valor: &str) -> Result<Vec<TechnologyItem>, String> {
+  add_named_value_item(app, "tecnologias", nome, valor, "Informe uma tecnologia válida.")
+}
+
+pub fn remove_technology(app: &AppHandle, nome: &str) -> Result<Vec<TechnologyItem>, String> {
+  remove_named_value_item(app, "tecnologias", nome, "Informe uma tecnologia válida.")
+}
+
+pub fn replace_technologies(app: &AppHandle, items: Vec<TechnologyItem>) -> Result<Vec<TechnologyItem>, String> {
+  replace_named_value_items(app, "tecnologias", items)
+}
+
+pub fn read_unimed_n(app: &AppHandle) -> Result<Vec<TechnologyItem>, String> {
+  read_named_value_items(app, "unimed-n")
+}
+
+pub fn add_unimed_n(app: &AppHandle, nome: &str, valor: &str) -> Result<Vec<TechnologyItem>, String> {
+  add_named_value_item(app, "unimed-n", nome, valor, "Informe um procedimento Unimed N válido.")
+}
+
+pub fn remove_unimed_n(app: &AppHandle, nome: &str) -> Result<Vec<TechnologyItem>, String> {
+  remove_named_value_item(app, "unimed-n", nome, "Informe um procedimento Unimed N válido.")
+}
+
+pub fn replace_unimed_n(app: &AppHandle, items: Vec<TechnologyItem>) -> Result<Vec<TechnologyItem>, String> {
+  replace_named_value_items(app, "unimed-n", items)
 }
 
 const ZOOM_MIN: f64 = 0.5;

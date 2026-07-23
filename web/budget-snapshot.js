@@ -34,6 +34,7 @@
         ? [...detailList.querySelectorAll(".hospital-detail-field")].map((field) => ({
             procedure: field.querySelector(".hospital-detail-input")?.value.trim() || "",
             multiplier: field.querySelector(".hospital-detail-multiplier")?.value.trim() || "",
+            value: field.querySelector(".hospital-detail-value")?.value.trim() || "",
           }))
         : [];
 

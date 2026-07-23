@@ -203,6 +203,7 @@ Endpoints principais:
 - `GET /api/observacoes`, `POST /api/observacoes`, `DELETE /api/observacoes`, `PUT /api/observacoes`: histórico de observações e persistência da ordem manual.
 - `GET /api/extras`, `POST /api/extras`, `DELETE /api/extras`, `PUT /api/extras`: histórico de extras e persistência da ordem manual.
 - `GET /api/tecnologias`, `POST /api/tecnologias`, `DELETE /api/tecnologias`, `PUT /api/tecnologias`: histórico de tecnologias com valor associado e persistência da ordem manual no dropdown.
+- `GET /api/unimed-n`, `POST /api/unimed-n`, `DELETE /api/unimed-n`, `PUT /api/unimed-n`: procedimentos Unimed N com valor associado (`{ nome, valor }`).
 - `GET /api/settings`, `PUT /api/settings`: preferências locais (zoom; `lastSnapshotDir` para o botão **Abrir**; grava em `data/settings.json`).
 - `POST /api/open-snapshot`: abre seletor nativo de JSON no Windows (`pywebview`/WebView2 via `scripts/open-snapshot-dialog.py`), lê o arquivo, persiste a pasta em `lastSnapshotDir` e devolve o snapshot parseado. **Bloqueado** para requisições remotas (Funnel).
 - `GET /api/snapshots`: lista snapshots `.json` em `output/` (nome, data, tamanho). Somente leitura; seguro para acesso remoto.
@@ -212,7 +213,7 @@ Endpoints principais:
 - `GET /api/auth/status`, `POST /api/auth/login`, `POST /api/auth/logout`: autenticação remota por token (`auth.js`; ativo só com `AUTH_ENABLED=1`).
 - `GET/POST/DELETE /api/auth/guests`: criar e revogar tokens (somente requisição local).
 
-Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observações são listas JSON simples, limitadas a 200 itens por tipo. O histórico de tecnologias também é limitado a 200 itens, mas cada item é um objeto com `nome` e `valor`.
+Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observações são listas JSON simples, limitadas a 200 itens por tipo. Os históricos de tecnologias e de procedimentos Unimed N também são limitados a 200 itens, mas cada item é um objeto com `nome` e `valor`.
 
 ## Frontend
 
@@ -235,11 +236,11 @@ Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observa�
 - histórico/autocomplete de pacientes, cirurgias, hospitais, extras, pagamentos, observações e tecnologias;
 - reordenação persistente nos dropdowns de histórico (handle `⋮⋮`, classe `history-dropdown--reorderable`, helper `installReorderableHistoryDropdown()` em `app.js`);
 - campos dinâmicos e reordenáveis de cirurgia, além de hospital;
-- entradas auxiliares de Regina e Sapiranga;
-- multiplicadores de pacotes hospitalares;
-- autofill das entradas auxiliares;
+- entradas auxiliares de Regina, Sapiranga e Unimed N;
+- multiplicadores de pacotes hospitalares (Regina/Sapiranga) e valores manuais (Unimed N);
+- autofill das entradas auxiliares (Regina/Sapiranga);
 - carregamento e renderização da tabela de implantes;
-- persistência de tecnologias com valor monetário associado;
+- persistência de tecnologias e procedimentos Unimed N com valor monetário associado;
 - renderização da equipe fixa com itens selecionáveis e valor monetário;
 - renderização opcional da seção de extras com lista rápida reordenável e campos dinâmicos adicionais;
 - renderização da seção de pagamento com campos dinâmicos e lista rápida reordenável;
@@ -262,6 +263,7 @@ data/extras.json
 data/pagamentos.json
 data/observacoes.json
 data/tecnologias.json
+data/unimed-n.json
 ```
 
 Esses arquivos são persistência local do app e também são versionados no repositório para manter uma base inicial compartilhada. Alterações feitas pelo uso do app só vão para o GitHub quando forem adicionadas ao staging e commitadas.
@@ -275,7 +277,7 @@ data/tabela-implantes.json
 
 O app carrega `data/tabelas-hospitalares.json` via `AppApi.loadTable("hospitalares")` — servido por `server.js` a partir de `data/` na raiz.
 
-As entradas auxiliares `Reg#`/`Sap#` não usam `<datalist>` nativo (limitado no WebView2). O app monta `#hospitalProcedureDropdown` em `app.js`: lista filtrável, posicionada à direita do input com altura de viewport completa (`positionHospitalProcedureDropdown`).
+As entradas auxiliares `Reg#`/`Sap#`/`Uni#` não usam `<datalist>` nativo (limitado no WebView2). O app monta `#hospitalProcedureDropdown` em `app.js`: lista filtrável, posicionada à direita do input com altura de viewport completa (`positionHospitalProcedureDropdown`). Para Regina/Sapiranga as opções vêm da tabela hospitalar; para Unimed N, de `data/unimed-n.json`.
 
 `data/tabela-implantes.json` guarda uma tabela independente de implantes, extraída de documento `.doc`, para preenchimento opcional da seção `Implantes`. O dropdown usa `rotulo`, `modelo` e `referencia`; itens com `favorito: true` recebem uma estrela ao final da opção.
 
@@ -288,6 +290,8 @@ Com duas ou mais entradas no formulário, `updateSurgeryFieldStructure()` exibe 
 `data/hospitais.json` guarda os nomes de hospital usados no autocomplete da seção **Hospital**. O dropdown de histórico permite reordenar entradas pelo handle `⋮⋮`; ao soltar, `app.js` envia a lista via `PUT /api/hospitais` / `AppApi.replaceHistory("hospitais", …)`.
 
 `data/tecnologias.json` guarda as tecnologias cadastradas no próprio app. Diferente dos históricos simples, cada item tem `nome` e `valor`, permitindo carregar o valor automaticamente quando a tecnologia é selecionada. O dropdown de histórico também permite reordenar pelo handle `⋮⋮`; ao soltar, `PUT /api/tecnologias` grava a ordem preservando `nome` e `valor` de cada item.
+
+`data/unimed-n.json` guarda os procedimentos dos subitens `Uni#` (hospitais cujo nome contém `Unimed N`). Cada item tem `nome` e `valor` (número em padrão brasileiro, sem `R$` no input). Detalhes em `docs/unimed-n.md`.
 
 `data/pagamentos.json` guarda as formas de pagamento cadastradas no formulário. O arquivo é usado pelo dropdown de histórico da seção `Pagamento` (reordenável pelo handle `⋮⋮`, via `PUT /api/pagamentos`) e pela lista rápida reordenável acima dos campos manuais — ambos compartilham o mesmo JSON.
 
@@ -420,13 +424,21 @@ A seção `Hospital` é controlada por um checkbox no título, marcado por padr�
 
 O campo de nome do hospital usa dropdown de histórico (`data/hospitais.json`) com reordenação persistente pelo handle `⋮⋮` (`PUT /api/hospitais`).
 
-Quando o nome do hospital contém `regin`, o app cria entradas auxiliares `Reg1`, `Reg2`, etc. Quando contém `sapirang`, cria `Sap1`, `Sap2`, etc.
+Quando o nome do hospital contém `regin`, o app cria entradas auxiliares `Reg1`, `Reg2`, etc. Quando contém `sapirang`, cria `Sap1`, `Sap2`, etc. Quando contém `unimed n`, cria `Uni1`, `Uni2`, etc.
 
-Cada entrada auxiliar tem:
+Cada entrada auxiliar `Reg#`/`Sap#` tem:
 
 - campo de pacote/taxa;
 - campo de multiplicador, iniciado com `1`;
-- dropdown customizado de procedimentos (`#hospitalProcedureDropdown`), alimentado por `data/tabelas-hospitalares.json`.
+- dropdown customizado de procedimentos (`#hospitalProcedureDropdown`), alimentado por `data/tabelas-hospitalares.json`;
+- botão verde de autofill.
+
+Cada entrada auxiliar `Uni#` tem:
+
+- campo de procedimento;
+- campo de valor (`R$` no rótulo; número no input), sem multiplicador;
+- o mesmo `#hospitalProcedureDropdown`, alimentado por `data/unimed-n.json` (com remoção pelo `x`);
+- **sem** botão verde de autofill.
 
 O preview hospitalar é montado em três colunas:
 
@@ -434,7 +446,7 @@ O preview hospitalar é montado em três colunas:
 - procedimentos e tempos de sala;
 - valor total do hospital.
 
-O valor exibido é a soma de `valor * multiplicador` de todas as entradas válidas daquele hospital. O formatador troca espaços não quebráveis por espaços comuns para evitar problemas de largura com a fonte do documento.
+Para Regina/Sapiranga, o valor exibido é a soma de `valor * multiplicador` de todas as entradas válidas daquele hospital. Para Unimed N, a soma dos valores digitados nas linhas `Uni#`. O formatador troca espaços não quebráveis por espaços comuns para evitar problemas de largura com a fonte do documento.
 
 ## Autofill Sapiranga
 
@@ -475,7 +487,8 @@ A ordem final é: pacotes de cirurgia plástica, taxas adicionais e, ao fim, ent
 - Fluxo diário: `abrir-auto-orcamento.bat` → WebView2 + `http://localhost:3000`.
 - O estado persistente fica em JSON local (`data/`, `output/`).
 - Alterações no preview devem chamar `updatePreview()` quando mudarem campos programaticamente.
-- Alterações nas tabelas devem preservar o formato descrito em `docs/tabelas-hospitalares.md`.
+- Alterações nas tabelas Regina/Sapiranga devem preservar o formato descrito em `docs/tabelas-hospitalares.md`.
+- Procedimentos Unimed N seguem `docs/unimed-n.md` (`data/unimed-n.json`, API `/api/unimed-n`).
 - Novas features implementam-se na stack Node; **não** portar para `tauri-fase_legado/` enquanto Tauri estiver congelado.
 
 ## Estado do repositório
@@ -499,7 +512,7 @@ Resumo do que existia no experimento Tauri:
 - **`pdf-build.js`:** monta HTML autocontido para exportação (CSS/fontes inline).
 - **`zoom.js`:** atalhos `Ctrl` + roda / `Ctrl` + `+`/`-`/`0`; indicador flutuante `#zoomFlag` (%, `−`/`+`, Redefinir). **Tauri:** persiste em `data/settings.json` via comandos `zoom_*` e `WebviewWindow::set_zoom`. **Node (WebView2):** `AppApi` persiste via `GET/PUT /api/settings` e aplica escala com `transform: scale()` no `body` (layout preenche a janela); o arraste da divisória entre painéis usa `AppApi.getWebZoomFactor()`. A impressão (`@media print`) anula esse transform para o papel coincidir com o PDF.
 - **`tauri-fase_legado/src-tauri/src/paths.rs`:** resolve `data/` e `output/` com `std::env::current_exe()`. Em debug, raiz do repo. Em release: raiz do repo se o `.exe` está em `tauri-fase_legado/src-tauri/target/release/` ou em `tauri-fase_legado/`; senão `{pasta-do-exe}/data/`. Não grava em `%AppData%`. Log de startup: `Diretório de dados: ...`.
-- **`tauri-fase_legado/src-tauri/src/storage.rs`:** históricos, tecnologias, zoom e tabelas (`table_load` / `read_table`); seed único de tabelas a partir de `dist/data/` embutido no build.
+- **`tauri-fase_legado/src-tauri/src/storage.rs`:** históricos, tecnologias, Unimed N (`unimed_n_*`), zoom e tabelas (`table_load` / `read_table`); seed único de tabelas a partir de `dist/data/` embutido no build.
 - **`tauri-fase_legado/src-tauri/src/pdf.rs`:** grava PDF em `output/` via Chrome/Edge headless; comando `export_pdf`.
 - **`tauri-fase_legado/scripts/copy-release-exe.cjs`:** após o build, copia o release para `tauri-fase_legado/auto-orcamento.exe`.
 - **`tauri-fase_legado/src-tauri/target/`:** cache Rust (`.gitignore`); limpar com `cargo clean` dentro de `tauri-fase_legado/src-tauri/`.

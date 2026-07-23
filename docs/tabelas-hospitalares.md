@@ -30,6 +30,8 @@ Os códigos originais da tabela Sapiranga não ficam no JSON operacional, porque
 
 O frontend carrega `data/tabelas-hospitalares.json` para montar as sugestões dos campos auxiliares `Reg#` e `Sap#`.
 
+Os subitens `Uni#` (Unimed N) **não** usam este arquivo: procedimentos e valores ficam no histórico editável `data/unimed-n.json`. Ver `docs/unimed-n.md`.
+
 Também usa a tabela para:
 
 - calcular `valor * multiplicador` no preview;

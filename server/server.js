@@ -16,6 +16,7 @@ const technologiesFile = path.join(dataDir, "tecnologias.json");
 const paymentsFile = path.join(dataDir, "pagamentos.json");
 const guidanceFile = path.join(dataDir, "observacoes.json");
 const extrasFile = path.join(dataDir, "extras.json");
+const unimedNFile = path.join(dataDir, "unimed-n.json");
 const settingsFile = path.join(dataDir, "settings.json");
 
 const ZOOM_MIN = 0.5;
@@ -713,6 +714,92 @@ async function handleHospitalsApi(request, response) {
   await handleHistoryApi(request, response, hospitalsFile, "um hospital válido");
 }
 
+async function handleUnimedNApi(request, response) {
+  if (request.method === "GET") {
+    sendJson(response, 200, readJsonList(unimedNFile));
+    return;
+  }
+
+  if (request.method === "POST") {
+    const body = await collectRequestBody(request);
+    const { nome, valor } = JSON.parse(body || "{}");
+    const procedure = typeof nome === "string" ? nome.trim() : "";
+
+    if (!procedure) {
+      sendJson(response, 400, { error: "Informe um procedimento Unimed N válido." });
+      return;
+    }
+
+    const item = {
+      nome: procedure,
+      valor: typeof valor === "string" ? valor.trim() : "",
+    };
+    const items = readJsonList(unimedNFile)
+      .filter((existingItem) => normalizeText(existingItem.nome || existingItem) !== normalizeText(item.nome));
+    const nextItems = [item, ...items].slice(0, 200);
+
+    writeJsonList(unimedNFile, nextItems);
+    sendJson(response, 200, nextItems);
+    return;
+  }
+
+  if (request.method === "DELETE") {
+    const body = await collectRequestBody(request);
+    const { nome, value } = JSON.parse(body || "{}");
+    const procedure = typeof nome === "string" ? nome.trim() : typeof value === "string" ? value.trim() : "";
+
+    if (!procedure) {
+      sendJson(response, 400, { error: "Informe um procedimento Unimed N válido." });
+      return;
+    }
+
+    const nextItems = readJsonList(unimedNFile)
+      .filter((existingItem) => normalizeText(existingItem.nome || existingItem) !== normalizeText(procedure));
+
+    writeJsonList(unimedNFile, nextItems);
+    sendJson(response, 200, nextItems);
+    return;
+  }
+
+  if (request.method === "PUT") {
+    const body = await collectRequestBody(request);
+    const { items } = JSON.parse(body || "{}");
+
+    if (!Array.isArray(items)) {
+      sendJson(response, 400, { error: "Informe uma lista de procedimentos Unimed N." });
+      return;
+    }
+
+    const normalizedKeys = new Set();
+    const nextItems = items
+      .map((item) => {
+        const nome = typeof item?.nome === "string" ? item.nome.trim() : "";
+        const valor = typeof item?.valor === "string" ? item.valor.trim() : "";
+        return { nome, valor };
+      })
+      .filter((item) => {
+        if (!item.nome) {
+          return false;
+        }
+
+        const key = normalizeText(item.nome);
+        if (normalizedKeys.has(key)) {
+          return false;
+        }
+
+        normalizedKeys.add(key);
+        return true;
+      })
+      .slice(0, 200);
+
+    writeJsonList(unimedNFile, nextItems);
+    sendJson(response, 200, nextItems);
+    return;
+  }
+
+  sendJson(response, 405, { error: "Método não permitido." });
+}
+
 async function handleTechnologyApi(request, response) {
   if (request.method === "GET") {
     sendJson(response, 200, readJsonList(technologiesFile));
@@ -902,6 +989,11 @@ const server = http.createServer(async (request, response) => {
 
     if (request.url.startsWith("/api/hospitais")) {
       await handleHospitalsApi(request, response);
+      return;
+    }
+
+    if (request.url.startsWith("/api/unimed-n")) {
+      await handleUnimedNApi(request, response);
       return;
     }
 

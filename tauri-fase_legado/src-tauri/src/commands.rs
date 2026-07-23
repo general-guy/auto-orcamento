@@ -4,9 +4,10 @@ use crate::pdf::{export_pdf as write_pdf, PdfExportResult};
 use serde_json::Value;
 
 use crate::storage::{
-  add_string_item, add_technology, adjust_zoom_level, read_string_list, read_table,
-  read_technologies, read_zoom_level, remove_string_item, remove_technology, replace_string_list,
-  replace_technologies, set_zoom_level, TechnologyItem,
+  add_string_item, add_technology, add_unimed_n, adjust_zoom_level, read_string_list, read_table,
+  read_technologies, read_unimed_n, read_zoom_level, remove_string_item, remove_technology,
+  remove_unimed_n, replace_string_list, replace_technologies, replace_unimed_n, set_zoom_level,
+  TechnologyItem,
 };
 
 #[tauri::command]
@@ -47,6 +48,26 @@ pub fn technologies_remove(app: AppHandle, nome: String) -> Result<Vec<Technolog
 #[tauri::command]
 pub fn technologies_replace(app: AppHandle, items: Vec<TechnologyItem>) -> Result<Vec<TechnologyItem>, String> {
   replace_technologies(&app, items)
+}
+
+#[tauri::command]
+pub fn unimed_n_list(app: AppHandle) -> Result<Vec<TechnologyItem>, String> {
+  read_unimed_n(&app)
+}
+
+#[tauri::command]
+pub fn unimed_n_add(app: AppHandle, nome: String, valor: String) -> Result<Vec<TechnologyItem>, String> {
+  add_unimed_n(&app, &nome, &valor)
+}
+
+#[tauri::command]
+pub fn unimed_n_remove(app: AppHandle, nome: String) -> Result<Vec<TechnologyItem>, String> {
+  remove_unimed_n(&app, &nome)
+}
+
+#[tauri::command]
+pub fn unimed_n_replace(app: AppHandle, items: Vec<TechnologyItem>) -> Result<Vec<TechnologyItem>, String> {
+  replace_unimed_n(&app, items)
 }
 
 #[tauri::command]

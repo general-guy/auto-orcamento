@@ -120,6 +120,7 @@ let technologyDropdownSuppressClick = false;
 let hospitalTables = null;
 let reginaHospitalProcedureOptions = [];
 let sapirangaHospitalProcedureOptions = [];
+let unimedNHistory = [];
 let activeHospitalDetailInput = null;
 let isInteractingWithHospitalProcedureDropdown = false;
 const hospitalProcedureDropdown = document.createElement("div");
@@ -400,6 +401,16 @@ function getHospitalDetailConfig(value) {
     };
   }
 
+  if (normalizedValue.includes("unimed n")) {
+    return {
+      datalistId: "unimedNHospitalOptions",
+      labelPrefix: "Uni",
+      name: "hospitalUnimedN",
+      placeholder: "Buscar procedimento Unimed N",
+      source: "unimedN",
+    };
+  }
+
   return null;
 }
 
@@ -455,6 +466,10 @@ function formatCurrency(value) {
     .replace(/\u00a0/g, " ");
 }
 
+function formatCurrencyAmount(value) {
+  return formatCurrency(value).replace(/^R\$\s*/, "");
+}
+
 function normalizeCurrencyInputValue(value) {
   const trimmedValue = value.trim();
   if (!trimmedValue) {
@@ -467,6 +482,20 @@ function normalizeCurrencyInputValue(value) {
 
   const currencyValue = parseCurrencyValue(trimmedValue);
   return Number.isFinite(currencyValue) ? formatCurrency(currencyValue) : trimmedValue;
+}
+
+function normalizeCurrencyAmountInputValue(value) {
+  const trimmedValue = value.trim();
+  if (!trimmedValue) {
+    return "";
+  }
+
+  if (!/\d/.test(trimmedValue)) {
+    return "";
+  }
+
+  const currencyValue = parseCurrencyValue(trimmedValue);
+  return Number.isFinite(currencyValue) ? formatCurrencyAmount(currencyValue) : trimmedValue.replace(/^R\$\s*/i, "").trim();
 }
 
 function normalizeTechnologyValueField() {
@@ -669,7 +698,23 @@ function getHospitalProcedureOptionsForInput(input) {
     return sapirangaHospitalProcedureOptions;
   }
 
+  if (datalistId === "unimedNHospitalOptions") {
+    return unimedNHistory;
+  }
+
   return [];
+}
+
+function isEditableHospitalProcedureList(input) {
+  return input?.closest(".hospital-detail-list")?.dataset.autofillSource === "unimedN";
+}
+
+function getUnimedNProcedureName(item) {
+  return typeof item === "string" ? item : item?.nome || "";
+}
+
+function getUnimedNProcedureValue(item) {
+  return typeof item === "string" ? "" : item?.valor || "";
 }
 
 function positionHospitalProcedureDropdown(input) {
@@ -694,24 +739,45 @@ function updateHospitalProcedureDropdown(query = "") {
   }
 
   const normalizedQuery = normalizeText(query);
-  const options = getHospitalProcedureOptionsForInput(activeHospitalDetailInput).filter(
-    (item) => !normalizedQuery || normalizeText(item).includes(normalizedQuery)
-  );
+  const editable = isEditableHospitalProcedureList(activeHospitalDetailInput);
+  const rawOptions = getHospitalProcedureOptionsForInput(activeHospitalDetailInput);
+  const options = editable
+    ? rawOptions.filter((item) => {
+        const name = getUnimedNProcedureName(item);
+        return name && (!normalizedQuery || normalizeText(name).includes(normalizedQuery));
+      })
+    : rawOptions.filter(
+        (item) => !normalizedQuery || normalizeText(item).includes(normalizedQuery)
+      );
 
   hospitalProcedureDropdown.innerHTML = "";
+  hospitalProcedureDropdown.classList.toggle("history-dropdown--reorderable", editable);
   hospitalProcedureDropdown.hidden = options.length === 0;
 
   if (options.length === 0) {
     return;
   }
 
-  options.forEach((optionText) => {
+  options.forEach((item) => {
+    if (editable) {
+      const optionText = getUnimedNProcedureName(item);
+      hospitalProcedureDropdown.append(
+        createReorderableHistoryOption(
+          optionText,
+          `Remover ${optionText} do histórico Unimed N`,
+          false,
+          { amount: getUnimedNProcedureValue(item) },
+        ),
+      );
+      return;
+    }
+
     const option = document.createElement("div");
     option.className = "history-option hospital-procedure-option";
-    option.dataset.value = optionText;
+    option.dataset.value = item;
     option.setAttribute("role", "option");
     option.setAttribute("tabindex", "0");
-    option.textContent = optionText;
+    option.textContent = item;
     hospitalProcedureDropdown.append(option);
   });
 
@@ -735,11 +801,22 @@ function selectHospitalProcedureOption(option, shouldAdvance = false) {
   }
 
   input.value = option.dataset.value;
+
+  const valueInput = input.closest(".hospital-detail-field")?.querySelector(".hospital-detail-value");
+  if (valueInput && Object.prototype.hasOwnProperty.call(option.dataset, "amount")) {
+    valueInput.value = normalizeCurrencyAmountInputValue(option.dataset.amount || "");
+  }
+
   updatePreview();
   isInteractingWithHospitalProcedureDropdown = false;
   hideHospitalProcedureDropdown();
 
   if (shouldAdvance) {
+    if (valueInput) {
+      valueInput.focus();
+      return;
+    }
+
     focusNextTextField(input);
     return;
   }
@@ -813,21 +890,41 @@ function createHospitalDetailEntry(detailList, detailConfig, shouldFocus = false
   detailInput.setAttribute("placeholder", detailConfig.placeholder);
   detailInput.setAttribute("aria-label", `${detailConfig.labelPrefix}${fieldNumber}`);
 
-  const multiplierLabel = document.createElement("span");
-  multiplierLabel.className = "hospital-detail-multiplier-label";
-  multiplierLabel.textContent = "x";
-
-  const multiplierInput = document.createElement("input");
-  multiplierInput.name = `${detailConfig.name}${fieldNumber}Multiplier`;
-  multiplierInput.type = "text";
-  multiplierInput.className = "hospital-detail-multiplier";
-  multiplierInput.value = "1";
-  multiplierInput.setAttribute("aria-label", `Multiplicador ${detailConfig.labelPrefix}${fieldNumber}`);
-
   detailField.append(detailLabel);
   detailField.append(detailInput);
-  detailField.append(multiplierLabel);
-  detailField.append(multiplierInput);
+
+  if (detailConfig.source === "unimedN") {
+    detailField.classList.add("hospital-detail-field--valued");
+
+    const valueLabel = document.createElement("span");
+    valueLabel.className = "hospital-detail-value-label";
+    valueLabel.textContent = "R$";
+
+    const valueInput = document.createElement("input");
+    valueInput.name = `${detailConfig.name}${fieldNumber}Value`;
+    valueInput.type = "text";
+    valueInput.className = "hospital-detail-value";
+    valueInput.placeholder = "0,00";
+    valueInput.setAttribute("aria-label", `Valor ${detailConfig.labelPrefix}${fieldNumber}`);
+
+    detailField.append(valueLabel);
+    detailField.append(valueInput);
+  } else {
+    const multiplierLabel = document.createElement("span");
+    multiplierLabel.className = "hospital-detail-multiplier-label";
+    multiplierLabel.textContent = "x";
+
+    const multiplierInput = document.createElement("input");
+    multiplierInput.name = `${detailConfig.name}${fieldNumber}Multiplier`;
+    multiplierInput.type = "text";
+    multiplierInput.className = "hospital-detail-multiplier";
+    multiplierInput.value = "1";
+    multiplierInput.setAttribute("aria-label", `Multiplicador ${detailConfig.labelPrefix}${fieldNumber}`);
+
+    detailField.append(multiplierLabel);
+    detailField.append(multiplierInput);
+  }
+
   detailList.append(detailField);
 
   if (shouldFocus) {
@@ -860,20 +957,35 @@ function createHospitalDetailActions(detailConfig) {
 
   actions.append(addButton);
   actions.append(removeButton);
-  actions.append(autofillButton);
+
+  if (detailConfig.source !== "unimedN") {
+    actions.append(autofillButton);
+  }
 
   return actions;
 }
 
 function wrapHospitalInputWithActions(input, detailConfig) {
   if (input.parentElement?.classList.contains("hospital-control-row")) {
-    const autofillButton = input.parentElement.querySelector(".hospital-detail-autofill");
-    if (autofillButton) {
+    const controlRow = input.parentElement;
+    let autofillButton = controlRow.querySelector(".hospital-detail-autofill");
+
+    if (detailConfig.source === "unimedN") {
+      autofillButton?.remove();
+    } else if (autofillButton) {
       autofillButton.dataset.autofillSource = detailConfig.source;
       autofillButton.setAttribute("aria-label", `Completar entradas automaticamente - ${detailConfig.labelPrefix}`);
+    } else {
+      autofillButton = document.createElement("button");
+      autofillButton.type = "button";
+      autofillButton.className = "hospital-detail-autofill";
+      autofillButton.dataset.autofillSource = detailConfig.source;
+      autofillButton.setAttribute("aria-label", `Completar entradas automaticamente - ${detailConfig.labelPrefix}`);
+      autofillButton.append(document.createElement("span"));
+      controlRow.querySelector(".hospital-detail-actions")?.append(autofillButton);
     }
 
-    return input.parentElement;
+    return controlRow;
   }
 
   const controlRow = document.createElement("div");
@@ -937,6 +1049,7 @@ function getHospitalDetailRows(detailList) {
     field,
     input: field.querySelector(".hospital-detail-input"),
     multiplier: field.querySelector(".hospital-detail-multiplier"),
+    valueInput: field.querySelector(".hospital-detail-value"),
   }));
 }
 
@@ -1206,6 +1319,14 @@ async function loadHospitalHistory() {
   }
 }
 
+async function loadUnimedNHistory() {
+  try {
+    unimedNHistory = await AppApi.getUnimedNProcedures();
+  } catch {
+    unimedNHistory = [];
+  }
+}
+
 async function loadPatientHistory() {
   try {
     patientHistory = await AppApi.getHistory("pacientes");
@@ -1421,6 +1542,59 @@ async function deleteHospitalFromHistory(value) {
   } catch {
     console.warn("Não foi possível remover o hospital do histórico local.");
   }
+}
+
+async function saveUnimedNToHistory(sourceField = null) {
+  const detailField = sourceField?.closest?.(".hospital-detail-field") || sourceField;
+  const procedureInput = detailField?.querySelector?.(".hospital-detail-input") || sourceField;
+  const valueInput = detailField?.querySelector?.(".hospital-detail-value");
+  const procedure = (procedureInput?.value || "").trim();
+
+  if (!procedure) {
+    return;
+  }
+
+  if (procedureInput?.dataset?.skipHistoryValue === normalizeText(procedure)) {
+    return;
+  }
+
+  if (valueInput) {
+    valueInput.value = normalizeCurrencyAmountInputValue(valueInput.value);
+  }
+
+  const valor = valueInput?.value.trim() || "";
+
+  try {
+    unimedNHistory = await AppApi.addUnimedNProcedure(procedure, valor);
+    if (activeHospitalDetailInput && isEditableHospitalProcedureList(activeHospitalDetailInput)) {
+      updateHospitalProcedureDropdown(activeHospitalDetailInput.value);
+    }
+  } catch {
+    console.warn("Não foi possível salvar o procedimento Unimed N no histórico local.");
+  }
+}
+
+async function deleteUnimedNFromHistory(value) {
+  const deletedKey = normalizeText(value);
+  unimedNHistory = unimedNHistory.filter(
+    (item) => normalizeText(getUnimedNProcedureName(item)) !== deletedKey
+  );
+  if (activeHospitalDetailInput && isEditableHospitalProcedureList(activeHospitalDetailInput)) {
+    updateHospitalProcedureDropdown(activeHospitalDetailInput.value);
+  }
+
+  try {
+    unimedNHistory = await AppApi.removeUnimedNProcedure(value);
+    if (activeHospitalDetailInput && isEditableHospitalProcedureList(activeHospitalDetailInput)) {
+      updateHospitalProcedureDropdown(activeHospitalDetailInput.value);
+    }
+  } catch {
+    console.warn("Não foi possível remover o procedimento Unimed N do histórico local.");
+  }
+}
+
+function getUnimedNDetailFields() {
+  return [...document.querySelectorAll('.hospital-detail-list[data-autofill-source="unimedN"] .hospital-detail-field')];
 }
 
 async function savePatientToHistory(value, sourceInput = null) {
@@ -3121,10 +3295,28 @@ function getHospitalPreviewRows(input, optionMap) {
     return [];
   }
 
+  const isUnimedN = detailList.dataset.autofillSource === "unimedN";
+
   return getHospitalDetailRows(detailList)
     .map((row) => {
+      if (isUnimedN) {
+        const procedureText = row.input.value.trim();
+        if (!procedureText) {
+          return null;
+        }
+
+        const amountText = row.valueInput?.value.trim() || "";
+        const amount = amountText ? parseCurrencyValue(amountText) : 0;
+
+        return {
+          label: procedureText,
+          tempoSala: "",
+          totalValue: Number.isFinite(amount) ? amount : 0,
+        };
+      }
+
       const option = optionMap.get(row.input.value);
-      if (!option) {
+      if (!option || !row.multiplier) {
         return null;
       }
 
@@ -3596,7 +3788,16 @@ function populateHospitalDetails(input, hospitalEntry) {
   [...detailList.querySelectorAll(".hospital-detail-field")].forEach((field, index) => {
     const detail = details[index] || {};
     field.querySelector(".hospital-detail-input").value = detail.procedure || "";
-    field.querySelector(".hospital-detail-multiplier").value = detail.multiplier || "1";
+
+    const multiplierInput = field.querySelector(".hospital-detail-multiplier");
+    if (multiplierInput) {
+      multiplierInput.value = detail.multiplier || "1";
+    }
+
+    const valueInput = field.querySelector(".hospital-detail-value");
+    if (valueInput) {
+      valueInput.value = normalizeCurrencyAmountInputValue(detail.value || "");
+    }
   });
 
   updateHospitalDetailButtons(detailList);
@@ -4176,9 +4377,18 @@ form.addEventListener("focusout", (event) => {
       return;
     }
 
+    if (isEditableHospitalProcedureList(event.target)) {
+      saveUnimedNToHistory(event.target);
+    }
+
     if (!isInteractingWithHospitalProcedureDropdown) {
       hideHospitalProcedureDropdown();
     }
+  }
+
+  if (event.target.matches(".hospital-detail-value")) {
+    saveUnimedNToHistory(event.target);
+    updatePreview();
   }
 
   if (event.target.matches(".technology-input, #technologyValue")) {
@@ -5041,6 +5251,14 @@ hospitalProcedureDropdown.addEventListener("click", (event) => {
     return;
   }
 
+  if (event.target.closest(".history-delete")) {
+    event.stopPropagation();
+    deleteUnimedNFromHistory(option.dataset.value);
+    activeHospitalDetailInput.focus();
+    isInteractingWithHospitalProcedureDropdown = false;
+    return;
+  }
+
   selectHospitalProcedureOption(option);
 });
 hospitalProcedureDropdown.addEventListener("keydown", (event) => {
@@ -5311,6 +5529,7 @@ printButton.addEventListener("click", async () => {
       ...(extrasEnabledInput.checked ? getManualExtrasValues().map((extra) => saveExtrasToHistory(extra)) : []),
       ...getManualGuidanceValues().map((guidance) => saveGuidanceToHistory(guidance)),
       ...getHospitalInputs().map((input) => saveHospitalToHistory(input.value, input)),
+      ...getUnimedNDetailFields().map((field) => saveUnimedNToHistory(field)),
       saveTechnologyToHistory(),
     ]
   );
@@ -5341,6 +5560,7 @@ async function initializeApp() {
     loadExtrasHistory(),
     loadGuidanceHistory(),
     loadHospitalHistory(),
+    loadUnimedNHistory(),
     loadTechnologyHistory(),
     loadHospitalTables(),
     loadImplantTable(),
