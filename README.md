@@ -29,9 +29,10 @@ Na raiz ficam só os **atalhos de uso** e o **mínimo para o app Node** rodar:
 | `server/` | Backend Node: HTTP, APIs, PDF e diálogos |
 | `launcher/` | WebView2, fallback navegador e consola oculta |
 | `tauri-fase_legado/` | `.exe`, build Tauri e `src-tauri/` (congelado) |
-| `assets/`, `data/`, `output/` | Recursos, JSONs e PDFs |
+| `assets/`, `data/`, `output/` | Recursos, históricos e PDF/JSON canônicos |
+| `export/` | Espelho SQLite dos snapshots (`orcamentos.sqlite`; não versionado) |
 | `docs/` | Arquitetura e snapshots |
-| `scripts/` | Utilitários de build e acesso remoto |
+| `scripts/` | Utilitários de build, acesso remoto e consolidação SQLite |
 
 **URLs no browser:** o código-fonte fica em `web/` e `server/`, mas o app continua abrindo em `http://localhost:3000` com caminhos na raiz (`/app.js`, `/styles.css`, `/assets/papel-timbrado.png`, `/data/*.json`). O `server/server.js` mapeia o primeiro segmento da URL: `assets/`, `data/` e `output/` vêm da raiz do repo; o restante vem de `web/`.
 
@@ -54,7 +55,7 @@ O web app (`web/index.html`, `web/app.js`, `web/api.js`, `web/styles.css`, `asse
 
 Detalhes do acesso remoto: [`docs/acesso-remoto.md`](docs/acesso-remoto.md).
 
-Históricos, tabelas, PDFs e snapshots JSON ficam em **`data/`** e **`output/`** na raiz do repo.
+Históricos e tabelas ficam em **`data/`**. PDFs e snapshots JSON canônicos ficam em **`output/`**. O espelho SQLite para outros webapps fica em **`export/`** (ver [`docs/export-sqlite.md`](docs/export-sqlite.md)).
 
 **Depois de editar o código:** abra de novo com `abrir-auto-orcamento.bat` (ou `npm start`) — não precisa de build.
 
@@ -91,6 +92,7 @@ Otimizações aplicadas na stack atual: Node e WebView2 em paralelo, liberação
 | Startup | Node em background + `--external-server`; poll breve pelo Node; splash `assets/launcher.html`; módulos pesados lazy no servidor; scripts com `defer` |
 | Impressão | `@media print` anula zoom da UI — papel alinhado ao PDF automático |
 | Snapshot | Exportação JSON na impressão + botão **Abrir** com seletor nativo HiDPI (pywebview/WebView2) |
+| Export SQLite | Após imprimir (local), consolida todos os `output/*.json` em `export/orcamentos.sqlite` (espelho; JSON continua canônico) |
 | Robustez | Liberação da porta 3000 no arranque do `server/server.js`; encerramento confiável ao fechar pelo X |
 
 Detalhes técnicos: `docs/ARCHITECTURE.md`. Baseline congelada pré-WebView2: `docs/SNAPSHOT-node-web-v0.1.0.md`.
@@ -203,8 +205,8 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 
 - Preenche os dados da paciente, cirurgia, hospital, implantes, tecnologias, equipe, extras, formas de pagamento e observações.
 - Mostra uma pré-visualização paginada do documento final sobre o papel timbrado.
-- Permite imprimir o orçamento e, ao clicar em `Imprimir orçamento`, gera automaticamente um **PDF** e um **JSON de snapshot** em `output/`.
-- Permite **reabrir** um orçamento anterior com o botão **Abrir** (verde, ao lado de **Limpar**; JSON exportado na impressão), restaurando o formulário e a pré-visualização.
+- Permite imprimir o orçamento e, ao clicar em `Imprimir orçamento`, gera automaticamente um **PDF** e um **JSON de snapshot** em `output/` e, em seguida, atualiza o espelho SQLite em `export/orcamentos.sqlite`.
+- Permite **reabrir** um orçamento anterior com o botão **Abrir** (verde, ao lado de **Limpar**; JSON canônico em `output/`), restaurando o formulário e a pré-visualização.
 - Guarda histórico local de pacientes, cirurgias, hospitais, extras, formas de pagamento, observações e tecnologias.
 - Permite reordenar por drag and drop os dropdowns de histórico (**Nome**, **Cirurgia**, **Hospital**, **Tecnologias**, **Extras adicionais**, **Pagamento** e **Observações adicionais**), com ordem persistida nos JSON correspondentes; reordenar entradas de cirurgia nos campos do formulário (só visual/preview); e reordenar as listas rápidas de extras, pagamento e observações.
 - Cria múltiplas entradas de cirurgia e hospital.
@@ -240,13 +242,21 @@ data/tabela-implantes.json
 
 Esses arquivos são usados pelo servidor Node e são versionados no repositório como base inicial. Quando o app altera históricos como extras, pagamentos, observações, tecnologias ou procedimentos Unimed N, essas mudanças ficam locais até serem adicionadas a um commit. A ordem dos históricos pode ser ajustada pelo drag and drop nos dropdowns (handle `⋮⋮`, com duas ou mais opções visíveis) — persiste nos JSON correspondentes. As tabelas hospitalares e de implantes podem ser editadas manualmente em `data/`; basta reabrir o app para carregar as alterações.
 
-Os PDFs gerados automaticamente ficam em:
+Os PDFs e snapshots JSON gerados automaticamente ficam em:
 
 ```text
 output/
 ```
 
-Essa pasta não é versionada no Git. Cada exportação usa o nome da paciente, ` - `, a **primeira cirurgia proposta** (se preenchida) e a data/hora, por exemplo `Maria da Silva - Abdominoplastia 2026-06-18 14-30-05.pdf` e o `.json` com o mesmo nome base.
+Essa pasta não é versionada no Git. Os JSON em `output/` são a **fonte canônica** do banco de arquivos do app (botão **Abrir** e APIs de snapshot). Cada exportação usa o nome da paciente, ` - `, a **primeira cirurgia proposta** (se preenchida) e a data/hora, por exemplo `Maria da Silva - Abdominoplastia 2026-06-18 14-30-05.pdf` e o `.json` com o mesmo nome base.
+
+O espelho consolidado para outros webapps fica em:
+
+```text
+export/orcamentos.sqlite
+```
+
+Também fora do Git. Detalhes do schema e da sincronização: [`docs/export-sqlite.md`](docs/export-sqlite.md).
 
 ## Impressão, PDF e snapshot JSON
 
@@ -255,10 +265,11 @@ Ao clicar em `Imprimir orçamento`:
 1. `app.js` salva históricos pendentes.
 2. `budget-snapshot.js` monta o snapshot do formulário (`schemaVersion: 1`).
 3. `AppApi.exportPdf()` envia `pagesHtml` + `snapshot` para `POST /api/pdf` (sem montar PDF no browser — isso fica no servidor).
-4. `server/server.js` + `server/pdf-export.js` gravam **PDF** e **JSON** em `output/` (mesmo nome base).
-5. Só então abre `window.print()`.
+4. `server/server.js` + `server/pdf-export.js` gravam **PDF** e **JSON** em `output/` (mesmo nome base) — comportamento canônico inalterado.
+5. `server/export-sqlite.js` reconstrói `export/orcamentos.sqlite` a partir de **todos** os JSON atuais em `output/` (falha aqui não impede a impressão).
+6. Só então abre `window.print()`.
 
-Se a exportação falhar (ex.: Chrome/Edge ausente ou bloqueado pelo sistema), aparece um **alert** com a mensagem de erro.
+Se a exportação de PDF/JSON falhar (ex.: Chrome/Edge ausente ou bloqueado pelo sistema), aparece um **alert** com a mensagem de erro. Consolidação manual: `npm run export:sqlite`.
 
 **Impressão vs PDF:** o PDF em `output/` é renderizado no servidor (HTML isolado, sem zoom da UI). O diálogo **Imprimir** usa o DOM da janela; por isso `@media print` anula o `transform` de zoom e `min-height` da shell — evita conteúdo deslocado e folha em branco extra quando o zoom não está em 100%.
 
@@ -395,6 +406,8 @@ Detalhes de arquitetura, arquivos principais, endpoints locais e fluxo do launch
 
 ```text
 docs/ARCHITECTURE.md
+docs/export-sqlite.md
+docs/acesso-remoto.md
 ```
 
 Detalhes sobre a origem e manutenção das tabelas hospitalares ficam em:

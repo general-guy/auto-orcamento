@@ -9,7 +9,7 @@ O Auto Orçamento é um app local para orçamentos cirúrgicos, servido por **No
 
 Guia operacional: `docs/acesso-remoto.md`.
 
-Históricos, tabelas, PDFs e snapshots JSON ficam em **`data/`** e **`output/`** na raiz do repo — sem banco de dados nem servidor externo.
+Históricos, tabelas, PDFs e snapshots JSON **canônicos** ficam em **`data/`** e **`output/`** na raiz do repo. O espelho SQLite para outros webapps fica em **`export/orcamentos.sqlite`** (ver `docs/export-sqlite.md`) — sem servidor externo.
 
 > **Desenvolvimento ativo:** stack Node + WebView2 na `main`.  
 > **Baseline congelada:** `stable/node-web-v0.1.0` / `v0.1.0-node-web` — `docs/SNAPSHOT-node-web-v0.1.0.md`.  
@@ -116,7 +116,7 @@ Fluxo opcional documentado em `docs/acesso-remoto.md`.
 ```text
 iniciar-acesso-remoto.bat
   -> scripts/remote-access-host.js
-      -> node server.js (AUTH_ENABLED=1)
+      -> node server/server.js (AUTH_ENABLED=1)
       -> tailscale funnel --bg 3000
       -> pythonw launcher/native_launcher.py --external-server --keep-server
       -> aguarda Q no terminal (cleanup: funnel reset + encerra servidor)
@@ -124,7 +124,7 @@ iniciar-acesso-remoto.bat
 
 `server/auth.js` distingue requisições **locais** (sem headers do Funnel) de **remotas** (`x-forwarded-proto` / `x-forwarded-for`). Locais usam o app sem login e podem criar tokens; remotos autenticam com token de uso único (sessão 12 h via cookie).
 
-No remoto, **Abrir** usa uma caixa dedicada (`GET /api/snapshots`) que lista só `.json` de `output/`; **Imprimir** não grava PDF no servidor — só `window.print()` no cliente. `POST /api/open-snapshot` (seletor nativo) fica bloqueado para visitantes remotos.
+No remoto, **Abrir** usa uma caixa dedicada (`GET /api/snapshots`) que lista só `.json` de `output/`; **Imprimir** não grava PDF/JSON no servidor nem atualiza o SQLite — só `window.print()` no cliente. `POST /api/open-snapshot` (seletor nativo) fica bloqueado para visitantes remotos.
 
 `abrir-auto-orcamento.bat` reutiliza servidor ativo na porta 3000 (`--keep-server`) sem reiniciar nem encerrar o modo remoto ao fechar a janela.
 
@@ -160,6 +160,8 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 | `web/budget-snapshot.js` | Snapshot JSON do formulário na impressão e validação na importação |
 | `server/snapshot-open-dialog.js` | Invoca `scripts/open-snapshot-dialog.py` (pywebview/WebView2) ou PowerShell para seletor nativo de JSON |
 | `server/pdf-export.js` | PDF via Puppeteer + Chrome/Edge; grava JSON ao lado do PDF |
+| `server/export-sqlite.js` | Consolida `output/*.json` em `export/orcamentos.sqlite` (espelho para outros apps) |
+| `scripts/consolidate-to-sqlite.js` | CLI da consolidação (`npm run export:sqlite`) |
 | `assets/launcher.html` | Splash local; detecta servidor e redireciona para o app |
 | `server/port-utils.js` | Liberação da porta 3000 (sondagem TCP assíncrona; fallback `netstat`/`taskkill` no Windows) |
 | `launcher/native_launcher.py` | Launcher Windows (servidor + janela WebView2 + ícone `.ico`) |
@@ -167,16 +169,17 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 | `launcher/launch-app.js` | Fallback: servidor + Chrome/Edge em modo app |
 | `launcher/requirements.txt` | `pywebview` para o launcher nativo |
 | `abrir-auto-orcamento.bat` | Atalho de entrada |
-| `package.json` | Metadados; única dependência: `puppeteer-core` |
+| `package.json` | Metadados; dependência runtime: `puppeteer-core`; script `export:sqlite` |
 
 ## Servidor Local
 
-`server/server.js` usa apenas módulos nativos do Node:
+`server/server.js` usa módulos nativos do Node:
 
 - `http` para servir a aplicação;
 - `fs` e `path` para ler e gravar arquivos locais;
+- `node:sqlite` (`DatabaseSync`) na consolidação via `server/export-sqlite.js` (Node 22.5+; experimental);
 - porta fixa `3000`, bind em `127.0.0.1`;
-- `server/pdf-export.js` e `server/snapshot-open-dialog.js` carregados **sob demanda** (startup mais rápido).
+- `server/pdf-export.js`, `server/snapshot-open-dialog.js` e `server/export-sqlite.js` carregados **sob demanda** (startup mais rápido).
 
 ### Arquivos estáticos
 
@@ -208,7 +211,7 @@ Endpoints principais:
 - `POST /api/open-snapshot`: abre seletor nativo de JSON no Windows (`pywebview`/WebView2 via `scripts/open-snapshot-dialog.py`), lê o arquivo, persiste a pasta em `lastSnapshotDir` e devolve o snapshot parseado. **Bloqueado** para requisições remotas (Funnel).
 - `GET /api/snapshots`: lista snapshots `.json` em `output/` (nome, data, tamanho). Somente leitura; seguro para acesso remoto.
 - `GET /api/snapshots/:nome`: lê um snapshot de `output/` com validação estrita de caminho (sem travessia de diretório; só `.json`).
-- `POST /api/pdf`: gera PDF em `output/` e, se enviado no corpo, grava snapshot JSON (`snapshot`) com o mesmo nome base (`.json`).
+- `POST /api/pdf`: gera PDF + snapshot JSON em `output/` (mesmo nome base) e, em seguida, reconstrói `export/orcamentos.sqlite` a partir de todos os JSON de `output/` (falha no SQLite não falha a resposta do PDF).
 - `POST /api/shutdown`: encerra o servidor ao fechar a janela (`launcher/native_launcher.py` ou fallback `launcher/launch-app.js`); bloqueado para visitantes remotos; ignorado com `--keep-server`.
 - `GET /api/auth/status`, `POST /api/auth/login`, `POST /api/auth/logout`: autenticação remota por token (`auth.js`; ativo só com `AUTH_ENABLED=1`).
 - `GET/POST/DELETE /api/auth/guests`: criar e revogar tokens (somente requisição local).
@@ -300,6 +303,8 @@ Com duas ou mais entradas no formulário, `updateSurgeryFieldStructure()` exibe 
 `data/observacoes.json` guarda as observações padrão e adicionais cadastradas no formulário. A lista rápida reordenável e o dropdown de histórico das **Observações adicionais** compartilham o mesmo arquivo; reordenar em qualquer um deles persiste via `PUT /api/observacoes`.
 
 A pasta `output/` guarda os PDFs e snapshots JSON gerados ao clicar em **Imprimir orçamento**. Ela é criada pelo servidor quando necessário e não entra no controle de versão. Cada par usa o mesmo nome base (`.pdf` e `.json`), no formato `{paciente} - {cirurgia} {AAAA-MM-DD HH-mm-ss}` — a primeira cirurgia preenchida no formulário vem do snapshot enviado na impressão.
+
+Os JSON em `output/` são a **fonte canônica** do banco de arquivos do app (**Abrir**, `GET /api/snapshots*`). A pasta `export/` guarda `orcamentos.sqlite`, um **espelho** reconstruído a cada impressão local (ou via `npm run export:sqlite`): apaga e reinsere todas as linhas a partir dos JSON atuais — sem histórico legado. Schema e contrato: `docs/export-sqlite.md`.
 
 ## Lógica de Cirurgia
 
@@ -401,6 +406,7 @@ exportPdfDocument()
   -> POST /api/pdf
   -> pdf-export.js: buildPdfFilename + buildPdfDocumentHtml + puppeteer-core
   -> output/{paciente} - {cirurgia} {data} {hora}.pdf + .json
+  -> export-sqlite.js: reconstrói export/orcamentos.sqlite (espelho de todos os JSON)
 ```
 
 `pdf-build.js` permanece no projeto para referência do Tauri congelado (carregado sob demanda por `api.js` no modo Tauri); na stack Node ativa, a montagem do HTML autocontido ocorre **no servidor** (`pdf-export.js`).
@@ -485,7 +491,7 @@ A ordem final é: pacotes de cirurgia plástica, taxas adicionais e, ao fim, ent
 
 - O frontend é HTML, CSS e JavaScript em `web/`, servido por `server/server.js` — **sem build step**.
 - Fluxo diário: `abrir-auto-orcamento.bat` → WebView2 + `http://localhost:3000`.
-- O estado persistente fica em JSON local (`data/`, `output/`).
+- O estado persistente do app fica em JSON local (`data/`, `output/`). `export/orcamentos.sqlite` é espelho derivado para outros webapps (`docs/export-sqlite.md`).
 - Alterações no preview devem chamar `updatePreview()` quando mudarem campos programaticamente.
 - Alterações nas tabelas Regina/Sapiranga devem preservar o formato descrito em `docs/tabelas-hospitalares.md`.
 - Procedimentos Unimed N seguem `docs/unimed-n.md` (`data/unimed-n.json`, API `/api/unimed-n`).

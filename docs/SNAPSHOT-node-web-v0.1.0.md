@@ -187,6 +187,7 @@ Na branch de trabalho atual, o fluxo Node deixou de depender do Chrome em modo `
 - pipeline de ícones: `npm run icon:web` sincroniza assets web a partir de `src-tauri/icons/`;
 - zoom da interface no Node: `GET/PUT /api/settings` + escala CSS (`transform`) em `api.js`/`zoom.js`, arquivo `data/settings.json`;
 - `@media print` isola impressão do zoom da UI (A4 sem `transform`; evita desalinhamento e folha em branco no `window.print()`);
-- layout dos painéis usa `height: 100%` (sem `100vh` fixo) para acompanhar redimensionamento e zoom.
+- layout dos painéis usa `height: 100%` (sem `100vh` fixo) para acompanhar redimensionamento e zoom;
+- **espelho SQLite** (`export/orcamentos.sqlite`): após imprimir na stack Node, consolida todos os `output/*.json` (`server/export-sqlite.js`; ver `docs/export-sqlite.md`). Os JSON em `output/` continuam canônicos.
 
 Este snapshot **v0.1.0** descreve o estado congelado em `stable/node-web-v0.1.0`; a lista acima resume apenas o que mudou depois na `main`.

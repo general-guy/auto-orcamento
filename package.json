@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node server/server.js",
+    "export:sqlite": "node scripts/consolidate-to-sqlite.js",
     "copy:frontend": "node scripts/copy-frontend.cjs",
     "icon:web": "powershell -ExecutionPolicy Bypass -File scripts/sync-web-icons-from-tauri.ps1",
     "icon:generate": "powershell -ExecutionPolicy Bypass -File scripts/extract-app-icon-g.ps1 && powershell -ExecutionPolicy Bypass -File scripts/build-app-icon-square.ps1 && powershell -ExecutionPolicy Bypass -File scripts/build-web-icons.ps1 && tauri icon assets/app-icon-square.png -o tauri-fase_legado/src-tauri/icons && npm run icon:web",

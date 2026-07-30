@@ -9,6 +9,7 @@ const repoRoot = path.join(__dirname, "..");
 const webDir = path.join(repoRoot, "web");
 const dataDir = path.join(repoRoot, "data");
 const outputDir = path.join(repoRoot, "output");
+const exportDir = path.join(repoRoot, "export");
 const surgeriesFile = path.join(dataDir, "cirurgias.json");
 const hospitalsFile = path.join(dataDir, "hospitais.json");
 const patientsFile = path.join(dataDir, "pacientes.json");
@@ -25,6 +26,7 @@ const ZOOM_DEFAULT = 1;
 
 let pdfExportModule = null;
 let snapshotOpenDialogModule = null;
+let exportSqliteModule = null;
 
 function getPdfExportModule() {
   if (!pdfExportModule) {
@@ -32,6 +34,31 @@ function getPdfExportModule() {
   }
 
   return pdfExportModule;
+}
+
+function getExportSqliteModule() {
+  if (!exportSqliteModule) {
+    exportSqliteModule = require("./export-sqlite");
+  }
+
+  return exportSqliteModule;
+}
+
+function consolidateOutputSqliteSafe() {
+  try {
+    const result = getExportSqliteModule().consolidateOutputToSqlite({
+      outputDir,
+      exportDir,
+    });
+    const skippedNote = result.skipped > 0 ? ` (${result.skipped} ignorado(s))` : "";
+    console.log(
+      `SQLite consolidado: ${result.dbRelativeHint} (${result.count} orçamento(s)${skippedNote}).`,
+    );
+    return result;
+  } catch (error) {
+    console.error(`Falha ao consolidar output/ em SQLite: ${error.message}`);
+    return null;
+  }
 }
 
 function getSnapshotOpenDialogModule() {
@@ -401,6 +428,14 @@ async function handlePdfExport(request, response) {
     responsePayload.jsonFilename = path.basename(jsonPath);
     responsePayload.jsonPath = path.relative(repoRoot, jsonPath).replace(/\\/g, "/");
     writeSettings({ lastSnapshotDir: path.dirname(jsonPath) });
+  }
+
+  // Espelha todos os JSON de output/ em export/orcamentos.sqlite (outros webapps).
+  // Não bloqueia a impressão/PDF se a consolidação falhar.
+  const sqliteResult = consolidateOutputSqliteSafe();
+  if (sqliteResult) {
+    responsePayload.sqlitePath = sqliteResult.dbRelativeHint;
+    responsePayload.sqliteCount = sqliteResult.count;
   }
 
   sendJson(response, 200, responsePayload);
