@@ -92,7 +92,7 @@ Otimizações aplicadas na stack atual: Node e WebView2 em paralelo, liberação
 | Startup | Node em background + `--external-server`; poll breve pelo Node; splash `assets/launcher.html`; módulos pesados lazy no servidor; scripts com `defer` |
 | Impressão | `@media print` anula zoom da UI — papel alinhado ao PDF automático |
 | Snapshot | Exportação JSON na impressão + botão **Abrir** com seletor nativo HiDPI (pywebview/WebView2) |
-| Export SQLite | Após imprimir (local), consolida todos os `output/*.json` em `export/orcamentos.sqlite` (espelho; JSON continua canônico) |
+| Export SQLite | Na abertura do servidor e após imprimir (local), reconstrói `export/orcamentos.sqlite` a partir de todos os `output/*.json` (espelho; JSON continua canônico) |
 | Robustez | Liberação da porta 3000 no arranque do `server/server.js`; encerramento confiável ao fechar pelo X |
 
 Detalhes técnicos: `docs/ARCHITECTURE.md`. Baseline congelada pré-WebView2: `docs/SNAPSHOT-node-web-v0.1.0.md`.
@@ -266,7 +266,7 @@ Ao clicar em `Imprimir orçamento`:
 2. `budget-snapshot.js` monta o snapshot do formulário (`schemaVersion: 1`).
 3. `AppApi.exportPdf()` envia `pagesHtml` + `snapshot` para `POST /api/pdf` (sem montar PDF no browser — isso fica no servidor).
 4. `server/server.js` + `server/pdf-export.js` gravam **PDF** e **JSON** em `output/` (mesmo nome base) — comportamento canônico inalterado.
-5. `server/export-sqlite.js` reconstrói `export/orcamentos.sqlite` a partir de **todos** os JSON atuais em `output/` (falha aqui não impede a impressão).
+5. `server/export-sqlite.js` reconstrói `export/orcamentos.sqlite` a partir de **todos** os JSON atuais em `output/` (falha aqui não impede a impressão). A mesma consolidação também corre **ao abrir o app** (arranque de `server/server.js`).
 6. Só então abre `window.print()`.
 
 Se a exportação de PDF/JSON falhar (ex.: Chrome/Edge ausente ou bloqueado pelo sistema), aparece um **alert** com a mensagem de erro. Consolidação manual: `npm run export:sqlite`.

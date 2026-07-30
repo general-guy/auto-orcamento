@@ -1113,6 +1113,9 @@ async function startServer() {
     if (auth.isAuthEnabled()) {
       console.log("Acesso remoto com autenticação ativado (AUTH_ENABLED).");
     }
+
+    // Espelho SQLite alinhado a output/ em cada abertura do app (além da impressão).
+    consolidateOutputSqliteSafe();
   });
 }
 

@@ -60,6 +60,8 @@ O diálogo nativo de arquivos (`POST /api/open-snapshot`) **não** é usado remo
 | **Abrir** | Seletor nativo do Windows (qualquer pasta) | **Caixa dedicada** com os `.json` de `output/` (somente leitura) |
 | **Imprimir** | Gera PDF + JSON em `output/`, reconstrói `export/orcamentos.sqlite`, depois diálogo de impressão | Só `window.print()` no navegador do cliente (use “Salvar como PDF” se quiser arquivo; **não** atualiza `output/` nem o SQLite) |
 
+Ao **iniciar** o servidor no PC (incluindo `iniciar-acesso-remoto.bat`), o SQLite já é reconstruído a partir de `output/` — mesmo sem impressão local.
+
 ### Caixa dedicada de orçamentos (`output/`)
 
 No cliente remoto, **Abrir** abre um modal que:

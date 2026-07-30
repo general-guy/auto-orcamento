@@ -14,10 +14,11 @@ O Auto Orçamento **não** usa este banco como fonte canônica: PDF e JSON em `o
 
 ## Quando é atualizado
 
-1. **Automaticamente** após `POST /api/pdf` (clique em **Imprimir orçamento** no uso local) — depois de gravar PDF/JSON.
-2. **Manualmente:** `npm run export:sqlite` (`scripts/consolidate-to-sqlite.js`).
+1. **Na abertura do app** — ao subir `server/server.js` (após escutar a porta 3000).
+2. **Automaticamente** após `POST /api/pdf` (clique em **Imprimir orçamento** no uso local) — depois de gravar PDF/JSON.
+3. **Manualmente:** `npm run export:sqlite` (`scripts/consolidate-to-sqlite.js`).
 
-No **acesso remoto** (Funnel), o cliente **não** chama `/api/pdf`; logo o SQLite **não** é atualizado por impressões remotas. Consolide no PC servidor (imprimir localmente ou rodar o script).
+No **acesso remoto** (Funnel), o cliente **não** chama `/api/pdf`; logo o SQLite **não** é atualizado por impressões remotas. Porém, ao **iniciar** o servidor no PC (incluindo `iniciar-acesso-remoto.bat`), a consolidação na abertura já espelha o `output/` atual. Também se pode consolidar no PC servidor imprimindo localmente ou rodando o script.
 
 Falhas na consolidação são registadas no log do servidor e **não** bloqueiam a impressão nem a gravação em `output/`.
 
@@ -62,7 +63,7 @@ A pasta `export/` está no `.gitignore` (como `output/`).
 |---|---|
 | `server/export-sqlite.js` | Lê `output/*.json` e regrava o SQLite (`node:sqlite` / `DatabaseSync`) |
 | `scripts/consolidate-to-sqlite.js` | CLI (`npm run export:sqlite`) |
-| `server/server.js` | Chama consolidação após `/api/pdf` |
+| `server/server.js` | Chama consolidação no arranque (`listen`) e após `/api/pdf` |
 
 Requisito: **Node.js 22.5+** (módulo experimental `node:sqlite`; o projeto usa Node 24 em desenvolvimento).
 

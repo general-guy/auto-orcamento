@@ -304,7 +304,7 @@ Com duas ou mais entradas no formulário, `updateSurgeryFieldStructure()` exibe 
 
 A pasta `output/` guarda os PDFs e snapshots JSON gerados ao clicar em **Imprimir orçamento**. Ela é criada pelo servidor quando necessário e não entra no controle de versão. Cada par usa o mesmo nome base (`.pdf` e `.json`), no formato `{paciente} - {cirurgia} {AAAA-MM-DD HH-mm-ss}` — a primeira cirurgia preenchida no formulário vem do snapshot enviado na impressão.
 
-Os JSON em `output/` são a **fonte canônica** do banco de arquivos do app (**Abrir**, `GET /api/snapshots*`). A pasta `export/` guarda `orcamentos.sqlite`, um **espelho** reconstruído a cada impressão local (ou via `npm run export:sqlite`): apaga e reinsere todas as linhas a partir dos JSON atuais — sem histórico legado. Schema e contrato: `docs/export-sqlite.md`.
+Os JSON em `output/` são a **fonte canônica** do banco de arquivos do app (**Abrir**, `GET /api/snapshots*`). A pasta `export/` guarda `orcamentos.sqlite`, um **espelho** reconstruído ao **abrir o app** e a cada impressão local (ou via `npm run export:sqlite`): apaga e reinsere todas as linhas a partir dos JSON atuais — sem histórico legado. Schema e contrato: `docs/export-sqlite.md`.
 
 ## Lógica de Cirurgia
 
@@ -408,6 +408,8 @@ exportPdfDocument()
   -> output/{paciente} - {cirurgia} {data} {hora}.pdf + .json
   -> export-sqlite.js: reconstrói export/orcamentos.sqlite (espelho de todos os JSON)
 ```
+
+A consolidação SQLite também corre no **arranque** de `server/server.js` (callback de `listen`), para alinhar `export/` mesmo sem imprimir.
 
 `pdf-build.js` permanece no projeto para referência do Tauri congelado (carregado sob demanda por `api.js` no modo Tauri); na stack Node ativa, a montagem do HTML autocontido ocorre **no servidor** (`pdf-export.js`).
 
