@@ -6,11 +6,17 @@ const outputDir = path.join(repoRoot, "output");
 const exportDir = path.join(repoRoot, "export");
 
 try {
-  const result = consolidateOutputToSqlite({ outputDir, exportDir });
+  const result = consolidateOutputToSqlite({ outputDir, exportDir, repoRoot });
   const skippedNote = result.skipped > 0 ? ` (${result.skipped} ignorado(s))` : "";
   console.log(
     `SQLite atualizado: ${result.dbRelativeHint} com ${result.count} orçamento(s)${skippedNote}.`,
   );
+  for (const deliveredPath of result.delivered || []) {
+    console.log(`SQLite entregue: ${deliveredPath}`);
+  }
+  for (const deliverError of result.deliverErrors || []) {
+    console.warn(`Falha ao entregar SQLite em ${deliverError.path}: ${deliverError.message}`);
+  }
   if (result.errors.length > 0) {
     for (const error of result.errors) {
       console.warn(`- ${error.file}: ${error.message}`);

@@ -49,11 +49,18 @@ function consolidateOutputSqliteSafe() {
     const result = getExportSqliteModule().consolidateOutputToSqlite({
       outputDir,
       exportDir,
+      repoRoot,
     });
     const skippedNote = result.skipped > 0 ? ` (${result.skipped} ignorado(s))` : "";
     console.log(
       `SQLite consolidado: ${result.dbRelativeHint} (${result.count} orçamento(s)${skippedNote}).`,
     );
+    for (const deliveredPath of result.delivered || []) {
+      console.log(`SQLite entregue: ${deliveredPath}`);
+    }
+    for (const deliverError of result.deliverErrors || []) {
+      console.warn(`Falha ao entregar SQLite em ${deliverError.path}: ${deliverError.message}`);
+    }
     return result;
   } catch (error) {
     console.error(`Falha ao consolidar output/ em SQLite: ${error.message}`);

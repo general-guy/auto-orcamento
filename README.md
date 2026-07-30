@@ -256,7 +256,9 @@ O espelho consolidado para outros webapps fica em:
 export/orcamentos.sqlite
 ```
 
-Também fora do Git. Detalhes do schema e da sincronização: [`docs/export-sqlite.md`](docs/export-sqlite.md).
+Também fora do Git. Após cada consolidação, uma cópia é entregue a
+`../dados-clinica/import/` (SQLite + papel timbrado + fontes), para a sessão
+**Orçamentos** da GUI. Detalhes: [`docs/export-sqlite.md`](docs/export-sqlite.md).
 
 ## Impressão, PDF e snapshot JSON
 

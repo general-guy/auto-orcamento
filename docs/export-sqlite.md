@@ -10,7 +10,8 @@ O Auto Orçamento **não** usa este banco como fonte canônica: PDF e JSON em `o
 |---|---|
 | `output/*.json` | **Canônico** — banco de arquivos do app; botão **Abrir**, APIs `/api/snapshots*` |
 | `output/*.pdf` | Documento gerado na impressão |
-| `export/orcamentos.sqlite` | **Espelho** — reconstruído a partir de todos os JSON de `output/` |
+| `export/orcamentos.sqlite` | **Espelho local** — reconstruído a partir de todos os JSON de `output/` |
+| `../dados-clinica/import/orcamentos.sqlite` | **Entrega** — cópia do espelho para o dados-clinica (push) |
 
 ## Quando é atualizado
 
@@ -35,9 +36,31 @@ Se um JSON for apagado de `output/`, a entrada correspondente **desaparece** do 
 
 ```text
 export/orcamentos.sqlite
+../dados-clinica/import/orcamentos.sqlite
 ```
 
 A pasta `export/` está no `.gitignore` (como `output/`).
+A cópia em `dados-clinica/import/` também fica fora do Git.
+
+Após cada consolidação, entrega (push) para o dados-clinica:
+
+| Origem | Destino |
+|--------|---------|
+| `export/orcamentos.sqlite` | `../dados-clinica/import/orcamentos.sqlite` |
+| `assets/papel-timbrado.pdf` / `.png` | `../dados-clinica/import/` |
+| `assets/fonts/**` (Gotham / Cinzel) | `../dados-clinica/import/fonts/` |
+
+Overrides:
+
+| Variável | Efeito |
+|----------|--------|
+| `AUTO_ORCAMENTO_DELIVER_SQLITE` | Caminho absoluto do `.sqlite` de destino |
+| `AUTO_ORCAMENTO_DELIVER_IMPORT_DIR` | Pasta `import/` de destino (timbrado + fontes) |
+
+Falha na entrega é registada e **não** falha a consolidação local.
+
+O dados-clinica usa esses ficheiros na sessão **Orçamentos** (preview HTML do
+documento a partir de `payload_json`, sem ler `output/*.pdf`).
 
 ## Schema (`budgets`)
 
@@ -61,7 +84,7 @@ A pasta `export/` está no `.gitignore` (como `output/`).
 
 | Arquivo | Função |
 |---|---|
-| `server/export-sqlite.js` | Lê `output/*.json` e regrava o SQLite (`node:sqlite` / `DatabaseSync`) |
+| `server/export-sqlite.js` | Lê `output/*.json`, regrava o SQLite e entrega cópia ao dados-clinica |
 | `scripts/consolidate-to-sqlite.js` | CLI (`npm run export:sqlite`) |
 | `server/server.js` | Chama consolidação no arranque (`listen`) e após `/api/pdf` |
 
