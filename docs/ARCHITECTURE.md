@@ -9,6 +9,8 @@ O Auto Orçamento é um app local para orçamentos cirúrgicos, servido por **No
 
 Guia operacional: `docs/acesso-remoto.md`.
 
+Agente Cursor / plugins: `AGENTS.md` (raiz) e `docs/cursor-plugins.md`.
+
 Históricos, tabelas, PDFs e snapshots JSON **canônicos** ficam em **`data/`** e **`output/`** na raiz do repo. O espelho SQLite para outros webapps fica em **`export/orcamentos.sqlite`** (ver `docs/export-sqlite.md`) — sem servidor externo.
 
 > **Desenvolvimento ativo:** stack Node + WebView2 na `main`.  

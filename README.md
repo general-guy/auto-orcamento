@@ -22,6 +22,7 @@ Na raiz ficam só os **atalhos de uso** e o **mínimo para o app Node** rodar:
 | `iniciar-acesso-remoto.bat` | Acesso remoto via Tailscale |
 | `package.json` / `package-lock.json` | Dependências npm |
 | `README.md` | Este guia |
+| `AGENTS.md` | Memória do agente Cursor (plugins / convenções) |
 
 | Pasta | Função |
 |---|---|
@@ -31,7 +32,7 @@ Na raiz ficam só os **atalhos de uso** e o **mínimo para o app Node** rodar:
 | `tauri-fase_legado/` | `.exe`, build Tauri e `src-tauri/` (congelado) |
 | `assets/`, `data/`, `output/` | Recursos, históricos e PDF/JSON canônicos |
 | `export/` | Espelho SQLite dos snapshots (`orcamentos.sqlite`; não versionado) |
-| `docs/` | Arquitetura e snapshots |
+| `docs/` | Arquitetura, snapshots e guia de plugins Cursor |
 | `scripts/` | Utilitários de build, acesso remoto e consolidação SQLite |
 
 **URLs no browser:** o código-fonte fica em `web/` e `server/`, mas o app continua abrindo em `http://localhost:3000` com caminhos na raiz (`/app.js`, `/styles.css`, `/assets/papel-timbrado.png`, `/data/*.json`). O `server/server.js` mapeia o primeiro segmento da URL: `assets/`, `data/` e `output/` vêm da raiz do repo; o restante vem de `web/`.
@@ -423,3 +424,14 @@ docs/SNAPSHOT-node-web-v0.1.0.md
 docs/SNAPSHOT-tauri-v0.2.0-paused.md
 docs/MIGRATION-tauri.md
 ```
+
+### Agente Cursor e plugins
+
+Para o agente no Cursor (e para tirar proveito dos plugins instalados):
+
+| Arquivo | Função |
+|---|---|
+| [`AGENTS.md`](AGENTS.md) | Memória do workspace (Continual Learning + convenções) |
+| [`docs/cursor-plugins.md`](docs/cursor-plugins.md) | Quando usar Context7, Browser Use, Team Kit e Continual Learning neste repo |
+
+Receitas curtas: QA em `localhost:3000` com Browser Use; docs de Puppeteer/pywebview via Context7; review/`deslop` via Team Kit. Detalhes e frases de exemplo em `docs/cursor-plugins.md`.
