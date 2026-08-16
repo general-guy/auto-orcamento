@@ -1,17 +1,24 @@
-# Acesso remoto (Tailscale Funnel)
+# Acesso remoto
 
-Permite que outro consultório use o Auto Orçamento pela internet, **sem instalar Tailscale**, com autenticação por **token de uso único**.
+**Produção clínica:** o app no **Axis** — `https://axis.tail5fe4b7.ts.net/` — via Tailscale Serve no host Proxmox. O cliente (celular, tablet ou browser neste PC) precisa estar na mesma tailnet. **Sem Funnel.** Ver [`atlas-axis.md`](atlas-axis.md).
+
+O restante deste arquivo descreve o modo **legado neste Windows**: Tailscale Funnel + token de uso único (`iniciar-acesso-remoto.bat`). Não usar para dados clínicos na internet pública.
+
+## Funnel neste PC (legado)
+
+Permite que outro consultório abra o app pela internet **sem instalar Tailscale**, com autenticação por **token de uso único**. Isso expõe **este** clone Atlas, não o Axis.
 
 ## Quando usar
 
-| Atalho | Cenário |
+| Atalho / URL | Cenário |
 |--------|---------|
-| `abrir-auto-orcamento.bat` | Uso local no dia a dia |
-| `iniciar-acesso-remoto.bat` | Consultório remoto precisa acessar pela internet |
+| `abrir-auto-orcamento.bat` | Desenvolvimento neste PC (Atlas) |
+| `https://axis.tail5fe4b7.ts.net/` | Produção (celular/tablet na tailnet) |
+| `iniciar-acesso-remoto.bat` | Só teste legado de Funnel **neste** Windows |
 
-## Pré-requisitos (uma vez)
+## Pré-requisitos (uma vez, só para o Funnel legado)
 
-1. [Tailscale](https://tailscale.com/) instalado e logado no PC servidor
+1. [Tailscale](https://tailscale.com/) instalado e logado **neste** PC
 2. **MagicDNS** e **HTTPS** habilitados em [login.tailscale.com/admin/dns](https://login.tailscale.com/admin/dns)
 3. **Funnel** aprovado no tailnet (o CLI mostra um link na primeira execução)
 4. Executar `iniciar-acesso-remoto.bat` **como Administrador** (necessário para o Funnel no Windows)

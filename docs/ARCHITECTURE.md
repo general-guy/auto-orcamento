@@ -1,17 +1,18 @@
 # Arquitetura
 
-O Auto Orçamento é um app local para orçamentos cirúrgicos, servido por **Node.js** e exibido numa janela **WebView2** nativa (`pywebview`).
+O Auto Orçamento é um app de orçamentos cirúrgicos, servido por **Node.js**. Neste PC (**Atlas**) a UI é uma janela **WebView2** nativa (`pywebview`). Em produção o mesmo Node corre no **Axis** (Proxmox CT 100).
 
 | Deploy | Entrada | Backend |
 |--------|---------|---------|
-| **Node (ativo)** | `abrir-auto-orcamento.bat` | `launcher/native_launcher.py` + `server/server.js` (HTTP `/api/*`) |
-| **Remoto (Funnel)** | `iniciar-acesso-remoto.bat` | `remote-access-host.js` + `auth.js` + Tailscale Funnel |
+| **Atlas (dev)** | `abrir-auto-orcamento.bat` | `launcher/native_launcher.py` + `server/server.js` em `127.0.0.1:3000` |
+| **Axis (produção)** | systemd no CT 100 | `BIND_HOST=192.168.68.202` + Tailscale Serve no host → `https://axis.tail5fe4b7.ts.net/` |
+| **Funnel neste PC (legado)** | `iniciar-acesso-remoto.bat` | `remote-access-host.js` + `auth.js` + Tailscale Funnel |
 
-Guia operacional: `docs/acesso-remoto.md`.
+Papel de cada máquina: `docs/atlas-axis.md`. Funnel legado: `docs/acesso-remoto.md`.
 
 Agente Cursor / plugins: `AGENTS.md` (raiz) e `docs/cursor-plugins.md`.
 
-Históricos, tabelas, PDFs e snapshots JSON **canônicos** ficam em **`data/`** e **`output/`** na raiz do repo. O espelho SQLite para outros webapps fica em **`export/orcamentos.sqlite`** (ver `docs/export-sqlite.md`) — sem servidor externo.
+Históricos, tabelas, PDFs e snapshots JSON **canônicos neste clone** ficam em **`data/`** e **`output/`** na raiz do repo. Em produção esses dados ao vivo ficam no disco do Axis — ver `docs/atlas-axis.md`. O espelho SQLite para outros webapps fica em **`export/orcamentos.sqlite`** (ver `docs/export-sqlite.md`).
 
 > **Desenvolvimento ativo:** stack Node + WebView2 na `main`.  
 > **Baseline congelada:** `stable/node-web-v0.1.0` / `v0.1.0-node-web` — `docs/SNAPSHOT-node-web-v0.1.0.md`.  
@@ -111,9 +112,17 @@ Para debug com terminal visível, rode `python launcher/native_launcher.py` ou `
 
 Para forçar um navegador específico no fallback, defina `AUTO_ORCAMENTO_BROWSER` com o caminho do executável.
 
-## Acesso remoto (Tailscale Funnel)
+## Produção no Axis e Funnel legado
 
-Fluxo opcional documentado em `docs/acesso-remoto.md`.
+Produção clínica: CT 100 no Axis, documentado em `docs/atlas-axis.md`.
+
+```text
+Axis host (192.168.68.201)  tailscale serve --https=443
+  -> http://192.168.68.202:3000   (CT 100, BIND_HOST=192.168.68.202)
+  -> https://axis.tail5fe4b7.ts.net/
+```
+
+O fluxo abaixo é **legado neste Windows** (Funnel + token), detalhado em `docs/acesso-remoto.md`. Não é o caminho clínico.
 
 ```text
 iniciar-acesso-remoto.bat
@@ -154,11 +163,12 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 | `web/index.html` | Markup do formulário e preview |
 | `web/styles.css` | Layout, timbrado, impressão |
 | `web/app.js` | Lógica de UI, preview, históricos, autofill |
-| `server/server.js` | Servidor na porta 3000, APIs REST; integra `server/auth.js` quando `AUTH_ENABLED=1` |
+| `server/server.js` | Servidor na porta 3000 (`BIND_HOST`), APIs REST; integra `server/auth.js` quando `AUTH_ENABLED=1` |
 | `server/auth.js` | Sessões, tokens de convidado, middleware local/remoto |
 | `web/auth-admin.js` | UI de criação/cópia de token (modo remoto, acesso local) |
 | `web/login.html` / `web/login.js` | Login remoto por token |
-| `scripts/remote-access-host.js` | Supervisor do `iniciar-acesso-remoto.bat` |
+| `scripts/remote-access-host.js` | Supervisor do `iniciar-acesso-remoto.bat` (Funnel legado) |
+| `docs/atlas-axis.md` | Relação Atlas (dev) × Axis (produção) |
 | `web/budget-snapshot.js` | Snapshot JSON do formulário na impressão e validação na importação |
 | `server/snapshot-open-dialog.js` | Invoca `scripts/open-snapshot-dialog.py` (pywebview/WebView2) ou PowerShell para seletor nativo de JSON |
 | `server/pdf-export.js` | PDF via Puppeteer + Chrome/Edge; grava JSON ao lado do PDF |
@@ -180,7 +190,7 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 - `http` para servir a aplicação;
 - `fs` e `path` para ler e gravar arquivos locais;
 - `node:sqlite` (`DatabaseSync`) na consolidação via `server/export-sqlite.js` (Node 22.5+; experimental);
-- porta fixa `3000`, bind em `127.0.0.1`;
+- porta fixa `3000`, bind em `BIND_HOST` (padrão `127.0.0.1` no Atlas; `192.168.68.202` no CT 100);
 - `server/pdf-export.js`, `server/snapshot-open-dialog.js` e `server/export-sqlite.js` carregados **sob demanda** (startup mais rápido).
 
 ### Arquivos estáticos
@@ -424,7 +434,7 @@ Falhas de exportação exibem um `alert` além do log no console. Requer Chrome 
 O botão **Abrir** (`#openButton`, verde, ao lado de **Limpar** no rodapé do formulário) restaura um snapshot JSON no formulário:
 
 - **Uso local:** `AppApi.openSnapshot()` → `POST /api/open-snapshot`. No Windows, `scripts/open-snapshot-dialog.py` usa **pywebview** para diálogo nativo nítido em HiDPI; fallback PowerShell/tkinter. Preferência: `lastSnapshotDir`; fallback `output/`.
-- **Acesso remoto (Funnel):** modal `#snapshotPicker` lista `GET /api/snapshots` e carrega `GET /api/snapshots/:nome`. Somente leitura de `output/`; não expõe o sistema de arquivos do servidor.
+- **Acesso remoto (browser no Axis ou Funnel legado):** modal `#snapshotPicker` lista `GET /api/snapshots` e carrega `GET /api/snapshots/:nome`. Somente leitura de `output/`; não expõe o sistema de arquivos do servidor.
 
 **Stack Tauri (congelada):** `export_pdf` gera só PDF; não há snapshot JSON nem importação.
 

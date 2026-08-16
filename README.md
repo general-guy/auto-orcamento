@@ -12,6 +12,12 @@ O `.bat` abre **sem janelas de terminal visíveis**: relança-se em modo oculto 
 
 **Não edite `tauri-fase_legado/`** no fluxo diário — evita `cargo check`, Rust Analyzer e `tauri:dev`, que recriam `tauri-fase_legado/src-tauri/target/` (centenas de MB). Para retomar Tauri no futuro, parta de `stable/tauri-v0.2.0-paused` e de `docs/MIGRATION-tauri.md`.
 
+## Atlas e Axis
+
+Este clone no **Atlas** (Geraldo-Server) é o ambiente de desenvolvimento (`abrir-auto-orcamento.bat` → `http://127.0.0.1:3000`). A produção clínica (celular/tablet) corre no **Axis** (Proxmox CT 100): `https://axis.tail5fe4b7.ts.net/` via Tailscale Serve, **sem Funnel**.
+
+Relação, bind e dados: [`docs/atlas-axis.md`](docs/atlas-axis.md).
+
 ## Estrutura da raiz
 
 Na raiz ficam só os **atalhos de uso** e o **mínimo para o app Node** rodar:
@@ -19,7 +25,7 @@ Na raiz ficam só os **atalhos de uso** e o **mínimo para o app Node** rodar:
 | Na raiz | Função |
 |---|---|
 | `abrir-auto-orcamento.bat` | Uso local (duplo clique) |
-| `iniciar-acesso-remoto.bat` | Acesso remoto via Tailscale |
+| `iniciar-acesso-remoto.bat` | Legado: Funnel neste Windows (não é produção clínica) |
 | `package.json` / `package-lock.json` | Dependências npm |
 | `README.md` | Este guia |
 | `AGENTS.md` | Memória do agente Cursor (plugins / convenções) |
@@ -32,7 +38,7 @@ Na raiz ficam só os **atalhos de uso** e o **mínimo para o app Node** rodar:
 | `tauri-fase_legado/` | `.exe`, build Tauri e `src-tauri/` (congelado) |
 | `assets/`, `data/`, `output/` | Recursos, históricos e PDF/JSON canônicos |
 | `export/` | Espelho SQLite dos snapshots (`orcamentos.sqlite`; não versionado) |
-| `docs/` | Arquitetura, snapshots e guia de plugins Cursor |
+| `docs/` | Arquitetura, Atlas/Axis, snapshots e guia de plugins Cursor |
 | `scripts/` | Utilitários de build, acesso remoto e consolidação SQLite |
 
 **URLs no browser:** o código-fonte fica em `web/` e `server/`, mas o app continua abrindo em `http://localhost:3000` com caminhos na raiz (`/app.js`, `/styles.css`, `/assets/papel-timbrado.png`, `/data/*.json`). O `server/server.js` mapeia o primeiro segmento da URL: `assets/`, `data/` e `output/` vêm da raiz do repo; o restante vem de `web/`.
@@ -51,10 +57,11 @@ O web app (`web/index.html`, `web/app.js`, `web/api.js`, `web/styles.css`, `asse
 | Fluxo | Atalho | Quando usar |
 |-------|--------|-------------|
 | **Node + WebView2** | `abrir-auto-orcamento.bat` | Uso diário e desenvolvimento |
-| **Acesso remoto** | `iniciar-acesso-remoto.bat` | Consultório remoto via Tailscale Funnel + token |
+| **Produção (Axis)** | URL Tailscale | `https://axis.tail5fe4b7.ts.net/` (Serve no Proxmox; ver [`docs/atlas-axis.md`](docs/atlas-axis.md)) |
+| **Funnel neste PC** | `iniciar-acesso-remoto.bat` | Legado / teste; token de uso único — não usar em clínica |
 | ~~Tauri (`.exe`)~~ | congelado | ver `stable/tauri-v0.2.0-paused` para retomada futura |
 
-Detalhes do acesso remoto: [`docs/acesso-remoto.md`](docs/acesso-remoto.md).
+Produção no Axis: [`docs/atlas-axis.md`](docs/atlas-axis.md). Funnel legado neste PC: [`docs/acesso-remoto.md`](docs/acesso-remoto.md).
 
 Históricos e tabelas ficam em **`data/`**. PDFs e snapshots JSON canônicos ficam em **`output/`**. O espelho SQLite para outros webapps fica em **`export/`** (ver [`docs/export-sqlite.md`](docs/export-sqlite.md)).
 
@@ -88,7 +95,7 @@ Otimizações aplicadas na stack atual: Node e WebView2 em paralelo, liberação
 
 | Área | Mudança |
 |---|---|
-| Acesso remoto | Tailscale Funnel + tokens de uso único; `iniciar-acesso-remoto.bat` + `docs/acesso-remoto.md` |
+| Produção / remoto | Axis (Tailscale Serve) + [`docs/atlas-axis.md`](docs/atlas-axis.md); Funnel neste PC é legado ([`docs/acesso-remoto.md`](docs/acesso-remoto.md)) |
 | Launcher | Janela **WebView2 nativa** (`launcher/native_launcher.py`), **maximizada ao abrir**, consola oculta (`launcher/launch-hidden.vbs`), ícone `.ico` na barra de tarefas |
 | Startup | Node em background + `--external-server`; poll breve pelo Node; splash `assets/launcher.html`; módulos pesados lazy no servidor; scripts com `defer` |
 | Impressão | `@media print` anula zoom da UI — papel alinhado ao PDF automático |
@@ -100,9 +107,11 @@ Detalhes técnicos: `docs/ARCHITECTURE.md`. Baseline congelada pré-WebView2: `d
 
 Se `pythonw` não estiver disponível, o `.bat` cai para Chrome/Edge em modo app (`launcher/launch-app.js`) — nesse modo o ícone da barra pode ficar borrado e um terminal permanece visível.
 
-### `iniciar-acesso-remoto.bat`
+### `iniciar-acesso-remoto.bat` (legado neste Windows)
 
-Expõe o app na internet via **Tailscale Funnel**, com login por **token de uso único** (128 bits, Base64). Requer Tailscale no PC servidor, HTTPS habilitado no tailnet e execução **como Administrador**.
+Produção clínica é o **Axis** (`https://axis.tail5fe4b7.ts.net/`), não este atalho. Ver [`docs/atlas-axis.md`](docs/atlas-axis.md).
+
+O `.bat` ainda existe para teste excepcional: expõe **este** PC na internet via **Tailscale Funnel**, com login por **token de uso único** (128 bits, Base64). **Não usar em clínica** (dados de orçamento em URL pública). Requer Tailscale neste PC, HTTPS habilitado no tailnet e execução **como Administrador**.
 
 ```text
 iniciar-acesso-remoto.bat
@@ -119,7 +128,7 @@ No PC remoto: acesse a URL `https://…ts.net`, cole o token e use o app (sessã
 
 **Fechar a janela do app não encerra o servidor.** Use **`Q`** no terminal para desligar tudo (forma mais confiável que fechar o terminal pelo X).
 
-Guia completo: [`docs/acesso-remoto.md`](docs/acesso-remoto.md).
+Guia do Funnel legado: [`docs/acesso-remoto.md`](docs/acesso-remoto.md).
 
 ### Equivalente manual (debug local)
 
@@ -145,7 +154,7 @@ node launcher/launch-app.js
 | npm | Sim (vem com Node) |
 | Python 3 + pywebview | Sim (janela nativa WebView2; `pip install -r launcher/requirements.txt`) |
 | Google Chrome ou Microsoft Edge | Sim (PDF automático e fallback `launcher/launch-app.js`) |
-| Tailscale | Só para `iniciar-acesso-remoto.bat` (PC servidor) |
+| Tailscale | Produção no Axis (cliente na mesma tailnet). Neste PC, só se for Funnel legado |
 | Internet | Só na primeira execução, se `node_modules` ainda não existir |
 
 Para migrar a pasta para outro PC: instale Node.js e Python, copie o projeto (de preferência com `node_modules` incluído) e execute `abrir-auto-orcamento.bat`.
@@ -241,7 +250,7 @@ data/tabelas-hospitalares.json
 data/tabela-implantes.json
 ```
 
-Esses arquivos são usados pelo servidor Node e são versionados no repositório como base inicial. Quando o app altera históricos como extras, pagamentos, observações, tecnologias ou procedimentos Unimed N, essas mudanças ficam locais até serem adicionadas a um commit. A ordem dos históricos pode ser ajustada pelo drag and drop nos dropdowns (handle `⋮⋮`, com duas ou mais opções visíveis) — persiste nos JSON correspondentes. As tabelas hospitalares e de implantes podem ser editadas manualmente em `data/`; basta reabrir o app para carregar as alterações.
+Esses arquivos são usados pelo servidor Node e são versionados no repositório como base inicial. Em **produção**, históricos e `output/` ao vivo ficam no disco do Axis (CT 100), não neste clone — ver [`docs/atlas-axis.md`](docs/atlas-axis.md). Quando o app altera históricos como extras, pagamentos, observações, tecnologias ou procedimentos Unimed N, essas mudanças ficam locais até serem adicionadas a um commit. A ordem dos históricos pode ser ajustada pelo drag and drop nos dropdowns (handle `⋮⋮`, com duas ou mais opções visíveis) — persiste nos JSON correspondentes. As tabelas hospitalares e de implantes podem ser editadas manualmente em `data/`; basta reabrir o app para carregar as alterações.
 
 Os PDFs e snapshots JSON gerados automaticamente ficam em:
 
@@ -295,9 +304,13 @@ O botão **Abrir** (verde, ao lado de **Limpar**) carrega um snapshot JSON gerad
 2. A pasta inicial é a **última usada** (`lastSnapshotDir` em `data/settings.json`), com fallback em `output/`; a raiz do perfil do usuário (`C:\Users\...`) nunca é reutilizada como pasta salva. Após imprimir, a pasta `output/` também é gravada automaticamente.
 3. Ao escolher um arquivo, o app valida `schemaVersion: 1`, repopula o formulário e atualiza a pré-visualização.
 
-### Acesso remoto (Funnel)
+### Produção no Axis (celular / tablet)
 
-No PC cliente, **Abrir** abre uma **caixa dedicada** com os orçamentos salvos em `output/` no servidor — somente leitura, sem acesso ao restante do sistema de arquivos. Detalhes em [`docs/acesso-remoto.md`](docs/acesso-remoto.md).
+Abrir `https://axis.tail5fe4b7.ts.net/` com Tailscale na mesma tailnet. **Abrir** usa a caixa dedicada com os `.json` de `output/` **no Axis**. Detalhes: [`docs/atlas-axis.md`](docs/atlas-axis.md).
+
+### Funnel neste PC (legado)
+
+No cliente do Funnel, **Abrir** abre uma **caixa dedicada** com os orçamentos salvos em `output/` **neste Windows** — somente leitura, sem acesso ao restante do sistema de arquivos. Detalhes em [`docs/acesso-remoto.md`](docs/acesso-remoto.md).
 
 Campos dinâmicos (cirurgias, hospitais com entradas auxiliares, extras, pagamento, observações), checkboxes de seções opcionais, listas rápidas e equipe são restaurados. Implantes são reassociados pelo índice ou por marca/modelo/referência na tabela local.
 
