@@ -243,6 +243,7 @@ Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observa�
 - visual dos campos, botões, dropdowns e pré-visualização;
 - agrupamento visual das seções do formulário com bordas cinza discretas;
 - papel A4 com imagem de fundo do papel timbrado;
+- negrito do documento: `strong`/`b` em `.document-content` usam `--document-emphasis-weight` (Gotham Medium, `500`), inclusive o rótulo `Tempo previsto` e os trechos `*texto*` das observações;
 - regras específicas de impressão (`@media print`): oculta formulário e chrome da UI; força A4 (`210mm` × `297mm`); anula o zoom da interface (`transform: none` no `body`) e alturas mínimas (`100vh`) que distorcem o diálogo **Imprimir** no WebView2.
 
 `app.js` concentra a lógica de interação:
@@ -259,7 +260,7 @@ Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observa�
 - renderização da equipe fixa com itens selecionáveis e valor monetário;
 - renderização opcional da seção de extras com lista rápida reordenável e campos dinâmicos adicionais;
 - renderização da seção de pagamento com campos dinâmicos e lista rápida reordenável;
-- renderização da seção de observações com lista rápida reordenável e campos dinâmicos adicionais;
+- renderização da seção de observações com lista rápida reordenável, campos dinâmicos adicionais e `*texto*` convertido em `<strong>` no preview (`appendWhatsAppBoldText()`);
 - paginação da pré-visualização do documento em páginas A4;
 - redimensionamento do painel;
 - impressão e exportação automática de PDF + snapshot JSON.
@@ -273,7 +274,6 @@ Arquivos de histórico:
 ```text
 data/cirurgias.json
 data/hospitais.json
-data/pacientes.json
 data/extras.json
 data/pagamentos.json
 data/observacoes.json
@@ -282,6 +282,16 @@ data/unimed-n.json
 ```
 
 Esses arquivos são persistência local do app e também são versionados no repositório para manter uma base inicial compartilhada. Alterações feitas pelo uso do app só vão para o GitHub quando forem adicionadas ao staging e commitadas.
+
+Não versionados (`.gitignore`):
+
+```text
+data/pacientes.json
+data/settings.json
+data/auth-users.json
+```
+
+Se `data/pacientes.json` não existir, `ensureDataFile()` grava `[]`. O formato de referência no Git é `data/pacientes.json.example`.
 
 Tabelas de referência estruturadas:
 
@@ -296,7 +306,7 @@ As entradas auxiliares `Reg#`/`Sap#`/`Uni#` não usam `<datalist>` nativo (limit
 
 `data/tabela-implantes.json` guarda uma tabela independente de implantes, extraída de documento `.doc`, para preenchimento opcional da seção `Implantes`. O dropdown usa `rotulo`, `modelo` e `referencia`; itens com `favorito: true` recebem uma estrela ao final da opção.
 
-`data/pacientes.json` guarda os nomes de pacientes usados no autocomplete. O dropdown de histórico do campo **Nome** permite reordenar entradas pelo handle `⋮⋮` (com duas ou mais opções visíveis); ao soltar, `app.js` envia a lista completa via `PUT /api/pacientes` / `AppApi.replaceHistory("pacientes", …)` e grava a ordem em `data/pacientes.json`. O menu fecha ao perder o foco do campo ou do dropdown.
+`data/pacientes.json` guarda os nomes de pacientes usados no autocomplete. O arquivo **não** entra no Git. O dropdown de histórico do campo **Nome** permite reordenar entradas pelo handle `⋮⋮` (com duas ou mais opções visíveis); ao soltar, `app.js` envia a lista completa via `PUT /api/pacientes` / `AppApi.replaceHistory("pacientes", …)` e grava a ordem em `data/pacientes.json`. O menu fecha ao perder o foco do campo ou do dropdown.
 
 `data/cirurgias.json` guarda as cirurgias cadastradas no formulário. O dropdown de histórico de **Cirurgia proposta** permite reordenar entradas pelo handle `⋮⋮` (com duas ou mais opções visíveis); ao soltar, `app.js` envia a lista via `PUT /api/cirurgias` / `AppApi.replaceHistory("cirurgias", …)` e grava em `data/cirurgias.json`. O menu fecha ao perder o foco do campo ou do dropdown.
 
@@ -385,7 +395,7 @@ As `Observações adicionais` usam uma lista dinâmica de inputs com botões `+/
 
 A lista rápida de observações padrão usa eventos de ponteiro para permitir drag and drop sem interferir nos checkboxes e no botão de exclusão. Durante o arraste, `app.js` mostra uma linha de encaixe entre os itens; ao soltar, reorganiza `guidanceHistory`, atualiza o preview e envia a lista completa para `PUT /api/observacoes`, que normaliza duplicatas e grava a nova ordem em `data/observacoes.json`.
 
-No preview, `updateGuidance()` combina as observações padrão marcadas com as adicionais preenchidas, remove duplicatas por texto normalizado e renderiza os itens em uma lista com marcadores. O espaçamento entre itens é controlado por `#guidancePreview` em `styles.css`.
+No preview, `updateGuidance()` combina as observações padrão marcadas com as adicionais preenchidas, remove duplicatas por texto normalizado e renderiza os itens em uma lista com marcadores. `appendWhatsAppBoldText()` converte trechos `*texto*` (sem espaço colado no asterisco) em `<strong>` no preview e no PDF; o JSON e o formulário continuam com os asteriscos. O negrito do documento (`strong`/`b` em `.document-content`, inclusive o rótulo `Tempo previsto`) usa Gotham Medium via `--document-emphasis-weight: 500`. O espaçamento entre itens é controlado por `#guidancePreview` em `styles.css`.
 
 ## Paginação do Documento
 
@@ -460,7 +470,7 @@ Cada entrada auxiliar `Uni#` tem:
 - o mesmo `#hospitalProcedureDropdown`, alimentado por `data/unimed-n.json` (com remoção pelo `x`);
 - **sem** botão verde de autofill.
 
-O preview hospitalar é montado em três colunas:
+O preview hospitalar inclui o rótulo `Tempo previsto` (`<strong>` em `.summary-inline`) e, abaixo, três colunas:
 
 - nome do hospital;
 - procedimentos e tempos de sala;
@@ -506,6 +516,8 @@ A ordem final é: pacotes de cirurgia plástica, taxas adicionais e, ao fim, ent
 - O frontend é HTML, CSS e JavaScript em `web/`, servido por `server/server.js` — **sem build step**.
 - Fluxo diário: `abrir-auto-orcamento.bat` → WebView2 + `http://localhost:3000`.
 - O estado persistente do app fica em JSON local (`data/`, `output/`). `export/orcamentos.sqlite` é espelho derivado para outros webapps (`docs/export-sqlite.md`).
+- `data/pacientes.json`, `data/settings.json` e `data/auth-users.json` não entram no Git.
+- Negrito do documento: `strong`/`b` em `.document-content` usam `--document-emphasis-weight` (Gotham Medium, `500`).
 - Alterações no preview devem chamar `updatePreview()` quando mudarem campos programaticamente.
 - Alterações nas tabelas Regina/Sapiranga devem preservar o formato descrito em `docs/tabelas-hospitalares.md`.
 - Procedimentos Unimed N seguem `docs/unimed-n.md` (`data/unimed-n.json`, API `/api/unimed-n`).

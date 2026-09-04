@@ -101,6 +101,7 @@ Otimizações aplicadas na stack atual: Node e WebView2 em paralelo, liberação
 | Impressão | `@media print` anula zoom da UI — papel alinhado ao PDF automático |
 | Snapshot | Exportação JSON na impressão + botão **Abrir** com seletor nativo HiDPI (pywebview/WebView2) |
 | Export SQLite | Na abertura do servidor e após imprimir (local), reconstrói `export/orcamentos.sqlite` a partir de todos os `output/*.json` (espelho; JSON continua canônico) |
+| Documento | Nas observações, `*texto*` (estilo WhatsApp) vira negrito no preview/PDF; o peso padrão do documento é Gotham Medium (`--document-emphasis-weight: 500`), inclusive o rótulo `Tempo previsto` |
 | Robustez | Liberação da porta 3000 no arranque do `server/server.js`; encerramento confiável ao fechar pelo X |
 
 Detalhes técnicos: `docs/ARCHITECTURE.md`. Baseline congelada pré-WebView2: `docs/SNAPSHOT-node-web-v0.1.0.md`.
@@ -226,6 +227,7 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 - Permite incluir uma seção opcional de implantes, alimentada por `data/tabela-implantes.json`.
 - Permite incluir uma seção opcional de tecnologias, com nome e valor salvos em `data/tecnologias.json`.
 - Mantém uma seção fixa de equipe com itens pré-marcados e valor normalizado em moeda brasileira.
+- Nas observações, trechos `*texto*` (estilo WhatsApp) saem em negrito no documento; o mesmo peso Medium vale para o rótulo `Tempo previsto`.
 - Agrupa as seções do formulário em blocos com borda cinza discreta para facilitar a leitura do painel esquerdo.
 
 ## Dados Locais
@@ -235,13 +237,24 @@ Os históricos ficam em arquivos JSON dentro de `data/`:
 ```text
 data/cirurgias.json
 data/hospitais.json
-data/pacientes.json
 data/extras.json
 data/pagamentos.json
 data/observacoes.json
 data/tecnologias.json
 data/unimed-n.json
 ```
+
+Esses arquivos são usados pelo servidor Node e são versionados no repositório como base inicial. Em **produção**, históricos e `output/` ao vivo ficam no disco do Axis (CT 100), não neste clone — ver [`docs/atlas-axis.md`](docs/atlas-axis.md). Quando o app altera históricos como extras, pagamentos, observações, tecnologias ou procedimentos Unimed N, essas mudanças ficam locais até serem adicionadas a um commit. A ordem dos históricos pode ser ajustada pelo drag and drop nos dropdowns (handle `⋮⋮`, com duas ou mais opções visíveis) — persiste nos JSON correspondentes.
+
+Não entram no Git (só neste PC / no disco do Axis):
+
+```text
+data/pacientes.json
+data/settings.json
+data/auth-users.json
+```
+
+`data/pacientes.json` é o autocomplete do campo **Nome**. Se o arquivo não existir, `server/server.js` cria uma lista vazia. O seed versionado é `data/pacientes.json.example`. `data/settings.json` guarda zoom e a última pasta do botão **Abrir**. `data/auth-users.json` guarda tokens do Funnel legado.
 
 As tabelas de referência estruturadas ficam em:
 
@@ -250,7 +263,7 @@ data/tabelas-hospitalares.json
 data/tabela-implantes.json
 ```
 
-Esses arquivos são usados pelo servidor Node e são versionados no repositório como base inicial. Em **produção**, históricos e `output/` ao vivo ficam no disco do Axis (CT 100), não neste clone — ver [`docs/atlas-axis.md`](docs/atlas-axis.md). Quando o app altera históricos como extras, pagamentos, observações, tecnologias ou procedimentos Unimed N, essas mudanças ficam locais até serem adicionadas a um commit. A ordem dos históricos pode ser ajustada pelo drag and drop nos dropdowns (handle `⋮⋮`, com duas ou mais opções visíveis) — persiste nos JSON correspondentes. As tabelas hospitalares e de implantes podem ser editadas manualmente em `data/`; basta reabrir o app para carregar as alterações.
+Essas tabelas são versionadas e podem ser editadas manualmente em `data/`; basta reabrir o app para carregar as alterações.
 
 Os PDFs e snapshots JSON gerados automaticamente ficam em:
 
@@ -317,6 +330,8 @@ Campos dinâmicos (cirurgias, hospitais com entradas auxiliares, extras, pagamen
 ## Hospitais Com Entradas Auxiliares
 
 A seção `Hospital` tem checkbox no título e vem marcada por padrão a cada nova sessão do app. Quando desmarcada, o conteúdo da seção é recolhido no painel esquerdo e o bloco de hospital deixa de aparecer no documento.
+
+No documento, o rótulo `Tempo previsto` usa o negrito padrão (Gotham Medium), o mesmo dos trechos `*texto*` nas observações.
 
 O dropdown de histórico do nome do hospital aceita reordenação pelo handle `⋮⋮` (ordem em `data/hospitais.json`).
 
@@ -406,7 +421,7 @@ A lista rápida aceita drag and drop para reorganizar as observações. Ao solta
 
 Abaixo da lista padrão, `Observações adicionais` usa campos dinâmicos com dropdown de histórico e botões `+/-`, seguindo o mesmo padrão de `Pagamento`. O dropdown aceita reordenação pelo handle `⋮⋮` (mesmo JSON da lista rápida).
 
-No documento final, as observações continuam como lista com marcadores, com espaçamento de `6px` entre os itens.
+No documento final, as observações continuam como lista com marcadores, com espaçamento de `6px` entre os itens. Trechos entre asteriscos (`*texto*`), no mesmo estilo do WhatsApp, saem em negrito no preview e no PDF; o formulário e `data/observacoes.json` guardam o texto com os asteriscos. O negrito do documento (incluindo o rótulo `Tempo previsto`) usa Gotham Medium (`--document-emphasis-weight: 500`).
 
 ## Paginação do Documento
 
@@ -422,6 +437,7 @@ Detalhes de arquitetura, arquivos principais, endpoints locais e fluxo do launch
 
 ```text
 docs/ARCHITECTURE.md
+docs/atlas-axis.md
 docs/export-sqlite.md
 docs/acesso-remoto.md
 ```

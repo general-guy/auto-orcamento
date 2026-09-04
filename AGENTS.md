@@ -10,7 +10,7 @@ Para fluxos com plugins (quando pedir o quê, frases úteis): [`docs/cursor-plug
 - Entrada diária neste PC: `abrir-auto-orcamento.bat` → `127.0.0.1:3000`. Produção: Axis CT 100 (`https://axis.tail5fe4b7.ts.net/`, Tailscale Serve, sem Funnel) — ver `docs/atlas-axis.md`.
 - `iniciar-acesso-remoto.bat` (Funnel neste Windows) é legado de teste, não caminho clínico.
 - Código ativo: `web/`, `server/`, `launcher/`. **Não** editar `tauri-fase_legado/` no fluxo diário (Tauri congelado).
-- Dados: históricos em `data/*.json` (versionados neste clone); produção ao vivo no disco do Axis. PDF/JSON canônicos em `output/` (não versionado); espelho SQLite em `export/orcamentos.sqlite` (ver `docs/export-sqlite.md`).
+- Dados: históricos em `data/*.json` (a maior parte versionada neste clone); `data/pacientes.json`, `data/settings.json` e `data/auth-users.json` são locais (`.gitignore`). Produção ao vivo no disco do Axis. PDF/JSON canônicos em `output/` (não versionado); espelho SQLite em `export/orcamentos.sqlite` (ver `docs/export-sqlite.md`).
 - Após mudar código: reabrir o app (`abrir-auto-orcamento.bat` ou `npm start`) — sem build. Deploy para o Axis: script no `local-atlas` (`axis/scripts/deploy_auto_orcamento.py`), só com pedido explícito.
 - Docs técnicas: `README.md`, `docs/ARCHITECTURE.md`, `docs/atlas-axis.md`, `docs/acesso-remoto.md`, `docs/export-sqlite.md`.
 
@@ -44,3 +44,5 @@ Para fluxos com plugins (quando pedir o quê, frases úteis): [`docs/cursor-plug
 - Dependência de PDF: `puppeteer-core` + Chrome/Edge instalado.
 - Snapshot JSON (`schemaVersion: 1`) e botão Abrir existem só na stack Node.
 - Espelho SQLite é gerado na abertura do servidor e após imprimir; também via `npm run export:sqlite`.
+- `data/pacientes.json` não entra no Git; o servidor cria `[]` se faltar. Seed: `data/pacientes.json.example`.
+- Negrito do documento (observações `*texto*` e rótulo `Tempo previsto`) é Gotham Medium (`--document-emphasis-weight: 500`).

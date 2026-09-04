@@ -1,6 +1,11 @@
 [
+  "Valores hospitalares sujeitos a confirmação com o hospital.",
+  "O valor hospitalar quando houver convênio associado depende sempre dos códigos *autorizados* pelo convênio.",
+  "Custos de coparticipação ou outros custos por parte do *convênio não* estão incluídos neste orçamento.",
   "O valor dos implantes é referente àquele informado pelo fornecedor. Esse valor deve ser confirmado diretamente com o representante da marca antes da cirurgia.",
   "Materiais especiais e tecnologias podem depender da indicação intraoperatória.",
-  "Valores hospitalares sujeitos a confirmação com o hospital.",
+  "Para uma melhor organização da sua cirurgia sugerimos seguir alguns prazos com antecedência.",
+  "Exames, liberações, laudos e autorizações de convênio devem ser *solicitadas 60 dias antes* da data prevista para a cirurgia.",
+  "O resultado dos exames, liberações e autorizações devem estar *prontos no mínimo 30 dias antes* da data do procedimento.",
   "Orçamento válido por 90 dias."
 ]

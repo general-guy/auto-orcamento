@@ -46,6 +46,7 @@
   --soft: #f7f7f7;
   --brand-font-primary: "Gotham Local", "Gotham", "Montserrat", "Avenir Next", Arial, sans-serif;
   --brand-font-highlight: "Cinzel Local", "Cinzel", "Times New Roman", Georgia, serif;
+  --document-emphasis-weight: 500;
   --form-panel-width: 560px;
   --paper-width: 210mm;
   --paper-height: 297mm;
@@ -790,6 +791,11 @@ textarea:focus {
   inset: 38mm 20mm 28mm;
   position: absolute;
   z-index: 1;
+}
+
+.document-content strong,
+.document-content b {
+  font-weight: var(--document-emphasis-weight);
 }
 
 .document-flow {

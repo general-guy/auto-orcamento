@@ -5,6 +5,7 @@ const auth = require("./auth");
 const { freeTcpPort } = require("./port-utils");
 
 const port = 3000;
+const bindHost = process.env.BIND_HOST || "127.0.0.1";
 const repoRoot = path.join(__dirname, "..");
 const webDir = path.join(repoRoot, "web");
 const dataDir = path.join(repoRoot, "data");
@@ -1114,8 +1115,8 @@ async function startServer() {
   ensureOutputDir();
   auth.ensureBootstrapAdmin(dataDir);
   await freeTcpPort(port);
-  server.listen(port, "127.0.0.1", () => {
-    console.log(`Auto Orçamento disponível em http://127.0.0.1:${port}`);
+  server.listen(port, bindHost, () => {
+    console.log(`Auto Orçamento disponível em http://${bindHost}:${port}`);
 
     if (auth.isAuthEnabled()) {
       console.log("Acesso remoto com autenticação ativado (AUTH_ENABLED).");

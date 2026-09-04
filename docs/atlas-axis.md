@@ -28,7 +28,7 @@ Independência:
 | Dados de produção (`data/` de runtime, `output/`) | Disco do CT 100 (`/opt/auto-orcamento`) | Sem sync nos dois sentidos; sem OneDrive no Axis |
 | Rede de segurança | OneDrive no Atlas + git | Não cobre o acervo clínico no CT |
 
-O clone neste PC é para **editar código**. Históricos e PDFs clínicos ao vivo moram no Axis.
+O clone neste PC é para **editar código**. Históricos e PDFs clínicos ao vivo moram no Axis. Nomes de pacientes deste clone ficam em `data/pacientes.json`, fora do Git.
 
 ## Bind
 

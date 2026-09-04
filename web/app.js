@@ -3561,6 +3561,26 @@ function updateExtrasPreview() {
   });
 }
 
+function appendWhatsAppBoldText(target, text) {
+  const pattern = /\*(?!\s)([^*\n]+?)(?<!\s)\*/g;
+  let lastIndex = 0;
+
+  for (const match of text.matchAll(pattern)) {
+    if (match.index > lastIndex) {
+      target.append(text.slice(lastIndex, match.index));
+    }
+
+    const strong = document.createElement("strong");
+    strong.textContent = match[1];
+    target.append(strong);
+    lastIndex = match.index + match[0].length;
+  }
+
+  if (lastIndex < text.length) {
+    target.append(text.slice(lastIndex));
+  }
+}
+
 function updateGuidance() {
   const selectedGuidance = getGuidanceValues();
 
@@ -3575,7 +3595,7 @@ function updateGuidance() {
 
   selectedGuidance.forEach((guidance) => {
     const item = document.createElement("li");
-    item.textContent = guidance;
+    appendWhatsAppBoldText(item, guidance);
     guidancePreview.append(item);
   });
 }
