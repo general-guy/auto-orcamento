@@ -273,7 +273,8 @@ textarea {
   gap: 10px;
 }
 
-.surgery-field-row {
+.surgery-field-row,
+.hospital-field-row {
   align-items: center;
   display: flex;
   gap: 8px;
@@ -281,11 +282,13 @@ textarea {
   width: 100%;
 }
 
-.surgery-field-caption {
+.surgery-field-caption,
+.hospital-field-caption {
   width: 100%;
 }
 
-.surgery-drag-handle {
+.surgery-drag-handle,
+.hospital-drag-handle {
   color: #9ca3af;
   cursor: grab;
   flex: 0 0 auto;
@@ -296,32 +299,39 @@ textarea {
   user-select: none;
 }
 
-.surgery-drag-handle::before {
+.surgery-drag-handle::before,
+.hospital-drag-handle::before {
   content: "⋮⋮";
 }
 
-.surgery-drag-handle[hidden] {
+.surgery-drag-handle[hidden],
+.hospital-drag-handle[hidden] {
   display: none;
 }
 
-.surgery-field .surgery-input {
+.surgery-field .surgery-input,
+.hospital-field-row > .hospital-input,
+.hospital-field-row > .hospital-control-row {
   flex: 1 1 auto;
   min-width: 0;
   width: auto;
 }
 
-.surgery-field.is-dragging {
+.surgery-field.is-dragging,
+.hospital-field.is-dragging {
   background: rgba(221, 231, 245, 0.95);
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
   opacity: 0.76;
 }
 
-.surgery-field.is-dragging .surgery-drag-handle {
+.surgery-field.is-dragging .surgery-drag-handle,
+.hospital-field.is-dragging .hospital-drag-handle {
   cursor: grabbing;
 }
 
-.surgery-list.is-dragging-surgery {
+.surgery-list.is-dragging-surgery,
+.hospital-list.is-dragging-hospital {
   user-select: none;
 }
 

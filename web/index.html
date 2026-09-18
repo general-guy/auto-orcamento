@@ -115,9 +115,12 @@
 
               <div class="dynamic-field-group">
                 <div id="hospitalList" class="hospital-list">
-                  <label>
-                    Nome do hospital
-                    <input id="hospital" name="hospital" type="text" class="hospital-input" autocomplete="off" />
+                  <label class="hospital-field">
+                    <span class="hospital-field-caption">Nome do hospital</span>
+                    <div class="hospital-field-row">
+                      <span class="hospital-drag-handle" aria-label="Reordenar hospital" hidden></span>
+                      <input id="hospital" name="hospital" type="text" class="hospital-input" autocomplete="off" />
+                    </div>
                   </label>
                 </div>
 

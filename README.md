@@ -219,7 +219,7 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 - Permite imprimir o orçamento e, ao clicar em `Imprimir orçamento`, gera automaticamente um **PDF** e um **JSON de snapshot** em `output/` e, em seguida, atualiza o espelho SQLite em `export/orcamentos.sqlite`.
 - Permite **reabrir** um orçamento anterior com o botão **Abrir** (verde, ao lado de **Limpar**; JSON canônico em `output/`), restaurando o formulário e a pré-visualização.
 - Guarda histórico local de pacientes, cirurgias, hospitais, extras, formas de pagamento, observações e tecnologias.
-- Permite reordenar por drag and drop os dropdowns de histórico (**Nome**, **Cirurgia**, **Hospital**, **Tecnologias**, **Extras adicionais**, **Pagamento** e **Observações adicionais**), com ordem persistida nos JSON correspondentes; reordenar entradas de cirurgia nos campos do formulário (só visual/preview); e reordenar as listas rápidas de extras, pagamento e observações.
+- Permite reordenar por drag and drop os dropdowns de histórico (**Nome**, **Cirurgia**, **Hospital**, **Tecnologias**, **Extras adicionais**, **Pagamento** e **Observações adicionais**), com ordem persistida nos JSON correspondentes; reordenar entradas de cirurgia e de hospital nos campos do formulário (preview e snapshot, sem alterar o JSON de histórico); e reordenar as listas rápidas de extras, pagamento e observações.
 - Cria múltiplas entradas de cirurgia e hospital.
 - Para Regina e Sapiranga, cria entradas auxiliares (`Reg1`, `Sap1`, etc.) com multiplicadores e tabelas locais.
 - Para hospitais cujo nome contém `Unimed N`, cria entradas auxiliares (`Uni1`, `Uni2`, etc.) com valor monetário editável em `data/unimed-n.json`.
@@ -335,6 +335,8 @@ No documento, o rótulo `Tempo previsto` usa o negrito padrão (Gotham Medium), 
 
 O dropdown de histórico do nome do hospital aceita reordenação pelo handle `⋮⋮` (ordem em `data/hospitais.json`).
 
+Com duas ou mais entradas de hospital no formulário, o app exibe o mesmo handle `⋮⋮` à esquerda de cada **campo** de nome (não no dropdown). Arrastar reorganiza os blocos no painel e no documento; cada hospital leva as entradas auxiliares (`Reg#`, `Sap#`, `Uni#`). Esse drag and drop não altera `data/hospitais.json`; a ordem vigente entra no snapshot JSON ao imprimir e é restaurada pelo **Abrir**. O rótulo `Nome do hospital` permanece no primeiro campo, mesmo após reordenar.
+
 ### Regina e Sapiranga (tabela + autofill)
 
 O botão verde ao lado do hospital preenche e reorganiza as entradas auxiliares.
@@ -383,7 +385,7 @@ A seção `Cirurgia` usa campos dinâmicos com botões `+/-`, no mesmo padrão d
 
 No dropdown de histórico, com duas ou mais opções visíveis, o handle `⋮⋮` à esquerda permite reordenar o histórico; a ordem persiste em `data/cirurgias.json`. O menu fecha ao sair do campo ou do dropdown.
 
-Com duas ou mais cirurgias propostas **nos campos do formulário**, aparece outro indicador `⋮⋮` à esquerda de cada caixa de texto. Esse drag and drop é só visual: reorganiza os campos no painel e a ordem exibida no preview do documento, sem alterar a ordem do histórico em `data/cirurgias.json`.
+Com duas ou mais cirurgias propostas **nos campos do formulário**, aparece outro indicador `⋮⋮` à esquerda de cada caixa de texto. Esse drag and drop reorganiza os campos no painel e a ordem no preview e no snapshot, sem alterar o histórico em `data/cirurgias.json`.
 
 ## Extras
 

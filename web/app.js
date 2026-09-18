@@ -108,6 +108,7 @@ let activeHospitalInput = null;
 let isInteractingWithHospitalDropdown = false;
 let hospitalDropdownDragState = null;
 let hospitalDropdownSuppressClick = false;
+let hospitalDragState = null;
 let patientHistory = [];
 let activePatientInput = null;
 let isInteractingWithPatientDropdown = false;
@@ -370,6 +371,90 @@ function getExtrasValues() {
 
 function getHospitalInputs() {
   return [...hospitalList.querySelectorAll(".hospital-input")];
+}
+
+function getHospitalFieldRows() {
+  return Array.from(hospitalList.querySelectorAll(":scope > .hospital-field"));
+}
+
+function ensureHospitalFieldRow(label) {
+  label.classList.add("hospital-field");
+
+  if (label.querySelector(".hospital-field-row")) {
+    return;
+  }
+
+  const input = label.querySelector(".hospital-input");
+  if (!input) {
+    return;
+  }
+
+  const row = document.createElement("div");
+  row.className = "hospital-field-row";
+
+  const handle = document.createElement("span");
+  handle.className = "hospital-drag-handle";
+  handle.setAttribute("aria-label", "Reordenar hospital");
+  handle.hidden = true;
+
+  const controlRow = input.closest(".hospital-control-row");
+  row.append(handle, controlRow || input);
+
+  const detailList = label.querySelector(".hospital-detail-list");
+  if (detailList) {
+    label.insertBefore(row, detailList);
+  } else {
+    label.append(row);
+  }
+}
+
+function updateHospitalFieldStructure() {
+  Array.from(hospitalList.querySelectorAll(":scope > label")).forEach((label) => {
+    ensureHospitalFieldRow(label);
+  });
+
+  const rows = getHospitalFieldRows();
+  const showHandles = rows.length > 1;
+
+  rows.forEach((label, index) => {
+    [...label.childNodes].forEach((node) => {
+      if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+        node.remove();
+      }
+    });
+
+    const input = label.querySelector(".hospital-input");
+    const handle = label.querySelector(".hospital-drag-handle");
+
+    if (handle) {
+      handle.hidden = !showHandles;
+    }
+
+    if (index === 0) {
+      label.classList.remove("unlabeled-field");
+
+      let caption = label.querySelector(".hospital-field-caption");
+      if (!caption) {
+        caption = document.createElement("span");
+        caption.className = "hospital-field-caption";
+        caption.textContent = "Nome do hospital";
+        label.prepend(caption);
+      }
+
+      if (input && !input.id) {
+        input.id = "hospital";
+      }
+    } else {
+      label.classList.add("unlabeled-field");
+      label.querySelector(".hospital-field-caption")?.remove();
+
+      if (input?.id === "hospital") {
+        input.removeAttribute("id");
+      }
+    }
+
+    input?.setAttribute("aria-label", `Hospital ${index + 1}`);
+  });
 }
 
 function getHospitalValues() {
@@ -1271,7 +1356,8 @@ function syncHospitalDetailField(input) {
   detailList.dataset.autofillSource = detailConfig.source;
 
   createHospitalDetailEntry(detailList, detailConfig);
-  input.parentElement.insertAdjacentElement("afterend", detailList);
+  const fieldRow = input.closest(".hospital-field-row");
+  (fieldRow || input.parentElement).insertAdjacentElement("afterend", detailList);
   updateHospitalDetailButtons(detailList);
 }
 
@@ -2405,6 +2491,81 @@ function handleSurgeryFieldPointerCancel() {
   endSurgeryFieldDrag({ shouldCommit: false });
 }
 
+function createHospitalDropIndicator() {
+  const indicator = document.createElement("div");
+  indicator.className = "payment-quick-drop-indicator";
+  return indicator;
+}
+
+function moveHospitalDropIndicator(clientY) {
+  if (!hospitalDragState) {
+    return;
+  }
+
+  const rows = getHospitalFieldRows().filter((row) => row !== hospitalDragState.row);
+  const nextRow = rows.find((row) => {
+    const rect = row.getBoundingClientRect();
+    return clientY < rect.top + rect.height / 2;
+  });
+
+  hospitalList.insertBefore(hospitalDragState.indicator, nextRow || null);
+}
+
+function endHospitalFieldDrag({ shouldCommit = true } = {}) {
+  if (!hospitalDragState) {
+    return;
+  }
+
+  const { row, handle, indicator, pointerId, originalNextSibling } = hospitalDragState;
+  const hasNewPosition = indicator.parentElement === hospitalList;
+
+  row.classList.remove("is-dragging");
+  hospitalList.classList.remove("is-dragging-hospital");
+
+  if (hasNewPosition && shouldCommit) {
+    hospitalList.insertBefore(row, indicator);
+  } else {
+    hospitalList.insertBefore(row, originalNextSibling);
+  }
+
+  indicator.remove();
+
+  if (handle.hasPointerCapture?.(pointerId)) {
+    handle.releasePointerCapture(pointerId);
+  }
+
+  handle.removeEventListener("pointermove", handleHospitalFieldPointerMove);
+  handle.removeEventListener("pointerup", handleHospitalFieldPointerUp);
+  handle.removeEventListener("pointercancel", handleHospitalFieldPointerCancel);
+
+  hospitalDragState = null;
+  updateHospitalFieldStructure();
+
+  if (!hasNewPosition || !shouldCommit) {
+    return;
+  }
+
+  updatePreview();
+}
+
+function handleHospitalFieldPointerMove(event) {
+  if (!hospitalDragState) {
+    return;
+  }
+
+  event.preventDefault();
+  moveHospitalDropIndicator(event.clientY);
+}
+
+function handleHospitalFieldPointerUp(event) {
+  event.preventDefault();
+  endHospitalFieldDrag();
+}
+
+function handleHospitalFieldPointerCancel() {
+  endHospitalFieldDrag({ shouldCommit: false });
+}
+
 async function saveGuidanceOrderToHistory(items) {
   try {
     guidanceHistory = await AppApi.replaceHistory("observacoes", items);
@@ -3005,7 +3166,15 @@ function createGuidanceField() {
 function createHospitalField() {
   const fieldNumber = getHospitalInputs().length + 1;
   const label = document.createElement("label");
-  label.className = "unlabeled-field";
+  label.className = "hospital-field unlabeled-field";
+
+  const row = document.createElement("div");
+  row.className = "hospital-field-row";
+
+  const handle = document.createElement("span");
+  handle.className = "hospital-drag-handle";
+  handle.setAttribute("aria-label", "Reordenar hospital");
+  handle.hidden = true;
 
   const input = document.createElement("input");
   input.name = "hospital";
@@ -3014,7 +3183,8 @@ function createHospitalField() {
   input.setAttribute("aria-label", `Hospital ${fieldNumber}`);
   input.setAttribute("autocomplete", "off");
 
-  label.append(input);
+  row.append(handle, input);
+  label.append(row);
   hospitalList.append(label);
   updateHospitalButtons();
   input.focus();
@@ -3110,6 +3280,7 @@ function updateGuidanceButtons() {
 
 function updateHospitalButtons() {
   removeHospitalButton.disabled = getHospitalInputs().length <= 1;
+  updateHospitalFieldStructure();
 }
 
 function isTextField(element) {
@@ -4330,6 +4501,38 @@ surgeryList.addEventListener("pointerdown", (event) => {
   handle.addEventListener("pointermove", handleSurgeryFieldPointerMove);
   handle.addEventListener("pointerup", handleSurgeryFieldPointerUp);
   handle.addEventListener("pointercancel", handleSurgeryFieldPointerCancel);
+});
+hospitalList.addEventListener("pointerdown", (event) => {
+  const handle = event.target.closest(".hospital-drag-handle");
+  if (!handle || event.button !== 0 || handle.hidden) {
+    return;
+  }
+
+  const row = handle.closest(".hospital-field");
+  if (!row) {
+    return;
+  }
+
+  event.preventDefault();
+  hideHospitalHistoryDropdown();
+  hideHospitalProcedureDropdown();
+
+  hospitalDragState = {
+    row,
+    handle,
+    indicator: createHospitalDropIndicator(),
+    pointerId: event.pointerId,
+    originalNextSibling: row.nextElementSibling,
+  };
+
+  row.classList.add("is-dragging");
+  hospitalList.classList.add("is-dragging-hospital");
+  handle.setPointerCapture(event.pointerId);
+  moveHospitalDropIndicator(event.clientY);
+
+  handle.addEventListener("pointermove", handleHospitalFieldPointerMove);
+  handle.addEventListener("pointerup", handleHospitalFieldPointerUp);
+  handle.addEventListener("pointercancel", handleHospitalFieldPointerCancel);
 });
 form.addEventListener("focusout", (event) => {
   if (event.target.matches(".patient-input")) {

@@ -251,7 +251,7 @@ Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observa�
 - sincronização entre formulário e preview;
 - histórico/autocomplete de pacientes, cirurgias, hospitais, extras, pagamentos, observações e tecnologias;
 - reordenação persistente nos dropdowns de histórico (handle `⋮⋮`, classe `history-dropdown--reorderable`, helper `installReorderableHistoryDropdown()` em `app.js`);
-- campos dinâmicos e reordenáveis de cirurgia, além de hospital;
+- campos dinâmicos e reordenáveis de cirurgia e de hospital;
 - entradas auxiliares de Regina, Sapiranga e Unimed N;
 - multiplicadores de pacotes hospitalares (Regina/Sapiranga) e valores manuais (Unimed N);
 - autofill das entradas auxiliares (Regina/Sapiranga);
@@ -310,9 +310,11 @@ As entradas auxiliares `Reg#`/`Sap#`/`Uni#` não usam `<datalist>` nativo (limit
 
 `data/cirurgias.json` guarda as cirurgias cadastradas no formulário. O dropdown de histórico de **Cirurgia proposta** permite reordenar entradas pelo handle `⋮⋮` (com duas ou mais opções visíveis); ao soltar, `app.js` envia a lista via `PUT /api/cirurgias` / `AppApi.replaceHistory("cirurgias", …)` e grava em `data/cirurgias.json`. O menu fecha ao perder o foco do campo ou do dropdown.
 
-Com duas ou mais entradas no formulário, `updateSurgeryFieldStructure()` exibe outro handle `⋮⋮` à esquerda de cada **campo** (não no dropdown), reorganizando só a ordem visual no painel e no preview — sem alterar `data/cirurgias.json`.
+Com duas ou mais entradas no formulário, `updateSurgeryFieldStructure()` exibe outro handle `⋮⋮` à esquerda de cada **campo** (não no dropdown), reorganizando a ordem no painel, no preview e no snapshot — sem alterar `data/cirurgias.json`.
 
 `data/hospitais.json` guarda os nomes de hospital usados no autocomplete da seção **Hospital**. O dropdown de histórico permite reordenar entradas pelo handle `⋮⋮`; ao soltar, `app.js` envia a lista via `PUT /api/hospitais` / `AppApi.replaceHistory("hospitais", …)`.
+
+Com duas ou mais entradas no formulário, `updateHospitalFieldStructure()` exibe outro handle `⋮⋮` à esquerda de cada **campo** de nome (não no dropdown), reorganizando a ordem no painel, no preview e no snapshot — sem alterar `data/hospitais.json`.
 
 `data/tecnologias.json` guarda as tecnologias cadastradas no próprio app. Diferente dos históricos simples, cada item tem `nome` e `valor`, permitindo carregar o valor automaticamente quando a tecnologia é selecionada. O dropdown de histórico também permite reordenar pelo handle `⋮⋮`; ao soltar, `PUT /api/tecnologias` grava a ordem preservando `nome` e `valor` de cada item.
 
@@ -453,6 +455,10 @@ O botão **Abrir** (`#openButton`, verde, ao lado de **Limpar** no rodapé do fo
 A seção `Hospital` é controlada por um checkbox no título, marcado por padrão no HTML para cada nova sessão do app. Quando desmarcado, o conteúdo do formulário é ocultado, os controles internos são desabilitados e o bloco de hospital no preview recebe `hidden`.
 
 O campo de nome do hospital usa dropdown de histórico (`data/hospitais.json`) com reordenação persistente pelo handle `⋮⋮` (`PUT /api/hospitais`).
+
+Com duas ou mais entradas no formulário, `updateHospitalFieldStructure()` exibe um handle de arraste (`⋮⋮`) à esquerda de cada **campo** de nome, dentro de `.hospital-field-row`. O rótulo `Nome do hospital` permanece sempre no primeiro campo, mesmo após reordenar.
+
+O arraste usa eventos de ponteiro apenas no handle, sem interferir na digitação. Durante o movimento, `app.js` mostra a mesma linha de encaixe usada nas listas rápidas; ao soltar, reorganiza os `<label class="hospital-field">` no DOM — inclusive as entradas auxiliares `Reg#`/`Sap#`/`Uni#` daquele hospital — chama `updatePreview()` e não persiste nada no servidor. `getHospitalInputs()` lê a ordem atual dos inputs no DOM; essa ordem alimenta o preview do documento e o snapshot JSON.
 
 Quando o nome do hospital contém `regin`, o app cria entradas auxiliares `Reg1`, `Reg2`, etc. Quando contém `sapirang`, cria `Sap1`, `Sap2`, etc. Quando contém `unimed n`, cria `Uni1`, `Uni2`, etc.
 
