@@ -252,9 +252,9 @@ Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observa�
 - histórico/autocomplete de pacientes, cirurgias, hospitais, extras, pagamentos, observações e tecnologias;
 - reordenação persistente nos dropdowns de histórico (handle `⋮⋮`, classe `history-dropdown--reorderable`, helper `installReorderableHistoryDropdown()` em `app.js`);
 - campos dinâmicos e reordenáveis de cirurgia e de hospital;
-- entradas auxiliares de Regina, Sapiranga e Unimed N;
-- multiplicadores de pacotes hospitalares (Regina/Sapiranga) e valores manuais (Unimed N);
-- autofill das entradas auxiliares (Regina/Sapiranga);
+- entradas auxiliares de Regina, Sapiranga, Blanc e Unimed N;
+- multiplicadores de pacotes hospitalares (Regina/Sapiranga/Blanc) e valores manuais (Unimed N);
+- autofill das entradas auxiliares (Regina/Sapiranga/Blanc);
 - carregamento e renderização da tabela de implantes;
 - persistência de tecnologias e procedimentos Unimed N com valor monetário associado;
 - renderização da equipe fixa com itens selecionáveis e valor monetário;
@@ -298,11 +298,12 @@ Tabelas de referência estruturadas:
 ```text
 data/tabelas-hospitalares.json
 data/tabela-implantes.json
+data/tabela-blanc-2026.json
 ```
 
-O app carrega `data/tabelas-hospitalares.json` via `AppApi.loadTable("hospitalares")` — servido por `server.js` a partir de `data/` na raiz.
+O app carrega `data/tabelas-hospitalares.json` via `AppApi.loadTable("hospitalares")` — servido por `server.js` a partir de `data/` na raiz. A chave `blanc` é a tabela operacional (totais = parcela 1+3 sem juros × 4). `data/tabela-blanc-2026.json` é só o arquivo seccionado da extração (maior incidência, demais, associadas, diárias); o frontend não o lê.
 
-As entradas auxiliares `Reg#`/`Sap#`/`Uni#` não usam `<datalist>` nativo (limitado no WebView2). O app monta `#hospitalProcedureDropdown` em `app.js`: lista filtrável, posicionada à direita do input com altura de viewport completa (`positionHospitalProcedureDropdown`). Para Regina/Sapiranga as opções vêm da tabela hospitalar; para Unimed N, de `data/unimed-n.json`.
+As entradas auxiliares `Reg#`/`Sap#`/`Bla#`/`Uni#` não usam `<datalist>` nativo (limitado no WebView2). O app monta `#hospitalProcedureDropdown` em `app.js`: lista filtrável, posicionada à direita do input com altura de viewport completa (`positionHospitalProcedureDropdown`). Para Regina/Sapiranga/Blanc as opções vêm da tabela hospitalar; para Unimed N, de `data/unimed-n.json`.
 
 `data/tabela-implantes.json` guarda uma tabela independente de implantes, extraída de documento `.doc`, para preenchimento opcional da seção `Implantes`. O dropdown usa `rotulo`, `modelo` e `referencia`; itens com `favorito: true` recebem uma estrela ao final da opção.
 
@@ -458,11 +459,11 @@ O campo de nome do hospital usa dropdown de histórico (`data/hospitais.json`) c
 
 Com duas ou mais entradas no formulário, `updateHospitalFieldStructure()` exibe um handle de arraste (`⋮⋮`) à esquerda de cada **campo** de nome, dentro de `.hospital-field-row`. O rótulo `Nome do hospital` permanece sempre no primeiro campo, mesmo após reordenar.
 
-O arraste usa eventos de ponteiro apenas no handle, sem interferir na digitação. Durante o movimento, `app.js` mostra a mesma linha de encaixe usada nas listas rápidas; ao soltar, reorganiza os `<label class="hospital-field">` no DOM — inclusive as entradas auxiliares `Reg#`/`Sap#`/`Uni#` daquele hospital — chama `updatePreview()` e não persiste nada no servidor. `getHospitalInputs()` lê a ordem atual dos inputs no DOM; essa ordem alimenta o preview do documento e o snapshot JSON.
+O arraste usa eventos de ponteiro apenas no handle, sem interferir na digitação. Durante o movimento, `app.js` mostra a mesma linha de encaixe usada nas listas rápidas; ao soltar, reorganiza os `<label class="hospital-field">` no DOM — inclusive as entradas auxiliares `Reg#`/`Sap#`/`Bla#`/`Uni#` daquele hospital — chama `updatePreview()` e não persiste nada no servidor. `getHospitalInputs()` lê a ordem atual dos inputs no DOM; essa ordem alimenta o preview do documento e o snapshot JSON.
 
-Quando o nome do hospital contém `regin`, o app cria entradas auxiliares `Reg1`, `Reg2`, etc. Quando contém `sapirang`, cria `Sap1`, `Sap2`, etc. Quando contém `unimed n`, cria `Uni1`, `Uni2`, etc.
+Quando o nome do hospital contém `regin`, o app cria entradas auxiliares `Reg1`, `Reg2`, etc. Quando contém `sapirang`, cria `Sap1`, `Sap2`, etc. Quando contém `blanc`, cria `Bla1`, `Bla2`, etc. Quando contém `unimed n`, cria `Uni1`, `Uni2`, etc.
 
-Cada entrada auxiliar `Reg#`/`Sap#` tem:
+Cada entrada auxiliar `Reg#`/`Sap#`/`Bla#` tem:
 
 - campo de pacote/taxa;
 - campo de multiplicador, iniciado com `1`;
@@ -482,7 +483,7 @@ O preview hospitalar inclui o rótulo `Tempo previsto` (`<strong>` em `.summary-
 - procedimentos e tempos de sala;
 - valor total do hospital.
 
-Para Regina/Sapiranga, o valor exibido é a soma de `valor * multiplicador` de todas as entradas válidas daquele hospital. Para Unimed N, a soma dos valores digitados nas linhas `Uni#`. O formatador troca espaços não quebráveis por espaços comuns para evitar problemas de largura com a fonte do documento.
+Para Regina/Sapiranga/Blanc, o valor exibido é a soma de `valor * multiplicador` de todas as entradas válidas daquele hospital. Para Unimed N, a soma dos valores digitados nas linhas `Uni#`. O formatador troca espaços não quebráveis por espaços comuns para evitar problemas de largura com a fonte do documento.
 
 ## Autofill Sapiranga
 
@@ -517,6 +518,24 @@ Exemplo: se faltam `6` horas, o multiplicador da taxa de meia hora é `12`.
 
 A ordem final é: pacotes de cirurgia plástica, taxas adicionais e, ao fim, entradas não reconhecidas.
 
+## Autofill Blanc
+
+O autofill de Blanc:
+
+- identifica pacotes, cirurgias associadas, taxa do Vibrolipo, diárias, horas excedentes e entradas desconhecidas;
+- ordena os pacotes por valor decrescente;
+- aplica multiplicadores automáticos só nos pacotes (maior incidência + demais): `1` no primeiro, `0.6` no segundo e `0.5` a partir do terceiro;
+- soma o `tempoSalaHoras` bruto dos pacotes e das cirurgias associadas, sem usar os multiplicadores de valor;
+- compara com `Tempo previsto de hospital`;
+- quando faltar tempo, adiciona `1/2 HORA EXCEDENTE DE CIRURGIA` com multiplicador em unidades de meia hora;
+- mantém cirurgias associadas em `1` (sem desconto); taxa do Vibrolipo, diárias e demais excedentes escolhidos pelo usuário também ficam fora da escala 100/60/50.
+
+O desconto de 3% à vista do PDF **não** entra no total do preview. Se precisar aparecer no documento, a frase fica em Formas de pagamento (`data/pagamentos.json`).
+
+Exemplo: se faltam `2` horas, o multiplicador da meia hora excedente é `4`.
+
+A ordem final é: pacotes, cirurgias associadas, taxas, meia hora excedente de cirurgia (se houver), demais excedentes escolhidos, diárias e, ao fim, entradas não reconhecidas.
+
 ## Convenções
 
 - O frontend é HTML, CSS e JavaScript em `web/`, servido por `server/server.js` — **sem build step**.
@@ -525,7 +544,7 @@ A ordem final é: pacotes de cirurgia plástica, taxas adicionais e, ao fim, ent
 - `data/pacientes.json`, `data/settings.json` e `data/auth-users.json` não entram no Git.
 - Negrito do documento: `strong`/`b` em `.document-content` usam `--document-emphasis-weight` (Gotham Medium, `500`).
 - Alterações no preview devem chamar `updatePreview()` quando mudarem campos programaticamente.
-- Alterações nas tabelas Regina/Sapiranga devem preservar o formato descrito em `docs/tabelas-hospitalares.md`.
+- Alterações nas tabelas Regina/Sapiranga/Blanc devem preservar o formato descrito em `docs/tabelas-hospitalares.md`.
 - Procedimentos Unimed N seguem `docs/unimed-n.md` (`data/unimed-n.json`, API `/api/unimed-n`).
 - Novas features implementam-se na stack Node; **não** portar para `tauri-fase_legado/` enquanto Tauri estiver congelado.
 

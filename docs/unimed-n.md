@@ -26,14 +26,14 @@ Exemplo:
 ]
 ```
 
-Diferente de `data/tabelas-hospitalares.json` (Regina/Sapiranga), este arquivo **não** é uma tabela de referência fixa: o app alimenta e edita a lista pelo uso, no mesmo espírito de pacientes, cirurgias, hospitais e tecnologias.
+Diferente de `data/tabelas-hospitalares.json` (Regina/Sapiranga/Blanc), este arquivo **não** é uma tabela de referência fixa: o app alimenta e edita a lista pelo uso, no mesmo espírito de pacientes, cirurgias, hospitais e tecnologias.
 
 ## Detecção no formulário
 
 Quando o nome do hospital (normalizado, sem acentos) contém a substring `unimed n`, o app cria entradas auxiliares `Uni1`, `Uni2`, etc., com:
 
 - campo de procedimento;
-- campo de valor (`R$` + caixa de texto), em vez do multiplicador `x` usado em Regina/Sapiranga;
+- campo de valor (`R$` + caixa de texto), em vez do multiplicador `x` usado em Regina/Sapiranga/Blanc;
 - botões `+/-` para adicionar/remover linhas;
 - **sem** botão verde de autofill.
 

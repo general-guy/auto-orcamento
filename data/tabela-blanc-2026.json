@@ -1,0 +1,2305 @@
+{
+  "nome": "Blanc Hospital",
+  "origem": "PACOTE PLÁSTICA 2026.pdf",
+  "vigencia": "2026",
+  "condicaoPagamento": "Valor total = parcela VALOR 1 + 3 SEM JUROS × 4",
+  "descontoVista": "3% à vista (débito/boleto/PIX até 48h antes)",
+  "secoes": {
+    "maiorIncidencia": {
+      "titulo": "PROCEDIMENTOS DE MAIOR INCIDÊNCIA",
+      "itens": [
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO - ATÉ 3h",
+          "valor": "R$ 8.600,00",
+          "valorNumero": 8600.0,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO - ATÉ 4h",
+          "valor": "R$ 10.150,00",
+          "valorNumero": 10150.0,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO - ATÉ 5h",
+          "valor": "R$ 10.929,12",
+          "valorNumero": 10929.12,
+          "tempoSala": "5h",
+          "tempoSalaHoras": 5.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 4h",
+          "valor": "R$ 11.451,96",
+          "valorNumero": 11451.96,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 4:30h",
+          "valor": "R$ 12.164,72",
+          "valorNumero": 12164.72,
+          "tempoSala": "4h30",
+          "tempoSalaHoras": 4.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO - ATÉ 2h",
+          "valor": "R$ 4.642,40",
+          "valorNumero": 4642.4,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO - ATÉ 2:30h",
+          "valor": "R$ 5.326,04",
+          "valorNumero": 5326.04,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 2:30h",
+          "valor": "R$ 8.028,76",
+          "valorNumero": 8028.76,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 3:30h",
+          "valor": "R$ 9.445,72",
+          "valorNumero": 9445.72,
+          "tempoSala": "3h30",
+          "tempoSalaHoras": 3.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 4h",
+          "valor": "R$ 9.771,04",
+          "valorNumero": 9771.04,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 5h",
+          "valor": "R$ 11.447,68",
+          "valorNumero": 11447.68,
+          "tempoSala": "5h",
+          "tempoSalaHoras": 5.0
+        },
+        {
+          "pacote": "MAMOPLASTIA DE AUMENTO - ATÉ 1:30h (S/Prótese)",
+          "valor": "R$ 3.834,52",
+          "valorNumero": 3834.52,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "MASTOPEXIA COM OU SEM PRÓTESE - ATÉ 2h",
+          "valor": "R$ 6.677,92",
+          "valorNumero": 6677.92,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        }
+      ]
+    },
+    "demais": {
+      "titulo": "DEMAIS PROCEDIMENTOS",
+      "itens": [
+        {
+          "pacote": "ABDOMINOPLASTIA - ATÉ 2h",
+          "valor": "R$ 5.900,00",
+          "valorNumero": 5900.0,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA - ATÉ 2:30h",
+          "valor": "R$ 6.117,72",
+          "valorNumero": 6117.72,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA - ATÉ 3h",
+          "valor": "R$ 6.600,00",
+          "valorNumero": 6600.0,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA - ATÉ 4h",
+          "valor": "R$ 7.650,00",
+          "valorNumero": 7650.0,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO - ATÉ 2h",
+          "valor": "R$ 7.350,00",
+          "valorNumero": 7350.0,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO - ATÉ 2:30h",
+          "valor": "R$ 7.992,24",
+          "valorNumero": 7992.24,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO - ATÉ 3:30h",
+          "valor": "R$ 9.371,08",
+          "valorNumero": 9371.08,
+          "tempoSala": "3h30",
+          "tempoSalaHoras": 3.5
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO - ATÉ 4:30h",
+          "valor": "R$ 10.740,48",
+          "valorNumero": 10740.48,
+          "tempoSala": "4h30",
+          "tempoSalaHoras": 4.5
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO (SEM OPME) - ATÉ 5:30h",
+          "valor": "R$ 11.814,52",
+          "valorNumero": 11814.52,
+          "tempoSala": "5h30",
+          "tempoSalaHoras": 5.5
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO - ATÉ 6h",
+          "valor": "R$ 12.542,28",
+          "valorNumero": 12542.28,
+          "tempoSala": "6h",
+          "tempoSalaHoras": 6.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO - ATÉ 7h",
+          "valor": "R$ 15.257,88",
+          "valorNumero": 15257.88,
+          "tempoSala": "7h",
+          "tempoSalaHoras": 7.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO - ATÉ 9h",
+          "valor": "R$ 21.361,04",
+          "valorNumero": 21361.04,
+          "tempoSala": "9h",
+          "tempoSalaHoras": 9.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO - ATÉ 2:30h(COM VIBROLIPO)",
+          "valor": "R$ 8.531,28",
+          "valorNumero": 8531.28,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO - ATÉ 3h (COM VIBROLIPO)",
+          "valor": "R$ 9.280,92",
+          "valorNumero": 9280.92,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO - ATÉ 3:30h(COM VIBROLIPO)",
+          "valor": "R$ 9.897,52",
+          "valorNumero": 9897.52,
+          "tempoSala": "3h30",
+          "tempoSalaHoras": 3.5
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO - ATÉ 4h (COM VIBROLIPO)",
+          "valor": "R$ 10.514,12",
+          "valorNumero": 10514.12,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO - ATÉ 5h (COM VIBROLIPO)",
+          "valor": "R$ 12.076,68",
+          "valorNumero": 12076.68,
+          "tempoSala": "5h",
+          "tempoSalaHoras": 5.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO - ATÉ 7h (COM VIBROLIPO)",
+          "valor": "R$ 16.907,32",
+          "valorNumero": 16907.32,
+          "tempoSala": "7h",
+          "tempoSalaHoras": 7.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MAMO DE AUMENTO - ATÉ 3:00h(S/Prótese)",
+          "valor": "R$ 9.600,72",
+          "valorNumero": 9600.72,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MAMO DE AUMENTO - ATÉ 3:30h(S/Prótese)",
+          "valor": "R$ 9.975,84",
+          "valorNumero": 9975.84,
+          "tempoSala": "3h30",
+          "tempoSalaHoras": 3.5
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MAMO DE AUMENTO - ATÉ 4h (S/Prótese)",
+          "valor": "R$ 10.641,88",
+          "valorNumero": 10641.88,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MAMO DE AUMENTO - ATÉ 5h (S/Prótese)",
+          "valor": "R$ 12.492,04",
+          "valorNumero": 12492.04,
+          "tempoSala": "5h",
+          "tempoSalaHoras": 5.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MAMO DE AUMENTO - ATÉ 5:30h (S/Prótese)",
+          "valor": "R$ 13.741,24",
+          "valorNumero": 13741.24,
+          "tempoSala": "5h30",
+          "tempoSalaHoras": 5.5
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MAMO DE AUMENTO - ATÉ 6h (S/Prótese)",
+          "valor": "R$ 14.043,88",
+          "valorNumero": 14043.88,
+          "tempoSala": "6h",
+          "tempoSalaHoras": 6.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MAMO DE AUMENTO - ATÉ 7h (S/Prótese)",
+          "valor": "R$ 16.852,64",
+          "valorNumero": 16852.64,
+          "tempoSala": "7h",
+          "tempoSalaHoras": 7.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MAMO DE AUMENTO - ATÉ 3:30h (S/Prótese) (COM VIBROLIPO)",
+          "valor": "R$ 10.564,64",
+          "valorNumero": 10564.64,
+          "tempoSala": "3h30",
+          "tempoSalaHoras": 3.5
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MAMO DE AUMENTO - ATÉ 4h (S/Prótese) (COM VIBROLIPO)",
+          "valor": "R$ 11.186,16",
+          "valorNumero": 11186.16,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MAMO DE AUMENTO - ATÉ 5h (S/Prótese) (COM VIBROLIPO)",
+          "valor": "R$ 13.051,60",
+          "valorNumero": 13051.6,
+          "tempoSala": "5h",
+          "tempoSalaHoras": 5.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MAMO DE AUMENTO - ATÉ 6h (S/Prótese) (COM VIBROLIPO)",
+          "valor": "R$ 14.603,44",
+          "valorNumero": 14603.44,
+          "tempoSala": "6h",
+          "tempoSalaHoras": 6.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 3h",
+          "valor": "R$ 9.868,12",
+          "valorNumero": 9868.12,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 5h",
+          "valor": "R$ 13.117,08",
+          "valorNumero": 13117.08,
+          "tempoSala": "5h",
+          "tempoSalaHoras": 5.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 5:30h",
+          "valor": "R$ 14.033,64",
+          "valorNumero": 14033.64,
+          "tempoSala": "5h30",
+          "tempoSalaHoras": 5.5
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 6:00h",
+          "valor": "R$ 14.650,00",
+          "valorNumero": 14650.0,
+          "tempoSala": "6h",
+          "tempoSalaHoras": 6.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 6:30h",
+          "valor": "R$ 15.505,68",
+          "valorNumero": 15505.68,
+          "tempoSala": "6h30",
+          "tempoSalaHoras": 6.5
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 7h",
+          "valor": "R$ 16.241,72",
+          "valorNumero": 16241.72,
+          "tempoSala": "7h",
+          "tempoSalaHoras": 7.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 9h",
+          "valor": "R$ 20.373,60",
+          "valorNumero": 20373.6,
+          "tempoSala": "9h",
+          "tempoSalaHoras": 9.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 2h (COM VIBROLIPO)",
+          "valor": "R$ 8.463,36",
+          "valorNumero": 8463.36,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 4h (COM VIBROLIPO)",
+          "valor": "R$ 12.086,04",
+          "valorNumero": 12086.04,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 4:30h(COM VIBROLIPO)",
+          "valor": "R$ 12.802,00",
+          "valorNumero": 12802.0,
+          "tempoSala": "4h30",
+          "tempoSalaHoras": 4.5
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 5h (COM VIBROLIPO)",
+          "valor": "R$ 13.896,96",
+          "valorNumero": 13896.96,
+          "tempoSala": "5h",
+          "tempoSalaHoras": 5.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 5:30h(COM VIBROLIPO)",
+          "valor": "R$ 14.633,00",
+          "valorNumero": 14633.0,
+          "tempoSala": "5h30",
+          "tempoSalaHoras": 5.5
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 6:30h(COM VIBROLIPO)",
+          "valor": "R$ 16.105,04",
+          "valorNumero": 16105.04,
+          "tempoSala": "6h30",
+          "tempoSalaHoras": 6.5
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 7h (COM VIBROLIPO)",
+          "valor": "R$ 16.841,04",
+          "valorNumero": 16841.04,
+          "tempoSala": "7h",
+          "tempoSalaHoras": 7.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + MAMO AUMENTO - ATÉ 2h - (S/Prótese)",
+          "valor": "R$ 7.370,20",
+          "valorNumero": 7370.2,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + MAMO AUMENTO - ATÉ 3h - (S/Prótese)",
+          "valor": "R$ 8.295,72",
+          "valorNumero": 8295.72,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + MAMO AUMENTO - ATÉ 4h - (S/Prótese)",
+          "valor": "R$ 9.884,16",
+          "valorNumero": 9884.16,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + MASTOPEXIA - ATE 2:30h",
+          "valor": "R$ 7.140,96",
+          "valorNumero": 7140.96,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + MASTOPEXIA - ATE 3h",
+          "valor": "R$ 7.517,44",
+          "valorNumero": 7517.44,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + MASTOPEXIA - ATE 4h",
+          "valor": "R$ 8.844,04",
+          "valorNumero": 8844.04,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + MASTOPEXIA - ATE 5h",
+          "valor": "R$ 10.170,40",
+          "valorNumero": 10170.4,
+          "tempoSala": "5h",
+          "tempoSalaHoras": 5.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + MASTOPEXIA - ATE 6h",
+          "valor": "R$ 11.248,88",
+          "valorNumero": 11248.88,
+          "tempoSala": "6h",
+          "tempoSalaHoras": 6.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + MASTOPEXIA - ATE 7h",
+          "valor": "R$ 13.498,68",
+          "valorNumero": 13498.68,
+          "tempoSala": "7h",
+          "tempoSalaHoras": 7.0
+        },
+        {
+          "pacote": "ABDOMINOPLASTIA + MASTOPEXIA - ATE 8h",
+          "valor": "R$ 16.198,40",
+          "valorNumero": 16198.4,
+          "tempoSala": "8h",
+          "tempoSalaHoras": 8.0
+        },
+        {
+          "pacote": "ALECTOMIA - ATÉ 1:30h",
+          "valor": "R$ 3.435,60",
+          "valorNumero": 3435.6,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "BICHECTOMIA - ATÉ 1h",
+          "valor": "R$ 2.704,84",
+          "valorNumero": 2704.84,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "BICHECTOMIA - ATÉ 2h",
+          "valor": "R$ 4.244,28",
+          "valorNumero": 4244.28,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "BLEFAROPLASTIA - ATÉ 45min",
+          "valor": "R$ 2.314,64",
+          "valorNumero": 2314.64,
+          "tempoSala": "45min",
+          "tempoSalaHoras": 0.75
+        },
+        {
+          "pacote": "BLEFAROPLASTIA - ATÉ 30min (SUPERIOR E INFERIOR)",
+          "valor": "R$ 2.227,84",
+          "valorNumero": 2227.84,
+          "tempoSala": "30min",
+          "tempoSalaHoras": 0.5
+        },
+        {
+          "pacote": "BLEFAROPLASTIA - ATÉ 1h",
+          "valor": "R$ 3.204,92",
+          "valorNumero": 3204.92,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "BLEFAROPLASTIA - ATÉ 1:30h",
+          "valor": "R$ 3.868,32",
+          "valorNumero": 3868.32,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "BLEFAROPLASTIA - ATÉ 2h",
+          "valor": "R$ 4.690,36",
+          "valorNumero": 4690.36,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "BLEFAROPLASTIA - ATÉ 2:30h",
+          "valor": "R$ 5.159,12",
+          "valorNumero": 5159.12,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "BLEFAROPLASTIA - ATÉ 3h",
+          "valor": "R$ 5.628,44",
+          "valorNumero": 5628.44,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "BLEFAROPLASTIA - SUPERIOR OU INFERIOR - ATÉ 45min - (ANESTESIA LOCAL) (Sala pequenos procedimentos)",
+          "valor": "R$ 1.258,12",
+          "valorNumero": 1258.12,
+          "tempoSala": "45min",
+          "tempoSalaHoras": 0.75
+        },
+        {
+          "pacote": "BLEFAROPLASTIA - SUPERIOR E INFERIOR - ATÉ 1h - (ANESTESIA LOCAL) (Sala pequenos procedimentos)",
+          "valor": "R$ 1.572,64",
+          "valorNumero": 1572.64,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "BLEFAROPLASTIA - SUPERIOR OU INFERIOR - ATÉ 45min - (SEDAÇÃO)",
+          "valor": "R$ 1.446,84",
+          "valorNumero": 1446.84,
+          "tempoSala": "45min",
+          "tempoSalaHoras": 0.75
+        },
+        {
+          "pacote": "BRAQUIOPLASTIA - ATÉ 1h",
+          "valor": "R$ 4.266,40",
+          "valorNumero": 4266.4,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "BRAQUIOPLASTIA - ATÉ 1:30h",
+          "valor": "R$ 4.939,52",
+          "valorNumero": 4939.52,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "BRAQUIOPLASTIA - ATÉ 2h",
+          "valor": "R$ 5.612,60",
+          "valorNumero": 5612.6,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "BRAQUIOPLASTIA - ATÉ 2:30h",
+          "valor": "R$ 6.286,12",
+          "valorNumero": 6286.12,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "BRAQUIOPLASTIA - ATÉ 3:00h",
+          "valor": "R$ 6.789,00",
+          "valorNumero": 6789.0,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "BODYTITE (SEM LIPOASPIRAÇÃO) - ATÉ 1h",
+          "valor": "R$ 2.629,88",
+          "valorNumero": 2629.88,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "BODYTITE (SEM LIPOASPIRAÇÃO) - ATÉ 1:30h",
+          "valor": "R$ 2.892,88",
+          "valorNumero": 2892.88,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "BODYTITE (SEM LIPOASPIRAÇÃO) - ATÉ 2h",
+          "valor": "R$ 3.155,84",
+          "valorNumero": 3155.84,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "BODYTITE (SEM LIPOASPIRAÇÃO) - ATÉ 3h",
+          "valor": "R$ 3.787,00",
+          "valorNumero": 3787.0,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "BODYTITE (SEM LIPOASPIRAÇÃO) - ATÉ 3:30h",
+          "valor": "R$ 4.089,96",
+          "valorNumero": 4089.96,
+          "tempoSala": "3h30",
+          "tempoSalaHoras": 3.5
+        },
+        {
+          "pacote": "BODYTITE (SEM LIPOASPIRAÇÃO) - ATÉ 4:30h",
+          "valor": "R$ 4.907,96",
+          "valorNumero": 4907.96,
+          "tempoSala": "4h30",
+          "tempoSalaHoras": 4.5
+        },
+        {
+          "pacote": "CIRURGA DE CASTANHARES -ATÉ 1H",
+          "valor": "R$ 3.148,24",
+          "valorNumero": 3148.24,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "CIRURGA DE CASTANHARES -ATÉ 2H",
+          "valor": "R$ 3.149,28",
+          "valorNumero": 3149.28,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "CERVICOPLASTIA - LIFTING DE PESCOÇO - ATÉ 1h",
+          "valor": "R$ 3.201,68",
+          "valorNumero": 3201.68,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "CERVICOPLASTIA - LIFTING DE PESCOÇO - ATÉ 2h",
+          "valor": "R$ 3.842,00",
+          "valorNumero": 3842.0,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "CERVICOPLASTIA - LIFTING DE PESCOÇO - ATÉ 2h30",
+          "valor": "R$ 4.226,20",
+          "valorNumero": 4226.2,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "CERVICOPLASTIA - LIFTING DE PESCOÇO - ATÉ 3h",
+          "valor": "R$ 4.741,80",
+          "valorNumero": 4741.8,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "CERVICOPLASTIA - LIFTING DE PESCOÇO - ATÉ 4h",
+          "valor": "R$ 5.578,60",
+          "valorNumero": 5578.6,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "CONTRATURA DUPUYTREN - ATÉ 2h",
+          "valor": "R$ 4.273,48",
+          "valorNumero": 4273.48,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "CRUROPLASTIA - ATÉ 1h",
+          "valor": "R$ 4.148,00",
+          "valorNumero": 4148.0,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "CRUROPLASTIA - ATÉ 1:30h",
+          "valor": "R$ 4.879,96",
+          "valorNumero": 4879.96,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "CRUROPLASTIA - ATÉ 2h",
+          "valor": "R$ 5.612,60",
+          "valorNumero": 5612.6,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "CRUROPLASTIA - ATÉ 3h",
+          "valor": "R$ 6.735,12",
+          "valorNumero": 6735.12,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "DERMOABRASÃO - ATÉ 30min",
+          "valor": "R$ 1.177,92",
+          "valorNumero": 1177.92,
+          "tempoSala": "30min",
+          "tempoSalaHoras": 0.5
+        },
+        {
+          "pacote": "DERMOABRASÃO - ATÉ 1h",
+          "valor": "R$ 1.851,00",
+          "valorNumero": 1851.0,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "DORSOPLASTIA - Até 1h",
+          "valor": "R$ 4.770,72",
+          "valorNumero": 4770.72,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "DORSOPLASTIA - ATÉ 2h",
+          "valor": "R$ 5.612,60",
+          "valorNumero": 5612.6,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "DRENAGEM DE HEMATOMA - ATÉ 1h",
+          "valor": "R$ 1.690,00",
+          "valorNumero": 1690.0,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "ENDOBROW - ATÉ 1h",
+          "valor": "R$ 4.711,68",
+          "valorNumero": 4711.68,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "ENDOBROW - ATÉ 3h",
+          "valor": "R$ 6.784,80",
+          "valorNumero": 6784.8,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "ENDOBROW - ATÉ 4h",
+          "valor": "R$ 8.141,76",
+          "valorNumero": 8141.76,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "ENGROSSAMENTO PENIANO COM Ac. Hialurônico -ATÉ 40 MIN",
+          "valor": "R$ 2.618,32",
+          "valorNumero": 2618.32,
+          "tempoSala": "40min",
+          "tempoSalaHoras": 0.6666666666666666
+        },
+        {
+          "pacote": "EXCISÃO E SUTURA - ATÉ 1h",
+          "valor": "R$ 2.525,72",
+          "valorNumero": 2525.72,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "EXCISÃO E SUTURA - ATÉ 1:30h",
+          "valor": "R$ 3.382,92",
+          "valorNumero": 3382.92,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "EXCISÃO E SUTURA - ATÉ 2h",
+          "valor": "R$ 4.059,52",
+          "valorNumero": 4059.52,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "EXCISÃO E SUTURA - ATÉ 2:30H",
+          "valor": "R$ 4.593,24",
+          "valorNumero": 4593.24,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "FLANCOPLASTIA SEM ASSOCIAÇÃO - ATÉ 1:30h",
+          "valor": "R$ 5.191,64",
+          "valorNumero": 5191.64,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "FLANCOPLASTIA SEM ASSOCIAÇÃO - ATÉ 2h",
+          "valor": "R$ 5.612,60",
+          "valorNumero": 5612.6,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "FRONTOPLASTIA – ATE 02:00H",
+          "valor": "R$ 5.232,08",
+          "valorNumero": 5232.08,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "FRONTOPLASTIA – ATE 02:30H",
+          "valor": "R$ 5.755,32",
+          "valorNumero": 5755.32,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "GINECOMASTIA - ATÉ 1h",
+          "valor": "R$ 3.471,36",
+          "valorNumero": 3471.36,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "GINECOMASTIA - ATÉ 1:30h",
+          "valor": "R$ 3.890,00",
+          "valorNumero": 3890.0,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "GINECOMASTIA - ATÉ 2h",
+          "valor": "R$ 6.627,24",
+          "valorNumero": 6627.24,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "GINECOMASTIA - ATÉ 2h30",
+          "valor": "R$ 7.164,60",
+          "valorNumero": 7164.6,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "GINECOMASTIA - ATÉ 3h",
+          "valor": "R$ 7.745,48",
+          "valorNumero": 7745.48,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "GLUTEOPLASTIA - ATÉ 1:30h",
+          "valor": "R$ 3.752,84",
+          "valorNumero": 3752.84,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "GLUTEOPLASTIA - ATÉ 2h",
+          "valor": "R$ 4.608,52",
+          "valorNumero": 4608.52,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "GLUTEOPLASTIA - ATÉ 3h",
+          "valor": "R$ 6.703,00",
+          "valorNumero": 6703.0,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "GLUTEOPLASTIA - ATÉ 4h",
+          "valor": "R$ 8.043,60",
+          "valorNumero": 8043.6,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "HÉRNIA UMBILICAL/ONFALOPLASTIA SEM ASSOCIAÇÃO ATÉ 1H",
+          "valor": "R$ 2.567,24",
+          "valorNumero": 2567.24,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "IMPLANTE CAPILAR - ATÉ 3h",
+          "valor": "R$ 7.663,20",
+          "valorNumero": 7663.2,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "IMPLANTE CAPILAR - ATÉ 6h",
+          "valor": "R$ 15.519,40",
+          "valorNumero": 15519.4,
+          "tempoSala": "6h",
+          "tempoSalaHoras": 6.0
+        },
+        {
+          "pacote": "IMPLANTE CAPILAR - ATÉ 7:30h",
+          "valor": "R$ 16.605,72",
+          "valorNumero": 16605.72,
+          "tempoSala": "7h30",
+          "tempoSalaHoras": 7.5
+        },
+        {
+          "pacote": "IMPLANTE CAPILAR - ATÉ 8h",
+          "valor": "R$ 17.102,44",
+          "valorNumero": 17102.44,
+          "tempoSala": "8h",
+          "tempoSalaHoras": 8.0
+        },
+        {
+          "pacote": "IMPLANTE CAPILAR - ATÉ 9h",
+          "valor": "R$ 18.626,32",
+          "valorNumero": 18626.32,
+          "tempoSala": "9h",
+          "tempoSalaHoras": 9.0
+        },
+        {
+          "pacote": "IMPLANTE CAPILAR - ATÉ 10h",
+          "valor": "R$ 20.150,20",
+          "valorNumero": 20150.2,
+          "tempoSala": "10h",
+          "tempoSalaHoras": 10.0
+        },
+        {
+          "pacote": "IMPLANTE CAPILAR - ATÉ 3h - (REALIZAÇÃO APÓS ÀS 16h)",
+          "valor": "R$ 5.889,56",
+          "valorNumero": 5889.56,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "IMPLANTE CAPILAR - ATÉ 3h - (ANESTESIA LOCAL) | (Sala pequenos procedimentos)",
+          "valor": "R$ 4.118,84",
+          "valorNumero": 4118.84,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "TRANSPLANTE DE SOBRANCELHA - ATÉ 4H",
+          "valor": "R$ 8.080,92",
+          "valorNumero": 8080.92,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "TRANSPLANTE DE SOBRANCELHA - ATÉ 5H",
+          "valor": "R$ 9.507,00",
+          "valorNumero": 9507.0,
+          "tempoSala": "5h",
+          "tempoSalaHoras": 5.0
+        },
+        {
+          "pacote": "LIFTING DE GLÚTEO - ATÉ 01:30h",
+          "valor": "R$ 6.086,56",
+          "valorNumero": 6086.56,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "LIFTING DE GLÚTEO - ATÉ 3h",
+          "valor": "R$ 7.828,04",
+          "valorNumero": 7828.04,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "LIFTING TEMPORAL - ATÉ 1:30h",
+          "valor": "R$ 3.527,00",
+          "valorNumero": 3527.0,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "LIFTING TEMPORAL - ATÉ 2:30h",
+          "valor": "R$ 4.149,44",
+          "valorNumero": 4149.44,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "LIFTING TEMPORAL - ATÉ 3h",
+          "valor": "R$ 4.564,36",
+          "valorNumero": 4564.36,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "LIP LIFT - ATÉ 1h",
+          "valor": "R$ 2.975,32",
+          "valorNumero": 2975.32,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO - ATÉ 3h",
+          "valor": "R$ 6.390,84",
+          "valorNumero": 6390.84,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO - ATÉ 3:30h",
+          "valor": "R$ 7.123,40",
+          "valorNumero": 7123.4,
+          "tempoSala": "3h30",
+          "tempoSalaHoras": 3.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO - ATÉ 4h",
+          "valor": "R$ 8.097,20",
+          "valorNumero": 8097.2,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO - ATÉ 4:30h",
+          "valor": "R$ 9.068,84",
+          "valorNumero": 9068.84,
+          "tempoSala": "4h30",
+          "tempoSalaHoras": 4.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO - ATÉ 5h",
+          "valor": "R$ 10.133,76",
+          "valorNumero": 10133.76,
+          "tempoSala": "5h",
+          "tempoSalaHoras": 5.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO - ATÉ 5:30h",
+          "valor": "R$ 11.199,68",
+          "valorNumero": 11199.68,
+          "tempoSala": "5h30",
+          "tempoSalaHoras": 5.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO - ATÉ 6h",
+          "valor": "R$ 12.543,64",
+          "valorNumero": 12543.64,
+          "tempoSala": "6h",
+          "tempoSalaHoras": 6.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO - ATÉ 7h",
+          "valor": "R$ 14.596,16",
+          "valorNumero": 14596.16,
+          "tempoSala": "7h",
+          "tempoSalaHoras": 7.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO - ATÉ 2h (COM VIBROLIPO)",
+          "valor": "R$ 5.212,20",
+          "valorNumero": 5212.2,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO - ATÉ 2:30h (COM VIBROLIPO)",
+          "valor": "R$ 5.889,60",
+          "valorNumero": 5889.6,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO - ATÉ 3h (COM VIBROLIPO)",
+          "valor": "R$ 6.775,88",
+          "valorNumero": 6775.88,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO - ATÉ 3:30h (COM VIBROLIPO)",
+          "valor": "R$ 7.735,80",
+          "valorNumero": 7735.8,
+          "tempoSala": "3h30",
+          "tempoSalaHoras": 3.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO - ATÉ 4:30h (COM VIBROLIPO)",
+          "valor": "R$ 9.283,00",
+          "valorNumero": 9283.0,
+          "tempoSala": "4h30",
+          "tempoSalaHoras": 4.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO - ATÉ 5h (COM VIBROLIPO)",
+          "valor": "R$ 10.212,44",
+          "valorNumero": 10212.44,
+          "tempoSala": "5h",
+          "tempoSalaHoras": 5.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO - ATÉ 8:00h (COM VIBROLIPO)",
+          "valor": "R$ 17.645,08",
+          "valorNumero": 17645.08,
+          "tempoSala": "8h",
+          "tempoSalaHoras": 8.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO - ATÉ 9:00h (COM VIBROLIPO)",
+          "valor": "R$ 21.174,12",
+          "valorNumero": 21174.12,
+          "tempoSala": "9h",
+          "tempoSalaHoras": 9.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + GLUTEOPLASTIA - ATÉ 2:30h",
+          "valor": "R$ 6.338,00",
+          "valorNumero": 6338.0,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + GLUTEOPLASTIA - ATÉ 5:h",
+          "valor": "R$ 9.507,00",
+          "valorNumero": 9507.0,
+          "tempoSala": "5h",
+          "tempoSalaHoras": 5.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MAMOPLASTIA DE AUMENTO - ATÉ 2h (S/Prótese)",
+          "valor": "R$ 5.877,76",
+          "valorNumero": 5877.76,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MAMOPLASTIA DE AUMENTO - ATÉ 3h (S/Prótese)",
+          "valor": "R$ 6.676,16",
+          "valorNumero": 6676.16,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MAMOPLASTIA DE AUMENTO - ATÉ 3:30h (S/Prótese)",
+          "valor": "R$ 7.009,96",
+          "valorNumero": 7009.96,
+          "tempoSala": "3h30",
+          "tempoSalaHoras": 3.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MAMOPLASTIA DE AUMENTO - ATÉ 4h (S/Prótese)",
+          "valor": "R$ 7.352,04",
+          "valorNumero": 7352.04,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MAMOPLASTIA DE AUMENTO - ATÉ 4:30h (S/Prótese)",
+          "valor": "R$ 7.833,48",
+          "valorNumero": 7833.48,
+          "tempoSala": "4h30",
+          "tempoSalaHoras": 4.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MAMOPLASTIA DE AUMENTO - ATÉ 5h (S/Prótese)",
+          "valor": "R$ 8.315,96",
+          "valorNumero": 8315.96,
+          "tempoSala": "5h",
+          "tempoSalaHoras": 5.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MAMOPLASTIA DE AUMENTO - ATÉ 6h (S/Prótese)",
+          "valor": "R$ 9.147,52",
+          "valorNumero": 9147.52,
+          "tempoSala": "6h",
+          "tempoSalaHoras": 6.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MAMOPLASTIA DE AUMENTO - ATÉ 7h (S/Prótese)",
+          "valor": "R$ 10.977,04",
+          "valorNumero": 10977.04,
+          "tempoSala": "7h",
+          "tempoSalaHoras": 7.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MAMOPLASTIA DE AUMENTO - ATÉ 2h (S/Prótese)(COM VIBROLIPO)",
+          "valor": "R$ 6.422,08",
+          "valorNumero": 6422.08,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MAMOPLASTIA DE AUMENTO - ATÉ 3h (S/Prótese)(COM VIBROLIPO)",
+          "valor": "R$ 7.159,20",
+          "valorNumero": 7159.2,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MAMOPLASTIA DE AUMENTO - ATÉ 3:30h (S/Prótese)(COM VIBROLIPO)",
+          "valor": "R$ 7.571,00",
+          "valorNumero": 7571.0,
+          "tempoSala": "3h30",
+          "tempoSalaHoras": 3.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MAMOPLASTIA DE AUMENTO - ATÉ 4h (S/Prótese)(COM VIBROLIPO)",
+          "valor": "R$ 7.896,32",
+          "valorNumero": 7896.32,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MAMOPLASTIA DE AUMENTO - ATÉ 5h (S/Prótese)(COM VIBROLIPO)",
+          "valor": "R$ 8.875,52",
+          "valorNumero": 8875.52,
+          "tempoSala": "5h",
+          "tempoSalaHoras": 5.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MAMOPLASTIA DE AUMENTO - ATÉ 6h (S/Prótese)(COM VIBROLIPO)",
+          "valor": "R$ 9.763,08",
+          "valorNumero": 9763.08,
+          "tempoSala": "6h",
+          "tempoSalaHoras": 6.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 3:00h",
+          "valor": "R$ 8.737,28",
+          "valorNumero": 8737.28,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 4:30h",
+          "valor": "R$ 10.998,80",
+          "valorNumero": 10998.8,
+          "tempoSala": "4h30",
+          "tempoSalaHoras": 4.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 5:30H",
+          "valor": "R$ 12.336,28",
+          "valorNumero": 12336.28,
+          "tempoSala": "5h30",
+          "tempoSalaHoras": 5.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 6h",
+          "valor": "R$ 13.016,16",
+          "valorNumero": 13016.16,
+          "tempoSala": "6h",
+          "tempoSalaHoras": 6.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 6:30h",
+          "valor": "R$ 14.529,04",
+          "valorNumero": 14529.04,
+          "tempoSala": "6h30",
+          "tempoSalaHoras": 6.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 7:00h",
+          "valor": "R$ 15.691,36",
+          "valorNumero": 15691.36,
+          "tempoSala": "7h",
+          "tempoSalaHoras": 7.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 8:30h",
+          "valor": "R$ 20.712,56",
+          "valorNumero": 20712.56,
+          "tempoSala": "8h30",
+          "tempoSalaHoras": 8.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 3:30h(COM VIBROLIPO)",
+          "valor": "R$ 9.942,04",
+          "valorNumero": 9942.04,
+          "tempoSala": "3h30",
+          "tempoSalaHoras": 3.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 4h (COM VIBROLIPO)",
+          "valor": "R$ 10.673,68",
+          "valorNumero": 10673.68,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 5h (COM VIBROLIPO)",
+          "valor": "R$ 12.635,12",
+          "valorNumero": 12635.12,
+          "tempoSala": "5h",
+          "tempoSalaHoras": 5.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 6h (COM VIBROLIPO)",
+          "valor": "R$ 14.297,32",
+          "valorNumero": 14297.32,
+          "tempoSala": "6h",
+          "tempoSalaHoras": 6.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 6:30h (COM VIBROLIPO)",
+          "valor": "R$ 15.128,40",
+          "valorNumero": 15128.4,
+          "tempoSala": "6h30",
+          "tempoSalaHoras": 6.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MASTOPEXIA - ATÉ 8h (COM VIBROLIPO)",
+          "valor": "R$ 19.666,92",
+          "valorNumero": 19666.92,
+          "tempoSala": "8h",
+          "tempoSalaHoras": 8.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MINIABDOMEN (PLICATURA) - ATÉ 2:30h",
+          "valor": "R$ 6.237,92",
+          "valorNumero": 6237.92,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MINIABDOMEN (PLICATURA) - ATÉ 3h",
+          "valor": "R$ 6.828,40",
+          "valorNumero": 6828.4,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MINIABDOMEN (PLICATURA) - ATÉ 3:30h",
+          "valor": "R$ 7.314,08",
+          "valorNumero": 7314.08,
+          "tempoSala": "3h30",
+          "tempoSalaHoras": 3.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MINIABDOMEN (PLICATURA) - ATÉ 4h",
+          "valor": "R$ 7.728,24",
+          "valorNumero": 7728.24,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MINIABDOMEN (PLICATURA) - ATÉ 4:30h",
+          "valor": "R$ 8.630,64",
+          "valorNumero": 8630.64,
+          "tempoSala": "4h30",
+          "tempoSalaHoras": 4.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MINIABDOMEN (PLICATURA) - ATÉ 5h",
+          "valor": "R$ 9.273,92",
+          "valorNumero": 9273.92,
+          "tempoSala": "5h",
+          "tempoSalaHoras": 5.0
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MINIABDOMEN (PLICATURA) - ATÉ 5h30",
+          "valor": "R$ 10.201,28",
+          "valorNumero": 10201.28,
+          "tempoSala": "5h30",
+          "tempoSalaHoras": 5.5
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO + MINIABDOMEN (PLICATURA) - ATÉ 6h",
+          "valor": "R$ 11.128,68",
+          "valorNumero": 11128.68,
+          "tempoSala": "6h",
+          "tempoSalaHoras": 6.0
+        },
+        {
+          "pacote": "LIPO DE MONTE DE VÊNUS - ATÉ 1h",
+          "valor": "R$ 3.070,04",
+          "valorNumero": 3070.04,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "LIPO DE PAPADA - ATÉ 45min",
+          "valor": "R$ 2.242,76",
+          "valorNumero": 2242.76,
+          "tempoSala": "45min",
+          "tempoSalaHoras": 0.75
+        },
+        {
+          "pacote": "LIPO DE PAPADA - ATÉ 1h",
+          "valor": "R$ 2.584,52",
+          "valorNumero": 2584.52,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "LIPO DE PAPADA - ATÉ 1:30h",
+          "valor": "R$ 2.907,36",
+          "valorNumero": 2907.36,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "LIPO DE PAPADA - ATÉ 2h",
+          "valor": "R$ 3.220,00",
+          "valorNumero": 3220.0,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "LIPO DE PAPADA - ATÉ 2:30h",
+          "valor": "R$ 3.565,96",
+          "valorNumero": 3565.96,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "LIPO DE PAPADA - ATÉ 3h",
+          "valor": "R$ 3.922,56",
+          "valorNumero": 3922.56,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "MAMOPLASTIA DE AUMENTO - ATÉ 2h (S/Prótese)",
+          "valor": "R$ 4.355,92",
+          "valorNumero": 4355.92,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "MAMOPLASTIA DE AUMENTO - ATÉ 2:30h (S/Prótese)",
+          "valor": "R$ 4.735,96",
+          "valorNumero": 4735.96,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "MAMOPLASTIA DE AUMENTO - ATÉ 3:00h (S/Prótese)",
+          "valor": "R$ 5.414,20",
+          "valorNumero": 5414.2,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "MAMOPLASTIA DE AUMENTO - ATÉ 3:30h (S/Prótese)",
+          "valor": "R$ 6.092,48",
+          "valorNumero": 6092.48,
+          "tempoSala": "3h30",
+          "tempoSalaHoras": 3.5
+        },
+        {
+          "pacote": "MAMOPLASTIA DE AUMENTO - ATÉ 4:30h (S/Prótese)",
+          "valor": "R$ 7.310,96",
+          "valorNumero": 7310.96,
+          "tempoSala": "4h30",
+          "tempoSalaHoras": 4.5
+        },
+        {
+          "pacote": "MASTOPEXIA COM OU SEM PRÓTESE - ATÉ 2:30h",
+          "valor": "R$ 7.212,08",
+          "valorNumero": 7212.08,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "MASTOPEXIA COM OU SEM PRÓTESE - ATÉ 3h",
+          "valor": "R$ 7.745,52",
+          "valorNumero": 7745.52,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "MASTOPEXIA COM OU SEM PRÓTESE - ATÉ 3:30h",
+          "valor": "R$ 8.269,68",
+          "valorNumero": 8269.68,
+          "tempoSala": "3h30",
+          "tempoSalaHoras": 3.5
+        },
+        {
+          "pacote": "MASTOPEXIA COM OU SEM PRÓTESE - ATÉ 4h",
+          "valor": "R$ 8.813,12",
+          "valorNumero": 8813.12,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "MASTOPEXIA COM OU SEM PRÓTESE - ATÉ 4:30h",
+          "valor": "R$ 9.693,52",
+          "valorNumero": 9693.52,
+          "tempoSala": "4h30",
+          "tempoSalaHoras": 4.5
+        },
+        {
+          "pacote": "MASTOPEXIA COM OU SEM PRÓTESE - ATÉ 5h",
+          "valor": "R$ 10.575,76",
+          "valorNumero": 10575.76,
+          "tempoSala": "5h",
+          "tempoSalaHoras": 5.0
+        },
+        {
+          "pacote": "MASTOPEXIA COM OU SEM PRÓTESE - ATÉ 6h",
+          "valor": "R$ 11.953,12",
+          "valorNumero": 11953.12,
+          "tempoSala": "6h",
+          "tempoSalaHoras": 6.0
+        },
+        {
+          "pacote": "MASTOPEXIA COM OU SEM PRÓTESE + LIPOENXERTIA - ATÉ 4:30h",
+          "valor": "R$ 11.632,24",
+          "valorNumero": 11632.24,
+          "tempoSala": "4h30",
+          "tempoSalaHoras": 4.5
+        },
+        {
+          "pacote": "MENTOPLASTIA - ATÉ 1h",
+          "valor": "R$ 2.944,80",
+          "valorNumero": 2944.8,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "MENTOPLASTIA - ATÉ 1:30h",
+          "valor": "R$ 3.590,80",
+          "valorNumero": 3590.8,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "MENTOPLASTIA - ATÉ 2h",
+          "valor": "R$ 3.982,20",
+          "valorNumero": 3982.2,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "MENTOPLASTIA - ATÉ 2:30h",
+          "valor": "R$ 4.451,04",
+          "valorNumero": 4451.04,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "MENTOPLASTIA - ATÉ 3h",
+          "valor": "R$ 4.778,72",
+          "valorNumero": 4778.72,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "MILA(LIPOASPIRAÇÃO + VIDEOLAPAROSCOPIA PARA CORREÇÃO DA DIÁSTASE) - ATÉ 3H30",
+          "valor": "R$ 8.433,96",
+          "valorNumero": 8433.96,
+          "tempoSala": "3h30",
+          "tempoSalaHoras": 3.5
+        },
+        {
+          "pacote": "MORPHEUS - ATÉ 1:00h",
+          "valor": "R$ 2.504,64",
+          "valorNumero": 2504.64,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "MORPHEUS - ATÉ 1:30h",
+          "valor": "R$ 2.755,12",
+          "valorNumero": 2755.12,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "MORPHEUS - ATÉ 2h",
+          "valor": "R$ 2.756,20",
+          "valorNumero": 2756.2,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "MORPHEUS - ATÉ 2h30",
+          "valor": "R$ 3.031,80",
+          "valorNumero": 3031.8,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "NANOFAT (Lipoaspiração e enxerto de gordura) - ATÉ 45min",
+          "valor": "R$ 3.014,96",
+          "valorNumero": 3014.96,
+          "tempoSala": "45min",
+          "tempoSalaHoras": 0.75
+        },
+        {
+          "pacote": "NANOFAT (Lipoaspiração e enxerto de gordura) - ATÉ 1:30h",
+          "valor": "R$ 3.470,28",
+          "valorNumero": 3470.28,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "NANOFAT (Lipoaspiração e enxerto de gordura) - ATÉ 2h",
+          "valor": "R$ 4.206,84",
+          "valorNumero": 4206.84,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "NINFOPLASTIA - ATÉ 1h",
+          "valor": "R$ 3.007,72",
+          "valorNumero": 3007.72,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "NINFOPLASTIA - ATÉ 1:30h",
+          "valor": "R$ 3.410,00",
+          "valorNumero": 3410.0,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "NINFOPLASTIA - ATÉ 2:30h",
+          "valor": "R$ 4.128,00",
+          "valorNumero": 4128.0,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "NINFOPLASTIA - ATÉ 4h",
+          "valor": "R$ 5.449,00",
+          "valorNumero": 5449.0,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "OTOPLASTIA - ATÉ 1h",
+          "valor": "R$ 3.471,40",
+          "valorNumero": 3471.4,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "OTOPLASTIA - ATÉ 1:30h",
+          "valor": "R$ 3.752,84",
+          "valorNumero": 3752.84,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "OTOPLASTIA - ATÉ 2:00h",
+          "valor": "R$ 4.049,36",
+          "valorNumero": 4049.36,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "OTOPLASTIA - ATÉ 2:30h",
+          "valor": "R$ 4.352,56",
+          "valorNumero": 4352.56,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "OTOPLASTIA - ATÉ 3h",
+          "valor": "R$ 4.787,84",
+          "valorNumero": 4787.84,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "PREENCHIMENTO CORPORAL INTRAMUSCULAR ATÉ 1h",
+          "valor": "R$ 3.006,52",
+          "valorNumero": 3006.52,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "PEELING DE FENOL - ATÉ 2h",
+          "valor": "R$ 3.527,32",
+          "valorNumero": 3527.32,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "PEELING DE FENOL - ATÉ 2:30h",
+          "valor": "R$ 3.928,84",
+          "valorNumero": 3928.84,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "PLÁSTICA GLOBAL - 1h",
+          "valor": "R$ 3.197,20",
+          "valorNumero": 3197.2,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "PLÁSTICA GLOBAL - 1:30h",
+          "valor": "R$ 3.965,28",
+          "valorNumero": 3965.28,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "PLÁSTICA GLOBAL - 2h",
+          "valor": "R$ 5.548,04",
+          "valorNumero": 5548.04,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "PLÁSTICA GLOBAL - 2:30h",
+          "valor": "R$ 6.319,00",
+          "valorNumero": 6319.0,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "PLÁSTICA GLOBAL - 3h",
+          "valor": "R$ 7.067,52",
+          "valorNumero": 7067.52,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "RENUVION (SEM LIPOASPIRAÇÃO) - ATÉ 1:00h",
+          "valor": "R$ 2.806,08",
+          "valorNumero": 2806.08,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "RENUVION (SEM LIPOASPIRAÇÃO) - ATÉ 1:30h",
+          "valor": "R$ 2.892,84",
+          "valorNumero": 2892.84,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "RENUVION (SEM LIPOASPIRAÇÃO) - ATÉ 2:00h",
+          "valor": "R$ 3.086,68",
+          "valorNumero": 3086.68,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "RETIRADA DE PROTESE - ATÉ 1h",
+          "valor": "R$ 2.498,60",
+          "valorNumero": 2498.6,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "RETIRADA DE PROTESE - ATÉ 1:30h",
+          "valor": "R$ 3.494,88",
+          "valorNumero": 3494.88,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "RETIRADA DE PROTESE - ATÉ 3h",
+          "valor": "R$ 4.407,08",
+          "valorNumero": 4407.08,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "RETIRADA DE PROTESE - ATÉ 4h",
+          "valor": "R$ 5.288,48",
+          "valorNumero": 5288.48,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "RETIRADA DE PRÓTESE – PROCEDIMENTO INICIAL REALIZADO EM OUTRO HOSPITAL - ATÉ 1:30h",
+          "valor": "R$ 6.298,76",
+          "valorNumero": 6298.76,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "REVISÃO DE PRÓTESE PENIANA – ATÉ 1H",
+          "valor": "R$ 2.693,52",
+          "valorNumero": 2693.52,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "RINOPLASTIA - ATÉ 1:00h",
+          "valor": "R$ 3.591,80",
+          "valorNumero": 3591.8,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "RINOPLASTIA - ATÉ 1:30h",
+          "valor": "R$ 3.780,48",
+          "valorNumero": 3780.48,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "RINOPLASTIA - ATÉ 2h",
+          "valor": "R$ 4.372,68",
+          "valorNumero": 4372.68,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "RINOPLASTIA - ATÉ 2:30h",
+          "valor": "R$ 4.964,40",
+          "valorNumero": 4964.4,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "RINOPLASTIA - ATÉ 3h",
+          "valor": "R$ 5.560,12",
+          "valorNumero": 5560.12,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "RINOPLASTIA - ATÉ 3:30h",
+          "valor": "R$ 6.323,24",
+          "valorNumero": 6323.24,
+          "tempoSala": "3h30",
+          "tempoSalaHoras": 3.5
+        },
+        {
+          "pacote": "RINOPLASTIA - ATÉ 4h",
+          "valor": "R$ 6.955,28",
+          "valorNumero": 6955.28,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "RINOPLASTIA - ATÉ 4:30h",
+          "valor": "R$ 7.587,92",
+          "valorNumero": 7587.92,
+          "tempoSala": "4h30",
+          "tempoSalaHoras": 4.5
+        },
+        {
+          "pacote": "RINOPLASTIA - ATÉ 5h",
+          "valor": "R$ 8.346,36",
+          "valorNumero": 8346.36,
+          "tempoSala": "5h",
+          "tempoSalaHoras": 5.0
+        },
+        {
+          "pacote": "RINOPLASTIA - ATÉ 6h",
+          "valor": "R$ 10.015,60",
+          "valorNumero": 10015.6,
+          "tempoSala": "6h",
+          "tempoSalaHoras": 6.0
+        },
+        {
+          "pacote": "RINOPLASTIA - ATÉ 7h",
+          "valor": "R$ 11.920,72",
+          "valorNumero": 11920.72,
+          "tempoSala": "7h",
+          "tempoSalaHoras": 7.0
+        },
+        {
+          "pacote": "RINOPLASTIA - ATÉ 8h",
+          "valor": "R$ 14.423,08",
+          "valorNumero": 14423.08,
+          "tempoSala": "8h",
+          "tempoSalaHoras": 8.0
+        },
+        {
+          "pacote": "RITIDOPLASTIA - ATÉ 1h",
+          "valor": "R$ 3.683,16",
+          "valorNumero": 3683.16,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "RITIDOPLASTIA - ATÉ 2h",
+          "valor": "R$ 5.505,72",
+          "valorNumero": 5505.72,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "RITIDOPLASTIA - ATÉ 2h30",
+          "valor": "R$ 6.056,28",
+          "valorNumero": 6056.28,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "RITIDOPLASTIA - ATÉ 3h",
+          "valor": "R$ 7.328,28",
+          "valorNumero": 7328.28,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "RITIDOPLASTIA - ATÉ 4h",
+          "valor": "R$ 9.150,84",
+          "valorNumero": 9150.84,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "RITIDOPLASTIA - ATÉ 4h30",
+          "valor": "R$ 10.065,92",
+          "valorNumero": 10065.92,
+          "tempoSala": "4h30",
+          "tempoSalaHoras": 4.5
+        },
+        {
+          "pacote": "RITIDOPLASTIA - ATÉ 5h",
+          "valor": "R$ 11.281,04",
+          "valorNumero": 11281.04,
+          "tempoSala": "5h",
+          "tempoSalaHoras": 5.0
+        },
+        {
+          "pacote": "RITIDOPLASTIA - ATÉ 5h30",
+          "valor": "R$ 12.409,12",
+          "valorNumero": 12409.12,
+          "tempoSala": "5h30",
+          "tempoSalaHoras": 5.5
+        },
+        {
+          "pacote": "RITIDOPLASTIA - ATÉ 6h",
+          "valor": "R$ 13.650,04",
+          "valorNumero": 13650.04,
+          "tempoSala": "6h",
+          "tempoSalaHoras": 6.0
+        },
+        {
+          "pacote": "RITIDOPLASTIA - ATÉ 7h",
+          "valor": "R$ 16.244,64",
+          "valorNumero": 16244.64,
+          "tempoSala": "7h",
+          "tempoSalaHoras": 7.0
+        },
+        {
+          "pacote": "RITIDOPLASTIA - ATÉ 8h",
+          "valor": "R$ 19.493,56",
+          "valorNumero": 19493.56,
+          "tempoSala": "8h",
+          "tempoSalaHoras": 8.0
+        },
+        {
+          "pacote": "RITIDOPLASTIA + BLEFAROPLASTIA - ATÉ 2h",
+          "valor": "R$ 6.544,24",
+          "valorNumero": 6544.24,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "RITIDOPLASTIA + BLEFAROPLASTIA - ATÉ 2h30",
+          "valor": "R$ 7.198,64",
+          "valorNumero": 7198.64,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "RITIDOPLASTIA + BLEFAROPLASTIA - ATÉ 3h",
+          "valor": "R$ 8.321,76",
+          "valorNumero": 8321.76,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "RITIDOPLASTIA + BLEFAROPLASTIA - ATÉ 3:30h",
+          "valor": "R$ 9.154,04",
+          "valorNumero": 9154.04,
+          "tempoSala": "3h30",
+          "tempoSalaHoras": 3.5
+        },
+        {
+          "pacote": "RITIDOPLASTIA + BLEFAROPLASTIA - ATÉ 4h",
+          "valor": "R$ 10.099,32",
+          "valorNumero": 10099.32,
+          "tempoSala": "4h",
+          "tempoSalaHoras": 4.0
+        },
+        {
+          "pacote": "RITIDOPLASTIA + BLEFAROPLASTIA - ATÉ 4h30",
+          "valor": "R$ 11.109,24",
+          "valorNumero": 11109.24,
+          "tempoSala": "4h30",
+          "tempoSalaHoras": 4.5
+        },
+        {
+          "pacote": "RITIDOPLASTIA + BLEFAROPLASTIA - ATÉ 5h",
+          "valor": "R$ 12.209,84",
+          "valorNumero": 12209.84,
+          "tempoSala": "5h",
+          "tempoSalaHoras": 5.0
+        },
+        {
+          "pacote": "RITIDOPLASTIA + BLEFAROPLASTIA - ATÉ 6h",
+          "valor": "R$ 14.037,24",
+          "valorNumero": 14037.24,
+          "tempoSala": "6h",
+          "tempoSalaHoras": 6.0
+        },
+        {
+          "pacote": "RITIDOPLASTIA + BLEFAROPLASTIA - ATÉ 7h",
+          "valor": "R$ 16.844,72",
+          "valorNumero": 16844.72,
+          "tempoSala": "7h",
+          "tempoSalaHoras": 7.0
+        },
+        {
+          "pacote": "RITIDOPLASTIA+ CERVICOPLASTIA - LIFTING DE PESCOÇO ATÉ 6H",
+          "valor": "R$ 14.037,24",
+          "valorNumero": 14037.24,
+          "tempoSala": "6h",
+          "tempoSalaHoras": 6.0
+        },
+        {
+          "pacote": "SUBSCISÃO - ATÉ 2h (SEDAÇÃO)",
+          "valor": "R$ 4.833,20",
+          "valorNumero": 4833.2,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "SCULPTRA - APLICAÇÃO DE MEDICAÇÃO (SEDAÇÃO) - (EXCLUI MEDICAÇÃO) ATÉ 30MIN",
+          "valor": "R$ 1.346,20",
+          "valorNumero": 1346.2,
+          "tempoSala": "30min",
+          "tempoSalaHoras": 0.5
+        },
+        {
+          "pacote": "SCULPTRA - APLICAÇÃO DE MEDICAÇÃO (SEDAÇÃO) - (EXCLUI MEDICAÇÃO) ATÉ 1H",
+          "valor": "R$ 1.480,80",
+          "valorNumero": 1480.8,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "TROCA DE PRÓTESE - ATÉ 1h",
+          "valor": "R$ 3.290,32",
+          "valorNumero": 3290.32,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "TROCA DE PRÓTESE - ATÉ 1:30h",
+          "valor": "R$ 3.655,92",
+          "valorNumero": 3655.92,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "TROCA DE PRÓTESE - ATÉ 2h",
+          "valor": "R$ 3.948,40",
+          "valorNumero": 3948.4,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "TROCA DE PRÓTESE - ATÉ 2:30h",
+          "valor": "R$ 4.387,08",
+          "valorNumero": 4387.08,
+          "tempoSala": "2h30",
+          "tempoSalaHoras": 2.5
+        },
+        {
+          "pacote": "TROCA DE PRÓTESE - ATÉ 3h",
+          "valor": "R$ 4.825,84",
+          "valorNumero": 4825.84,
+          "tempoSala": "3h",
+          "tempoSalaHoras": 3.0
+        },
+        {
+          "pacote": "PROTESE DE PANTURRILHA - ATÉ 1:30h",
+          "valor": "R$ 3.459,84",
+          "valorNumero": 3459.84,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "PROTESE DE PANTURRILHA - ATÉ 2h",
+          "valor": "R$ 3.805,80",
+          "valorNumero": 3805.8,
+          "tempoSala": "2h",
+          "tempoSalaHoras": 2.0
+        },
+        {
+          "pacote": "PROCEDIMENTO ESTÉTICO COMPLEMENTAR SOB ANESTESIA-ATÉ 30MIN",
+          "valor": "R$ 1.566,00",
+          "valorNumero": 1566.0,
+          "tempoSala": "30min",
+          "tempoSalaHoras": 0.5
+        },
+        {
+          "pacote": "PROCEDIMENTO ESTÉTICO COMPLEMENTAR SOB ANESTESIA-ATÉ 1H",
+          "valor": "R$ 2.088,00",
+          "valorNumero": 2088.0,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "CIRURGIA COMPLEMENTAR - RETOQUE - ATÉ 1h",
+          "valor": "R$ 2.650,00",
+          "valorNumero": 2650.0,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "CIRURGIA COMPLEMENTAR - RETOQUE - ATÉ 1:30h",
+          "valor": "R$ 3.584,64",
+          "valorNumero": 3584.64,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        },
+        {
+          "pacote": "TAXA DE UTILIZAÇÃO DO VIBROLIPO",
+          "valor": "R$ 519,24",
+          "valorNumero": 519.24,
+          "tempoSala": null,
+          "tempoSalaHoras": null
+        }
+      ]
+    },
+    "associadas": {
+      "titulo": "CIRURGIAS ASSOCIADAS",
+      "itens": [
+        {
+          "pacote": "CO² - (BLEFAROPLASIA) - ATÉ 30MIN",
+          "valor": "R$ 1.409,40",
+          "valorNumero": 1409.4,
+          "tempoSala": "30min",
+          "tempoSalaHoras": 0.5
+        },
+        {
+          "pacote": "CO² - (BLEFAROPLASIA) - ATÉ 45MIN",
+          "valor": "R$ 1.566,00",
+          "valorNumero": 1566.0,
+          "tempoSala": "45min",
+          "tempoSalaHoras": 0.75
+        },
+        {
+          "pacote": "CO² - (BLEFAROPLASIA) - ATÉ 60MIN",
+          "valor": "R$ 1.879,20",
+          "valorNumero": 1879.2,
+          "tempoSala": "60min",
+          "tempoSalaHoras": 1.0
+        },
+        {
+          "pacote": "NINFOPLASTIA - ATÉ 30MIN",
+          "valor": "R$ 1.126,84",
+          "valorNumero": 1126.84,
+          "tempoSala": "30min",
+          "tempoSalaHoras": 0.5
+        },
+        {
+          "pacote": "BLEFAROPLASTIA (SUPERIOR OU INFERIOR) - ATÉ 30MIN",
+          "valor": "R$ 1.126,84",
+          "valorNumero": 1126.84,
+          "tempoSala": "30min",
+          "tempoSalaHoras": 0.5
+        },
+        {
+          "pacote": "MENTOPLASTIA (COLOCAÇÃO DE PRÓTESE) - ATÉ 30 MIN",
+          "valor": "R$ 1.126,84",
+          "valorNumero": 1126.84,
+          "tempoSala": "30min",
+          "tempoSalaHoras": 0.5
+        },
+        {
+          "pacote": "BICHECTOMIA - ATÉ 30 MIN",
+          "valor": "R$ 1.126,84",
+          "valorNumero": 1126.84,
+          "tempoSala": "30min",
+          "tempoSalaHoras": 0.5
+        },
+        {
+          "pacote": "MINIABDOMEN - ATÉ 30 MIN",
+          "valor": "R$ 1.126,84",
+          "valorNumero": 1126.84,
+          "tempoSala": "30min",
+          "tempoSalaHoras": 0.5
+        },
+        {
+          "pacote": "FLANCOPLASTIA - ATÉ 45 MIN",
+          "valor": "R$ 1.126,84",
+          "valorNumero": 1126.84,
+          "tempoSala": "45min",
+          "tempoSalaHoras": 0.75
+        },
+        {
+          "pacote": "EXCISÃO E SUTURA - ATÉ 30MIN",
+          "valor": "R$ 1.126,84",
+          "valorNumero": 1126.84,
+          "tempoSala": "30min",
+          "tempoSalaHoras": 0.5
+        },
+        {
+          "pacote": "OTOPLASTIA - ATÉ 45MIN",
+          "valor": "R$ 1.126,84",
+          "valorNumero": 1126.84,
+          "tempoSala": "45min",
+          "tempoSalaHoras": 0.75
+        },
+        {
+          "pacote": "MINI LIPOASPIRAÇÃO - ATÉ 15 MIN",
+          "valor": "R$ 1.150,00",
+          "valorNumero": 1150.0,
+          "tempoSala": "15min",
+          "tempoSalaHoras": 0.25
+        },
+        {
+          "pacote": "LIPOASPIRAÇÃO - ATÉ 1:30h",
+          "valor": "R$ 3.664,60",
+          "valorNumero": 3664.6,
+          "tempoSala": "1h30",
+          "tempoSalaHoras": 1.5
+        }
+      ]
+    },
+    "diarias": {
+      "titulo": "DIÁRIAS",
+      "itens": [
+        {
+          "pacote": "DIÁRIA CLINIC PREMIUM",
+          "valor": "R$ 1.196,32",
+          "valorNumero": 1196.32,
+          "tempoSala": null,
+          "tempoSalaHoras": null
+        },
+        {
+          "pacote": "DIÁRIA SUÍTE DELUXE",
+          "valor": "R$ 2.887,52",
+          "valorNumero": 2887.52,
+          "tempoSala": null,
+          "tempoSalaHoras": null
+        },
+        {
+          "pacote": "DIÁRIA DE UTI",
+          "valor": "R$ 6.137,04",
+          "valorNumero": 6137.04,
+          "tempoSala": null,
+          "tempoSalaHoras": null
+        },
+        {
+          "pacote": "PERNOITE (DAY CLINIC)",
+          "valor": "R$ 928,64",
+          "valorNumero": 928.64,
+          "tempoSala": null,
+          "tempoSalaHoras": null
+        },
+        {
+          "pacote": "1/2 HORA EXCEDENTE DE CIRURGIA - (tolerância 15min)",
+          "valor": "R$ 1.004,84",
+          "valorNumero": 1004.84,
+          "tempoSala": "30min",
+          "tempoSalaHoras": 0.5
+        },
+        {
+          "pacote": "1/2 HORA EXCEDENTE DE SALA PEQUENOS PROCEDIMENTOS - (sem tolerância de tempo)",
+          "valor": "R$ 510,12",
+          "valorNumero": 510.12,
+          "tempoSala": "30min",
+          "tempoSalaHoras": 0.5
+        },
+        {
+          "pacote": "HORA EXCEDENTE DE RECUPERAÇÃO",
+          "valor": "R$ 96,92",
+          "valorNumero": 96.92,
+          "tempoSala": "1h",
+          "tempoSalaHoras": 1.0
+        }
+      ]
+    }
+  },
+  "fatorParcela": 4
+}

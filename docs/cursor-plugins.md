@@ -34,7 +34,7 @@ Memória persistente do agente: [`AGENTS.md`](../AGENTS.md) na raiz.
 - "Usa Context7 para a versão atual de puppeteer-core e ajusta o export de PDF."
 - "/context7:docs pywebview create_window maximized"
 
-Não use Context7 para regras de negócio do orçamento (Unimed N, Regina/Sapiranga) — isso está em `docs/` e `data/`.
+Não use Context7 para regras de negócio do orçamento (Unimed N, Regina/Sapiranga/Blanc) — isso está em `docs/` e `data/`.
 
 ## Browser Use
 
@@ -52,6 +52,7 @@ Não use Context7 para regras de negócio do orçamento (Unimed N, Regina/Sapira
 
 - "Com Browser Use, abre o app local e confere se a seção Equipe aparece no preview."
 - "Tira screenshot da pré-visualização após carregar um JSON de `output/`."
+- "Preenche hospital Blanc, dois pacotes e uma associada, clica no botão verde e confere multiplicadores 1 / 0.6 / 1 e o total no preview."
 
 O app em WebView2 nativo **não** é o mesmo processo do Chrome do Browser Use; para UI nativa (ícone da barra, maximizado), o teste manual pelo `.bat` continua necessário. Browser Use cobre o **mesmo HTML/JS** servido em `localhost:3000`.
 
@@ -116,6 +117,6 @@ Rules do kit (`no-inline-imports`, `typescript-exhaustive-switch`) aplicam-se po
 
 ## O que não precisa de plugin
 
-- Regras de Regina / Sapiranga / Unimed N / implantes → `docs/tabelas-*.md`, `docs/unimed-n.md`, `data/*.json`
+- Regras de Regina / Sapiranga / Blanc / Unimed N / implantes → `docs/tabelas-*.md`, `docs/unimed-n.md`, `data/*.json`
 - Arquitetura do launcher → `docs/ARCHITECTURE.md`
 - Commit/push pedestres → Agent + regras de git do usuário (sem plugin obrigatório)

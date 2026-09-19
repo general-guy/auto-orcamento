@@ -221,9 +221,9 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 - Guarda histórico local de pacientes, cirurgias, hospitais, extras, formas de pagamento, observações e tecnologias.
 - Permite reordenar por drag and drop os dropdowns de histórico (**Nome**, **Cirurgia**, **Hospital**, **Tecnologias**, **Extras adicionais**, **Pagamento** e **Observações adicionais**), com ordem persistida nos JSON correspondentes; reordenar entradas de cirurgia e de hospital nos campos do formulário (preview e snapshot, sem alterar o JSON de histórico); e reordenar as listas rápidas de extras, pagamento e observações.
 - Cria múltiplas entradas de cirurgia e hospital.
-- Para Regina e Sapiranga, cria entradas auxiliares (`Reg1`, `Sap1`, etc.) com multiplicadores e tabelas locais.
+- Para Regina, Sapiranga e Blanc, cria entradas auxiliares (`Reg1`, `Sap1`, `Bla1`, etc.) com multiplicadores e tabelas locais.
 - Para hospitais cujo nome contém `Unimed N`, cria entradas auxiliares (`Uni1`, `Uni2`, etc.) com valor monetário editável em `data/unimed-n.json`.
-- Usa tabelas hospitalares locais (Regina/Sapiranga) para sugerir pacotes e calcular valores auxiliares no preview.
+- Usa tabelas hospitalares locais (Regina/Sapiranga/Blanc) para sugerir pacotes e calcular valores auxiliares no preview.
 - Permite incluir uma seção opcional de implantes, alimentada por `data/tabela-implantes.json`.
 - Permite incluir uma seção opcional de tecnologias, com nome e valor salvos em `data/tecnologias.json`.
 - Mantém uma seção fixa de equipe com itens pré-marcados e valor normalizado em moeda brasileira.
@@ -261,9 +261,10 @@ As tabelas de referência estruturadas ficam em:
 ```text
 data/tabelas-hospitalares.json
 data/tabela-implantes.json
+data/tabela-blanc-2026.json
 ```
 
-Essas tabelas são versionadas e podem ser editadas manualmente em `data/`; basta reabrir o app para carregar as alterações.
+O app lê `tabelas-hospitalares.json` e `tabela-implantes.json`. `tabela-blanc-2026.json` é o arquivo seccionado da extração Blanc (não é carregado em runtime). Essas tabelas são versionadas e podem ser editadas manualmente em `data/`; basta reabrir o app para carregar as alterações das tabelas operacionais.
 
 Os PDFs e snapshots JSON gerados automaticamente ficam em:
 
@@ -335,9 +336,9 @@ No documento, o rótulo `Tempo previsto` usa o negrito padrão (Gotham Medium), 
 
 O dropdown de histórico do nome do hospital aceita reordenação pelo handle `⋮⋮` (ordem em `data/hospitais.json`).
 
-Com duas ou mais entradas de hospital no formulário, o app exibe o mesmo handle `⋮⋮` à esquerda de cada **campo** de nome (não no dropdown). Arrastar reorganiza os blocos no painel e no documento; cada hospital leva as entradas auxiliares (`Reg#`, `Sap#`, `Uni#`). Esse drag and drop não altera `data/hospitais.json`; a ordem vigente entra no snapshot JSON ao imprimir e é restaurada pelo **Abrir**. O rótulo `Nome do hospital` permanece no primeiro campo, mesmo após reordenar.
+Com duas ou mais entradas de hospital no formulário, o app exibe o mesmo handle `⋮⋮` à esquerda de cada **campo** de nome (não no dropdown). Arrastar reorganiza os blocos no painel e no documento; cada hospital leva as entradas auxiliares (`Reg#`, `Sap#`, `Bla#`, `Uni#`). Esse drag and drop não altera `data/hospitais.json`; a ordem vigente entra no snapshot JSON ao imprimir e é restaurada pelo **Abrir**. O rótulo `Nome do hospital` permanece no primeiro campo, mesmo após reordenar.
 
-### Regina e Sapiranga (tabela + autofill)
+### Regina, Sapiranga e Blanc (tabela + autofill)
 
 O botão verde ao lado do hospital preenche e reorganiza as entradas auxiliares.
 
@@ -345,7 +346,9 @@ Para Sapiranga, os pacotes de centro cirúrgico ficam no topo, ordenados do maio
 
 Para Regina, o app ordena os pacotes por valor decrescente e aplica multiplicadores automáticos (`1`, `0.7` e `0.5`) apenas sobre o valor de cada pacote. Adicionais de sala e pernoite de recuperação ficam depois, na ordem do JSON. Se faltar tempo em relação ao tempo previsto de hospital, adiciona `SALA CIRÚRGICA - MEIA HORA SUBSEQUENTE` com multiplicador em unidades de meia hora, usando sempre o tempo bruto dos pacotes no cálculo.
 
-Nos campos auxiliares `Reg#` e `Sap#`, a busca de pacotes/taxas usa um dropdown customizado (`#hospitalProcedureDropdown`): abre **à direita** do campo, ocupa **toda a altura visível da janela** e filtra conforme a digitação. Fonte: `data/tabelas-hospitalares.json`.
+Para o Blanc, o nome do hospital precisa conter `Blanc`. Os valores da tabela já estão no total do item (parcela 1+3 sem juros × 4). O autofill ordena os pacotes (maior incidência + demais procedimentos) por valor decrescente com multiplicadores `1`, `0.6` e `0.5`; cirurgias associadas ficam depois, sempre em `1`. Taxa do Vibrolipo e diárias também ficam fora dessa escala. Se faltar tempo, adiciona `1/2 HORA EXCEDENTE DE CIRURGIA` em unidades de meia hora. Meia hora de sala de pequenos procedimentos e hora de recuperação só entram se o usuário as escolheu. O desconto de 3% à vista do PDF não é aplicado no total; entra no documento só se estiver marcado em Formas de pagamento.
+
+Nos campos auxiliares `Reg#`, `Sap#` e `Bla#`, a busca de pacotes/taxas usa um dropdown customizado (`#hospitalProcedureDropdown`): abre **à direita** do campo, ocupa **toda a altura visível da janela** e filtra conforme a digitação. Fonte: `data/tabelas-hospitalares.json`.
 
 ### Unimed N (histórico editável)
 

@@ -121,6 +121,7 @@ let technologyDropdownSuppressClick = false;
 let hospitalTables = null;
 let reginaHospitalProcedureOptions = [];
 let sapirangaHospitalProcedureOptions = [];
+let blancHospitalProcedureOptions = [];
 let unimedNHistory = [];
 let activeHospitalDetailInput = null;
 let isInteractingWithHospitalProcedureDropdown = false;
@@ -486,6 +487,16 @@ function getHospitalDetailConfig(value) {
     };
   }
 
+  if (normalizedValue.includes("blanc")) {
+    return {
+      datalistId: "blancHospitalOptions",
+      labelPrefix: "Bla",
+      name: "hospitalBlanc",
+      placeholder: "Buscar pacote ou taxa Blanc",
+      source: "blanc",
+    };
+  }
+
   if (normalizedValue.includes("unimed n")) {
     return {
       datalistId: "unimedNHospitalOptions",
@@ -514,6 +525,18 @@ function formatSapirangaOption(item, type) {
 
   if (type === "excedente") {
     return `${item.descricao} - ${item.valor}`;
+  }
+
+  return `${item.pacote} - Sala ${item.tempoSala} - ${item.valor}`;
+}
+
+function formatBlancOption(item, type) {
+  if (type === "diaria" || type === "excedente" || type === "taxa") {
+    return `${item.descricao} - ${item.valor}`;
+  }
+
+  if (!item.tempoSala || item.tempoSala === "-") {
+    return `${item.pacote} - ${item.valor}`;
   }
 
   return `${item.pacote} - Sala ${item.tempoSala} - ${item.valor}`;
@@ -648,6 +671,46 @@ function createHospitalPreviewOptionMap() {
     });
   });
 
+  hospitalTables?.blanc?.pacotesCirurgiaPlastica?.forEach((item) => {
+    options.set(formatBlancOption(item, "pacote"), {
+      label: item.pacote,
+      tempoSala: item.tempoSala && item.tempoSala !== "-" ? item.tempoSala : "",
+      value: parseCurrencyValue(item.valor),
+    });
+  });
+
+  hospitalTables?.blanc?.cirurgiasAssociadas?.forEach((item) => {
+    options.set(formatBlancOption(item, "associada"), {
+      label: item.pacote,
+      tempoSala: item.tempoSala && item.tempoSala !== "-" ? item.tempoSala : "",
+      value: parseCurrencyValue(item.valor),
+    });
+  });
+
+  hospitalTables?.blanc?.taxasAdicionais?.forEach((item) => {
+    options.set(formatBlancOption(item, "taxa"), {
+      label: item.descricao,
+      tempoSala: "",
+      value: parseCurrencyValue(item.valor),
+    });
+  });
+
+  hospitalTables?.blanc?.diarias?.forEach((item) => {
+    options.set(formatBlancOption(item, "diaria"), {
+      label: item.descricao,
+      tempoSala: "",
+      value: parseCurrencyValue(item.valor),
+    });
+  });
+
+  hospitalTables?.blanc?.excedente?.forEach((item) => {
+    options.set(formatBlancOption(item, "excedente"), {
+      label: item.descricao,
+      tempoSala: "",
+      value: parseCurrencyValue(item.valor),
+    });
+  });
+
   return options;
 }
 
@@ -749,10 +812,56 @@ function getSapirangaExcedenteOption() {
   };
 }
 
+function createBlancOptionMap(items = [], type, category) {
+  return new Map(
+    items.map((item, order) => {
+      const optionText = formatBlancOption(item, type);
+      return [
+        optionText,
+        {
+          category,
+          hours: item.tempoSalaHoras,
+          optionText,
+          order,
+          value: parseCurrencyValue(item.valor),
+        },
+      ];
+    })
+  );
+}
+
+function getBlancOptionMaps() {
+  return {
+    associada: createBlancOptionMap(hospitalTables?.blanc?.cirurgiasAssociadas, "associada", "associada"),
+    diaria: createBlancOptionMap(hospitalTables?.blanc?.diarias, "diaria", "diaria"),
+    excedente: createBlancOptionMap(hospitalTables?.blanc?.excedente, "excedente", "excedente"),
+    pacote: createBlancOptionMap(hospitalTables?.blanc?.pacotesCirurgiaPlastica, "pacote", "pacote"),
+    taxa: createBlancOptionMap(hospitalTables?.blanc?.taxasAdicionais, "taxa", "taxa"),
+  };
+}
+
+function getBlancSurgeryExcedenteOption() {
+  const excessItems = hospitalTables?.blanc?.excedente || [];
+  const surgeryExcess = excessItems.find((item) =>
+    item.descricao.toUpperCase().includes("1/2 HORA EXCEDENTE DE CIRURGIA")
+  );
+  if (!surgeryExcess) {
+    return null;
+  }
+
+  return {
+    category: "excedente",
+    optionText: formatBlancOption(surgeryExcess, "excedente"),
+    order: excessItems.indexOf(surgeryExcess),
+    value: parseCurrencyValue(surgeryExcess.valor),
+  };
+}
+
 function buildHospitalDatalists() {
   if (!hospitalTables) {
     reginaHospitalProcedureOptions = [];
     sapirangaHospitalProcedureOptions = [];
+    blancHospitalProcedureOptions = [];
     return;
   }
 
@@ -768,8 +877,17 @@ function buildHospitalDatalists() {
     ...hospitalTables.sapiranga.diarias.map((item) => formatSapirangaOption(item, "diaria")),
   ];
 
+  blancHospitalProcedureOptions = [
+    ...(hospitalTables.blanc?.pacotesCirurgiaPlastica || []).map((item) => formatBlancOption(item, "pacote")),
+    ...(hospitalTables.blanc?.cirurgiasAssociadas || []).map((item) => formatBlancOption(item, "associada")),
+    ...(hospitalTables.blanc?.taxasAdicionais || []).map((item) => formatBlancOption(item, "taxa")),
+    ...(hospitalTables.blanc?.excedente || []).map((item) => formatBlancOption(item, "excedente")),
+    ...(hospitalTables.blanc?.diarias || []).map((item) => formatBlancOption(item, "diaria")),
+  ];
+
   document.querySelector("#reginaHospitalOptions")?.remove();
   document.querySelector("#sapirangaHospitalOptions")?.remove();
+  document.querySelector("#blancHospitalOptions")?.remove();
 }
 
 function getHospitalProcedureOptionsForInput(input) {
@@ -781,6 +899,10 @@ function getHospitalProcedureOptionsForInput(input) {
 
   if (datalistId === "sapirangaHospitalOptions") {
     return sapirangaHospitalProcedureOptions;
+  }
+
+  if (datalistId === "blancHospitalOptions") {
+    return blancHospitalProcedureOptions;
   }
 
   if (datalistId === "unimedNHospitalOptions") {
@@ -1305,6 +1427,133 @@ function autofillReginaDetails(button) {
   updateHospitalDetailButtons(detailList);
 }
 
+function autofillBlancDetails(button) {
+  const label = button.closest("label");
+  const detailList = label.querySelector(".hospital-detail-list");
+  if (!detailList) {
+    return;
+  }
+
+  const blancOptions = getBlancOptionMaps();
+  const surgeryExcessOption = getBlancSurgeryExcedenteOption();
+  const rows = getHospitalDetailRows(detailList);
+  const packageEntries = [];
+  const associadaEntries = [];
+  const taxEntries = [];
+  const diariaEntries = [];
+  const otherExcessEntries = [];
+  const otherEntries = [];
+
+  rows.forEach((row) => {
+    if (row.input.value === surgeryExcessOption?.optionText) {
+      return;
+    }
+
+    const packageOption = blancOptions.pacote.get(row.input.value);
+    if (packageOption) {
+      packageEntries.push(packageOption);
+      return;
+    }
+
+    const associadaOption = blancOptions.associada.get(row.input.value);
+    if (associadaOption) {
+      associadaEntries.push({
+        ...associadaOption,
+        multiplierValue: "1",
+      });
+      return;
+    }
+
+    const taxOption = blancOptions.taxa.get(row.input.value);
+    if (taxOption) {
+      taxEntries.push({
+        ...taxOption,
+        multiplierValue: row.multiplier.value,
+      });
+      return;
+    }
+
+    const diariaOption = blancOptions.diaria.get(row.input.value);
+    if (diariaOption) {
+      diariaEntries.push({
+        ...diariaOption,
+        multiplierValue: row.multiplier.value,
+      });
+      return;
+    }
+
+    const excessOption = blancOptions.excedente.get(row.input.value);
+    if (excessOption) {
+      otherExcessEntries.push({
+        ...excessOption,
+        multiplierValue: row.multiplier.value,
+      });
+      return;
+    }
+
+    otherEntries.push({
+      optionText: row.input.value,
+      multiplierValue: row.multiplier.value,
+    });
+  });
+
+  packageEntries.sort((left, right) => right.value - left.value || left.order - right.order);
+  associadaEntries.sort((left, right) => left.order - right.order);
+  taxEntries.sort((left, right) => left.order - right.order);
+  otherExcessEntries.sort((left, right) => left.order - right.order);
+  diariaEntries.sort((left, right) => left.order - right.order);
+
+  const totalSurgicalHours = [...packageEntries, ...associadaEntries].reduce(
+    (total, entry) => total + (entry.hours || 0),
+    0
+  );
+  const expectedHours = parseHourValue(getFieldValue("hospitalStay"));
+  const missingHours = expectedHours === null ? 0 : Math.max(0, expectedHours - totalSurgicalHours);
+  const halfHourMultiplier = Number((missingHours / 0.5).toFixed(2));
+  const excessEntries =
+    missingHours > 0 && surgeryExcessOption
+      ? [{ ...surgeryExcessOption, multiplierValue: String(halfHourMultiplier) }]
+      : [];
+  const orderedEntries = [
+    ...packageEntries,
+    ...associadaEntries,
+    ...taxEntries,
+    ...excessEntries,
+    ...otherExcessEntries,
+    ...diariaEntries,
+    ...otherEntries,
+  ];
+
+  if (orderedEntries.length === 0) {
+    orderedEntries.push({ optionText: "", multiplierValue: "1" });
+  }
+
+  while (getHospitalDetailRows(detailList).length < orderedEntries.length) {
+    createHospitalDetailEntry(detailList, getHospitalDetailConfigFromList(detailList));
+  }
+
+  getHospitalDetailRows(detailList).slice(orderedEntries.length).forEach((row) => row.field.remove());
+
+  getHospitalDetailRows(detailList).forEach((row, index) => {
+    const entry = orderedEntries[index];
+    row.input.value = entry.optionText;
+
+    if (index < packageEntries.length) {
+      row.multiplier.value = index === 0 ? "1" : index === 1 ? "0.6" : "0.5";
+      return;
+    }
+
+    if (entry.category === "associada") {
+      row.multiplier.value = "1";
+      return;
+    }
+
+    row.multiplier.value = entry.multiplierValue;
+  });
+
+  updateHospitalDetailButtons(detailList);
+}
+
 function autofillHospitalDetails(button) {
   if (button.dataset.autofillSource === "regina") {
     autofillReginaDetails(button);
@@ -1313,6 +1562,11 @@ function autofillHospitalDetails(button) {
 
   if (button.dataset.autofillSource === "sapiranga") {
     autofillSapirangaDetails(button);
+    return;
+  }
+
+  if (button.dataset.autofillSource === "blanc") {
+    autofillBlancDetails(button);
   }
 }
 
