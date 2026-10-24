@@ -4,13 +4,10 @@ const path = require("node:path");
 const auth = require("./auth");
 const { freeTcpPort } = require("./port-utils");
 
+const { repoRoot, webDir, dataDir, outputDir, exportDir } = require("./paths");
+
 const port = 3000;
 const bindHost = process.env.BIND_HOST || "127.0.0.1";
-const repoRoot = path.join(__dirname, "..");
-const webDir = path.join(repoRoot, "web");
-const dataDir = path.join(repoRoot, "data");
-const outputDir = path.join(repoRoot, "output");
-const exportDir = path.join(repoRoot, "export");
 const surgeriesFile = path.join(dataDir, "cirurgias.json");
 const hospitalsFile = path.join(dataDir, "hospitais.json");
 const patientsFile = path.join(dataDir, "pacientes.json");
@@ -161,9 +158,22 @@ function isUserHomeDirectory(dir) {
   return Boolean(home && resolved === path.resolve(home));
 }
 
+function remapLegacySnapshotDir(dir) {
+  if (!dir) {
+    return dir;
+  }
+
+  const legacyOutput = path.resolve(path.join(repoRoot, "output"));
+  if (path.resolve(dir) === legacyOutput) {
+    return outputDir;
+  }
+
+  return dir;
+}
+
 function getPreferredSnapshotDir() {
   const stored = readSettingsFile();
-  const savedDir = normalizeSnapshotDir(stored.lastSnapshotDir);
+  const savedDir = normalizeSnapshotDir(remapLegacySnapshotDir(stored.lastSnapshotDir));
 
   if (savedDir && !isUserHomeDirectory(savedDir)) {
     return savedDir;
@@ -429,12 +439,12 @@ async function handlePdfExport(request, response) {
 
   const responsePayload = {
     filename: path.basename(outputPath),
-    path: path.relative(repoRoot, outputPath).replace(/\\/g, "/"),
+    path: outputPath,
   };
 
   if (jsonPath) {
     responsePayload.jsonFilename = path.basename(jsonPath);
-    responsePayload.jsonPath = path.relative(repoRoot, jsonPath).replace(/\\/g, "/");
+    responsePayload.jsonPath = jsonPath;
     writeSettings({ lastSnapshotDir: path.dirname(jsonPath) });
   }
 
@@ -929,7 +939,14 @@ async function handleTechnologyApi(request, response) {
   sendJson(response, 405, { error: "Método não permitido." });
 }
 
-const repoRootUrlPrefixes = ["assets", "data", "output"];
+const repoRootUrlPrefixes = ["assets", "data"];
+
+function isPathInsideDir(filePath, dir) {
+  const resolvedFile = path.resolve(filePath);
+  const resolvedDir = path.resolve(dir);
+  const prefix = resolvedDir.endsWith(path.sep) ? resolvedDir : resolvedDir + path.sep;
+  return resolvedFile === resolvedDir || resolvedFile.startsWith(prefix);
+}
 
 function resolveStaticPath(requestedPath) {
   const cleanPath = requestedPath.replace(/^\/+/, "").replace(/\\/g, "/");
@@ -940,10 +957,20 @@ function resolveStaticPath(requestedPath) {
     .replace(/^\/+/, "");
 
   const topSegment = urlPath.split("/")[0];
+
+  if (topSegment === "output") {
+    const relativePath = urlPath.slice("output".length).replace(/^\/+/, "");
+    const filePath = path.normalize(path.join(outputDir, relativePath));
+    if (!isPathInsideDir(filePath, outputDir)) {
+      return null;
+    }
+    return { filePath, urlPath };
+  }
+
   const baseDir = repoRootUrlPrefixes.includes(topSegment) ? repoRoot : webDir;
   const filePath = path.normalize(path.join(baseDir, urlPath));
 
-  if (!filePath.startsWith(baseDir)) {
+  if (!isPathInsideDir(filePath, baseDir)) {
     return null;
   }
 

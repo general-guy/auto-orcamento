@@ -12,7 +12,7 @@ Papel de cada máquina: `docs/atlas-axis.md`. Funnel legado: `docs/acesso-remoto
 
 Agente Cursor / plugins: `AGENTS.md` (raiz) e `docs/cursor-plugins.md`.
 
-Históricos, tabelas, PDFs e snapshots JSON **canônicos neste clone** ficam em **`data/`** e **`output/`** na raiz do repo. Em produção esses dados ao vivo ficam no disco do Axis — ver `docs/atlas-axis.md`. O espelho SQLite para outros webapps fica em **`export/orcamentos.sqlite`** (ver `docs/export-sqlite.md`).
+Históricos e tabelas versionados ficam em **`data/`** na raiz do repo. PDFs e snapshots JSON canônicos no **Atlas (Windows)** ficam em **`C:\auto-orcamento\output\`** (`server/paths.js`; override com `OUTPUT_DIR`). Em produção no **Axis** os dados ao vivo ficam no disco do CT — ver `docs/atlas-axis.md` (lá o padrão sem `OUTPUT_DIR` é `output/` no deploy). O espelho SQLite para outros webapps fica em **`export/orcamentos.sqlite`** no repo (ver `docs/export-sqlite.md`).
 
 > **Desenvolvimento ativo:** stack Node + WebView2 na `main`.  
 > **Baseline congelada:** `stable/node-web-v0.1.0` / `v0.1.0-node-web` — `docs/SNAPSHOT-node-web-v0.1.0.md`.  
@@ -163,6 +163,7 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 | `web/index.html` | Markup do formulário e preview |
 | `web/styles.css` | Layout, timbrado, impressão |
 | `web/app.js` | Lógica de UI, preview, históricos, autofill |
+| `server/paths.js` | Raiz do repo, `data/`, `export/` e `outputDir` (`C:\auto-orcamento\output` no Windows; `OUTPUT_DIR` opcional) |
 | `server/server.js` | Servidor na porta 3000 (`BIND_HOST`), APIs REST; integra `server/auth.js` quando `AUTH_ENABLED=1` |
 | `server/auth.js` | Sessões, tokens de convidado, middleware local/remoto |
 | `web/auth-admin.js` | UI de criação/cópia de token (modo remoto, acesso local) |
@@ -202,9 +203,9 @@ O frontend vive em `web/`, mas as URLs no browser **não** incluem `/web/` — o
 | `/`, `/index.html`, `/app.js`, `/styles.css` | `web/` | HTML, CSS e JS do app |
 | `/assets/papel-timbrado.png`, `/assets/fonts/...` | `assets/` (raiz do repo) | Timbrado, fontes, ícones |
 | `/data/*.json` | `data/` | Históricos e tabelas |
-| `/output/*.pdf` | `output/` | PDFs gerados |
+| `/output/*.pdf` | `outputDir` (`C:\auto-orcamento\output` no Windows) | PDFs gerados |
 
-`resolveStaticPath()` em `server/server.js` decide a pasta pelo **primeiro segmento** da URL (`assets`, `data`, `output` → raiz do repo; demais → `web/`). A normalização usa `path.posix` para manter barras `/` no Windows — `path.normalize` nativo converteria `assets/...` em `assets\...` e quebraria o roteamento (timbrado e fontes retornavam 404).
+`resolveStaticPath()` em `server/server.js` decide a pasta pelo **primeiro segmento** da URL (`assets` e `data` → raiz do repo; `output` → `outputDir` de `server/paths.js`; demais → `web/`). A normalização usa `path.posix` para manter barras `/` no Windows — `path.normalize` nativo converteria `assets/...` em `assets\...` e quebraria o roteamento (timbrado e fontes retornavam 404).
 
 Tipos MIME relevantes: `.otf`/`.ttf`/`.woff`/`.woff2` para fontes; `.png` para o papel timbrado.
 
@@ -327,9 +328,9 @@ Com duas ou mais entradas no formulário, `updateHospitalFieldStructure()` exibe
 
 `data/observacoes.json` guarda as observações padrão e adicionais cadastradas no formulário. A lista rápida reordenável e o dropdown de histórico das **Observações adicionais** compartilham o mesmo arquivo; reordenar em qualquer um deles persiste via `PUT /api/observacoes`.
 
-A pasta `output/` guarda os PDFs e snapshots JSON gerados ao clicar em **Imprimir orçamento**. Ela é criada pelo servidor quando necessário e não entra no controle de versão. Cada par usa o mesmo nome base (`.pdf` e `.json`), no formato `{paciente} - {cirurgia} {AAAA-MM-DD HH-mm-ss}` — a primeira cirurgia preenchida no formulário vem do snapshot enviado na impressão.
+A pasta de saída (`outputDir` em `server/paths.js`) guarda os PDFs e snapshots JSON gerados ao clicar em **Imprimir orçamento**. No Windows o padrão é `C:\auto-orcamento\output\`; ela é criada pelo servidor quando necessário e não entra no controle de versão. Cada par usa o mesmo nome base (`.pdf` e `.json`), no formato `{paciente} - {cirurgia} {AAAA-MM-DD HH-mm-ss}` — a primeira cirurgia preenchida no formulário vem do snapshot enviado na impressão.
 
-Os JSON em `output/` são a **fonte canônica** do banco de arquivos do app (**Abrir**, `GET /api/snapshots*`). A pasta `export/` guarda `orcamentos.sqlite`, um **espelho** reconstruído ao **abrir o app** e a cada impressão local (ou via `npm run export:sqlite`): apaga e reinsere todas as linhas a partir dos JSON atuais — sem histórico legado. Na mesma consolidação, o espelho (e o papel timbrado + fontes) é **entregue** ao projeto irmão `dados-clinica/import/` para a sessão Orçamentos da GUI. Schema e contrato: `docs/export-sqlite.md`.
+Os JSON nessa pasta são a **fonte canônica** do banco de arquivos do app (**Abrir**, `GET /api/snapshots*`). A pasta `export/` no repo guarda `orcamentos.sqlite`, um **espelho** reconstruído ao **abrir o app** e a cada impressão local (ou via `npm run export:sqlite`): apaga e reinsere todas as linhas a partir dos JSON atuais — sem histórico legado. Na mesma consolidação, o espelho (e o papel timbrado + fontes) é **entregue** ao projeto irmão `dados-clinica/import/` para a sessão Orçamentos da GUI. Schema e contrato: `docs/export-sqlite.md`.
 
 ## Lógica de Cirurgia
 
@@ -446,7 +447,7 @@ Falhas de exportação exibem um `alert` além do log no console. Requer Chrome 
 
 O botão **Abrir** (`#openButton`, verde, ao lado de **Limpar** no rodapé do formulário) restaura um snapshot JSON no formulário:
 
-- **Uso local:** `AppApi.openSnapshot()` → `POST /api/open-snapshot`. No Windows, `scripts/open-snapshot-dialog.py` usa **pywebview** para diálogo nativo nítido em HiDPI; fallback PowerShell/tkinter. Preferência: `lastSnapshotDir`; fallback `output/`.
+- **Uso local:** `AppApi.openSnapshot()` → `POST /api/open-snapshot`. No Windows, `scripts/open-snapshot-dialog.py` usa **pywebview** para diálogo nativo nítido em HiDPI; fallback PowerShell/tkinter. Preferência: `lastSnapshotDir`; fallback `C:\auto-orcamento\output\` (servidor e script Python).
 - **Acesso remoto (browser no Axis ou Funnel legado):** modal `#snapshotPicker` lista `GET /api/snapshots` e carrega `GET /api/snapshots/:nome`. Somente leitura de `output/`; não expõe o sistema de arquivos do servidor.
 
 **Stack Tauri (congelada):** `export_pdf` gera só PDF; não há snapshot JSON nem importação.

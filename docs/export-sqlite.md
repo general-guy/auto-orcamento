@@ -1,8 +1,8 @@
 # Exportação SQLite (`export/orcamentos.sqlite`)
 
-Espelho consolidado dos snapshots JSON de `output/`, para consumo por **outros webapps**.
+Espelho consolidado dos snapshots JSON da pasta de saída (`C:\auto-orcamento\output` no Windows; ver `server/paths.js`), para consumo por **outros webapps**.
 
-O Auto Orçamento **não** usa este banco como fonte canônica: PDF e JSON em `output/` continuam a ser gerados, nomeados e abertos como antes.
+O Auto Orçamento **não** usa este banco como fonte canônica: PDF e JSON na pasta de saída continuam a ser gerados, nomeados e abertos como antes.
 
 ## Fonte canônica vs espelho
 

@@ -1,9 +1,7 @@
 const path = require("node:path");
 const { consolidateOutputToSqlite } = require("../server/export-sqlite");
 
-const repoRoot = path.join(__dirname, "..");
-const outputDir = path.join(repoRoot, "output");
-const exportDir = path.join(repoRoot, "export");
+const { repoRoot, outputDir, exportDir } = require("../server/paths");
 
 try {
   const result = consolidateOutputToSqlite({ outputDir, exportDir, repoRoot });

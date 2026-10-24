@@ -36,12 +36,13 @@ Na raiz ficam só os **atalhos de uso** e o **mínimo para o app Node** rodar:
 | `server/` | Backend Node: HTTP, APIs, PDF e diálogos |
 | `launcher/` | WebView2, fallback navegador e consola oculta |
 | `tauri-fase_legado/` | `.exe`, build Tauri e `src-tauri/` (congelado) |
-| `assets/`, `data/`, `output/` | Recursos, históricos e PDF/JSON canônicos |
+| `assets/`, `data/` | Recursos e históricos versionados no repo |
+| `C:\auto-orcamento\output\` (Windows) | PDF/JSON canônicos fora do repositório (ver abaixo) |
 | `export/` | Espelho SQLite dos snapshots (`orcamentos.sqlite`; não versionado) |
 | `docs/` | Arquitetura, Atlas/Axis, snapshots e guia de plugins Cursor |
 | `scripts/` | Utilitários de build, acesso remoto e consolidação SQLite |
 
-**URLs no browser:** o código-fonte fica em `web/` e `server/`, mas o app continua abrindo em `http://localhost:3000` com caminhos na raiz (`/app.js`, `/styles.css`, `/assets/papel-timbrado.png`, `/data/*.json`). O `server/server.js` mapeia o primeiro segmento da URL: `assets/`, `data/` e `output/` vêm da raiz do repo; o restante vem de `web/`.
+**URLs no browser:** o código-fonte fica em `web/` e `server/`, mas o app continua abrindo em `http://localhost:3000` com caminhos na raiz (`/app.js`, `/styles.css`, `/assets/papel-timbrado.png`, `/data/*.json`). O `server/server.js` mapeia o primeiro segmento da URL: `assets/` e `data/` vêm da raiz do repo; `/output/*` aponta para a pasta de saída no disco (`C:\auto-orcamento\output` no Windows); o restante vem de `web/`.
 
 | Referência | Branch / tag | Documento |
 |---|---|---|
@@ -63,7 +64,7 @@ O web app (`web/index.html`, `web/app.js`, `web/api.js`, `web/styles.css`, `asse
 
 Produção no Axis: [`docs/atlas-axis.md`](docs/atlas-axis.md). Funnel legado neste PC: [`docs/acesso-remoto.md`](docs/acesso-remoto.md).
 
-Históricos e tabelas ficam em **`data/`**. PDFs e snapshots JSON canônicos ficam em **`output/`**. O espelho SQLite para outros webapps fica em **`export/`** (ver [`docs/export-sqlite.md`](docs/export-sqlite.md)).
+Históricos e tabelas ficam em **`data/`** (no repositório). PDFs e snapshots JSON canônicos ficam em **`C:\auto-orcamento\output\`** no Windows (fora do OneDrive/repo; variável `OUTPUT_DIR` para outro caminho). O espelho SQLite para outros webapps fica em **`export/`** no repo (ver [`docs/export-sqlite.md`](docs/export-sqlite.md)).
 
 **Depois de editar o código:** abra de novo com `abrir-auto-orcamento.bat` (ou `npm start`) — não precisa de build.
 
@@ -266,13 +267,13 @@ data/tabela-blanc-2026.json
 
 O app lê `tabelas-hospitalares.json` e `tabela-implantes.json`. `tabela-blanc-2026.json` é o arquivo seccionado da extração Blanc (não é carregado em runtime). Essas tabelas são versionadas e podem ser editadas manualmente em `data/`; basta reabrir o app para carregar as alterações das tabelas operacionais.
 
-Os PDFs e snapshots JSON gerados automaticamente ficam em:
+Os PDFs e snapshots JSON gerados automaticamente ficam fora do repositório:
 
 ```text
-output/
+C:\auto-orcamento\output\
 ```
 
-Essa pasta não é versionada no Git. Os JSON em `output/` são a **fonte canônica** do banco de arquivos do app (botão **Abrir** e APIs de snapshot). Cada exportação usa o nome da paciente, ` - `, a **primeira cirurgia proposta** (se preenchida) e a data/hora, por exemplo `Maria da Silva - Abdominoplastia 2026-06-18 14-30-05.pdf` e o `.json` com o mesmo nome base.
+No Linux (Axis) o padrão continua sendo `output/` na raiz do deploy, salvo `OUTPUT_DIR`. Essa pasta não é versionada no Git. Referência técnica: [`docs/agent-memory/output-path.md`](docs/agent-memory/output-path.md). Os JSON ali são a **fonte canônica** do banco de arquivos do app (botão **Abrir** e APIs de snapshot). Cada exportação usa o nome da paciente, ` - `, a **primeira cirurgia proposta** (se preenchida) e a data/hora, por exemplo `Maria da Silva - Abdominoplastia 2026-06-18 14-30-05.pdf` e o `.json` com o mesmo nome base.
 
 O espelho consolidado para outros webapps fica em:
 
@@ -315,7 +316,7 @@ O botão **Abrir** (verde, ao lado de **Limpar**) carrega um snapshot JSON gerad
 ### Uso local
 
 1. No Windows, o servidor Node abre um **seletor nativo** via **pywebview** (WebView2, mesma stack do app; nítido em telas HiDPI), com fallback para PowerShell e tkinter.
-2. A pasta inicial é a **última usada** (`lastSnapshotDir` em `data/settings.json`), com fallback em `output/`; a raiz do perfil do usuário (`C:\Users\...`) nunca é reutilizada como pasta salva. Após imprimir, a pasta `output/` também é gravada automaticamente.
+2. A pasta inicial é a **última usada** (`lastSnapshotDir` em `data/settings.json`), com fallback em `C:\auto-orcamento\output\`; a raiz do perfil do usuário (`C:\Users\...`) nunca é reutilizada como pasta salva. Após imprimir, essa pasta de saída também é gravada automaticamente.
 3. Ao escolher um arquivo, o app valida `schemaVersion: 1`, repopula o formulário e atualiza a pré-visualização.
 
 ### Produção no Axis (celular / tablet)

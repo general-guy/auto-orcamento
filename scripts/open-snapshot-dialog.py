@@ -5,6 +5,8 @@ from __future__ import annotations
 import os
 import sys
 
+DEFAULT_OUTPUT_DIR = r"C:\auto-orcamento\output"
+
 
 def configure_dpi_awareness() -> None:
     if sys.platform != "win32":
@@ -82,9 +84,18 @@ def pick_with_tkinter(initial_dir: str) -> str | None:
     return os.path.normpath(selected) if selected else None
 
 
+def resolve_initial_dir() -> str:
+    if len(sys.argv) > 1:
+        return os.path.normpath(sys.argv[1])
+
+    if sys.platform == "win32" and os.path.isdir(DEFAULT_OUTPUT_DIR):
+        return os.path.normpath(DEFAULT_OUTPUT_DIR)
+
+    return os.path.normpath(os.getcwd())
+
+
 def main() -> int:
-    initial_dir = sys.argv[1] if len(sys.argv) > 1 else os.getcwd()
-    initial_dir = os.path.normpath(initial_dir)
+    initial_dir = resolve_initial_dir()
 
     if not os.path.isdir(initial_dir):
         print(f"Pasta inicial inexistente: {initial_dir}", file=sys.stderr)
