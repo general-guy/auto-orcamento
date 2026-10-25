@@ -11,6 +11,7 @@ Abrir o app **sem esperar** o Axis; em segundo plano reconciliar `C:\auto-orcame
 | Peça | Caminho |
 |------|---------|
 | Fila + SSE | [`server/axis-sync.js`](../server/axis-sync.js) |
+| Log de sessões (10 últimas) | `C:\auto-orcamento\logs\axis-sync\session-*.log` — stdout/stderr de cada execução do Python (`startup`, `push`, …) |
 | Toasts UI | [`web/sync-toasts.js`](../web/sync-toasts.js), `GET /api/sync/events` |
 | Motor SSH/rsync | `local-atlas/axis/scripts/sync_auto_orcamento.py` |
 

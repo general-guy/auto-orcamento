@@ -1,6 +1,11 @@
 const { spawn } = require("node:child_process");
 const path = require("node:path");
 
+const {
+  createAxisSyncSessionLogger,
+  resolveAxisSyncLogDir,
+} = require("./axis-sync-session-log");
+
 const DEFAULT_LOCAL_ATLAS = path.join(
   "C:",
   "Users",
@@ -13,6 +18,7 @@ const DEFAULT_LOCAL_ATLAS = path.join(
 
 const syncClients = new Set();
 let queue = Promise.resolve();
+let syncLogDir = null;
 
 function resolveLocalAtlasRoot() {
   const override = String(process.env.AUTO_ORCAMENTO_LOCAL_ATLAS || "").trim();
@@ -58,8 +64,14 @@ function parseStdoutChunk(buffer, onToast) {
   return rest;
 }
 
-function runPythonSync(argv, { timeoutMs = 4 * 60 * 60 * 1000 } = {}) {
+function runPythonSync(argv, { taskName = "sync", timeoutMs = 4 * 60 * 60 * 1000 } = {}) {
   const script = path.join(resolveLocalAtlasRoot(), "axis", "scripts", "sync_auto_orcamento.py");
+  const sessionLog = createAxisSyncSessionLogger(syncLogDir, {
+    taskName,
+    argv,
+    scriptPath: script,
+  });
+
   return new Promise((resolve) => {
     const proc = spawn("py", ["-3", script, ...argv], {
       cwd: resolveLocalAtlasRoot(),
@@ -69,8 +81,10 @@ function runPythonSync(argv, { timeoutMs = 4 * 60 * 60 * 1000 } = {}) {
 
     let stdoutBuffer = "";
     let settled = false;
+    let timedOut = false;
     const timer = setTimeout(() => {
       if (!settled) {
+        timedOut = true;
         proc.kill();
         broadcast({
           type: "toast",
@@ -81,11 +95,13 @@ function runPythonSync(argv, { timeoutMs = 4 * 60 * 60 * 1000 } = {}) {
     }, timeoutMs);
 
     proc.stdout.on("data", (chunk) => {
+      sessionLog.logChunk("stdout", chunk);
       stdoutBuffer += chunk.toString("utf8");
       stdoutBuffer = parseStdoutChunk(stdoutBuffer, (toast) => broadcast(toast));
     });
 
     proc.stderr.on("data", (chunk) => {
+      sessionLog.logChunk("stderr", chunk);
       const text = chunk.toString("utf8").trim();
       if (text) {
         console.error(`[axis-sync] ${text}`);
@@ -99,6 +115,7 @@ function runPythonSync(argv, { timeoutMs = 4 * 60 * 60 * 1000 } = {}) {
         parseStdoutChunk(stdoutBuffer + "\n", (toast) => broadcast(toast));
       }
       const exitCode = typeof code === "number" ? code : 1;
+      sessionLog.finish(exitCode, { timedOut });
       if (exitCode !== 0) {
         broadcast({
           type: "toast",
@@ -112,6 +129,7 @@ function runPythonSync(argv, { timeoutMs = 4 * 60 * 60 * 1000 } = {}) {
     proc.on("error", (error) => {
       settled = true;
       clearTimeout(timer);
+      sessionLog.finish(1, { spawnError: error.message });
       broadcast({
         type: "toast",
         level: "error",
@@ -124,7 +142,7 @@ function runPythonSync(argv, { timeoutMs = 4 * 60 * 60 * 1000 } = {}) {
 
 function enqueue(taskName, argv) {
   queue = queue
-    .then(() => runPythonSync(argv))
+    .then(() => runPythonSync(argv, { taskName }))
     .catch((error) => {
       broadcast({
         type: "toast",
@@ -138,6 +156,7 @@ function enqueue(taskName, argv) {
 
 function createAxisSync({ bindHost, dataDir }) {
   const enabled = isSyncEnabled(bindHost);
+  syncLogDir = enabled ? resolveAxisSyncLogDir(dataDir) : null;
 
   function enqueueStartup() {
     if (!enabled) {

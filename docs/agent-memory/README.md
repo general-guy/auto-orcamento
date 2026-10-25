@@ -9,6 +9,7 @@ Memória durável do **Auto Orçamento** (decisões, caminhos, deploy). O plugin
 | Dados ao vivo Windows (`C:\auto-orcamento\`) | [`output-path.md`](output-path.md) |
 | CT 100, axis-data, `/opt` vs `/data` | [`axis-ct100.md`](axis-ct100.md) |
 | Sync automático Atlas ↔ Axis (dev) | [`../atlas-axis-sync.md`](../atlas-axis-sync.md) |
+| Log das últimas 10 sessões de sync (Atlas) | [`axis-sync-sessions.md`](axis-sync-sessions.md) |
 | Narrativa Atlas/Axis no app | [`../atlas-axis.md`](../atlas-axis.md) |
 | SQLite espelho | [`../export-sqlite.md`](../export-sqlite.md) |
 | Operação Axis (scripts, Pi, PVE) | repositório **`local-atlas`** (`axis/`, `docs/referencias/web-apps-axis.md`) |
