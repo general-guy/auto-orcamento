@@ -27,11 +27,15 @@ O Python no subprocesso usava cp1252 no stdout; o Node lia UTF-8. **`axis-sync.j
 
 Explorer pode mostrar a mesma “Data de modificação” em todos os PDFs; a **criação** costuma continuar correta. O merge usa **mtime**; no Patriot não há data de criação do Windows.
 
-Recuperação (scripts no **local-atlas**):
+**Regras de mtime (local-atlas):** `data/` e `export/` usam só **modificação** (`st_mtime`). `output/` usa **data do documento** (criação / carimbo no nome do PDF) no merge e no push.
 
-1. `--repair-mtimes <member>` — alinha `st_mtime` local (criação / carimbo no nome do PDF).
-2. `--align-remote-mtimes <member>` — `touch` no axis-data sem reupload (evita o merge puxar tudo porque o remoto parecia “mais novo”).
-3. `--merge-member <member>` — reconcilia conteúdo.
+Recuperação de PDFs com data errada (**só `output/`**):
+
+1. `--repair-mtimes output` — alinha `st_mtime` local.
+2. `--align-remote-mtimes output` — `touch` no Patriot sem reupload.
+3. `--merge-member output` — reconcilia conteúdo.
+
+`data/`/`export/`: merge normal; não usar `repair` (birthtime não entra na comparação).
 
 Detalhes: [`../atlas-axis-sync.md`](../atlas-axis-sync.md#datas-dos-arquivos-output-etc).
 
@@ -41,4 +45,4 @@ Sintoma: toast `data: 0 puxado(s), 15 enviado(s), 0 igual(is).` em cada abertura
 
 Causa no **local-atlas**: `find -printf '%Y'` (tipo `f`, não mtime) → inventário remoto vazio → push repetido.
 
-Correção: `%T@`, SFTP com `utime`, slop 1 s, data lógica no push, flags acima.
+Correção: `%T@`, SFTP com `utime`, slop 1 s. Pull repetido de `data/` (15 arquivos) vinha de comparar com `birthtime` — corrigido separando mtime por membro (ver acima).

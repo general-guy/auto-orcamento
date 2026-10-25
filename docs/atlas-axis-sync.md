@@ -49,7 +49,7 @@ Deploy tar completo continua válido para cutover ou CT novo.
 
 ## Datas dos arquivos (`output/` etc.)
 
-O merge usa **mtime** (no Axis só mtime/atime; não há “data de criação” do Windows). No push, o script grava no Patriot o horário lógico do documento: o **mais antigo** entre modificação local, criação no Windows (`st_birthtime`) e o carimbo no nome (`… 2026-09-08 14-07-13.pdf`).
+O merge usa **mtime** (no Axis só mtime/atime). **`data/` e `export/`** — comparação e push com o `st_mtime` real (última gravação). **`output/`** — data do documento (mais antigo entre modificação, criação no Windows e carimbo no nome `… 2026-09-08 14-07-13.pdf`).
 
 Se um sync em massa deixou tudo com a mesma “Data de modificação” no Explorer:
 
@@ -59,7 +59,7 @@ py -3 .\axis\scripts\sync_auto_orcamento.py --align-remote-mtimes output
 py -3 .\axis\scripts\sync_auto_orcamento.py --merge-member output
 ```
 
-`--align-remote-mtimes` faz `touch` no Patriot com a data lógica do documento (sem reupload). Só depois o merge deixa de puxar tudo de volta por mtime “falso” no Axis.
+`--repair-mtimes` e `--align-remote-mtimes` são para **`output/`** apenas. `data/`/`export/` usam mtime de modificação; o merge normal basta.
 
 ## Relacionado
 
