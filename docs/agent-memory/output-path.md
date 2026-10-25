@@ -1,42 +1,41 @@
-# Pasta de saída (PDF e snapshot JSON)
+# Dados ao vivo fora do repo (Atlas / Windows)
 
-Decisão (2026-10-24): tirar `output/` do repositório no Windows para não depender do OneDrive nem do caminho do clone.
+Decisão (2026-10-25): concentrar em `C:\auto-orcamento\` o que muda no dia a dia e pode sincronizar no futuro.
 
-## Caminho canônico (Atlas / Windows)
+## Caminhos canônicos
 
 ```text
-C:\auto-orcamento\output\
-C:\auto-orcamento\export\orcamentos.sqlite   (cópia na consolidação; ver docs/export-sqlite.md)
+C:\auto-orcamento\data\          históricos, settings, tabelas em runtime
+C:\auto-orcamento\output\        PDF + snapshot JSON
+C:\auto-orcamento\export\        orcamentos.sqlite (cópia na consolidação)
 ```
 
-- Criada automaticamente pelo servidor na primeira impressão ou consolidação.
-- Migração nesta sessão: conteúdo antigo de `{repo}/output/` movido para o caminho acima.
+- **Seed no repo:** `seed/data/` (versionado). `server/data-bootstrap.js` copia para `dataDir` só arquivos que ainda não existem ao vivo.
+- **Legado:** se ainda existir `{repo}/data/`, o bootstrap também copia de lá (uma vez por arquivo).
+- Pasta `{repo}/data/` está no `.gitignore` (lixeira local / migração).
 
 ## Código
 
 | Artefato | Função |
 |---|---|
-| `server/paths.js` | Resolve `outputDir` (e `repoRoot`, `data/`, `export/`) |
-| `server/server.js` | Grava PDF/JSON, APIs `/api/snapshots*`, estáticos `/output/*`, diálogo **Abrir** |
-| `scripts/open-snapshot-dialog.py` | Fallback de pasta inicial = `C:\auto-orcamento\output` |
-| `scripts/consolidate-to-sqlite.js` | Lê JSON de `outputDir` |
+| `server/paths.js` | `dataDir`, `outputDir`, `seedDataDir`; overrides `DATA_DIR`, `OUTPUT_DIR` |
+| `server/data-bootstrap.js` | Popula `dataDir` a partir de seed/legado |
+| `server/server.js` | APIs gravam em `dataDir`; HTTP `/data/*` serve de `dataDir` |
 
-## Override
+## Overrides
 
-Variável de ambiente **`OUTPUT_DIR`**: caminho absoluto da pasta de saída (útil no Axis ou outro deploy).
+| Variável | Efeito |
+|---|---|
+| `DATA_DIR` | Pasta de dados (absoluto) |
+| `OUTPUT_DIR` | Pasta de PDF/JSON |
 
-Sem `OUTPUT_DIR`:
-
-- **win32:** `C:\auto-orcamento\output`
-- **outros:** `{repoRoot}/output` (comportamento anterior no Linux)
+Sem override no **win32:** `C:\auto-orcamento\data` e `C:\auto-orcamento\output`. Em **Linux** (deploy atual): `{repoRoot}/data` e `{repoRoot}/output` até novo desenho do CT.
 
 ## Settings
 
-`data/settings.json` → `lastSnapshotDir`: pasta do último **Abrir**/impressão. O servidor remapeia o caminho legado `{repo}/output` para `outputDir` atual.
+`settings.json` em `dataDir` → `zoom`, `lastSnapshotDir` (pasta do **Abrir**/impressão; legado `{repo}/output` remapeado para `outputDir`).
 
 ## Documentação relacionada
 
-- `README.md` (uso e URLs)
-- `docs/ARCHITECTURE.md` (roteamento estático e APIs)
-- `docs/export-sqlite.md` (espelho a partir dos JSON de saída)
-- `docs/acesso-remoto.md` / `docs/atlas-axis.md` (remoto e produção)
+- `docs/export-sqlite.md`
+- `seed/data/README.md`

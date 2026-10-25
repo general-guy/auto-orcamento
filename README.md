@@ -32,13 +32,15 @@ Na raiz ficam só os **atalhos de uso** e o **mínimo para o app Node** rodar:
 | `web/` | Frontend: HTML, CSS e JavaScript do app |
 | `server/` | Backend Node: HTTP, APIs, PDF e diálogos |
 | `launcher/` | WebView2, fallback navegador e consola oculta |
-| `assets/`, `data/` | Recursos e históricos versionados no repo |
+| `assets/` | Timbrado, fontes, ícones (versionados no repo) |
+| `seed/data/` | Seed versionado de tabelas e históricos base |
+| `C:\auto-orcamento\data\` (Windows) | Dados ao vivo: históricos, settings, tabelas em runtime |
 | `C:\auto-orcamento\output\` (Windows) | PDF/JSON canônicos fora do repositório (ver abaixo) |
 | `export/` | Espelho SQLite dos snapshots (`orcamentos.sqlite`; não versionado) |
 | `docs/` | Arquitetura, Atlas/Axis, snapshots e guia de plugins Cursor |
 | `scripts/` | Utilitários de build, acesso remoto e consolidação SQLite |
 
-**URLs no browser:** o código-fonte fica em `web/` e `server/`, mas o app continua abrindo em `http://localhost:3000` com caminhos na raiz (`/app.js`, `/styles.css`, `/assets/papel-timbrado.png`, `/data/*.json`). O `server/server.js` mapeia o primeiro segmento da URL: `assets/` e `data/` vêm da raiz do repo; `/output/*` aponta para a pasta de saída no disco (`C:\auto-orcamento\output` no Windows); o restante vem de `web/`.
+**URLs no browser:** o app abre em `http://localhost:3000`. `server/server.js` serve `web/` (UI), `assets/` do repo, `/data/*` de `C:\auto-orcamento\data` no Windows (`DATA_DIR` opcional) e `/output/*` de `C:\auto-orcamento\output`.
 
 | Referência | Branch / tag | Documento |
 |---|---|---|
@@ -58,7 +60,7 @@ O web app (`web/index.html`, `web/app.js`, `web/api.js`, `web/styles.css`, `asse
 
 Produção e acesso remoto: [`docs/atlas-axis.md`](docs/atlas-axis.md), [`docs/acesso-remoto.md`](docs/acesso-remoto.md). Funnel + tokens (removidos): [`docs/legado-funnel-auth.md`](docs/legado-funnel-auth.md).
 
-Históricos e tabelas ficam em **`data/`** (no repositório). PDFs e snapshots JSON canônicos ficam em **`C:\auto-orcamento\output\`** no Windows (fora do OneDrive/repo; variável `OUTPUT_DIR` para outro caminho). O espelho SQLite fica em **`export/orcamentos.sqlite`** no repo e, na mesma consolidação, cópia idêntica em **`C:\auto-orcamento\export\`** (ver [`docs/export-sqlite.md`](docs/export-sqlite.md)).
+Históricos, settings e tabelas em runtime ficam em **`C:\auto-orcamento\data\`** no Windows (`DATA_DIR` opcional). Seed versionado: **`seed/data/`**. PDFs e snapshots JSON: **`C:\auto-orcamento\output\`**. Espelho SQLite: **`export/orcamentos.sqlite`** no repo + **`C:\auto-orcamento\export\`** (ver [`docs/export-sqlite.md`](docs/export-sqlite.md), [`docs/agent-memory/output-path.md`](docs/agent-memory/output-path.md)).
 
 **Depois de editar o código:** abra de novo com `abrir-auto-orcamento.bat` (ou `npm start`) — não precisa de build.
 
@@ -153,11 +155,11 @@ Removido do tree atual. Ver [`docs/legado-tauri.md`](docs/legado-tauri.md), tag 
 
 ## Zoom da interface
 
-`Ctrl` + roda do mouse, `Ctrl` + `+` / `Ctrl` + `-` (passos de 10%, entre 50% e 200%) e `Ctrl` + `0` para voltar a 100%. O nível fica salvo em `data/settings.json`. Um indicador flutuante (estilo Chrome) mostra a porcentagem, botões `−`/`+` e **Redefinir**. No fallback `launcher/launch-app.js` (Chrome/Edge), vale o zoom nativo do navegador.
+`Ctrl` + roda do mouse, `Ctrl` + `+` / `Ctrl` + `-` (passos de 10%, entre 50% e 200%) e `Ctrl` + `0` para voltar a 100%. O nível fica salvo em `C:\auto-orcamento\data\settings.json` (Windows). Um indicador flutuante (estilo Chrome) mostra a porcentagem, botões `−`/`+` e **Redefinir**. No fallback `launcher/launch-app.js` (Chrome/Edge), vale o zoom nativo do navegador.
 
 No **Node (WebView2)**, o zoom escala só a interface na tela (`transform: scale()` no `body`). A **impressão do navegador** (`window.print()`) ignora esse zoom: `@media print` em `styles.css` restaura dimensões A4 e anula o transform, para o papel sair igual ao PDF automático.
 
-Preferências locais (zoom e última pasta do botão **Abrir**) ficam em `data/settings.json`.
+Preferências locais (zoom e última pasta do botão **Abrir**) ficam em `settings.json` dentro de `C:\auto-orcamento\data\`.
 
 **Ícone do app:** `npm run icon:web` sincroniza `assets/app-icon.ico` e favicons (G dourado em círculo preto).
 
@@ -191,40 +193,29 @@ Depois configure o Cursor para abrir novos terminais com o perfil `PowerShell 7`
 - Nas observações, trechos `*texto*` (estilo WhatsApp) saem em negrito no documento; o mesmo peso Medium vale para o rótulo `Tempo previsto`.
 - Agrupa as seções do formulário em blocos com borda cinza discreta para facilitar a leitura do painel esquerdo.
 
-## Dados Locais
+## Dados locais (Windows)
 
-Os históricos ficam em arquivos JSON dentro de `data/`:
-
-```text
-data/cirurgias.json
-data/hospitais.json
-data/extras.json
-data/pagamentos.json
-data/observacoes.json
-data/tecnologias.json
-data/unimed-n.json
-```
-
-Esses arquivos são usados pelo servidor Node e são versionados no repositório como base inicial. Em **produção**, históricos e `output/` ao vivo ficam no disco do Axis (CT 100), não neste clone — ver [`docs/atlas-axis.md`](docs/atlas-axis.md). Quando o app altera históricos como extras, pagamentos, observações, tecnologias ou procedimentos Unimed N, essas mudanças ficam locais até serem adicionadas a um commit. A ordem dos históricos pode ser ajustada pelo drag and drop nos dropdowns (handle `⋮⋮`, com duas ou mais opções visíveis) — persiste nos JSON correspondentes.
-
-Não entram no Git (só neste PC / no disco do Axis):
+Tudo que o app lê/grava em “data” no dia a dia fica em **`C:\auto-orcamento\data\`** (fora do OneDrive/repo). Seed versionado no Git: **`seed/data/`** (copiado na primeira abertura se faltar arquivo). Override: variável `DATA_DIR`.
 
 ```text
-data/pacientes.json
-data/settings.json
+C:\auto-orcamento\data\cirurgias.json
+C:\auto-orcamento\data\hospitais.json
+… (históricos, pacientes, settings, tabelas em runtime)
 ```
 
-`data/pacientes.json` é o autocomplete do campo **Nome**. Se o arquivo não existir, `server/server.js` cria uma lista vazia. O seed versionado é `data/pacientes.json.example`. `data/settings.json` guarda zoom e a última pasta do botão **Abrir**.
+`pacientes.json` e `settings.json` existem só no disco ao vivo. O exemplo de pacientes está em `seed/data/pacientes.json.example`. Drag and drop nos dropdowns (⋮⋮) persiste a ordem nos JSON correspondentes.
 
-As tabelas de referência estruturadas ficam em:
+Tabelas de referência (seed + cópia ao vivo):
 
 ```text
-data/tabelas-hospitalares.json
-data/tabela-implantes.json
-data/tabela-blanc-2026.json
+seed/data/tabelas-hospitalares.json
+seed/data/tabela-implantes.json
+seed/data/tabela-blanc-2026.json   (extração; não carregada em runtime)
 ```
 
-O app lê `tabelas-hospitalares.json` e `tabela-implantes.json`. `tabela-blanc-2026.json` é o arquivo seccionado da extração Blanc (não é carregado em runtime). Essas tabelas são versionadas e podem ser editadas manualmente em `data/`; basta reabrir o app para carregar as alterações das tabelas operacionais.
+Para atualizar catálogos versionados: edite em `seed/data/`, commit, e copie manualmente para `C:\auto-orcamento\data\` (ou apague o arquivo ao vivo e reinicie o app para repuxar o seed).
+
+Detalhes: [`docs/agent-memory/output-path.md`](docs/agent-memory/output-path.md).
 
 Os PDFs e snapshots JSON gerados automaticamente ficam fora do repositório:
 

@@ -11,7 +11,16 @@ function isRemoteRequest(request) {
   return Boolean(request.headers["x-forwarded-for"]);
 }
 
-const { repoRoot, webDir, dataDir, outputDir, exportDir } = require("./paths");
+const {
+  repoRoot,
+  webDir,
+  dataDir,
+  outputDir,
+  exportDir,
+  seedDataDir,
+  legacyRepoDataDir,
+} = require("./paths");
+const { ensureDataDirReady } = require("./data-bootstrap");
 
 const port = 3000;
 const bindHost = process.env.BIND_HOST || "127.0.0.1";
@@ -946,8 +955,6 @@ async function handleTechnologyApi(request, response) {
   sendJson(response, 405, { error: "Método não permitido." });
 }
 
-const repoRootUrlPrefixes = ["assets", "data"];
-
 function isPathInsideDir(filePath, dir) {
   const resolvedFile = path.resolve(filePath);
   const resolvedDir = path.resolve(dir);
@@ -974,7 +981,16 @@ function resolveStaticPath(requestedPath) {
     return { filePath, urlPath };
   }
 
-  const baseDir = repoRootUrlPrefixes.includes(topSegment) ? repoRoot : webDir;
+  if (topSegment === "data") {
+    const relativePath = urlPath.slice("data".length).replace(/^\/+/, "");
+    const filePath = path.normalize(path.join(dataDir, relativePath));
+    if (!isPathInsideDir(filePath, dataDir)) {
+      return null;
+    }
+    return { filePath, urlPath };
+  }
+
+  const baseDir = topSegment === "assets" ? repoRoot : webDir;
   const filePath = path.normalize(path.join(baseDir, urlPath));
 
   if (!isPathInsideDir(filePath, baseDir)) {
@@ -1113,11 +1129,22 @@ const server = http.createServer(async (request, response) => {
 });
 
 async function startServer() {
+  const bootstrap = ensureDataDirReady({
+    dataDir,
+    seedDataDir,
+    legacyRepoDataDir,
+  });
+  if (bootstrap.copied > 0) {
+    console.log(`Dados: ${bootstrap.copied} arquivo(s) copiado(s) para ${dataDir}.`);
+  }
+
   ensureDataFile();
   ensureOutputDir();
   await freeTcpPort(port);
   server.listen(port, bindHost, () => {
     console.log(`Auto Orçamento disponível em http://${bindHost}:${port}`);
+    console.log(`Dados: ${dataDir}`);
+    console.log(`Saída: ${outputDir}`);
 
     // Espelho SQLite alinhado a output/ em cada abertura do app (além da impressão).
     consolidateOutputSqliteSafe();

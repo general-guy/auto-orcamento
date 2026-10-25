@@ -4,7 +4,5 @@ node_modules/
 dist/
 __pycache__/
 auto-orcamento.exe
-data/settings.json
-data/pacientes.json
-data/.~lock.*
+/data/
 .cursor/hooks/state/

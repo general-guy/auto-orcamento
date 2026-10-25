@@ -9,7 +9,7 @@ Para fluxos com plugins (quando pedir o quê, frases úteis): [`docs/cursor-plug
 - App local de orçamentos cirúrgicos: **Node.js + WebView2** (`pywebview`) na `main` (desenvolvimento no Atlas).
 - Entrada diária neste PC: `abrir-auto-orcamento.bat` → `127.0.0.1:3000`. Produção: Axis CT 100 (`https://axis.tail5fe4b7.ts.net/`, Tailscale Serve, sem Funnel) — ver `docs/atlas-axis.md`.
 - Código ativo: `web/`, `server/`, `launcher/`. Tauri e Funnel+token removidos do tree — ver `docs/legado-tauri.md` e `docs/legado-funnel-auth.md`.
-- Dados: históricos em `data/*.json` (a maior parte versionada neste clone); `data/pacientes.json` e `data/settings.json` são locais (`.gitignore`). PDF/JSON canônicos: ver `docs/agent-memory/output-path.md`; espelho SQLite em `export/orcamentos.sqlite` + `C:\auto-orcamento\export\` (ver `docs/export-sqlite.md`).
+- Dados ao vivo no Windows: `C:\auto-orcamento\data\` + `output\` + `export\` (ver `docs/agent-memory/output-path.md`). Seed no repo: `seed/data/`. Pasta `data/` no clone é local (`.gitignore`).
 - Após mudar código: reabrir o app (`abrir-auto-orcamento.bat` ou `npm start`) — sem build. Deploy para o Axis: script no `local-atlas` (`axis/scripts/deploy_auto_orcamento.py`), só com pedido explícito.
 - Docs técnicas: `README.md`, `docs/ARCHITECTURE.md`, `docs/atlas-axis.md`, `docs/acesso-remoto.md`, `docs/export-sqlite.md`, `docs/tabelas-hospitalares.md`, `docs/unimed-n.md`.
 
