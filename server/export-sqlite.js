@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { DatabaseSync } = require("node:sqlite");
+const { defaultWindowsExportDir } = require("./paths");
 
 const DEFAULT_DB_NAME = "orcamentos.sqlite";
 
@@ -190,6 +191,28 @@ function defaultDeliverPaths(repoRoot) {
   return [path.join(repoRoot, "..", "dados-clinica", "import", DEFAULT_DB_NAME)];
 }
 
+function windowsExportSqliteDeliverPath() {
+  if (process.platform !== "win32") {
+    return null;
+  }
+
+  return path.join(path.resolve(defaultWindowsExportDir), DEFAULT_DB_NAME);
+}
+
+function withWindowsExportDeliverPath(targets) {
+  const windowsTarget = windowsExportSqliteDeliverPath();
+  if (!windowsTarget) {
+    return targets;
+  }
+
+  const resolved = new Set((targets || []).map((target) => path.resolve(target)));
+  if (resolved.has(path.resolve(windowsTarget))) {
+    return targets;
+  }
+
+  return [...(targets || []), windowsTarget];
+}
+
 function deliverSqliteCopy(dbPath, deliverPaths) {
   const delivered = [];
   const deliverErrors = [];
@@ -236,8 +259,9 @@ function consolidateOutputToSqlite({
 
   const dbPath = path.join(exportDir, dbName);
   const resolvedRepoRoot = repoRoot || path.join(exportDir, "..");
-  const targets =
-    deliverPaths !== undefined ? deliverPaths : defaultDeliverPaths(resolvedRepoRoot);
+  const targets = withWindowsExportDeliverPath(
+    deliverPaths !== undefined ? deliverPaths : defaultDeliverPaths(resolvedRepoRoot),
+  );
   const jsonPaths = listSnapshotJsonFiles(outputDir);
   const records = [];
   const errors = [];

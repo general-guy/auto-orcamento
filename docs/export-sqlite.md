@@ -10,7 +10,8 @@ O Auto Orçamento **não** usa este banco como fonte canônica: PDF e JSON na pa
 |---|---|
 | `output/*.json` | **Canônico** — banco de arquivos do app; botão **Abrir**, APIs `/api/snapshots*` |
 | `output/*.pdf` | Documento gerado na impressão |
-| `export/orcamentos.sqlite` | **Espelho local** — reconstruído a partir de todos os JSON de `output/` |
+| `export/orcamentos.sqlite` | **Espelho no repo** — reconstruído a partir de todos os JSON de `output/` |
+| `C:\auto-orcamento\export\orcamentos.sqlite` | **Cópia idêntica** no Windows (fora do repo; mesmo conteúdo que o espelho) |
 | `../dados-clinica/import/orcamentos.sqlite` | **Entrega** — cópia do espelho para o dados-clinica (push) |
 
 ## Quando é atualizado
@@ -36,6 +37,7 @@ Se um JSON for apagado de `output/`, a entrada correspondente **desaparece** do 
 
 ```text
 export/orcamentos.sqlite
+C:\auto-orcamento\export\orcamentos.sqlite   (Windows; cópia na consolidação)
 ../dados-clinica/import/orcamentos.sqlite
 ```
 
@@ -46,6 +48,7 @@ Após cada consolidação, entrega (push) para o dados-clinica:
 
 | Origem | Destino |
 |--------|---------|
+| `export/orcamentos.sqlite` | `C:\auto-orcamento\export\orcamentos.sqlite` (Windows) |
 | `export/orcamentos.sqlite` | `../dados-clinica/import/orcamentos.sqlite` |
 | `assets/papel-timbrado.pdf` / `.png` | `../dados-clinica/import/` |
 | `assets/fonts/**` (Gotham / Cinzel) | `../dados-clinica/import/fonts/` |

@@ -64,7 +64,7 @@ O web app (`web/index.html`, `web/app.js`, `web/api.js`, `web/styles.css`, `asse
 
 Produção no Axis: [`docs/atlas-axis.md`](docs/atlas-axis.md). Funnel legado neste PC: [`docs/acesso-remoto.md`](docs/acesso-remoto.md).
 
-Históricos e tabelas ficam em **`data/`** (no repositório). PDFs e snapshots JSON canônicos ficam em **`C:\auto-orcamento\output\`** no Windows (fora do OneDrive/repo; variável `OUTPUT_DIR` para outro caminho). O espelho SQLite para outros webapps fica em **`export/`** no repo (ver [`docs/export-sqlite.md`](docs/export-sqlite.md)).
+Históricos e tabelas ficam em **`data/`** (no repositório). PDFs e snapshots JSON canônicos ficam em **`C:\auto-orcamento\output\`** no Windows (fora do OneDrive/repo; variável `OUTPUT_DIR` para outro caminho). O espelho SQLite fica em **`export/orcamentos.sqlite`** no repo e, na mesma consolidação, cópia idêntica em **`C:\auto-orcamento\export\`** (ver [`docs/export-sqlite.md`](docs/export-sqlite.md)).
 
 **Depois de editar o código:** abra de novo com `abrir-auto-orcamento.bat` (ou `npm start`) — não precisa de build.
 
@@ -101,7 +101,7 @@ Otimizações aplicadas na stack atual: Node e WebView2 em paralelo, liberação
 | Startup | Node em background + `--external-server`; poll breve pelo Node; splash `assets/launcher.html`; módulos pesados lazy no servidor; scripts com `defer` |
 | Impressão | `@media print` anula zoom da UI — papel alinhado ao PDF automático |
 | Snapshot | Exportação JSON na impressão + botão **Abrir** com seletor nativo HiDPI (pywebview/WebView2) |
-| Export SQLite | Na abertura do servidor e após imprimir (local), reconstrói `export/orcamentos.sqlite` a partir de todos os `output/*.json` (espelho; JSON continua canônico) |
+| Export SQLite | Na abertura do servidor e após imprimir (local), reconstrói `export/orcamentos.sqlite` (+ cópia em `C:\auto-orcamento\export\` no Windows) a partir de todos os `output/*.json` (espelho; JSON continua canônico) |
 | Documento | Nas observações, `*texto*` (estilo WhatsApp) vira negrito no preview/PDF; o peso padrão do documento é Gotham Medium (`--document-emphasis-weight: 500`), inclusive o rótulo `Tempo previsto` |
 | Robustez | Liberação da porta 3000 no arranque do `server/server.js`; encerramento confiável ao fechar pelo X |
 
@@ -279,11 +279,10 @@ O espelho consolidado para outros webapps fica em:
 
 ```text
 export/orcamentos.sqlite
+C:\auto-orcamento\export\orcamentos.sqlite
 ```
 
-Também fora do Git. Após cada consolidação, uma cópia é entregue a
-`../dados-clinica/import/` (SQLite + papel timbrado + fontes), para a sessão
-**Orçamentos** da GUI. Detalhes: [`docs/export-sqlite.md`](docs/export-sqlite.md).
+Também fora do Git (incluindo a pasta `export/` no repo). Após cada consolidação, cópias idênticas vão para `C:\auto-orcamento\export\` (Windows) e para `../dados-clinica/import/` (SQLite + papel timbrado + fontes), para a sessão **Orçamentos** da GUI. Detalhes: [`docs/export-sqlite.md`](docs/export-sqlite.md).
 
 ## Impressão, PDF e snapshot JSON
 

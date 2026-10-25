@@ -22,6 +22,9 @@ const dataDir = path.join(repoRoot, "data");
 /** Caminho padrão de PDF/JSON no Windows (fora do repositório). */
 const defaultWindowsOutputDir = "C:\\auto-orcamento\\output";
 
+/** Cópia espelho do SQLite no Windows (fora do repositório). */
+const defaultWindowsExportDir = "C:\\auto-orcamento\\export";
+
 module.exports = {
   repoRoot,
   webDir,
@@ -30,4 +33,5 @@ module.exports = {
   exportDir,
   resolveOutputDir,
   defaultWindowsOutputDir,
+  defaultWindowsExportDir,
 };

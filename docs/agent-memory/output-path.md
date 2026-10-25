@@ -6,6 +6,7 @@ Decisão (2026-10-24): tirar `output/` do repositório no Windows para não depe
 
 ```text
 C:\auto-orcamento\output\
+C:\auto-orcamento\export\orcamentos.sqlite   (cópia na consolidação; ver docs/export-sqlite.md)
 ```
 
 - Criada automaticamente pelo servidor na primeira impressão ou consolidação.
