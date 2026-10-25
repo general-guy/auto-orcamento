@@ -19,6 +19,8 @@ Só quando o sync está habilitado (Windows + `BIND_HOST` localhost). Produção
 
 O merge de `data` / `output` / `export` no arranque usa **SSH find + SFTP** por arquivo (`sync_auto_orcamento_data.py`), não o rsync em massa do `push_axis_data.py`. O log ainda vale para depurar reenvios e mensagens do motor Python.
 
+Toasts de merge usam **`/data/`**, **`/output/`**, **`/export/`** no texto. Com tudo já sincronizado, a etapa lenta costumava ser `/output/` (centenas de PDFs): o motor comparava hash baixando cada arquivo; agora usa **`sha256sum` no Patriot em lote** (local-atlas).
+
 ## Toasts com `` no lugar de acentos
 
 O Python no subprocesso usava cp1252 no stdout; o Node lia UTF-8. **`axis-sync.js`** define `PYTHONIOENCODING=utf-8` e `PYTHONUTF8=1` no spawn do `py`.
