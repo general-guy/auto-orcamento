@@ -79,4 +79,5 @@ py -3 .\axis\scripts\sync_auto_orcamento.py --merge-member output
 
 - [`docs/atlas-axis.md`](atlas-axis.md) — papéis Atlas/Axis
 - [`docs/agent-memory/axis-ct100.md`](agent-memory/axis-ct100.md) — layout axis-data no CT
-- Skill Cursor (global): `ct100-auto-orcamento`
+- [`docs/agent-memory/axis-sync-ui.md`](agent-memory/axis-sync-ui.md) — toasts e histórico no preview
+- Skills Cursor (global): `ct100-webapps` (pai) + `ct100-auto-orcamento` (filho)

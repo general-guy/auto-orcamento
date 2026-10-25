@@ -10,7 +10,7 @@ Para fluxos com plugins (quando pedir o quê, frases úteis): [`docs/cursor-plug
 - Entrada diária neste PC: `abrir-auto-orcamento.bat` → `127.0.0.1:3000`. Produção: Axis CT 100 (`https://axis.tail5fe4b7.ts.net/`, Tailscale Serve, sem Funnel) — ver `docs/atlas-axis.md`.
 - Código ativo: `web/`, `server/`, `launcher/`. Tauri e Funnel+token removidos do tree — ver `docs/legado-tauri.md` e `docs/legado-funnel-auth.md`.
 - Dados ao vivo no Windows: `C:\auto-orcamento\data\` + `output\` + `export\` (ver `docs/agent-memory/output-path.md`). Seed no repo: `seed/data/`. Pasta `data/` no clone é local (`.gitignore`).
-- Sync Atlas↔Axis em background ao abrir o `.bat` (só `127.0.0.1`): `server/axis-sync.js` → `sync_auto_orcamento.py` (se o PVE estiver off, `ensure_axis_online.py` acorda via Hub/WoL antes do merge) — ver `docs/atlas-axis-sync.md`.
+- Sync Atlas↔Axis em background ao abrir o `.bat` (só `127.0.0.1`): `server/axis-sync.js` → `sync_auto_orcamento.py` (wake: `ensure_axis_online.py` no local-atlas); toasts SSE + histórico na toolbar do preview — `docs/atlas-axis-sync.md`, `docs/agent-memory/axis-sync-ui.md`.
 - Após mudar código: reabrir o app (`abrir-auto-orcamento.bat` ou `npm start`) — sem build. Deploy manual completo: `local-atlas` → `deploy_auto_orcamento.py`; o sync automático envia diff de código quando o manifesto mudou.
 - Docs técnicas: `README.md`, `docs/ARCHITECTURE.md`, `docs/atlas-axis.md`, `docs/atlas-axis-sync.md`, `docs/acesso-remoto.md`, `docs/export-sqlite.md`, `docs/tabelas-hospitalares.md`, `docs/unimed-n.md`; memória temática em `docs/agent-memory/README.md`.
 
