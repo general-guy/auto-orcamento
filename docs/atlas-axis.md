@@ -39,11 +39,9 @@ O clone neste PC é para **editar código**. Históricos e PDFs clínicos ao viv
 | Atlas (`.bat` / `npm start`) | omitido → `127.0.0.1` | Só este PC; janela WebView2 |
 | CT 100 (`auto-orcamento.service`) | `192.168.68.202` | O Serve no host precisa alcançar a porta na LAN do CT. iptables no CT aceita só o hypervisor (`.201`) nessa porta. |
 
-## Funnel neste Windows
+## Funnel neste Windows (removido)
 
-`iniciar-acesso-remoto.bat` (Funnel + token de uso único) é **legado de teste**. Não é o caminho clínico: dados de orçamento não devem ir à internet pública. O atalho e o código de auth continuam no repo para o caso excepcional — ver [`acesso-remoto.md`](acesso-remoto.md).
-
-Cliente de produção (celular/tablet/Atlas no browser) usa Tailscale na mesma tailnet e a URL do Axis.
+Tailscale Funnel + `iniciar-acesso-remoto.bat` + `auth-users.json` foram removidos do repositório (out/2026). Histórico: [`legado-funnel-auth.md`](legado-funnel-auth.md). Cliente de produção usa Tailscale na mesma tailnet e a URL do Axis.
 
 ## Deploy
 

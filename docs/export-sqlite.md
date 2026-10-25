@@ -20,7 +20,7 @@ O Auto Orçamento **não** usa este banco como fonte canônica: PDF e JSON na pa
 2. **Automaticamente** após `POST /api/pdf` (clique em **Imprimir orçamento** no uso local) — depois de gravar PDF/JSON.
 3. **Manualmente:** `npm run export:sqlite` (`scripts/consolidate-to-sqlite.js`).
 
-No **acesso remoto** (browser no Axis via Serve, ou Funnel legado neste PC), o cliente **não** chama `/api/pdf`; logo o SQLite **não** é atualizado por impressões remotas. No Axis, a consolidação corre ao subir o Node (systemd) a partir do `output/` daquele disco. Neste PC, ao **iniciar** o servidor (incluindo `iniciar-acesso-remoto.bat`), a consolidação na abertura já espelha o `output/` local. Também se pode consolidar imprimindo no servidor ou rodando o script.
+No browser na tailnet (ex.: Axis via Serve), a impressão chama `/api/pdf` no servidor e atualiza `output/` + SQLite **no host que serve o app**. Ao **iniciar** o Node, a consolidação na abertura já espelha o `output/` local. Também se pode consolidar imprimindo ou rodando `npm run export:sqlite`.
 
 Falhas na consolidação são registadas no log do servidor e **não** bloqueiam a impressão nem a gravação em `output/`.
 

@@ -1,8 +1,15 @@
 const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
-const auth = require("./auth");
 const { freeTcpPort } = require("./port-utils");
+
+function isRemoteRequest(request) {
+  if (request.headers["x-forwarded-proto"] === "https") {
+    return true;
+  }
+
+  return Boolean(request.headers["x-forwarded-for"]);
+}
 
 const { repoRoot, webDir, dataDir, outputDir, exportDir } = require("./paths");
 
@@ -988,24 +995,7 @@ function serveStaticFile(request, response) {
     return;
   }
 
-  const { filePath, urlPath } = resolved;
-  if (auth.isAuthEnabled()) {
-    if (urlPath.startsWith("output/")) {
-      response.writeHead(403);
-      response.end("Acesso negado.");
-      return;
-    }
-
-    if (
-      urlPath.startsWith("data/") &&
-      urlPath !== "data/tabelas-hospitalares.json" &&
-      urlPath !== "data/tabela-implantes.json"
-    ) {
-      response.writeHead(403);
-      response.end("Acesso negado.");
-      return;
-    }
-  }
+  const { filePath } = resolved;
 
   fs.readFile(filePath, (error, content) => {
     if (error) {
@@ -1024,24 +1014,9 @@ function serveStaticFile(request, response) {
 
 const server = http.createServer(async (request, response) => {
   try {
-    const authHandled = await auth.handleRequest(request, response, {
-      dataDir,
-      sendJson,
-      collectRequestBody,
-    });
-
-    if (authHandled) {
-      return;
-    }
-
     if (request.url.startsWith("/api/shutdown")) {
       if (request.method !== "POST") {
         sendJson(response, 405, { error: "Método não permitido." });
-        return;
-      }
-
-      if (!auth.canShutdown(request)) {
-        sendJson(response, 403, { error: "Apenas o administrador pode encerrar o servidor." });
         return;
       }
 
@@ -1112,7 +1087,7 @@ const server = http.createServer(async (request, response) => {
     if (request.url.startsWith("/api/open-snapshot")) {
       // O seletor nativo abre no PC servidor; nunca deve ser disparado por um
       // cliente remoto (Funnel). O frontend remoto usa a caixa dedicada de output/.
-      if (auth.isAuthEnabled() && auth.isRemoteRequest(request)) {
+      if (isRemoteRequest(request)) {
         sendJson(response, 403, {
           error: "Seletor nativo indisponível no acesso remoto. Use a lista de orçamentos salvos.",
         });
@@ -1140,14 +1115,9 @@ const server = http.createServer(async (request, response) => {
 async function startServer() {
   ensureDataFile();
   ensureOutputDir();
-  auth.ensureBootstrapAdmin(dataDir);
   await freeTcpPort(port);
   server.listen(port, bindHost, () => {
     console.log(`Auto Orçamento disponível em http://${bindHost}:${port}`);
-
-    if (auth.isAuthEnabled()) {
-      console.log("Acesso remoto com autenticação ativado (AUTH_ENABLED).");
-    }
 
     // Espelho SQLite alinhado a output/ em cada abertura do app (além da impressão).
     consolidateOutputSqliteSafe();

@@ -3,23 +3,9 @@ const printButton = document.querySelector("#printButton");
 const openButton = document.querySelector("#openButton");
 const openSnapshotInput = document.querySelector("#openSnapshotInput");
 
-// Acesso remoto (Tailscale Funnel): operações nativas do servidor (seletor de
-// arquivo e geração de PDF em output/) não fazem sentido no PC cliente, então
-// usamos os equivalentes do navegador (upload e window.print()).
-let isRemoteSession = false;
-
-async function detectAccessMode() {
-  if (AppApi.isTauri()) {
-    isRemoteSession = false;
-    return;
-  }
-
-  try {
-    const status = await AppApi.getAuthStatus();
-    isRemoteSession = Boolean(status.authRequired) && !status.localAccess;
-  } catch {
-    isRemoteSession = false;
-  }
+function usesSnapshotPickerForOpen() {
+  const host = window.location.hostname;
+  return host !== "127.0.0.1" && host !== "localhost";
 }
 const clearButton = document.querySelector("#clearButton");
 const addSurgeryButton = document.querySelector("#addSurgeryButton");
@@ -4363,32 +4349,26 @@ async function openBudgetSnapshotFile(file) {
 async function handleOpenButtonClick() {
   // No acesso remoto usamos a caixa dedicada (somente leitura de output/), que
   // não expõe o sistema de arquivos do servidor.
-  if (isRemoteSession) {
+  if (usesSnapshotPickerForOpen()) {
     await openSnapshotPicker();
     return;
   }
 
-  // Local (WebView2): seletor nativo do sistema, com acesso total do dono do PC.
-  if (!AppApi.isTauri()) {
-    try {
-      const result = await AppApi.openSnapshot();
-      if (result.cancelled) {
-        return;
-      }
-
-      if (result.error) {
-        window.alert(result.error);
-        return;
-      }
-
-      await applySnapshotPayload(result.snapshot);
-    } catch (error) {
-      window.alert(`Não foi possível abrir o seletor de arquivos.\n\n${error.message}`);
+  try {
+    const result = await AppApi.openSnapshot();
+    if (result.cancelled) {
+      return;
     }
-    return;
-  }
 
-  openSnapshotInput.click();
+    if (result.error) {
+      window.alert(result.error);
+      return;
+    }
+
+    await applySnapshotPayload(result.snapshot);
+  } catch (error) {
+    window.alert(`Não foi possível abrir o seletor de arquivos.\n\n${error.message}`);
+  }
 }
 
 const snapshotPicker = document.querySelector("#snapshotPicker");
@@ -6010,12 +5990,7 @@ printButton.addEventListener("click", async () => {
       saveTechnologyToHistory(),
     ]
   );
-  // No acesso remoto, a exportação de PDF gravaria em output/ do servidor
-  // (inútil para o cliente); o cliente usa "Salvar como PDF" da impressão.
-  if (!isRemoteSession) {
-    await exportPdfDocument();
-  }
-
+  await exportPdfDocument();
   window.print();
 });
 
@@ -6025,8 +6000,6 @@ async function initializeApp() {
   } catch (error) {
     console.error(error);
   }
-
-  await detectAccessMode();
 
   updatePreview();
 

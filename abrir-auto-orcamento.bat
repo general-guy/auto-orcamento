@@ -19,7 +19,7 @@ if errorlevel 1 (
   rem A liberação da porta 3000 ocorre dentro de server/server.js (evita spawn extra de Node aqui).
   start "" /B node server\server.js
 ) else (
-  rem Servidor já ativo (ex.: iniciar-acesso-remoto.bat) — só abre a janela.
+  rem Servidor já ativo na porta 3000 — só abre a janela.
   set AO_KEEP_SERVER=1
 )
 

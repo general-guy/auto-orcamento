@@ -1,4 +1,4 @@
-> **Nota (2026-07):** o código Tauri foi movido para `tauri-fase_legado/`. Referências abaixo a `src-tauri/` na raiz equivalem a `tauri-fase_legado/src-tauri/`; build via `tauri-fase_legado/build-auto-orcamento-tauri.bat`.
+> **Nota (2026-10):** a pasta `tauri-fase_legado/` foi **removida** do `main`; use a tag `stable/tauri-v0.2.0-paused` no Git. Nota antiga (2026-07): referências a `src-tauri/` na raiz equivalem a `tauri-fase_legado/src-tauri/` no histórico.
 
 # Snapshot — migração Tauri estagnada (v0.2.0-paused)
 

@@ -8,9 +8,8 @@ Para fluxos com plugins (quando pedir o quê, frases úteis): [`docs/cursor-plug
 
 - App local de orçamentos cirúrgicos: **Node.js + WebView2** (`pywebview`) na `main` (desenvolvimento no Atlas).
 - Entrada diária neste PC: `abrir-auto-orcamento.bat` → `127.0.0.1:3000`. Produção: Axis CT 100 (`https://axis.tail5fe4b7.ts.net/`, Tailscale Serve, sem Funnel) — ver `docs/atlas-axis.md`.
-- `iniciar-acesso-remoto.bat` (Funnel neste Windows) é legado de teste, não caminho clínico.
-- Código ativo: `web/`, `server/`, `launcher/`. **Não** editar `tauri-fase_legado/` no fluxo diário (Tauri congelado).
-- Dados: históricos em `data/*.json` (a maior parte versionada neste clone); `data/pacientes.json`, `data/settings.json` e `data/auth-users.json` são locais (`.gitignore`). Produção ao vivo no disco do Axis. PDF/JSON canônicos: ver `docs/agent-memory/output-path.md`; espelho SQLite em `export/orcamentos.sqlite` (ver `docs/export-sqlite.md`).
+- Código ativo: `web/`, `server/`, `launcher/`. Tauri e Funnel+token removidos do tree — ver `docs/legado-tauri.md` e `docs/legado-funnel-auth.md`.
+- Dados: históricos em `data/*.json` (a maior parte versionada neste clone); `data/pacientes.json` e `data/settings.json` são locais (`.gitignore`). PDF/JSON canônicos: ver `docs/agent-memory/output-path.md`; espelho SQLite em `export/orcamentos.sqlite` + `C:\auto-orcamento\export\` (ver `docs/export-sqlite.md`).
 - Após mudar código: reabrir o app (`abrir-auto-orcamento.bat` ou `npm start`) — sem build. Deploy para o Axis: script no `local-atlas` (`axis/scripts/deploy_auto_orcamento.py`), só com pedido explícito.
 - Docs técnicas: `README.md`, `docs/ARCHITECTURE.md`, `docs/atlas-axis.md`, `docs/acesso-remoto.md`, `docs/export-sqlite.md`, `docs/tabelas-hospitalares.md`, `docs/unimed-n.md`.
 
@@ -32,7 +31,7 @@ Para fluxos com plugins (quando pedir o quê, frases úteis): [`docs/cursor-plug
 
 ## Learned User Preferences
 
-- Desenvolvimento diário só na stack Node + WebView2; Tauri permanece congelado em `tauri-fase_legado/`.
+- Desenvolvimento diário só na stack Node + WebView2.
 - Depois de features ou correções, costuma pedir revisão da documentação e, em seguida, commit + push.
 - Prefere PowerShell 7 (`pwsh`) no terminal do Cursor no Windows.
 

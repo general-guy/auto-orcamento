@@ -6,11 +6,9 @@ Aplicativo local para gerar orçamentos cirúrgicos em papel timbrado, com preen
 
 Use **`abrir-auto-orcamento.bat`** (Node.js + janela WebView2 nativa). Esta é a **única stack em evolução** na `main`.
 
-A migração **Tauri está congelada** — não há desenvolvimento ativo em Rust nem no branch `feature/tauri`. O código Tauri permanece em **`tauri-fase_legado/`** só como referência histórica (`stable/tauri-v0.2.0-paused`).
+Stack histórica **Tauri** removida do tree; referência no Git: `stable/tauri-v0.2.0-paused` e [`docs/legado-tauri.md`](docs/legado-tauri.md).
 
 O `.bat` abre **sem janelas de terminal visíveis**: relança-se em modo oculto via `launcher/launch-hidden.vbs` e o servidor Node arranca com `CREATE_NO_WINDOW`. Só aparece a janela do app — WebView2 via `pywebview`, com ícone `.ico` nítido na barra de tarefas. Requer **Node.js** e **Python** com `pywebview` (`python -m pip install -r launcher/requirements.txt`).
-
-**Não edite `tauri-fase_legado/`** no fluxo diário — evita `cargo check`, Rust Analyzer e `tauri:dev`, que recriam `tauri-fase_legado/src-tauri/target/` (centenas de MB). Para retomar Tauri no futuro, parta de `stable/tauri-v0.2.0-paused` e de `docs/MIGRATION-tauri.md`.
 
 ## Atlas e Axis
 
@@ -25,7 +23,6 @@ Na raiz ficam só os **atalhos de uso** e o **mínimo para o app Node** rodar:
 | Na raiz | Função |
 |---|---|
 | `abrir-auto-orcamento.bat` | Uso local (duplo clique) |
-| `iniciar-acesso-remoto.bat` | Legado: Funnel neste Windows (não é produção clínica) |
 | `package.json` / `package-lock.json` | Dependências npm |
 | `README.md` | Este guia |
 | `AGENTS.md` | Memória do agente Cursor (plugins / convenções) |
@@ -35,7 +32,6 @@ Na raiz ficam só os **atalhos de uso** e o **mínimo para o app Node** rodar:
 | `web/` | Frontend: HTML, CSS e JavaScript do app |
 | `server/` | Backend Node: HTTP, APIs, PDF e diálogos |
 | `launcher/` | WebView2, fallback navegador e consola oculta |
-| `tauri-fase_legado/` | `.exe`, build Tauri e `src-tauri/` (congelado) |
 | `assets/`, `data/` | Recursos e históricos versionados no repo |
 | `C:\auto-orcamento\output\` (Windows) | PDF/JSON canônicos fora do repositório (ver abaixo) |
 | `export/` | Espelho SQLite dos snapshots (`orcamentos.sqlite`; não versionado) |
@@ -59,10 +55,8 @@ O web app (`web/index.html`, `web/app.js`, `web/api.js`, `web/styles.css`, `asse
 |-------|--------|-------------|
 | **Node + WebView2** | `abrir-auto-orcamento.bat` | Uso diário e desenvolvimento |
 | **Produção (Axis)** | URL Tailscale | `https://axis.tail5fe4b7.ts.net/` (Serve no Proxmox; ver [`docs/atlas-axis.md`](docs/atlas-axis.md)) |
-| **Funnel neste PC** | `iniciar-acesso-remoto.bat` | Legado / teste; token de uso único — não usar em clínica |
-| ~~Tauri (`.exe`)~~ | congelado | ver `stable/tauri-v0.2.0-paused` para retomada futura |
 
-Produção no Axis: [`docs/atlas-axis.md`](docs/atlas-axis.md). Funnel legado neste PC: [`docs/acesso-remoto.md`](docs/acesso-remoto.md).
+Produção e acesso remoto: [`docs/atlas-axis.md`](docs/atlas-axis.md), [`docs/acesso-remoto.md`](docs/acesso-remoto.md). Funnel + tokens (removidos): [`docs/legado-funnel-auth.md`](docs/legado-funnel-auth.md).
 
 Históricos e tabelas ficam em **`data/`** (no repositório). PDFs e snapshots JSON canônicos ficam em **`C:\auto-orcamento\output\`** no Windows (fora do OneDrive/repo; variável `OUTPUT_DIR` para outro caminho). O espelho SQLite fica em **`export/orcamentos.sqlite`** no repo e, na mesma consolidação, cópia idêntica em **`C:\auto-orcamento\export\`** (ver [`docs/export-sqlite.md`](docs/export-sqlite.md)).
 
@@ -78,7 +72,7 @@ abrir-auto-orcamento.bat
 
 Requer **Node.js** instalado. O atalho instala dependências se faltar `node_modules`, **inicia o Node em background** e abre o WebView2 em paralelo (`pythonw launcher/native_launcher.py --external-server`). A janela abre **já maximizada**. O formulário aparece assim que a página carrega; históricos e tabelas continuam a carregar em seguida. **Fechar a janela (X)** encerra o servidor Node automaticamente.
 
-Se o servidor remoto já estiver ativo (`iniciar-acesso-remoto.bat`), o `.bat` **só abre a janela** e não reinicia nem encerra o servidor (`--keep-server`).
+Se o Node já estiver na porta 3000, o `.bat` **só abre a janela** e não reinicia o servidor (`--keep-server`).
 
 Pode haver um **flash breve** do CMD ao duplo clique — o Windows abre o `.bat` antes do relançamento oculto. Se o launcher nativo falhar, o fallback `launcher/launch-app.js` (Chrome/Edge) **mostra** um terminal de propósito, para facilitar diagnóstico.
 
@@ -90,13 +84,13 @@ Pode haver um **flash breve** do CMD ao duplo clique — o Windows abre o `.bat`
 | **Gargalo principal** | O **primeiro** arranque do WebView2 no dia (runtime frio no Windows) ainda pode levar alguns segundos — limitação do sistema, não do Node. Aberturas seguintes no mesmo dia tendem a ser mais rápidas. |
 | **Fechamento** | **Fechar pelo X** é o fluxo normal: a janela some na hora; o Python encerra o Node **uma vez** no `finally` (`POST /api/shutdown`). Se a API falhar, libera a porta 3000 como fallback. |
 
-Otimizações aplicadas na stack atual: Node e WebView2 em paralelo, liberação assíncrona da porta 3000 só no `server/server.js` (sem PowerShell), splash local, scripts com `defer`, `web/pdf-build.js` fora do caminho crítico (só Tauri), carregamento sob demanda de `server/pdf-export.js` e `server/snapshot-open-dialog.js` no servidor, e históricos carregados sem bloquear a UI.
+Otimizações aplicadas na stack atual: Node e WebView2 em paralelo, liberação assíncrona da porta 3000 só no `server/server.js` (sem PowerShell), splash local, scripts com `defer`, carregamento sob demanda de `server/pdf-export.js` e `server/snapshot-open-dialog.js` no servidor, e históricos carregados sem bloquear a UI.
 
 ### Evolução recente na `main` (desde `stable/node-web-v0.1.0`)
 
 | Área | Mudança |
 |---|---|
-| Produção / remoto | Axis (Tailscale Serve) + [`docs/atlas-axis.md`](docs/atlas-axis.md); Funnel neste PC é legado ([`docs/acesso-remoto.md`](docs/acesso-remoto.md)) |
+| Produção / remoto | Axis (Tailscale Serve) + [`docs/atlas-axis.md`](docs/atlas-axis.md); [`docs/acesso-remoto.md`](docs/acesso-remoto.md) |
 | Launcher | Janela **WebView2 nativa** (`launcher/native_launcher.py`), **maximizada ao abrir**, consola oculta (`launcher/launch-hidden.vbs`), ícone `.ico` na barra de tarefas |
 | Startup | Node em background + `--external-server`; poll breve pelo Node; splash `assets/launcher.html`; módulos pesados lazy no servidor; scripts com `defer` |
 | Impressão | `@media print` anula zoom da UI — papel alinhado ao PDF automático |
@@ -108,29 +102,6 @@ Otimizações aplicadas na stack atual: Node e WebView2 em paralelo, liberação
 Detalhes técnicos: `docs/ARCHITECTURE.md`. Baseline congelada pré-WebView2: `docs/SNAPSHOT-node-web-v0.1.0.md`.
 
 Se `pythonw` não estiver disponível, o `.bat` cai para Chrome/Edge em modo app (`launcher/launch-app.js`) — nesse modo o ícone da barra pode ficar borrado e um terminal permanece visível.
-
-### `iniciar-acesso-remoto.bat` (legado neste Windows)
-
-Produção clínica é o **Axis** (`https://axis.tail5fe4b7.ts.net/`), não este atalho. Ver [`docs/atlas-axis.md`](docs/atlas-axis.md).
-
-O `.bat` ainda existe para teste excepcional: expõe **este** PC na internet via **Tailscale Funnel**, com login por **token de uso único** (128 bits, Base64). **Não usar em clínica** (dados de orçamento em URL pública). Requer Tailscale neste PC, HTTPS habilitado no tailnet e execução **como Administrador**.
-
-```text
-iniciar-acesso-remoto.bat
-```
-
-O script (`scripts/remote-access-host.js`):
-
-1. Sobe `server/server.js` com `AUTH_ENABLED=1`
-2. Ativa `tailscale funnel` na porta 3000
-3. Abre o WebView2 local (barra **PC local** + **Criar acesso**)
-4. Aguarda **`Q`** no terminal para encerrar servidor e Funnel
-
-No PC remoto: acesse a URL `https://…ts.net`, cole o token e use o app (sessão de 12 h).
-
-**Fechar a janela do app não encerra o servidor.** Use **`Q`** no terminal para desligar tudo (forma mais confiável que fechar o terminal pelo X).
-
-Guia do Funnel legado: [`docs/acesso-remoto.md`](docs/acesso-remoto.md).
 
 ### Equivalente manual (debug local)
 
@@ -156,7 +127,7 @@ node launcher/launch-app.js
 | npm | Sim (vem com Node) |
 | Python 3 + pywebview | Sim (janela nativa WebView2; `pip install -r launcher/requirements.txt`) |
 | Google Chrome ou Microsoft Edge | Sim (PDF automático e fallback `launcher/launch-app.js`) |
-| Tailscale | Produção no Axis (cliente na mesma tailnet). Neste PC, só se for Funnel legado |
+| Tailscale | Produção no Axis (cliente na mesma tailnet) |
 | Internet | Só na primeira execução, se `node_modules` ainda não existir |
 
 Para migrar a pasta para outro PC: instale Node.js e Python, copie o projeto (de preferência com `node_modules` incluído) e execute `abrir-auto-orcamento.bat`.
@@ -176,20 +147,9 @@ Detalhes: `docs/SNAPSHOT-node-web-v0.1.0.md`, `docs/SNAPSHOT-tauri-v0.2.0-paused
 
 Para a baseline Node antiga: `git checkout stable/node-web-v0.1.0` e `npm install`.
 
-## Tauri congelado (referência histórica)
+## Tauri (referência histórica)
 
-> **Não use no dia a dia.** O código Tauri/Rust em `tauri-fase_legado/` permanece no repositório como referência; **não recebe novas features** na `main`.
-
-O experimento Tauri (executável `.exe` via WebView2 + Rust) parou nas Fases 1–3. Estado preservado em `stable/tauri-v0.2.0-paused`. Build: `tauri-fase_legado/build-auto-orcamento-tauri.bat`. Instruções de paridade e retomada futura estão em `docs/SNAPSHOT-tauri-v0.2.0-paused.md` e `docs/MIGRATION-tauri.md`.
-
-**Cache Rust:** `tauri-fase_legado/src-tauri/target/` pode ocupar centenas de MB ou GB após builds antigos. Está no `.gitignore`. Para liberar espaço:
-
-```powershell
-cd tauri-fase_legado/src-tauri
-cargo clean
-```
-
-Não inclua `tauri-fase_legado/src-tauri/target/` ao copiar o projeto. O uso diário continua sendo **`abrir-auto-orcamento.bat`**.
+Removido do tree atual. Ver [`docs/legado-tauri.md`](docs/legado-tauri.md), tag `stable/tauri-v0.2.0-paused`.
 
 ## Zoom da interface
 
@@ -252,10 +212,9 @@ Não entram no Git (só neste PC / no disco do Axis):
 ```text
 data/pacientes.json
 data/settings.json
-data/auth-users.json
 ```
 
-`data/pacientes.json` é o autocomplete do campo **Nome**. Se o arquivo não existir, `server/server.js` cria uma lista vazia. O seed versionado é `data/pacientes.json.example`. `data/settings.json` guarda zoom e a última pasta do botão **Abrir**. `data/auth-users.json` guarda tokens do Funnel legado.
+`data/pacientes.json` é o autocomplete do campo **Nome**. Se o arquivo não existir, `server/server.js` cria uma lista vazia. O seed versionado é `data/pacientes.json.example`. `data/settings.json` guarda zoom e a última pasta do botão **Abrir**.
 
 As tabelas de referência estruturadas ficam em:
 
@@ -321,10 +280,6 @@ O botão **Abrir** (verde, ao lado de **Limpar**) carrega um snapshot JSON gerad
 ### Produção no Axis (celular / tablet)
 
 Abrir `https://axis.tail5fe4b7.ts.net/` com Tailscale na mesma tailnet. **Abrir** usa a caixa dedicada com os `.json` de `output/` **no Axis**. Detalhes: [`docs/atlas-axis.md`](docs/atlas-axis.md).
-
-### Funnel neste PC (legado)
-
-No cliente do Funnel, **Abrir** abre uma **caixa dedicada** com os orçamentos salvos em `output/` **neste Windows** — somente leitura, sem acesso ao restante do sistema de arquivos. Detalhes em [`docs/acesso-remoto.md`](docs/acesso-remoto.md).
 
 Campos dinâmicos (cirurgias, hospitais com entradas auxiliares, extras, pagamento, observações), checkboxes de seções opcionais, listas rápidas e equipe são restaurados. Implantes são reassociados pelo índice ou por marca/modelo/referência na tabela local.
 

@@ -1,51 +1,17 @@
 (function () {
-  /** @type {"tauri" | "web" | null} */
-  let backendMode = null;
-
-  function detectTauriInvoke() {
-    return typeof window.__TAURI__?.core?.invoke === "function";
-  }
-
-  function isTauri() {
-    if (backendMode === "web") {
-      return false;
-    }
-
-    return backendMode === "tauri" || detectTauriInvoke();
-  }
-
   async function waitForBackend() {
-    if (backendMode) {
-      return backendMode;
-    }
-
-    if (detectTauriInvoke()) {
-      backendMode = "tauri";
-      return backendMode;
-    }
-
     if (window.location.port === "3000") {
-      backendMode = "web";
-      return backendMode;
+      return "web";
     }
 
     for (let attempt = 0; attempt < 100; attempt += 1) {
       await new Promise((resolve) => setTimeout(resolve, 50));
-      if (detectTauriInvoke()) {
-        backendMode = "tauri";
-        return backendMode;
+      if (window.location.port === "3000") {
+        return "web";
       }
     }
 
-    throw new Error("Backend Tauri indisponível neste ambiente.");
-  }
-
-  function invoke(command, payload) {
-    if (!detectTauriInvoke()) {
-      throw new Error(`Comando Tauri indisponível: ${command}`);
-    }
-
-    return window.__TAURI__.core.invoke(command, payload);
+    throw new Error("Servidor local indisponível na porta 3000.");
   }
 
   async function fetchJson(url, options = {}) {
@@ -69,12 +35,6 @@
     }
 
     if (!response.ok) {
-      if (response.status === 401 && data?.authRequired && !window.location.pathname.endsWith("/login.html")) {
-        const next = encodeURIComponent(`${window.location.pathname}${window.location.search}`);
-        window.location.replace(`/login.html?next=${next}`);
-        throw new Error("Autenticação necessária.");
-      }
-
       const message = data?.error || `Falha na requisição: ${url}`;
       throw new Error(message);
     }
@@ -83,18 +43,10 @@
   }
 
   async function getHistory(store) {
-    if (isTauri()) {
-      return invoke("history_list", { store });
-    }
-
     return fetchJson(`/api/${store}`);
   }
 
   async function addHistory(store, value) {
-    if (isTauri()) {
-      return invoke("history_add", { store, value });
-    }
-
     return fetchJson(`/api/${store}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -103,10 +55,6 @@
   }
 
   async function removeHistory(store, value) {
-    if (isTauri()) {
-      return invoke("history_remove", { store, value });
-    }
-
     return fetchJson(`/api/${store}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -115,10 +63,6 @@
   }
 
   async function replaceHistory(store, items) {
-    if (isTauri()) {
-      return invoke("history_replace", { store, items });
-    }
-
     return fetchJson(`/api/${store}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -127,18 +71,10 @@
   }
 
   async function getTechnologies() {
-    if (isTauri()) {
-      return invoke("technologies_list");
-    }
-
     return fetchJson("/api/tecnologias");
   }
 
   async function addTechnology(nome, valor) {
-    if (isTauri()) {
-      return invoke("technologies_add", { nome, valor });
-    }
-
     return fetchJson("/api/tecnologias", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -147,10 +83,6 @@
   }
 
   async function removeTechnology(nome) {
-    if (isTauri()) {
-      return invoke("technologies_remove", { nome });
-    }
-
     return fetchJson("/api/tecnologias", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -159,10 +91,6 @@
   }
 
   async function replaceTechnologies(items) {
-    if (isTauri()) {
-      return invoke("technologies_replace", { items });
-    }
-
     return fetchJson("/api/tecnologias", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -171,18 +99,10 @@
   }
 
   async function getUnimedNProcedures() {
-    if (isTauri()) {
-      return invoke("unimed_n_list");
-    }
-
     return fetchJson("/api/unimed-n");
   }
 
   async function addUnimedNProcedure(nome, valor) {
-    if (isTauri()) {
-      return invoke("unimed_n_add", { nome, valor });
-    }
-
     return fetchJson("/api/unimed-n", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -191,10 +111,6 @@
   }
 
   async function removeUnimedNProcedure(nome) {
-    if (isTauri()) {
-      return invoke("unimed_n_remove", { nome });
-    }
-
     return fetchJson("/api/unimed-n", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -203,10 +119,6 @@
   }
 
   async function replaceUnimedNProcedures(items) {
-    if (isTauri()) {
-      return invoke("unimed_n_replace", { items });
-    }
-
     return fetchJson("/api/unimed-n", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -252,27 +164,15 @@
   }
 
   function getWebZoomFactor() {
-    if (isTauri()) {
-      return 1;
-    }
-
     return webZoomFactor;
   }
 
   async function getZoom() {
-    if (isTauri()) {
-      return invoke("zoom_get");
-    }
-
     const data = await fetchJson("/api/settings");
     return applyWebZoom(data.zoom ?? ZOOM_DEFAULT);
   }
 
   async function setZoom(scale) {
-    if (isTauri()) {
-      return invoke("zoom_set", { scale });
-    }
-
     const data = await fetchJson("/api/settings", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -283,19 +183,11 @@
   }
 
   async function adjustZoom(delta) {
-    if (isTauri()) {
-      return invoke("zoom_adjust", { delta });
-    }
-
     const current = await getZoom();
     return setZoom(current + Number(delta || 0));
   }
 
   async function loadTable(table) {
-    if (isTauri()) {
-      return invoke("table_load", { table });
-    }
-
     const url =
       table === "hospitalares"
         ? "data/tabelas-hospitalares.json"
@@ -321,21 +213,6 @@
       throw new Error("Informe o conteúdo do documento para exportar.");
     }
 
-    if (isTauri()) {
-      if (!window.PdfBuild) {
-        await new Promise((resolve, reject) => {
-          const script = document.createElement("script");
-          script.src = "pdf-build.js";
-          script.onload = resolve;
-          script.onerror = () => reject(new Error("Não foi possível carregar pdf-build.js."));
-          document.head.appendChild(script);
-        });
-      }
-
-      const documentHtml = await PdfBuild.buildPdfDocumentHtml(html);
-      return invoke("export_pdf", { patientName, documentHtml });
-    }
-
     return fetchJson("/api/pdf", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -348,10 +225,6 @@
   }
 
   async function openSnapshot() {
-    if (isTauri()) {
-      throw new Error("Abrir snapshot não está disponível no Tauri congelado.");
-    }
-
     return fetchJson("/api/open-snapshot", { method: "POST" });
   }
 
@@ -363,50 +236,7 @@
     return fetchJson(`/api/snapshots/${encodeURIComponent(name)}`);
   }
 
-  async function getAuthStatus() {
-    if (isTauri()) {
-      return { authRequired: false, localAccess: false, authenticated: true, user: null };
-    }
-
-    return fetchJson("/api/auth/status");
-  }
-
-  async function login(token) {
-    return fetchJson("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
-    });
-  }
-
-  async function logout() {
-    if (isTauri()) {
-      return { ok: true };
-    }
-
-    return fetchJson("/api/auth/logout", { method: "POST" });
-  }
-
-  async function listGuests() {
-    return fetchJson("/api/auth/guests");
-  }
-
-  async function createGuest(label, expiresInHours) {
-    return fetchJson("/api/auth/guests", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ label, expiresInHours }),
-    });
-  }
-
-  async function revokeGuest(guestId) {
-    return fetchJson(`/api/auth/guests/${encodeURIComponent(guestId)}`, {
-      method: "DELETE",
-    });
-  }
-
   window.AppApi = {
-    isTauri,
     waitForBackend,
     getHistory,
     addHistory,
@@ -429,11 +259,5 @@
     openSnapshot,
     listSnapshots,
     loadSnapshot,
-    getAuthStatus,
-    login,
-    logout,
-    listGuests,
-    createGuest,
-    revokeGuest,
   };
 })();

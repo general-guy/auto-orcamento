@@ -6,9 +6,8 @@ O Auto Orçamento é um app de orçamentos cirúrgicos, servido por **Node.js**.
 |--------|---------|---------|
 | **Atlas (dev)** | `abrir-auto-orcamento.bat` | `launcher/native_launcher.py` + `server/server.js` em `127.0.0.1:3000` |
 | **Axis (produção)** | systemd no CT 100 | `BIND_HOST=192.168.68.202` + Tailscale Serve no host → `https://axis.tail5fe4b7.ts.net/` |
-| **Funnel neste PC (legado)** | `iniciar-acesso-remoto.bat` | `remote-access-host.js` + `auth.js` + Tailscale Funnel |
 
-Papel de cada máquina: `docs/atlas-axis.md`. Funnel legado: `docs/acesso-remoto.md`.
+Papel de cada máquina: `docs/atlas-axis.md`. Acesso remoto: `docs/acesso-remoto.md`. Funnel+token removidos: `docs/legado-funnel-auth.md`.
 
 Agente Cursor / plugins: `AGENTS.md` (raiz) e `docs/cursor-plugins.md`.
 
@@ -16,7 +15,7 @@ Históricos e tabelas versionados ficam em **`data/`** na raiz do repo. PDFs e s
 
 > **Desenvolvimento ativo:** stack Node + WebView2 na `main`.  
 > **Baseline congelada:** `stable/node-web-v0.1.0` / `v0.1.0-node-web` — `docs/SNAPSHOT-node-web-v0.1.0.md`.  
-> **Tauri congelado:** `stable/tauri-v0.2.0-paused` — código legado em `tauri-fase_legado/`; ver [Referência Tauri](#referência-tauri-congelado) no fim deste documento.
+> **Tauri (histórico):** removido do tree; tag `stable/tauri-v0.2.0-paused` — `docs/legado-tauri.md`.
 
 ## Visão Geral — deploy Node (válido na `main` e em `stable/node-web-v0.1.0`)
 
@@ -63,7 +62,7 @@ O servidor Node **não** é iniciado pelo Python neste fluxo — o `.bat` já o 
 - aguarda até ~800 ms pelo Node (`resolve_startup_url`) e abre `http://127.0.0.1:3000` direto quando possível; senão `assets/launcher.html` (splash) até redirecionar;
 - encerra o Node ao fechar a janela (X): `ensure_server_stopped()` roda **uma vez** no `finally` (`POST /api/shutdown`); se a API falhar, `free_tcp_port(3000)` como fallback. **Não** bloqueia o fechamento da janela com handlers no evento `closing`. Com `--keep-server` (servidor remoto já ativo), **não** encerra o Node.
 
-`launcher/native_launcher.py` também aceita `--keep-server` para o fluxo `iniciar-acesso-remoto.bat` + `abrir-auto-orcamento.bat`.
+`launcher/native_launcher.py` também aceita `--keep-server` quando o Node já está na porta 3000.
 
 Pode haver um flash breve do CMD na primeira linha do `.bat`, antes do relançamento oculto. O **primeiro** arranque do WebView2 no dia (runtime frio) ainda pode levar alguns segundos — limitação do Windows, não do Node. Aberturas seguintes no mesmo dia tendem a ser mais rápidas.
 
@@ -112,7 +111,7 @@ Para debug com terminal visível, rode `python launcher/native_launcher.py` ou `
 
 Para forçar um navegador específico no fallback, defina `AUTO_ORCAMENTO_BROWSER` com o caminho do executável.
 
-## Produção no Axis e Funnel legado
+## Produção no Axis
 
 Produção clínica: CT 100 no Axis, documentado em `docs/atlas-axis.md`.
 
@@ -122,22 +121,9 @@ Axis host (192.168.68.201)  tailscale serve --https=443
   -> https://axis.tail5fe4b7.ts.net/
 ```
 
-O fluxo abaixo é **legado neste Windows** (Funnel + token), detalhado em `docs/acesso-remoto.md`. Não é o caminho clínico.
+No browser na tailnet (hostname ≠ `localhost`), **Abrir** usa `GET /api/snapshots` (lista só `.json` de `output/`). **Imprimir** grava PDF/JSON no `output/` do servidor e reconstrói o SQLite antes de `window.print()`. `POST /api/open-snapshot` (seletor nativo) fica bloqueado quando a requisição traz `x-forwarded-proto` / `x-forwarded-for` (Serve).
 
-```text
-iniciar-acesso-remoto.bat
-  -> scripts/remote-access-host.js
-      -> node server/server.js (AUTH_ENABLED=1)
-      -> tailscale funnel --bg 3000
-      -> pythonw launcher/native_launcher.py --external-server --keep-server
-      -> aguarda Q no terminal (cleanup: funnel reset + encerra servidor)
-```
-
-`server/auth.js` distingue requisições **locais** (sem headers do Funnel) de **remotas** (`x-forwarded-proto` / `x-forwarded-for`). Locais usam o app sem login e podem criar tokens; remotos autenticam com token de uso único (sessão 12 h via cookie).
-
-No remoto, **Abrir** usa uma caixa dedicada (`GET /api/snapshots`) que lista só `.json` de `output/`; **Imprimir** não grava PDF/JSON no servidor nem atualiza o SQLite — só `window.print()` no cliente. `POST /api/open-snapshot` (seletor nativo) fica bloqueado para visitantes remotos.
-
-`abrir-auto-orcamento.bat` reutiliza servidor ativo na porta 3000 (`--keep-server`) sem reiniciar nem encerrar o modo remoto ao fechar a janela.
+`abrir-auto-orcamento.bat` reutiliza servidor ativo na porta 3000 (`--keep-server`).
 
 ## Ambiente de Desenvolvimento
 
@@ -164,11 +150,7 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 | `web/styles.css` | Layout, timbrado, impressão |
 | `web/app.js` | Lógica de UI, preview, históricos, autofill |
 | `server/paths.js` | Raiz do repo, `data/`, `export/` e `outputDir` (`C:\auto-orcamento\output` no Windows; `OUTPUT_DIR` opcional) |
-| `server/server.js` | Servidor na porta 3000 (`BIND_HOST`), APIs REST; integra `server/auth.js` quando `AUTH_ENABLED=1` |
-| `server/auth.js` | Sessões, tokens de convidado, middleware local/remoto |
-| `web/auth-admin.js` | UI de criação/cópia de token (modo remoto, acesso local) |
-| `web/login.html` / `web/login.js` | Login remoto por token |
-| `scripts/remote-access-host.js` | Supervisor do `iniciar-acesso-remoto.bat` (Funnel legado) |
+| `server/server.js` | Servidor na porta 3000 (`BIND_HOST`), APIs REST |
 | `docs/atlas-axis.md` | Relação Atlas (dev) × Axis (produção) |
 | `web/budget-snapshot.js` | Snapshot JSON do formulário na impressão e validação na importação |
 | `server/snapshot-open-dialog.js` | Invoca `scripts/open-snapshot-dialog.py` (pywebview/WebView2) ou PowerShell para seletor nativo de JSON |
@@ -221,13 +203,11 @@ Endpoints principais:
 - `GET /api/tecnologias`, `POST /api/tecnologias`, `DELETE /api/tecnologias`, `PUT /api/tecnologias`: histórico de tecnologias com valor associado e persistência da ordem manual no dropdown.
 - `GET /api/unimed-n`, `POST /api/unimed-n`, `DELETE /api/unimed-n`, `PUT /api/unimed-n`: procedimentos Unimed N com valor associado (`{ nome, valor }`).
 - `GET /api/settings`, `PUT /api/settings`: preferências locais (zoom; `lastSnapshotDir` para o botão **Abrir**; grava em `data/settings.json`).
-- `POST /api/open-snapshot`: abre seletor nativo de JSON no Windows (`pywebview`/WebView2 via `scripts/open-snapshot-dialog.py`), lê o arquivo, persiste a pasta em `lastSnapshotDir` e devolve o snapshot parseado. **Bloqueado** para requisições remotas (Funnel).
+- `POST /api/open-snapshot`: abre seletor nativo de JSON no Windows (`pywebview`/WebView2 via `scripts/open-snapshot-dialog.py`), lê o arquivo, persiste a pasta em `lastSnapshotDir` e devolve o snapshot parseado. **Bloqueado** para requisições remotas (headers de proxy do Serve).
 - `GET /api/snapshots`: lista snapshots `.json` em `output/` (nome, data, tamanho). Somente leitura; seguro para acesso remoto.
 - `GET /api/snapshots/:nome`: lê um snapshot de `output/` com validação estrita de caminho (sem travessia de diretório; só `.json`).
 - `POST /api/pdf`: gera PDF + snapshot JSON em `output/` (mesmo nome base) e, em seguida, reconstrói `export/orcamentos.sqlite` a partir de todos os JSON de `output/` (falha no SQLite não falha a resposta do PDF).
 - `POST /api/shutdown`: encerra o servidor ao fechar a janela (`launcher/native_launcher.py` ou fallback `launcher/launch-app.js`); bloqueado para visitantes remotos; ignorado com `--keep-server`.
-- `GET /api/auth/status`, `POST /api/auth/login`, `POST /api/auth/logout`: autenticação remota por token (`auth.js`; ativo só com `AUTH_ENABLED=1`).
-- `GET/POST/DELETE /api/auth/guests`: criar e revogar tokens (somente requisição local).
 
 Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observações são listas JSON simples, limitadas a 200 itens por tipo. Os históricos de tecnologias e de procedimentos Unimed N também são limitados a 200 itens, mas cada item é um objeto com `nome` e `valor`.
 
@@ -289,7 +269,6 @@ Não versionados (`.gitignore`):
 ```text
 data/pacientes.json
 data/settings.json
-data/auth-users.json
 ```
 
 Se `data/pacientes.json` não existir, `ensureDataFile()` grava `[]`. O formato de referência no Git é `data/pacientes.json.example`.
@@ -448,7 +427,7 @@ Falhas de exportação exibem um `alert` além do log no console. Requer Chrome 
 O botão **Abrir** (`#openButton`, verde, ao lado de **Limpar** no rodapé do formulário) restaura um snapshot JSON no formulário:
 
 - **Uso local:** `AppApi.openSnapshot()` → `POST /api/open-snapshot`. No Windows, `scripts/open-snapshot-dialog.py` usa **pywebview** para diálogo nativo nítido em HiDPI; fallback PowerShell/tkinter. Preferência: `lastSnapshotDir`; fallback `C:\auto-orcamento\output\` (servidor e script Python).
-- **Acesso remoto (browser no Axis ou Funnel legado):** modal `#snapshotPicker` lista `GET /api/snapshots` e carrega `GET /api/snapshots/:nome`. Somente leitura de `output/`; não expõe o sistema de arquivos do servidor.
+- **Browser na tailnet (hostname ≠ localhost):** modal `#snapshotPicker` lista `GET /api/snapshots` e carrega `GET /api/snapshots/:nome`. Somente leitura de `output/`; não expõe o sistema de arquivos do servidor.
 
 **Stack Tauri (congelada):** `export_pdf` gera só PDF; não há snapshot JSON nem importação.
 
@@ -542,12 +521,12 @@ A ordem final é: pacotes, cirurgias associadas, taxas, meia hora excedente de c
 - O frontend é HTML, CSS e JavaScript em `web/`, servido por `server/server.js` — **sem build step**.
 - Fluxo diário: `abrir-auto-orcamento.bat` → WebView2 + `http://localhost:3000`.
 - O estado persistente do app fica em JSON local (`data/`, `output/`). `export/orcamentos.sqlite` é espelho derivado para outros webapps (`docs/export-sqlite.md`).
-- `data/pacientes.json`, `data/settings.json` e `data/auth-users.json` não entram no Git.
+- `data/pacientes.json` e `data/settings.json` não entram no Git.
 - Negrito do documento: `strong`/`b` em `.document-content` usam `--document-emphasis-weight` (Gotham Medium, `500`).
 - Alterações no preview devem chamar `updatePreview()` quando mudarem campos programaticamente.
 - Alterações nas tabelas Regina/Sapiranga/Blanc devem preservar o formato descrito em `docs/tabelas-hospitalares.md`.
 - Procedimentos Unimed N seguem `docs/unimed-n.md` (`data/unimed-n.json`, API `/api/unimed-n`).
-- Novas features implementam-se na stack Node; **não** portar para `tauri-fase_legado/` enquanto Tauri estiver congelado.
+- Novas features implementam-se na stack Node (`web/`, `server/`, `launcher/`).
 
 ## Estado do repositório
 
@@ -560,18 +539,6 @@ A ordem final é: pacotes, cirurgias associadas, taxas, meia hora excedente de c
 
 **Decisão (2026-06-26):** evolução **somente Node** na `main`. Tauri e `feature/tauri` permanecem congelados.
 
-## Referência Tauri (congelado)
+## Referência Tauri (histórico)
 
-> Documentação histórica. **Não** use no fluxo diário. Retomada futura: `docs/SNAPSHOT-tauri-v0.2.0-paused.md` e `docs/MIGRATION-tauri.md`.
-
-O repositório ainda contém `tauri-fase_legado/` (Rust + `.exe`), `api.js` (com detecção Tauri legada) e scripts de build. Esses artefatos correspondem ao snapshot `stable/tauri-v0.2.0-paused` e **não** recebem novas features.
-
-Resumo do que existia no experimento Tauri:
-- **`pdf-build.js`:** monta HTML autocontido para exportação (CSS/fontes inline).
-- **`zoom.js`:** atalhos `Ctrl` + roda / `Ctrl` + `+`/`-`/`0`; indicador flutuante `#zoomFlag` (%, `−`/`+`, Redefinir). **Tauri:** persiste em `data/settings.json` via comandos `zoom_*` e `WebviewWindow::set_zoom`. **Node (WebView2):** `AppApi` persiste via `GET/PUT /api/settings` e aplica escala com `transform: scale()` no `body` (layout preenche a janela); o arraste da divisória entre painéis usa `AppApi.getWebZoomFactor()`. A impressão (`@media print`) anula esse transform para o papel coincidir com o PDF.
-- **`tauri-fase_legado/src-tauri/src/paths.rs`:** resolve `data/` e `output/` com `std::env::current_exe()`. Em debug, raiz do repo. Em release: raiz do repo se o `.exe` está em `tauri-fase_legado/src-tauri/target/release/` ou em `tauri-fase_legado/`; senão `{pasta-do-exe}/data/`. Não grava em `%AppData%`. Log de startup: `Diretório de dados: ...`.
-- **`tauri-fase_legado/src-tauri/src/storage.rs`:** históricos, tecnologias, Unimed N (`unimed_n_*`), zoom e tabelas (`table_load` / `read_table`); seed único de tabelas a partir de `dist/data/` embutido no build.
-- **`tauri-fase_legado/src-tauri/src/pdf.rs`:** grava PDF em `output/` via Chrome/Edge headless; comando `export_pdf`.
-- **`tauri-fase_legado/scripts/copy-release-exe.cjs`:** após o build, copia o release para `tauri-fase_legado/auto-orcamento.exe`.
-- **`tauri-fase_legado/src-tauri/target/`:** cache Rust (`.gitignore`); limpar com `cargo clean` dentro de `tauri-fase_legado/src-tauri/`.
-- **PDF no Tauri congelado:** `export_pdf` via Chrome/Edge headless — **sem** snapshot JSON (feature só na stack Node).
+Removido do tree em out/2026. Ver `docs/legado-tauri.md`, `docs/SNAPSHOT-tauri-v0.2.0-paused.md` e tag `stable/tauri-v0.2.0-paused`.
