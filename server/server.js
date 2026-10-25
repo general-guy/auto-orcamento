@@ -1134,8 +1134,15 @@ async function startServer() {
     seedDataDir,
     legacyRepoDataDir,
   });
-  if (bootstrap.copied > 0) {
-    console.log(`Dados: ${bootstrap.copied} arquivo(s) copiado(s) para ${dataDir}.`);
+  if (bootstrap.copied > 0 || bootstrap.updated > 0) {
+    const parts = [];
+    if (bootstrap.copied > 0) {
+      parts.push(`${bootstrap.copied} novo(s)`);
+    }
+    if (bootstrap.updated > 0) {
+      parts.push(`${bootstrap.updated} atualizado(s) a partir de ${legacyRepoDataDir}`);
+    }
+    console.log(`Dados: ${parts.join(", ")} em ${dataDir}.`);
   }
 
   ensureDataFile();

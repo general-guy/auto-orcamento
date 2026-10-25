@@ -29,21 +29,45 @@ function copyFileIfMissing(sourcePath, destPath) {
   return true;
 }
 
+function shouldCopyLegacyFile(sourcePath, destPath) {
+  if (!fs.existsSync(sourcePath)) {
+    return false;
+  }
+
+  if (!fs.existsSync(destPath)) {
+    return true;
+  }
+
+  const sourceMtime = fs.statSync(sourcePath).mtimeMs;
+  const destMtime = fs.statSync(destPath).mtimeMs;
+  return sourceMtime > destMtime;
+}
+
+function copyFileIfNeeded(sourcePath, destPath) {
+  if (!shouldCopyLegacyFile(sourcePath, destPath)) {
+    return false;
+  }
+
+  fs.mkdirSync(path.dirname(destPath), { recursive: true });
+  const tempPath = destPath + ".tmp";
+  fs.copyFileSync(sourcePath, tempPath);
+  fs.renameSync(tempPath, destPath);
+  return true;
+}
+
 /**
- * Garante dataDir populado: copia de seed/data e, se ainda existir, de {repo}/data legado.
- * Nunca sobrescreve arquivos já presentes em dataDir.
+ * Garante dataDir populado: seed/data só preenche lacunas; {repo}/data legado
+ * também atualiza destino se o arquivo no clone for mais recente.
  */
 function ensureDataDirReady({ dataDir, seedDataDir, legacyRepoDataDir }) {
   fs.mkdirSync(dataDir, { recursive: true });
 
   let copied = 0;
-  for (const sourceRoot of [seedDataDir, legacyRepoDataDir]) {
-    if (!sourceRoot || !fs.existsSync(sourceRoot)) {
-      continue;
-    }
+  let updated = 0;
 
-    for (const sourcePath of listFilesRecursive(sourceRoot)) {
-      const relative = path.relative(sourceRoot, sourcePath);
+  if (seedDataDir && fs.existsSync(seedDataDir)) {
+    for (const sourcePath of listFilesRecursive(seedDataDir)) {
+      const relative = path.relative(seedDataDir, sourcePath);
       const destPath = path.join(dataDir, relative);
       if (copyFileIfMissing(sourcePath, destPath)) {
         copied += 1;
@@ -51,7 +75,24 @@ function ensureDataDirReady({ dataDir, seedDataDir, legacyRepoDataDir }) {
     }
   }
 
-  return { copied };
+  if (legacyRepoDataDir && fs.existsSync(legacyRepoDataDir)) {
+    for (const sourcePath of listFilesRecursive(legacyRepoDataDir)) {
+      const relative = path.relative(legacyRepoDataDir, sourcePath);
+      if (!relative || relative.startsWith("..")) {
+        continue;
+      }
+      const destPath = path.join(dataDir, relative);
+      if (!fs.existsSync(destPath) && copyFileIfMissing(sourcePath, destPath)) {
+        copied += 1;
+        continue;
+      }
+      if (fs.existsSync(destPath) && copyFileIfNeeded(sourcePath, destPath)) {
+        updated += 1;
+      }
+    }
+  }
+
+  return { copied, updated };
 }
 
 module.exports = {

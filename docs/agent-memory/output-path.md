@@ -11,15 +11,16 @@ C:\auto-orcamento\export\        orcamentos.sqlite (cópia na consolidação)
 ```
 
 - **Seed no repo:** `seed/data/` (versionado). `server/data-bootstrap.js` copia para `dataDir` só arquivos que ainda não existem ao vivo.
-- **Legado:** se ainda existir `{repo}/data/`, o bootstrap também copia de lá (uma vez por arquivo).
-- Pasta `{repo}/data/` está no `.gitignore` (lixeira local / migração).
+- **Legado:** se ainda existir `{repo}/data/`, o bootstrap copia lacunas e **atualiza** destino se o arquivo no clone for mais recente.
+- Pasta `{repo}/data/` está no `.gitignore`. Após migrar, limpar o clone: `pwsh -File scripts/finalize-repo-data-migration.ps1` (move ou apaga duplicatas já em `C:\auto-orcamento\data`).
 
 ## Código
 
 | Artefato | Função |
 |---|---|
 | `server/paths.js` | `dataDir`, `outputDir`, `seedDataDir`; overrides `DATA_DIR`, `OUTPUT_DIR` |
-| `server/data-bootstrap.js` | Popula `dataDir` a partir de seed/legado |
+| `server/data-bootstrap.js` | Seed → lacunas; legado `{repo}/data` → lacunas + mtime mais novo |
+| `scripts/finalize-repo-data-migration.ps1` | Remove ou move resíduos de `{repo}/data` após destino ok |
 | `server/server.js` | APIs gravam em `dataDir`; HTTP `/data/*` serve de `dataDir` |
 
 ## Overrides
