@@ -1,5 +1,6 @@
 # Agent memory — changelog
 
+- 2026-10-25: Sync Atlas — `ensure_axis_online.py` (wake Hub/WoL + poll SSH) antes do merge/push; docs `atlas-axis-sync.md`, `axis-sync-sessions.md`, skill `ct100-auto-orcamento` (motor no local-atlas).
 - 2026-10-25: Toasts `/data/` `/output/` `/export/`; merge rápido em `/output/` (hash remoto em lote no local-atlas) — `axis-sync-sessions.md`.
 - 2026-10-25: Sync mtime — `data`/`export` vs `output` (documento); `align-remote-mtimes`; docs `atlas-axis-sync.md` / `axis-sync-sessions.md` (implementação no local-atlas).
 - 2026-10-25: Sync — UTF-8 nos toasts (`axis-sync.js`); runbook datas (`repair` / `align-remote-mtimes` / merge) em `atlas-axis-sync.md` e `axis-sync-sessions.md` (motor no local-atlas).

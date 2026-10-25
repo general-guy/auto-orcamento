@@ -15,6 +15,12 @@ Cabeçalho: horário, tarefa, script, argv. Rodapé: `exit_code`, timeout ou err
 
 Só quando o sync está habilitado (Windows + `BIND_HOST` localhost). Produção no CT **não** gera estes logs.
 
+## Fase wake (Axis desligado)
+
+No início de `--startup` ou push que precisa do PVE, o log pode mostrar linhas JSON de toast (`phase`: `wake`) antes do merge — saída de `ensure_axis_online.py`. Se o Hub falhar ou o SSH não subir em 180 s, `exit_code` ≠ 0 e não há merge.
+
+Wake manual para testar: `py -3 local-atlas/axis/scripts/wake_axis.py`.
+
 ## O que não é rsync
 
 O merge de `data` / `output` / `export` no arranque usa **SSH find + SFTP** por arquivo (`sync_auto_orcamento_data.py`), não o rsync em massa do `push_axis_data.py`. O log ainda vale para depurar reenvios e mensagens do motor Python.

@@ -4,7 +4,7 @@ Só no **Atlas** com `abrir-auto-orcamento.bat` (`BIND_HOST` = `127.0.0.1`, Wind
 
 ## Objetivo
 
-Abrir o app **sem esperar** o Axis; em segundo plano reconciliar `C:\auto-orcamento\` com a partição **axis-data** no Patriot e atualizar o código no CT quando o manifesto mudar.
+Abrir o app **sem bloquear a UI** no Axis; em segundo plano reconciliar `C:\auto-orcamento\` com a partição **axis-data** no Patriot e atualizar o código no CT quando o manifesto mudar. Se o **host Proxmox** estiver desligado, o motor tenta **ligar** (Hub → tomada + WoL) antes de falhar.
 
 ## Componentes
 
@@ -13,17 +13,31 @@ Abrir o app **sem esperar** o Axis; em segundo plano reconciliar `C:\auto-orcame
 | Fila + SSE | [`server/axis-sync.js`](../server/axis-sync.js) |
 | Log de sessões (10 últimas) | `C:\auto-orcamento\logs\axis-sync\session-*.log` — stdout/stderr de cada execução do Python (`startup`, `push`, …) |
 | Toasts UI | [`web/sync-toasts.js`](../web/sync-toasts.js), `GET /api/sync/events` |
-| Motor SSH/rsync | `local-atlas/axis/scripts/sync_auto_orcamento.py` |
+| Motor merge + código | `local-atlas/axis/scripts/sync_auto_orcamento.py` |
+| Wake PVE (se offline) | `local-atlas/axis/scripts/ensure_axis_online.py` (`wake_axis.py` + `probe_host_ssh` em `ct_access.py`) |
 
 Variável opcional: `AUTO_ORCAMENTO_LOCAL_ATLAS` → pasta do clone `local-atlas` (padrão: `...\2.Projetos\local-atlas`).
 
 ## Pipeline no arranque (`--startup`)
+
+Antes de qualquer SSH/rsync: se o PVE não responde, o script chama o mesmo fluxo do `wake_axis.py` (Hub → tomada + WoL) e aguarda até **180 s** pelo SSH; toasts amarelo/verde na UI (`ensure_axis_online.py`).
 
 Ordem fixa:
 
 1. **Merge** `data/` → `output/` → `export/` (por arquivo: mtime mais novo vence; empate + SHA diferente → **toast amarelo**, sem overwrite).
 2. **Código** incremental para `/opt/auto-orcamento` (manifesto local vs CT; `npm install` só se `package.json` / lock mudou; `systemctl restart auto-orcamento` se houve alteração).
 3. **Manifesto** axis-data (`publish_manifest` no script Python).
+
+## Wake automático
+
+Disparado em `--startup`, `--push-relative`, merge, sync de código e `align-remote-mtimes` (não em `--repair-mtimes`, só local).
+
+1. `probe_host_ssh` no PVE (`axis.local.env`).
+2. Se falhar → `wake_axis.py` (SSH no Pi → `POST /axis/wake`).
+3. Poll SSH até **180 s** (CT 100 sobe com `onboot=1` no host).
+4. Toasts fase `wake`: amarelo (ligando/aguardando), verde (online), vermelho (Hub/WoL ou timeout).
+
+Pré-requisitos: Pi na LAN, `raspberry-home-hub/.raspberry-access.local.json`, mesmos do wake manual (`axis/README.md`).
 
 ## Eventos durante o uso
 

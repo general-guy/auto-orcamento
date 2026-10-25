@@ -98,7 +98,7 @@ Otimizações aplicadas na stack atual: Node e WebView2 em paralelo, liberação
 | Impressão | `@media print` anula zoom da UI — papel alinhado ao PDF automático |
 | Snapshot | Exportação JSON na impressão + botão **Abrir** com seletor nativo HiDPI (pywebview/WebView2) |
 | Export SQLite | Na abertura e após imprimir, reconstrói `orcamentos.sqlite` em `C:\auto-orcamento\export\`; sync envia ao Axis em background |
-| Sync Axis | Após listen: merge `data`/`output`/`export` + código CT; toasts SSE — [`docs/atlas-axis-sync.md`](docs/atlas-axis-sync.md) |
+| Sync Axis | Após listen: wake do PVE se necessário, merge `data`/`output`/`export` + código CT; toasts SSE — [`docs/atlas-axis-sync.md`](docs/atlas-axis-sync.md) |
 | Documento | Nas observações, `*texto*` (estilo WhatsApp) vira negrito no preview/PDF; o peso padrão do documento é Gotham Medium (`--document-emphasis-weight: 500`), inclusive o rótulo `Tempo previsto` |
 | Robustez | Liberação da porta 3000 no arranque do `server/server.js`; encerramento confiável ao fechar pelo X |
 

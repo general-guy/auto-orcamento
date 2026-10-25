@@ -54,7 +54,7 @@ Cutover operacional: `push_axis_data.py --only auto-orcamento` + `deploy_auto_or
 
 Só no Windows com `127.0.0.1` (`abrir-auto-orcamento.bat`):
 
-1. Após o listen na porta 3000, fila em background (`server/axis-sync.js` → `local-atlas/axis/scripts/sync_auto_orcamento.py --startup`).
+1. Após o listen na porta 3000, fila em background (`server/axis-sync.js` → `sync_auto_orcamento.py --startup`; se o Axis estiver desligado, `ensure_axis_online.py` acorda via Hub antes do merge).
 2. Ordem: merge bidirecional por arquivo em `data` → `output` → `export` (axis-data); depois código incremental para `/opt/auto-orcamento` (+ restart se mudou); manifesto axis-data.
 3. Regra de conflito: mesmo horário e SHA diferente → toast amarelo, sem overwrite.
 4. Após gravar JSON em `data/` (API) ou imprimir (PDF+JSON+sqlite): push unidirecional só dos arquivos alterados.

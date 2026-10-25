@@ -18,7 +18,7 @@ Plugins esperados: **Context7**, **Continual Learning**, **Cursor Team Kit**, **
 
 Memória persistente do agente: [`AGENTS.md`](../AGENTS.md) na raiz; temas em [`docs/agent-memory/README.md`](agent-memory/README.md).
 
-Skills globais CT100 (`ct100-webapps`, `ct100-auto-orcamento`): em `~/.cursor/skills/` — sync Axis ao abrir o app Atlas documentado em [`atlas-axis-sync.md`](atlas-axis-sync.md).
+Skills globais CT100 (`ct100-webapps`, `ct100-auto-orcamento`): em `~/.cursor/skills/` — sync Axis ao abrir o app Atlas (inclui wake Hub/WoL se o PVE estiver off) em [`atlas-axis-sync.md`](atlas-axis-sync.md).
 
 ## Context7
 

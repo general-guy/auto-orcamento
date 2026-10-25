@@ -10,7 +10,7 @@ Para fluxos com plugins (quando pedir o quê, frases úteis): [`docs/cursor-plug
 - Entrada diária neste PC: `abrir-auto-orcamento.bat` → `127.0.0.1:3000`. Produção: Axis CT 100 (`https://axis.tail5fe4b7.ts.net/`, Tailscale Serve, sem Funnel) — ver `docs/atlas-axis.md`.
 - Código ativo: `web/`, `server/`, `launcher/`. Tauri e Funnel+token removidos do tree — ver `docs/legado-tauri.md` e `docs/legado-funnel-auth.md`.
 - Dados ao vivo no Windows: `C:\auto-orcamento\data\` + `output\` + `export\` (ver `docs/agent-memory/output-path.md`). Seed no repo: `seed/data/`. Pasta `data/` no clone é local (`.gitignore`).
-- Sync Atlas↔Axis em background ao abrir o `.bat` (só `127.0.0.1`): `server/axis-sync.js` + `local-atlas/axis/scripts/sync_auto_orcamento.py` — ver `docs/atlas-axis-sync.md`.
+- Sync Atlas↔Axis em background ao abrir o `.bat` (só `127.0.0.1`): `server/axis-sync.js` → `sync_auto_orcamento.py` (se o PVE estiver off, `ensure_axis_online.py` acorda via Hub/WoL antes do merge) — ver `docs/atlas-axis-sync.md`.
 - Após mudar código: reabrir o app (`abrir-auto-orcamento.bat` ou `npm start`) — sem build. Deploy manual completo: `local-atlas` → `deploy_auto_orcamento.py`; o sync automático envia diff de código quando o manifesto mudou.
 - Docs técnicas: `README.md`, `docs/ARCHITECTURE.md`, `docs/atlas-axis.md`, `docs/atlas-axis-sync.md`, `docs/acesso-remoto.md`, `docs/export-sqlite.md`, `docs/tabelas-hospitalares.md`, `docs/unimed-n.md`; memória temática em `docs/agent-memory/README.md`.
 
@@ -46,6 +46,6 @@ Para fluxos com plugins (quando pedir o quê, frases úteis): [`docs/cursor-plug
 - Espelho SQLite é reconstruído a partir de `output/` na abertura do servidor e após imprimir (também `npm run export:sqlite`); cópia em `C:\auto-orcamento\export\` e entrega para `dados-clinica/import/` (no CT: `/data/dados-clinica/import/`).
 - `pacientes.json` ao vivo em `C:\auto-orcamento\data\` (não no Git); seed: `seed/data/pacientes.json.example`.
 - Negrito do documento (observações `*texto*` e rótulo `Tempo previsto`) é Gotham Medium (`--document-emphasis-weight: 500`).
-- CT 100: mutável em axis-data (`/data/auto-orcamento/`), código em `/opt/auto-orcamento`. Deploy tar via `deploy_auto_orcamento.py`; sync automático no Atlas reconcilia `C:\auto-orcamento\` e código incremental (`sync_auto_orcamento.py`).
+- CT 100: mutável em axis-data (`/data/auto-orcamento/`), código em `/opt/auto-orcamento`. Deploy tar via `deploy_auto_orcamento.py`; sync automático no Atlas reconcilia `C:\auto-orcamento\` e código incremental (`sync_auto_orcamento.py`); wake do host sob demanda no arranque/push do sync.
 - Hospital cujo nome contém Unimed N abre linhas Uni# com valor em R$ (sem multiplicador), histórico em `data/unimed-n.json`.
 - Hospital cujo nome contém Blanc abre linhas Bla# com tabela em `tabelas-hospitalares.json` (valores = parcela 1+3 × 4; autofill 1 / 0.6 / 0.5 só em maior incidência + demais; associadas em x1). `data/tabela-blanc-2026.json` é extração seccionada, não lida pelo app. O 3% à vista do PDF não é automático.

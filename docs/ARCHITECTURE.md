@@ -151,7 +151,7 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 | `web/app.js` | Lógica de UI, preview, históricos, autofill |
 | `server/paths.js` | Raiz do repo, `data/`, `export/` e `outputDir` (`C:\auto-orcamento\output` no Windows; `OUTPUT_DIR` opcional) |
 | `server/server.js` | Servidor na porta 3000 (`BIND_HOST`), APIs REST |
-| `server/axis-sync.js` | Fila sync Atlas→Axis (só Windows localhost); SSE `/api/sync/events`; chama `local-atlas/axis/scripts/sync_auto_orcamento.py`; log rotativo (10 sessões) em `C:\auto-orcamento\logs\axis-sync\` via `axis-sync-session-log.js` |
+| `server/axis-sync.js` | Fila sync Atlas→Axis (só Windows localhost); SSE `/api/sync/events`; chama `sync_auto_orcamento.py` (wake PVE via `ensure_axis_online.py` no local-atlas se offline); log rotativo (10 sessões) em `C:\auto-orcamento\logs\axis-sync\` via `axis-sync-session-log.js` |
 | `docs/atlas-axis.md` | Relação Atlas (dev) × Axis (produção) |
 | `web/budget-snapshot.js` | Snapshot JSON do formulário na impressão e validação na importação |
 | `server/snapshot-open-dialog.js` | Invoca `scripts/open-snapshot-dialog.py` (pywebview/WebView2) ou PowerShell para seletor nativo de JSON |
