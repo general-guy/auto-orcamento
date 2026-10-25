@@ -14,7 +14,7 @@ O `.bat` abre **sem janelas de terminal visíveis**: relança-se em modo oculto 
 
 Este clone no **Atlas** (Geraldo-Server) é o ambiente de desenvolvimento (`abrir-auto-orcamento.bat` → `http://127.0.0.1:3000`). A produção clínica (celular/tablet) corre no **Axis** (Proxmox CT 100): `https://axis.tail5fe4b7.ts.net/` via Tailscale Serve, **sem Funnel**.
 
-Relação, bind e dados: [`docs/atlas-axis.md`](docs/atlas-axis.md).
+Relação, bind, dados e **sync em background** ao abrir o app: [`docs/atlas-axis.md`](docs/atlas-axis.md), [`docs/atlas-axis-sync.md`](docs/atlas-axis-sync.md).
 
 ## Estrutura da raiz
 
@@ -36,7 +36,7 @@ Na raiz ficam só os **atalhos de uso** e o **mínimo para o app Node** rodar:
 | `seed/data/` | Seed versionado de tabelas e históricos base |
 | `C:\auto-orcamento\data\` (Windows) | Dados ao vivo: históricos, settings, tabelas em runtime |
 | `C:\auto-orcamento\output\` (Windows) | PDF/JSON canônicos fora do repositório (ver abaixo) |
-| `export/` | Espelho SQLite dos snapshots (`orcamentos.sqlite`; não versionado) |
+| `C:\auto-orcamento\export\` | Espelho SQLite (`orcamentos.sqlite`; fora do repo no Windows) |
 | `docs/` | Arquitetura, Atlas/Axis, snapshots e guia de plugins Cursor |
 | `scripts/` | Utilitários de build, acesso remoto e consolidação SQLite |
 
@@ -97,7 +97,8 @@ Otimizações aplicadas na stack atual: Node e WebView2 em paralelo, liberação
 | Startup | Node em background + `--external-server`; poll breve pelo Node; splash `assets/launcher.html`; módulos pesados lazy no servidor; scripts com `defer` |
 | Impressão | `@media print` anula zoom da UI — papel alinhado ao PDF automático |
 | Snapshot | Exportação JSON na impressão + botão **Abrir** com seletor nativo HiDPI (pywebview/WebView2) |
-| Export SQLite | Na abertura do servidor e após imprimir (local), reconstrói `export/orcamentos.sqlite` (+ cópia em `C:\auto-orcamento\export\` no Windows) a partir de todos os `output/*.json` (espelho; JSON continua canônico) |
+| Export SQLite | Na abertura e após imprimir, reconstrói `orcamentos.sqlite` em `C:\auto-orcamento\export\`; sync envia ao Axis em background |
+| Sync Axis | Após listen: merge `data`/`output`/`export` + código CT; toasts SSE — [`docs/atlas-axis-sync.md`](docs/atlas-axis-sync.md) |
 | Documento | Nas observações, `*texto*` (estilo WhatsApp) vira negrito no preview/PDF; o peso padrão do documento é Gotham Medium (`--document-emphasis-weight: 500`), inclusive o rótulo `Tempo previsto` |
 | Robustez | Liberação da porta 3000 no arranque do `server/server.js`; encerramento confiável ao fechar pelo X |
 

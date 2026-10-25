@@ -1491,3 +1491,44 @@ body.login-page {
   padding: 8px 2px;
   white-space: pre-line;
 }
+
+.axis-sync-toasts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: min(360px, calc(100vw - 24px));
+  pointer-events: none;
+  position: fixed;
+  right: 16px;
+  top: 16px;
+  z-index: 10000;
+}
+
+.axis-sync-toast {
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  color: #fff;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  opacity: 0;
+  padding: 10px 14px;
+  transform: translateY(-6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.axis-sync-toast--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.axis-sync-toast--ok {
+  background: #1b7f4a;
+}
+
+.axis-sync-toast--error {
+  background: #b42318;
+}
+
+.axis-sync-toast--warn {
+  background: #9a6700;
+}

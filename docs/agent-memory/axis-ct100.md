@@ -50,6 +50,18 @@ O **seed** versionado continua só no código (`/opt/auto-orcamento/seed/data/`)
 
 Cutover operacional: `push_axis_data.py --only auto-orcamento` + `deploy_auto_orcamento.py`.
 
+## Sync automático no Atlas (dev)
+
+Só no Windows com `127.0.0.1` (`abrir-auto-orcamento.bat`):
+
+1. Após o listen na porta 3000, fila em background (`server/axis-sync.js` → `local-atlas/axis/scripts/sync_auto_orcamento.py --startup`).
+2. Ordem: merge bidirecional por arquivo em `data` → `output` → `export` (axis-data); depois código incremental para `/opt/auto-orcamento` (+ restart se mudou); manifesto axis-data.
+3. Regra de conflito: mesmo horário e SHA diferente → toast amarelo, sem overwrite.
+4. Após gravar JSON em `data/` (API) ou imprimir (PDF+JSON+sqlite): push unidirecional só dos arquivos alterados.
+5. Toasts: SSE `GET /api/sync/events` + `web/sync-toasts.js`.
+
+Override: `AUTO_ORCAMENTO_LOCAL_ATLAS` aponta para o clone `local-atlas`. Runbook completo: [`../atlas-axis-sync.md`](../atlas-axis-sync.md).
+
 ## Referências (local-atlas)
 
 - `axis/AXIS-DATA.md` — particão Patriot `nvme0n1p2`, fstab, binds mp0..mp2.

@@ -16,7 +16,9 @@ Plugins esperados: **Context7**, **Continual Learning**, **Cursor Team Kit**, **
 | Harness de UI local | Team Kit → `control-ui` | "Monta um harness CDP para o fluxo Abrir snapshot" |
 | Preferências que se repetem nos chats | Continual Learning | Automático; ou "Atualiza o AGENTS.md a partir dos chats recentes" |
 
-Memória persistente do agente: [`AGENTS.md`](../AGENTS.md) na raiz.
+Memória persistente do agente: [`AGENTS.md`](../AGENTS.md) na raiz; temas em [`docs/agent-memory/README.md`](agent-memory/README.md).
+
+Skills globais CT100 (`ct100-webapps`, `ct100-auto-orcamento`): em `~/.cursor/skills/` — sync Axis ao abrir o app Atlas documentado em [`atlas-axis-sync.md`](atlas-axis-sync.md).
 
 ## Context7
 

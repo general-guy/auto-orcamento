@@ -52,3 +52,15 @@ py -3 .\axis\scripts\deploy_auto_orcamento.py
 ```
 
 Copia **código** para `/opt/auto-orcamento` (sem `data/`/`output/`/`export/` no tar); dados em axis-data (`push_axis_data.py` + binds). Detalhe: `docs/agent-memory/axis-ct100.md` e `local-atlas/docs/referencias/web-apps-axis.md`.
+
+## Sync automático (Atlas dev)
+
+Ao abrir `abrir-auto-orcamento.bat`, após a porta 3000 subir, o servidor enfileira sync em segundo plano (toasts no canto superior direito). Não bloqueia a UI.
+
+| Fase | O quê |
+|------|--------|
+| Dados | Merge `data` → `output` → `export` entre `C:\auto-orcamento\` e axis-data |
+| Código | Incremental para `/opt/auto-orcamento` + restart se mudou |
+| Uso | Gravar histórico ou imprimir → push só dos arquivos alterados |
+
+Runbook: [`atlas-axis-sync.md`](atlas-axis-sync.md). Axis desligado → toasts vermelhos; app local segue normal.

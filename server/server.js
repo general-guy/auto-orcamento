@@ -21,9 +21,11 @@ const {
   legacyRepoDataDir,
 } = require("./paths");
 const { ensureDataDirReady } = require("./data-bootstrap");
+const { createAxisSync } = require("./axis-sync");
 
 const port = 3000;
 const bindHost = process.env.BIND_HOST || "127.0.0.1";
+const axisSync = createAxisSync({ bindHost, dataDir });
 const surgeriesFile = path.join(dataDir, "cirurgias.json");
 const hospitalsFile = path.join(dataDir, "hospitais.json");
 const patientsFile = path.join(dataDir, "pacientes.json");
@@ -262,6 +264,7 @@ function writeSettings(patch = {}) {
   }
 
   fs.writeFileSync(settingsFile, `${JSON.stringify(next, null, 2)}\n`, "utf8");
+  axisSync.afterDataFileWrite(settingsFile);
   return readSettings();
 }
 
@@ -280,6 +283,7 @@ function readJsonList(filePath) {
 function writeJsonList(filePath, items) {
   ensureDataFile();
   fs.writeFileSync(filePath, `${JSON.stringify(items, null, 2)}\n`, "utf8");
+  axisSync.afterDataFileWrite(filePath);
 }
 
 function sendJson(response, statusCode, data) {
@@ -471,6 +475,11 @@ async function handlePdfExport(request, response) {
     responsePayload.sqlitePath = sqliteResult.dbRelativeHint;
     responsePayload.sqliteCount = sqliteResult.count;
   }
+
+  axisSync.afterPdfExport({
+    filename: responsePayload.filename,
+    jsonFilename: responsePayload.jsonFilename,
+  });
 
   sendJson(response, 200, responsePayload);
 }
@@ -1030,6 +1039,15 @@ function serveStaticFile(request, response) {
 
 const server = http.createServer(async (request, response) => {
   try {
+    if (request.url.startsWith("/api/sync/events")) {
+      if (request.method !== "GET" || isRemoteRequest(request)) {
+        sendJson(response, 403, { error: "Sync disponível só no Atlas local." });
+        return;
+      }
+      axisSync.attachSyncEventsRoute(request, response);
+      return;
+    }
+
     if (request.url.startsWith("/api/shutdown")) {
       if (request.method !== "POST") {
         sendJson(response, 405, { error: "Método não permitido." });
@@ -1155,6 +1173,7 @@ async function startServer() {
 
     // Espelho SQLite alinhado a output/ em cada abertura do app (além da impressão).
     consolidateOutputSqliteSafe();
+    setImmediate(() => axisSync.enqueueStartup());
   });
 }
 
