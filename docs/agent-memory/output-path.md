@@ -18,7 +18,7 @@ C:\auto-orcamento\export\        orcamentos.sqlite (cópia na consolidação)
 
 | Artefato | Função |
 |---|---|
-| `server/paths.js` | `dataDir`, `outputDir`, `seedDataDir`; overrides `DATA_DIR`, `OUTPUT_DIR` |
+| `server/paths.js` | `dataDir`, `outputDir`, `exportDir`; overrides `DATA_DIR`, `OUTPUT_DIR`, `EXPORT_DIR` |
 | `server/data-bootstrap.js` | Seed → lacunas; legado `{repo}/data` → lacunas + mtime mais novo |
 | `scripts/finalize-repo-data-migration.ps1` | Remove ou move resíduos de `{repo}/data` após destino ok |
 | `server/server.js` | APIs gravam em `dataDir`; HTTP `/data/*` serve de `dataDir` |
@@ -29,8 +29,9 @@ C:\auto-orcamento\export\        orcamentos.sqlite (cópia na consolidação)
 |---|---|
 | `DATA_DIR` | Pasta de dados (absoluto) |
 | `OUTPUT_DIR` | Pasta de PDF/JSON |
+| `EXPORT_DIR` | Pasta do espelho `orcamentos.sqlite` |
 
-Sem override no **win32:** `C:\auto-orcamento\data` e `C:\auto-orcamento\output`. Em **Linux** (deploy atual): `{repoRoot}/data` e `{repoRoot}/output` até novo desenho do CT.
+Sem override no **win32:** `C:\auto-orcamento\data` e `C:\auto-orcamento\output`. **CT 100 (alvo):** `/data/auto-orcamento/{data,output,export}` via bind axis-data — `docs/agent-memory/axis-ct100.md`.
 
 ## Settings
 
@@ -39,4 +40,5 @@ Sem override no **win32:** `C:\auto-orcamento\data` e `C:\auto-orcamento\output`
 ## Documentação relacionada
 
 - `docs/export-sqlite.md`
+- `docs/agent-memory/axis-ct100.md` (produção CT 100)
 - `seed/data/README.md`

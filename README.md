@@ -60,7 +60,7 @@ O web app (`web/index.html`, `web/app.js`, `web/api.js`, `web/styles.css`, `asse
 
 Produção e acesso remoto: [`docs/atlas-axis.md`](docs/atlas-axis.md), [`docs/acesso-remoto.md`](docs/acesso-remoto.md). Funnel + tokens (removidos): [`docs/legado-funnel-auth.md`](docs/legado-funnel-auth.md).
 
-Históricos, settings e tabelas em runtime ficam em **`C:\auto-orcamento\data\`** no Windows (`DATA_DIR` opcional). Seed versionado: **`seed/data/`**. PDFs e snapshots JSON: **`C:\auto-orcamento\output\`**. Espelho SQLite: **`export/orcamentos.sqlite`** no repo + **`C:\auto-orcamento\export\`** (ver [`docs/export-sqlite.md`](docs/export-sqlite.md), [`docs/agent-memory/output-path.md`](docs/agent-memory/output-path.md)).
+Históricos, settings e tabelas em runtime ficam em **`C:\auto-orcamento\data\`** no Windows (`DATA_DIR` opcional). Seed versionado: **`seed/data/`**. PDFs/JSON: **`C:\auto-orcamento\output\`**. Espelho SQLite: **`C:\auto-orcamento\export\`**. No **CT 100**, o mesmo trio em **`/data/auto-orcamento/`** (axis-data); código em `/opt/auto-orcamento` — [`docs/agent-memory/axis-ct100.md`](docs/agent-memory/axis-ct100.md), [`docs/export-sqlite.md`](docs/export-sqlite.md).
 
 **Depois de editar o código:** abra de novo com `abrir-auto-orcamento.bat` (ou `npm start`) — não precisa de build.
 
@@ -223,7 +223,7 @@ Os PDFs e snapshots JSON gerados automaticamente ficam fora do repositório:
 C:\auto-orcamento\output\
 ```
 
-No Linux (Axis) o padrão continua sendo `output/` na raiz do deploy, salvo `OUTPUT_DIR`. Essa pasta não é versionada no Git. Referência técnica: [`docs/agent-memory/output-path.md`](docs/agent-memory/output-path.md). Os JSON ali são a **fonte canônica** do banco de arquivos do app (botão **Abrir** e APIs de snapshot). Cada exportação usa o nome da paciente, ` - `, a **primeira cirurgia proposta** (se preenchida) e a data/hora, por exemplo `Maria da Silva - Abdominoplastia 2026-06-18 14-30-05.pdf` e o `.json` com o mesmo nome base.
+No **CT 100**, `OUTPUT_DIR`/`DATA_DIR`/`EXPORT_DIR` apontam para `/data/auto-orcamento/...` (bind Patriot). Essas pastas não entram no Git. Referência técnica: [`docs/agent-memory/output-path.md`](docs/agent-memory/output-path.md). Os JSON ali são a **fonte canônica** do banco de arquivos do app (botão **Abrir** e APIs de snapshot). Cada exportação usa o nome da paciente, ` - `, a **primeira cirurgia proposta** (se preenchida) e a data/hora, por exemplo `Maria da Silva - Abdominoplastia 2026-06-18 14-30-05.pdf` e o `.json` com o mesmo nome base.
 
 O espelho consolidado para outros webapps fica em:
 

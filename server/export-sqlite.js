@@ -187,30 +187,35 @@ function defaultDeliverPaths(repoRoot) {
     return [path.resolve(envPath)];
   }
 
+  const axisClinicaImport = path.join("/data/dados-clinica/import", DEFAULT_DB_NAME);
+  if (process.platform !== "win32" && fs.existsSync("/data/dados-clinica")) {
+    return [axisClinicaImport];
+  }
+
   // Entrega padrão ao projeto irmão dados-clinica (push, não pull).
   return [path.join(repoRoot, "..", "dados-clinica", "import", DEFAULT_DB_NAME)];
 }
 
-function windowsExportSqliteDeliverPath() {
-  if (process.platform !== "win32") {
-    return null;
+function extraExportSqliteMirrorPath() {
+  if (process.platform === "win32") {
+    return path.join(path.resolve(defaultWindowsExportDir), DEFAULT_DB_NAME);
   }
 
-  return path.join(path.resolve(defaultWindowsExportDir), DEFAULT_DB_NAME);
+  return null;
 }
 
-function withWindowsExportDeliverPath(targets) {
-  const windowsTarget = windowsExportSqliteDeliverPath();
-  if (!windowsTarget) {
+function withExtraExportDeliverPaths(targets) {
+  const mirrorTarget = extraExportSqliteMirrorPath();
+  if (!mirrorTarget) {
     return targets;
   }
 
   const resolved = new Set((targets || []).map((target) => path.resolve(target)));
-  if (resolved.has(path.resolve(windowsTarget))) {
+  if (resolved.has(path.resolve(mirrorTarget))) {
     return targets;
   }
 
-  return [...(targets || []), windowsTarget];
+  return [...(targets || []), mirrorTarget];
 }
 
 function deliverSqliteCopy(dbPath, deliverPaths) {
@@ -259,7 +264,7 @@ function consolidateOutputToSqlite({
 
   const dbPath = path.join(exportDir, dbName);
   const resolvedRepoRoot = repoRoot || path.join(exportDir, "..");
-  const targets = withWindowsExportDeliverPath(
+  const targets = withExtraExportDeliverPaths(
     deliverPaths !== undefined ? deliverPaths : defaultDeliverPaths(resolvedRepoRoot),
   );
   const jsonPaths = listSnapshotJsonFiles(outputDir);

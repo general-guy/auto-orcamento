@@ -25,7 +25,7 @@ Independência:
 | O quê | Fonte da verdade | Onde não vive ao vivo |
 |---|---|---|
 | Código | GitHub (`git pull` / rsync do clone Atlas) | OneDrive não é o origin |
-| Dados de produção (`data/` de runtime, `output/`) | Disco do CT 100 (`/opt/auto-orcamento`) | Sem sync nos dois sentidos; sem OneDrive no Axis |
+| Dados de produção (`data/`, `output/`, `export/`) | Patriot **axis-data** → bind CT `/data/auto-orcamento` (espelho `C:\auto-orcamento\` no Atlas) | Código em `/opt/auto-orcamento` só estável; ver `docs/agent-memory/axis-ct100.md` |
 | Rede de segurança | OneDrive no Atlas + git | Não cobre o acervo clínico no CT |
 
 O clone neste PC é para **editar código**. Históricos e PDFs clínicos ao vivo moram no Axis. Nomes de pacientes deste clone ficam em `data/pacientes.json`, fora do Git.
@@ -51,4 +51,4 @@ Pedido explícito, a partir do clone `local-atlas` neste PC:
 py -3 .\axis\scripts\deploy_auto_orcamento.py
 ```
 
-Copia este repo para `/opt/auto-orcamento`, liga o systemd e configura Serve `:443` no host. Detalhe operacional: `local-atlas/docs/referencias/web-apps-axis.md`.
+Copia **código** para `/opt/auto-orcamento` (sem `data/`/`output/`/`export/` no tar); dados em axis-data (`push_axis_data.py` + binds). Detalhe: `docs/agent-memory/axis-ct100.md` e `local-atlas/docs/referencias/web-apps-axis.md`.

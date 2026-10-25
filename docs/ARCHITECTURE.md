@@ -11,7 +11,7 @@ Papel de cada máquina: `docs/atlas-axis.md`. Acesso remoto: `docs/acesso-remoto
 
 Agente Cursor / plugins: `AGENTS.md` (raiz) e `docs/cursor-plugins.md`.
 
-Históricos e tabelas versionados ficam em **`data/`** na raiz do repo. PDFs e snapshots JSON canônicos no **Atlas (Windows)** ficam em **`C:\auto-orcamento\output\`** (`server/paths.js`; override com `OUTPUT_DIR`). Em produção no **Axis** os dados ao vivo ficam no disco do CT — ver `docs/atlas-axis.md` (lá o padrão sem `OUTPUT_DIR` é `output/` no deploy). O espelho SQLite para outros webapps fica em **`export/orcamentos.sqlite`** no repo (ver `docs/export-sqlite.md`).
+Catálogos versionados em **`seed/data/`**; runtime em **`C:\auto-orcamento\{data,output,export}`** no Atlas ou bind **`/data/auto-orcamento/...`** no CT (axis-data). Código de produção em **`/opt/auto-orcamento`**. Ver `docs/agent-memory/axis-ct100.md` e `docs/atlas-axis.md`.
 
 > **Desenvolvimento ativo:** stack Node + WebView2 na `main`.  
 > **Baseline congelada:** `stable/node-web-v0.1.0` / `v0.1.0-node-web` — `docs/SNAPSHOT-node-web-v0.1.0.md`.  

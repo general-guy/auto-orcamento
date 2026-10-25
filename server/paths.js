@@ -1,6 +1,14 @@
+const fs = require("node:fs");
 const path = require("node:path");
 
 const repoRoot = path.join(__dirname, "..");
+
+/** CT 100 bind mp1 (axis-data); paridade com C:\auto-orcamento no Atlas. */
+const defaultLinuxAxisDataRoot = "/data/auto-orcamento";
+
+function linuxUsesAxisDataBind() {
+  return process.platform !== "win32" && fs.existsSync(defaultLinuxAxisDataRoot);
+}
 
 function resolveOutputDir() {
   if (process.env.OUTPUT_DIR && String(process.env.OUTPUT_DIR).trim()) {
@@ -9,6 +17,10 @@ function resolveOutputDir() {
 
   if (process.platform === "win32") {
     return path.resolve("C:\\auto-orcamento\\output");
+  }
+
+  if (linuxUsesAxisDataBind()) {
+    return path.join(defaultLinuxAxisDataRoot, "output");
   }
 
   return path.join(repoRoot, "output");
@@ -23,12 +35,32 @@ function resolveDataDir() {
     return path.resolve("C:\\auto-orcamento\\data");
   }
 
+  if (linuxUsesAxisDataBind()) {
+    return path.join(defaultLinuxAxisDataRoot, "data");
+  }
+
   return path.join(repoRoot, "data");
+}
+
+function resolveExportDir() {
+  if (process.env.EXPORT_DIR && String(process.env.EXPORT_DIR).trim()) {
+    return path.resolve(String(process.env.EXPORT_DIR).trim());
+  }
+
+  if (process.platform === "win32") {
+    return path.resolve("C:\\auto-orcamento\\export");
+  }
+
+  if (linuxUsesAxisDataBind()) {
+    return path.join(defaultLinuxAxisDataRoot, "export");
+  }
+
+  return path.join(repoRoot, "export");
 }
 
 const outputDir = resolveOutputDir();
 const dataDir = resolveDataDir();
-const exportDir = path.join(repoRoot, "export");
+const exportDir = resolveExportDir();
 const webDir = path.join(repoRoot, "web");
 const seedDataDir = path.join(repoRoot, "seed", "data");
 const legacyRepoDataDir = path.join(repoRoot, "data");
@@ -52,6 +84,8 @@ module.exports = {
   legacyRepoDataDir,
   resolveOutputDir,
   resolveDataDir,
+  resolveExportDir,
+  defaultLinuxAxisDataRoot,
   defaultWindowsOutputDir,
   defaultWindowsDataDir,
   defaultWindowsExportDir,

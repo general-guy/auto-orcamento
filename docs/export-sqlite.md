@@ -10,9 +10,9 @@ O Auto Orçamento **não** usa este banco como fonte canônica: PDF e JSON na pa
 |---|---|
 | `output/*.json` | **Canônico** — banco de arquivos do app; botão **Abrir**, APIs `/api/snapshots*` |
 | `output/*.pdf` | Documento gerado na impressão |
-| `export/orcamentos.sqlite` | **Espelho no repo** — reconstruído a partir de todos os JSON de `output/` |
-| `C:\auto-orcamento\export\orcamentos.sqlite` | **Cópia idêntica** no Windows (fora do repo; mesmo conteúdo que o espelho) |
-| `../dados-clinica/import/orcamentos.sqlite` | **Entrega** — cópia do espelho para o dados-clinica (push) |
+| `EXPORT_DIR/orcamentos.sqlite` | **Espelho** — `C:\auto-orcamento\export\` (Atlas) ou `/data/auto-orcamento/export/` (CT 100) |
+| `../dados-clinica/import/orcamentos.sqlite` | **Entrega** no Atlas (clone irmão) |
+| `/data/dados-clinica/import/orcamentos.sqlite` | **Entrega** no CT 100 (bind axis-data; ver `AUTO_ORCAMENTO_DELIVER_SQLITE`) |
 
 ## Quando é atualizado
 
