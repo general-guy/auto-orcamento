@@ -19,12 +19,26 @@ Só quando o sync está habilitado (Windows + `BIND_HOST` localhost). Produção
 
 O merge de `data` / `output` / `export` no arranque usa **SSH find + SFTP** por arquivo (`sync_auto_orcamento_data.py`), não o rsync em massa do `push_axis_data.py`. O log ainda vale para depurar reenvios e mensagens do motor Python.
 
-## Diagnóstico (2026-10-25): reenvio de `data/` em todo startup
+## Toasts com `` no lugar de acentos
+
+O Python no subprocesso usava cp1252 no stdout; o Node lia UTF-8. **`axis-sync.js`** define `PYTHONIOENCODING=utf-8` e `PYTHONUTF8=1` no spawn do `py`.
+
+## Datas de `output/` após sync em massa
+
+Explorer pode mostrar a mesma “Data de modificação” em todos os PDFs; a **criação** costuma continuar correta. O merge usa **mtime**; no Patriot não há data de criação do Windows.
+
+Recuperação (scripts no **local-atlas**):
+
+1. `--repair-mtimes <member>` — alinha `st_mtime` local (criação / carimbo no nome do PDF).
+2. `--align-remote-mtimes <member>` — `touch` no axis-data sem reupload (evita o merge puxar tudo porque o remoto parecia “mais novo”).
+3. `--merge-member <member>` — reconcilia conteúdo.
+
+Detalhes: [`../atlas-axis-sync.md`](../atlas-axis-sync.md#datas-dos-arquivos-output-etc).
+
+## Histórico: reenvio de `data/` em todo startup (corrigido)
 
 Sintoma: toast `data: 0 puxado(s), 15 enviado(s), 0 igual(is).` em cada abertura.
 
-Causa provável no **local-atlas**: `list_remote_member` usa `find -printf '%Y'` — no GNU find `%Y` é **tipo** de arquivo (`f`), não mtime. O parser descarta as linhas → inventário remoto vazio → todos os arquivos locais tratados como “só no Atlas” → push repetido.
+Causa no **local-atlas**: `find -printf '%Y'` (tipo `f`, não mtime) → inventário remoto vazio → push repetido.
 
-Correção pendente: trocar por `%T@` (mtime Unix) em `local-atlas/axis/scripts/sync_auto_orcamento_data.py`.
-
-Runbook geral: [`../atlas-axis-sync.md`](../atlas-axis-sync.md).
+Correção: `%T@`, SFTP com `utime`, slop 1 s, data lógica no push, flags acima.

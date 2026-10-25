@@ -32,7 +32,7 @@ Ordem fixa:
 | API grava JSON em `data/` (históricos, settings, tabelas) | Push unidirecional **só daquele arquivo** |
 | `POST /api/pdf` (impressão) | Push do par `.pdf` + `.json` em `output/` e `export/orcamentos.sqlite` |
 
-Toasts: verde (ok), vermelho (Axis offline / falha), amarelo (conflito manual).
+Toasts: verde (ok), vermelho (Axis offline / falha), amarelo (conflito manual). O `axis-sync.js` define `PYTHONIOENCODING=utf-8` no subprocesso Python (acentos no Windows).
 
 ## Manual (sem abrir o app)
 
@@ -46,6 +46,20 @@ py -3 .\axis\scripts\deploy_auto_orcamento.py
 ```
 
 Deploy tar completo continua válido para cutover ou CT novo.
+
+## Datas dos arquivos (`output/` etc.)
+
+O merge usa **mtime** (no Axis só mtime/atime; não há “data de criação” do Windows). No push, o script grava no Patriot o horário lógico do documento: o **mais antigo** entre modificação local, criação no Windows (`st_birthtime`) e o carimbo no nome (`… 2026-09-08 14-07-13.pdf`).
+
+Se um sync em massa deixou tudo com a mesma “Data de modificação” no Explorer:
+
+```powershell
+py -3 .\axis\scripts\sync_auto_orcamento.py --repair-mtimes output
+py -3 .\axis\scripts\sync_auto_orcamento.py --align-remote-mtimes output
+py -3 .\axis\scripts\sync_auto_orcamento.py --merge-member output
+```
+
+`--align-remote-mtimes` faz `touch` no Patriot com a data lógica do documento (sem reupload). Só depois o merge deixa de puxar tudo de volta por mtime “falso” no Axis.
 
 ## Relacionado
 

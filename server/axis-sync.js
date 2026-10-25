@@ -77,6 +77,12 @@ function runPythonSync(argv, { taskName = "sync", timeoutMs = 4 * 60 * 60 * 1000
       cwd: resolveLocalAtlasRoot(),
       windowsHide: true,
       stdio: ["ignore", "pipe", "pipe"],
+      env: {
+        ...process.env,
+        // Toasts JSON com acentos; sem isso o stdout do py no Windows sai em cp1252 e o Node lê como UTF-8.
+        PYTHONIOENCODING: "utf-8",
+        PYTHONUTF8: "1",
+      },
     });
 
     let stdoutBuffer = "";

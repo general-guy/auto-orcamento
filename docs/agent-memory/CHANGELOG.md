@@ -1,5 +1,6 @@
 # Agent memory — changelog
 
+- 2026-10-25: Sync — UTF-8 nos toasts (`axis-sync.js`); runbook datas (`repair` / `align-remote-mtimes` / merge) em `atlas-axis-sync.md` e `axis-sync-sessions.md` (motor no local-atlas).
 - 2026-10-25: Log rotativo do sync Atlas (10 sessões em `C:\auto-orcamento\logs\axis-sync\`); memória `axis-sync-sessions.md` + diagnóstico `%Y` no find remoto (reenvio de `data/`).
 - 2026-10-25: Docs sync — `atlas-axis-sync.md`, `docs/agent-memory/README.md`; AGENTS/README/ARCHITECTURE alinhados.
 - 2026-10-25: Sync Atlas↔Axis em background (startup merge + push por arquivo); toasts SSE; scripts `sync_auto_orcamento*.py` no local-atlas.
