@@ -88,9 +88,17 @@ function runPythonSync(argv, { taskName = "sync", timeoutMs = 4 * 60 * 60 * 1000
     let stdoutBuffer = "";
     let settled = false;
     let timedOut = false;
+    let failureToastSent = false;
+    const onPythonToast = (toast) => {
+      if (toast.level === "error") {
+        failureToastSent = true;
+      }
+      broadcast(toast);
+    };
     const timer = setTimeout(() => {
       if (!settled) {
         timedOut = true;
+        failureToastSent = true;
         proc.kill();
         broadcast({
           type: "toast",
@@ -103,7 +111,7 @@ function runPythonSync(argv, { taskName = "sync", timeoutMs = 4 * 60 * 60 * 1000
     proc.stdout.on("data", (chunk) => {
       sessionLog.logChunk("stdout", chunk);
       stdoutBuffer += chunk.toString("utf8");
-      stdoutBuffer = parseStdoutChunk(stdoutBuffer, (toast) => broadcast(toast));
+      stdoutBuffer = parseStdoutChunk(stdoutBuffer, onPythonToast);
     });
 
     proc.stderr.on("data", (chunk) => {
@@ -118,11 +126,11 @@ function runPythonSync(argv, { taskName = "sync", timeoutMs = 4 * 60 * 60 * 1000
       settled = true;
       clearTimeout(timer);
       if (stdoutBuffer.trim()) {
-        parseStdoutChunk(stdoutBuffer + "\n", (toast) => broadcast(toast));
+        parseStdoutChunk(stdoutBuffer + "\n", onPythonToast);
       }
       const exitCode = typeof code === "number" ? code : 1;
       sessionLog.finish(exitCode, { timedOut });
-      if (exitCode !== 0) {
+      if (exitCode !== 0 && !failureToastSent) {
         broadcast({
           type: "toast",
           level: "error",

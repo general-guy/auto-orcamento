@@ -58,7 +58,7 @@ Só no Windows com `127.0.0.1` (`abrir-auto-orcamento.bat`):
 2. Ordem: merge bidirecional por arquivo em `data` → `output` → `export` (axis-data); depois código incremental para `/opt/auto-orcamento` (+ restart se mudou); manifesto axis-data.
 3. Regra de conflito: mesmo horário e SHA diferente → toast amarelo, sem overwrite.
 4. Após gravar JSON em `data/` (API) ou imprimir (PDF+JSON+sqlite): push unidirecional só dos arquivos alterados.
-5. Toasts: SSE `GET /api/sync/events` + `web/sync-toasts.js`.
+5. Toasts: SSE `GET /api/sync/events` + `web/sync-toasts.js` (flutuantes + histórico na toolbar do preview).
 6. Log rotativo (10 sessões): `C:\auto-orcamento\logs\axis-sync\` — ver [`axis-sync-sessions.md`](axis-sync-sessions.md).
 
 Override: `AUTO_ORCAMENTO_LOCAL_ATLAS` aponta para o clone `local-atlas`. Runbook completo: [`../atlas-axis-sync.md`](../atlas-axis-sync.md).

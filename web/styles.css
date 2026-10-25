@@ -764,8 +764,9 @@ textarea:focus {
 }
 
 .preview-toolbar {
-  align-items: end;
+  align-items: flex-start;
   display: flex;
+  gap: 16px;
   justify-content: space-between;
 }
 
@@ -1490,6 +1491,115 @@ body.login-page {
   margin: 0;
   padding: 8px 2px;
   white-space: pre-line;
+}
+
+.axis-sync-history-wrap {
+  flex-shrink: 0;
+  position: relative;
+}
+
+.axis-sync-history-btn {
+  align-items: center;
+  background: var(--panel);
+  border: 1px solid rgba(31, 41, 51, 0.12);
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(31, 41, 51, 0.08);
+  color: var(--muted);
+  cursor: pointer;
+  display: inline-flex;
+  height: 36px;
+  justify-content: center;
+  padding: 0;
+  width: 36px;
+}
+
+.axis-sync-history-btn:hover {
+  background: var(--soft);
+  color: var(--text);
+}
+
+.axis-sync-history-btn[aria-expanded="true"] {
+  background: var(--primary-soft);
+  border-color: rgba(31, 94, 255, 0.28);
+  color: var(--primary);
+}
+
+.axis-sync-history-panel {
+  background: var(--panel);
+  border: 1px solid rgba(31, 41, 51, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(31, 41, 51, 0.14);
+  margin-top: 8px;
+  max-height: min(420px, calc(100vh - 80px));
+  overflow: auto;
+  padding: 12px 14px;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  width: min(360px, calc(100vw - 24px));
+  z-index: 10002;
+}
+
+.axis-sync-history-panel[hidden] {
+  display: none;
+}
+
+.axis-sync-history-title {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin: 0 0 10px;
+  text-transform: uppercase;
+}
+
+.axis-sync-history-list {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.axis-sync-history-empty {
+  color: var(--muted);
+  font-size: 0.88rem;
+  padding: 4px 0;
+}
+
+.axis-sync-history-item {
+  border-left: 3px solid #9ca3af;
+  border-radius: 0 8px 8px 0;
+  display: grid;
+  gap: 4px;
+  padding: 8px 10px 8px 12px;
+}
+
+.axis-sync-history-item--ok {
+  background: rgba(27, 127, 74, 0.08);
+  border-left-color: #1b7f4a;
+}
+
+.axis-sync-history-item--warn {
+  background: rgba(154, 103, 0, 0.08);
+  border-left-color: #9a6700;
+}
+
+.axis-sync-history-item--error {
+  background: rgba(180, 35, 24, 0.08);
+  border-left-color: #b42318;
+}
+
+.axis-sync-history-time {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.axis-sync-history-message {
+  color: var(--text);
+  font-size: 0.88rem;
+  line-height: 1.35;
 }
 
 .axis-sync-toasts {

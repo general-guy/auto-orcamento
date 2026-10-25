@@ -17,9 +17,21 @@ Só quando o sync está habilitado (Windows + `BIND_HOST` localhost). Produção
 
 ## Fase wake (Axis desligado)
 
-No início de `--startup` ou push que precisa do PVE, o log pode mostrar linhas JSON de toast (`phase`: `wake`) antes do merge — saída de `ensure_axis_online.py`. Se o Hub falhar ou o SSH não subir em 180 s, `exit_code` ≠ 0 e não há merge.
+No início de `--startup` ou push que precisa do PVE, o log pode mostrar linhas JSON de toast (`phase`: `wake`) antes do merge — saída de `ensure_axis_online.py`.
+
+| Ordem (Axis estava off) | Nível | Mensagem |
+|-------------------------|-------|----------|
+| 1 | `warn` | Axis desligado; ligando via Hub (tomada e WoL). Pode levar cerca de 1 minuto… |
+| 2 | `ok` | Axis online. |
+| 3+ | merge/código | `/data/`, `/output/`, `/export/`, `code` — como no fluxo normal |
+
+Falhas wake: `error` Hub/WoL ou timeout (180 s); o Node **não** repete “Falha na sincronização” se o Python já emitiu `error`. Se o Hub falhar ou o SSH não subir, `exit_code` ≠ 0 e não há merge.
 
 Wake manual para testar: `py -3 local-atlas/axis/scripts/wake_axis.py`.
+
+## Histórico na UI (preview)
+
+`web/sync-toasts.js` grava cada toast em memória (máx. **10**) e expõe o botão de histórico na `preview-toolbar` do painel “Documento Final”. Os toasts ao vivo **não** entram no fluxo do documento (não empurram a folha); só o painel dropdown lista mensagem + `HH:MM:SS`.
 
 ## O que não é rsync
 

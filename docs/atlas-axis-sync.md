@@ -12,7 +12,7 @@ Abrir o app **sem bloquear a UI** no Axis; em segundo plano reconciliar `C:\auto
 |------|---------|
 | Fila + SSE | [`server/axis-sync.js`](../server/axis-sync.js) |
 | Log de sessões (10 últimas) | `C:\auto-orcamento\logs\axis-sync\session-*.log` — stdout/stderr de cada execução do Python (`startup`, `push`, …) |
-| Toasts UI | [`web/sync-toasts.js`](../web/sync-toasts.js), `GET /api/sync/events` |
+| Toasts UI | [`web/sync-toasts.js`](../web/sync-toasts.js), `GET /api/sync/events` — toasts flutuantes (`position: fixed`); ícone de histórico na **toolbar do preview** (à direita de “Documento Final”), painel com os **10** últimos toasts + horário |
 | Motor merge + código | `local-atlas/axis/scripts/sync_auto_orcamento.py` |
 | Wake PVE (se offline) | `local-atlas/axis/scripts/ensure_axis_online.py` (`wake_axis.py` + `probe_host_ssh` em `ct_access.py`) |
 
@@ -35,7 +35,7 @@ Disparado em `--startup`, `--push-relative`, merge, sync de código e `align-rem
 1. `probe_host_ssh` no PVE (`axis.local.env`).
 2. Se falhar → `wake_axis.py` (SSH no Pi → `POST /axis/wake`).
 3. Poll SSH até **180 s** (CT 100 sobe com `onboot=1` no host).
-4. Toasts fase `wake`: amarelo (ligando/aguardando), verde (online), vermelho (Hub/WoL ou timeout).
+4. Toasts fase `wake` (`phase` no JSON): amarelo único enquanto liga (20 s na UI), verde `Axis online.`, vermelho se Hub/WoL ou timeout — sem toast genérico duplicado do Node se o Python já reportou erro.
 
 Pré-requisitos: Pi na LAN, `raspberry-home-hub/.raspberry-access.local.json`, mesmos do wake manual (`axis/README.md`).
 
