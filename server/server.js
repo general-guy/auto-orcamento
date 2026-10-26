@@ -22,12 +22,20 @@ const {
 } = require("./paths");
 const { ensureDataDirReady } = require("./data-bootstrap");
 const { createAxisSync } = require("./axis-sync");
+const {
+  createAtlasNotifyRequestHandler,
+  notifyAtlasAfterFileWrite,
+  notifyAtlasRelativePaths,
+  startAtlasNotifyListener,
+} = require("./atlas-notify");
 const { EMPTY_CATALOG } = require("./catalog-v2");
 const { readCatalogFresh, writeCatalog, handleCatalogApi } = require("./catalog-http");
 
 const port = 3000;
 const bindHost = process.env.BIND_HOST || "127.0.0.1";
 const axisSync = createAxisSync({ bindHost, dataDir });
+const atlasNotifyRoots = { dataDir, outputDir, exportDir };
+const handleAtlasNotifyRequest = createAtlasNotifyRequestHandler({ axisSync });
 const surgeriesFile = path.join(dataDir, "cirurgias.json");
 const hospitalsFile = path.join(dataDir, "hospitais.json");
 const patientsFile = path.join(dataDir, "pacientes.json");
@@ -141,8 +149,9 @@ function pullCatalog(filePath) {
   return axisSync.pullDataFileIfRemoteNewer(filePath);
 }
 
-function afterCatalogWrite(filePath) {
+async function afterCatalogWrite(filePath) {
   axisSync.afterDataFileWrite(filePath);
+  return notifyAtlasAfterFileWrite(filePath, atlasNotifyRoots);
 }
 
 const catalogApiOptions = {
@@ -287,7 +296,12 @@ async function writeSettings(patch = {}) {
 
   fs.writeFileSync(settingsFile, `${JSON.stringify(next, null, 2)}\n`, "utf8");
   axisSync.afterDataFileWrite(settingsFile);
-  return readSettings();
+  const atlasNotify = await notifyAtlasAfterFileWrite(settingsFile, atlasNotifyRoots);
+  const settings = readSettings();
+  if (atlasNotify) {
+    settings.atlasNotify = atlasNotify;
+  }
+  return settings;
 }
 
 function sendJson(response, statusCode, data) {
@@ -485,6 +499,19 @@ async function handlePdfExport(request, response) {
     jsonFilename: responsePayload.jsonFilename,
   });
 
+  const notifyPaths = [];
+  if (responsePayload.filename) {
+    notifyPaths.push(`output/${responsePayload.filename}`);
+  }
+  if (responsePayload.jsonFilename) {
+    notifyPaths.push(`output/${responsePayload.jsonFilename}`);
+  }
+  notifyPaths.push("export/orcamentos.sqlite");
+  const atlasNotify = await notifyAtlasRelativePaths(notifyPaths);
+  if (atlasNotify) {
+    responsePayload.atlasNotify = atlasNotify;
+  }
+
   sendJson(response, 200, responsePayload);
 }
 
@@ -614,6 +641,12 @@ function serveStaticFile(request, response) {
 
 const server = http.createServer(async (request, response) => {
   try {
+    const apiUrl = new URL(request.url, "http://localhost");
+    if (apiUrl.pathname === "/api/sync/notify") {
+      await handleAtlasNotifyRequest(request, response);
+      return;
+    }
+
     if (request.url.startsWith("/api/sync/events")) {
       if (request.method !== "GET" || isRemoteRequest(request)) {
         sendJson(response, 403, { error: "Sync disponível só no Atlas local." });
@@ -749,6 +782,7 @@ async function startServer() {
     // Espelho SQLite alinhado a output/ em cada abertura do app (além da impressão).
     consolidateOutputSqliteSafe();
     axisSync.scheduleStartupWhenUiReady();
+    startAtlasNotifyListener({ axisSync, handler: handleAtlasNotifyRequest });
   });
 }
 

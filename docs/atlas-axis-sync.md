@@ -18,6 +18,8 @@ Abrir o app **sem bloquear a UI** no Axis; em segundo plano reconciliar `C:\auto
 
 Variável opcional: `AUTO_ORCAMENTO_LOCAL_ATLAS` → pasta do clone `local-atlas` (padrão: `...\2.Projetos\local-atlas`).
 
+**Notify Axis → Atlas** (pull pontual enquanto o `.bat` está aberto): `POST /api/sync/notify` no Atlas com `AUTO_ORCAMENTO_ATLAS_NOTIFY_TOKEN`; opcional listener dedicado (`AUTO_ORCAMENTO_ATLAS_NOTIFY_BIND_HOST`, porta `3010`). Detalhe: [`agent-memory/axis-data-live-sync.md`](agent-memory/axis-data-live-sync.md).
+
 ## Pipeline no arranque (`--startup`)
 
 Antes de qualquer SSH/rsync: se o PVE não responde, o script chama o mesmo fluxo do `wake_axis.py` (Hub → tomada + WoL) e aguarda até **180 s** pelo SSH; toasts amarelo/verde na UI (`ensure_axis_online.py`).

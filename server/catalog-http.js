@@ -31,9 +31,9 @@ async function readCatalogFresh(filePath, pullFn) {
   return readCatalogFile(filePath);
 }
 
-function writeCatalog(filePath, doc, afterWrite) {
+async function writeCatalog(filePath, doc, afterWrite) {
   writeCatalogFile(filePath, doc);
-  afterWrite(filePath);
+  return afterWrite(filePath);
 }
 
 async function handleCatalogApi(request, response, filePath, pullFn, afterWrite, options) {
@@ -62,9 +62,13 @@ async function handleCatalogApi(request, response, filePath, pullFn, afterWrite,
       return;
     }
 
-    writeCatalog(filePath, next, afterWrite);
+    const atlasNotify = await writeCatalog(filePath, next, afterWrite);
+    const payload = toApiPayload(next);
+    if (atlasNotify) {
+      payload.atlasNotify = atlasNotify;
+    }
     response.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
-    response.end(JSON.stringify(toApiPayload(next)));
+    response.end(JSON.stringify(payload));
     return;
   }
 
@@ -100,9 +104,13 @@ async function handleCatalogApi(request, response, filePath, pullFn, afterWrite,
       return;
     }
 
-    writeCatalog(filePath, next, afterWrite);
+    const atlasNotify = await writeCatalog(filePath, next, afterWrite);
+    const payload = toApiPayload(next);
+    if (atlasNotify) {
+      payload.atlasNotify = atlasNotify;
+    }
     response.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
-    response.end(JSON.stringify(toApiPayload(next)));
+    response.end(JSON.stringify(payload));
     return;
   }
 
@@ -119,9 +127,13 @@ async function handleCatalogApi(request, response, filePath, pullFn, afterWrite,
 
     const doc = await readCatalogFresh(filePath, pullFn);
     const { doc: next } = deleteEntry(doc, { id: id || undefined, value: value || undefined });
-    writeCatalog(filePath, next, afterWrite);
+    const atlasNotify = await writeCatalog(filePath, next, afterWrite);
+    const payload = toApiPayload(next);
+    if (atlasNotify) {
+      payload.atlasNotify = atlasNotify;
+    }
     response.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
-    response.end(JSON.stringify(toApiPayload(next)));
+    response.end(JSON.stringify(payload));
     return;
   }
 

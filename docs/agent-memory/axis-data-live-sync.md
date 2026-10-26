@@ -6,13 +6,16 @@ Complemento ao merge no arranque ([`../atlas-axis-sync.md`](../atlas-axis-sync.m
 
 Antes, cada gravação em `data/` após blur/API enfileirava `--push-relative` **cego**: o Atlas sobrescrevia o axis-data mesmo quando o CT tinha o JSON mais novo. Com o Atlas aberto o dia todo, melhorias feitas no Axis eram perdidas no próximo blur.
 
+No **Axis**, blur só gravava em `/data/auto-orcamento/` (axis-data); o espelho `C:\auto-orcamento\` no Atlas podia ficar desatualizado até o próximo `--startup` ou blur no Atlas. O notify abaixo fecha essa lacuna **sem** o CT empurrar merge (coordenação continua no Atlas).
+
 ## Fluxo atual (por arquivo)
 
 | Etapa | Onde | O quê |
 |-------|------|--------|
-| Leitura (GET / POST / DELETE que lê antes de gravar) | `server/server.js` → `readJsonListFresh` / `writeSettings` | `axisSync.pullDataFileIfRemoteNewer` → Python `--pull-if-remote-newer data/…` |
-| Gravação | `writeJsonList` / `writeSettings` | Disco em `C:\auto-orcamento\data\` |
-| Pós-gravação | `axisSync.afterDataFileWrite` | Python `--push-relative` = **reconciliação** de um arquivo (`sync_one_relative` em `sync_auto_orcamento_data.py`) |
+| Leitura (GET / POST / DELETE que lê antes de gravar) | Atlas: `server/server.js` → catálogos / `writeSettings` | `axisSync.pullDataFileIfRemoteNewer` → Python `--pull-if-remote-newer data/…` |
+| Gravação | Atlas: `C:\auto-orcamento\data\`; Axis: bind `/data/auto-orcamento/data/` | Disco local em cada host |
+| Pós-gravação (Atlas) | `axisSync.afterDataFileWrite` | Python `--push-relative` = **reconciliação** (`sync_one_relative` / `sync_catalog_v2.py`) |
+| Pós-gravação (Axis) | `server/atlas-notify.js` | `POST` ao Atlas → `POST /api/sync/notify` → fila `--pull-if-remote-newer` no caminho informado |
 
 Regras de reconciliação (iguais ao merge): mtime com slop de **1 s**; em empate de horário, tamanho e SHA-256; conflito → toast amarelo, sem overwrite.
 
@@ -34,6 +37,20 @@ Tarefas no log: `pull`, `push`, `startup` — ver [`axis-sync-sessions.md`](axis
 
 Arquivos com `schemaVersion: 2` em `data/` (oito catálogos de histórico — ver [`data-schema-v2.md`](data-schema-v2.md)) → `sync_catalog_v2.py` no push/pull unitário. Demais JSON em `data/` (ex. `settings.json`, tabelas estáticas) → `sync_one_relative()`. Merge em massa no `--startup` continua por arquivo (`merge_member`).
 
+## Aviso Axis → Atlas (sessão aberta no Atlas)
+
+No **CT 100**, após gravar `data/` (blur/API), `settings` ou impressão (`output/` + sqlite), o Node envia `POST` para o Atlas (`AUTO_ORCAMENTO_ATLAS_NOTIFY_URL`) com token compartilhado. O Atlas enfileira `--pull-if-remote-newer` só para o(s) caminho(s) informado(s). Toast no Axis: verde se entregue, amarelo se o app no Atlas estiver desligado ou inacessível (sem fila persistente; merge global no próximo `--startup`).
+
+| Variável | Onde |
+|----------|------|
+| `AUTO_ORCAMENTO_ATLAS_NOTIFY_TOKEN` | Atlas e Axis (mesmo segredo) |
+| `AUTO_ORCAMENTO_ATLAS_NOTIFY_URL` | Axis — ex. `http://<tailscale-atlas>:3010/api/sync/notify` |
+| `AUTO_ORCAMENTO_ATLAS_NOTIFY_BIND_HOST` + `AUTO_ORCAMENTO_ATLAS_NOTIFY_PORT` (opcional, padrão `3010`) | Atlas — listener só do notify na interface Tailscale (app principal pode continuar em `127.0.0.1:3000`) |
+
+Alternativa: Tailscale Serve no Atlas apontando para `127.0.0.1:3000` e URL `…/api/sync/notify` na porta 3000 (expõe o app inteiro na tailnet).
+
+Implementação Node: `server/atlas-notify.js`, `axis-sync.js` (`enqueuePullIfRemoteNewer`), resposta API `atlasNotify` → toast no Axis (`web/api.js`, `web/sync-toasts.js` / `AutoOrcamentoSyncUi.showToast`). Header: `X-Auto-Orcamento-Notify-Token` ou `Authorization: Bearer`.
+
 ## Limitações
 
 | Caso | Comportamento |
@@ -45,7 +62,7 @@ Arquivos com `schemaVersion: 2` em `data/` (oito catálogos de histórico — ve
 
 ## Não é fila offline
 
-Falha de push ou wake **não** acumula lista incremental para quando o Axis ligar. O JSON local já foi salvo; o próximo pull/push bem-sucedido (blur, impressão ou `--startup`) reconcilia.
+Falha de push, wake ou **notify** (Atlas desligado) **não** acumula lista incremental. O JSON no axis-data já foi salvo no CT; o próximo pull/push bem-sucedido (notify, blur no Atlas, impressão ou `--startup`) reconcilia.
 
 ## Relacionado
 

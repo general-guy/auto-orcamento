@@ -30,6 +30,7 @@ O **seed** versionado continua só no código (`/opt/auto-orcamento/seed/data/`)
 | Bind app | `BIND_HOST=192.168.68.202` (Serve no host `.201` → `:3000`) |
 | URL | `https://axis.tail5fe4b7.ts.net/` (Tailscale Serve, sem Funnel) |
 | PDF | `AUTO_ORCAMENTO_BROWSER=/usr/bin/chromium` |
+| Notify → Atlas | `AUTO_ORCAMENTO_ATLAS_NOTIFY_URL` + `AUTO_ORCAMENTO_ATLAS_NOTIFY_TOKEN` (mesmo token no `.bat` / listener do Atlas) |
 
 ## Sincronização (sentido único)
 

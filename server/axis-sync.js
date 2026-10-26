@@ -1,5 +1,6 @@
 const { spawn } = require("node:child_process");
 const path = require("node:path");
+const { normalizeNotifyRelativePath } = require("./atlas-notify");
 
 const {
   createAxisSyncSessionLogger,
@@ -279,6 +280,26 @@ function createAxisSync({ bindHost, dataDir }) {
     return enqueue("pull", ["--pull-if-remote-newer", relative]).then(() => {});
   }
 
+  function enqueuePullIfRemoteNewer(relativePaths) {
+    if (!enabled) {
+      return [];
+    }
+    const queued = [];
+    const argv = [];
+    for (const raw of relativePaths) {
+      const normalized = normalizeNotifyRelativePath(raw);
+      if (!normalized) {
+        continue;
+      }
+      queued.push(normalized);
+      argv.push("--pull-if-remote-newer", normalized);
+    }
+    if (argv.length) {
+      enqueue("pull", argv);
+    }
+    return queued;
+  }
+
   function afterDataFileWrite(filePath) {
     if (!enabled || !filePath || !dataDir) {
       return;
@@ -331,6 +352,7 @@ function createAxisSync({ bindHost, dataDir }) {
     enqueueStartup,
     scheduleStartupWhenUiReady,
     enqueuePushRelative,
+    enqueuePullIfRemoteNewer,
     pullDataFileIfRemoteNewer,
     afterDataFileWrite,
     afterPdfExport,

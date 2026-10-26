@@ -216,6 +216,11 @@
     };
   }
 
+  window.AutoOrcamentoSyncUi = {
+    showToast,
+    ensureContainer,
+  };
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", connect);
   } else {
