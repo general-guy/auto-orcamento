@@ -60,7 +60,7 @@ A partir do `local-atlas`:
 py -3 .\axis\scripts\sync_auto_orcamento.py --startup
 py -3 .\axis\scripts\sync_auto_orcamento.py --pull-if-remote-newer data/pacientes.json
 py -3 .\axis\scripts\sync_auto_orcamento.py --push-relative data/pacientes.json
-py -3 .\axis\scripts\sync_auto_orcamento.py --push-force-relative data/pacientes.json   # uma vez: v2 no Axis sem merge
+py -3 .\axis\scripts\sync_auto_orcamento.py --push-force-relative data/pacientes.json   # cutover v2 (sem merge); idem cirurgias, hospitais, pagamentos, observacoes, extras, tecnologias, unimed-n
 py -3 .\axis\scripts\push_axis_data.py --only auto-orcamento
 py -3 .\axis\scripts\deploy_auto_orcamento.py
 ```

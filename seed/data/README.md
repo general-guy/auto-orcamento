@@ -4,4 +4,4 @@ Cópia inicial dos JSON de tabelas e históricos base. No **Windows**, o runtime
 
 Na primeira abertura (ou se faltar arquivo), `server/data-bootstrap.js` copia daqui para `dataDir` **sem sobrescrever** o que já existir ao vivo.
 
-Edite catálogos aqui no repo, commit, e depois copie manualmente ou redeploy para o disco ao vivo se precisar atualizar produção local.
+Históricos ao vivo usam **schema v2** (UUID + label); ver `docs/agent-memory/data-schema-v2.md`. Edite seed aqui, commit, e depois copie manualmente ou use bootstrap/migração para o disco ao vivo se precisar atualizar produção local.

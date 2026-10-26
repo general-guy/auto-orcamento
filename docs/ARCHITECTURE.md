@@ -203,7 +203,7 @@ Endpoints principais:
 - `GET /api/observacoes`, `POST /api/observacoes`, `DELETE /api/observacoes`, `PUT /api/observacoes`: histórico de observações e persistência da ordem manual.
 - `GET /api/extras`, `POST /api/extras`, `DELETE /api/extras`, `PUT /api/extras`: histórico de extras e persistência da ordem manual.
 - `GET /api/tecnologias`, `POST /api/tecnologias`, `DELETE /api/tecnologias`, `PUT /api/tecnologias`: histórico de tecnologias com valor associado e persistência da ordem manual no dropdown.
-- `GET /api/unimed-n`, `POST /api/unimed-n`, `DELETE /api/unimed-n`, `PUT /api/unimed-n`: procedimentos Unimed N com valor associado (`{ nome, valor }`).
+- `GET /api/unimed-n`, `POST /api/unimed-n`, `DELETE /api/unimed-n`, `PUT /api/unimed-n`: procedimentos Unimed N (catálogo v2; POST aceita `{ nome, valor }`).
 - `GET /api/settings`, `PUT /api/settings`: preferências locais (zoom; `lastSnapshotDir` para o botão **Abrir**; grava em `data/settings.json`).
 - `POST /api/open-snapshot`: abre seletor nativo de JSON no Windows (`pywebview`/WebView2 via `scripts/open-snapshot-dialog.py`), lê o arquivo, persiste a pasta em `lastSnapshotDir` e devolve o snapshot parseado. **Bloqueado** para requisições remotas (headers de proxy do Serve).
 - `GET /api/snapshots`: lista snapshots `.json` em `output/` (nome, data, tamanho). Somente leitura; seguro para acesso remoto.
@@ -211,9 +211,7 @@ Endpoints principais:
 - `POST /api/pdf`: gera PDF + snapshot JSON em `output/` (mesmo nome base) e, em seguida, reconstrói `export/orcamentos.sqlite` a partir de todos os JSON de `output/` (falha no SQLite não falha a resposta do PDF).
 - `POST /api/shutdown`: encerra o servidor ao fechar a janela (`launcher/native_launcher.py` ou fallback `launcher/launch-app.js`); bloqueado para visitantes remotos; ignorado com `--keep-server`.
 
-**Pacientes** (`data/pacientes.json`): schema **v2** — envelope `{ schemaVersion: 2, items: [{ id, label, mtime, deleted? }] }`; API `/api/pacientes` devolve só itens ativos; merge por UUID no sync Python. Ver [`docs/agent-memory/data-schema-v2.md`](docs/agent-memory/data-schema-v2.md).
-
-Cirurgias, hospitais, extras, pagamentos e observações seguem listas JSON simples (`string[]`), limitadas a 200 itens. Tecnologias e Unimed N: objetos com `nome` e `valor`.
+**Catálogos v2** (`data/pacientes.json`, `cirurgias.json`, `hospitais.json`, `pagamentos.json`, `observacoes.json`, `extras.json`, `tecnologias.json`, `unimed-n.json`): envelope `{ schemaVersion: 2, items: [{ id, label, mtime, deleted?, valor? }] }`; GET devolve só itens ativos; blur/reorder via `server/catalog-http.js`; merge por UUID no sync Python (`sync_catalog_v2.py`). `settings.json` permanece objeto simples (zoom / `lastSnapshotDir`). Ver [`docs/agent-memory/data-schema-v2.md`](docs/agent-memory/data-schema-v2.md).
 
 ## Frontend
 
@@ -254,9 +252,10 @@ Cirurgias, hospitais, extras, pagamentos e observações seguem listas JSON simp
 
 ## Dados
 
-Arquivos de histórico:
+Catálogos de histórico (schema v2, disco ao vivo — pasta `data/` no clone é `.gitignore`; seed em `seed/data/`):
 
 ```text
+data/pacientes.json
 data/cirurgias.json
 data/hospitais.json
 data/extras.json
@@ -264,18 +263,10 @@ data/pagamentos.json
 data/observacoes.json
 data/tecnologias.json
 data/unimed-n.json
+data/settings.json   # v1 — preferências locais
 ```
 
-Esses arquivos são persistência local do app e também são versionados no repositório para manter uma base inicial compartilhada. Alterações feitas pelo uso do app só vão para o GitHub quando forem adicionadas ao staging e commitadas.
-
-Não versionados (`.gitignore`):
-
-```text
-data/pacientes.json
-data/settings.json
-```
-
-Se `data/pacientes.json` não existir, `ensureDataFile()` grava schema v2 vazio. Referência: `seed/data/pacientes.json.example`. Migração legado: `node scripts/migrate-pacientes-schema-v2.js`.
+`ensureDataFile()` cria catálogos vazios (envelope v2) e `settings` se faltarem. Migração legado: `node scripts/migrate-data-catalogs-v2.js`. Exemplo de pacientes: `seed/data/pacientes.json.example`.
 
 Tabelas de referência estruturadas:
 
@@ -291,9 +282,9 @@ As entradas auxiliares `Reg#`/`Sap#`/`Bla#`/`Uni#` não usam `<datalist>` nativo
 
 `data/tabela-implantes.json` guarda uma tabela independente de implantes, extraída de documento `.doc`, para preenchimento opcional da seção `Implantes`. O dropdown usa `rotulo`, `modelo` e `referencia`; itens com `favorito: true` recebem uma estrela ao final da opção.
 
-`data/pacientes.json` guarda o catálogo de pacientes (label + UUID). O arquivo **não** entra no Git. O dropdown do **Nome** usa `dataset.entryId`; reordenar via `PUT /api/pacientes` com `AppApi.replacePatients`. Blur cria ou atualiza via `POST` (`upsertPatient`).
+Todos os dropdowns de histórico acima usam **`dataset.entryId`** nos inputs, blur com upsert (`AppApi.upsertCatalog` / `upsertPatient` para pacientes) e reorder com `PUT` + itens `{ id, label, valor? }`.
 
-`data/cirurgias.json` guarda as cirurgias cadastradas no formulário. O dropdown de histórico de **Cirurgia proposta** permite reordenar entradas pelo handle `⋮⋮` (com duas ou mais opções visíveis); ao soltar, `app.js` envia a lista via `PUT /api/cirurgias` / `AppApi.replaceHistory("cirurgias", …)` e grava em `data/cirurgias.json`. O menu fecha ao perder o foco do campo ou do dropdown.
+`data/cirurgias.json` guarda as cirurgias cadastradas no formulário. O dropdown de histórico de **Cirurgia proposta** permite reordenar entradas pelo handle `⋮⋮` (com duas ou mais opções visíveis); ao soltar, `app.js` envia a lista via `PUT /api/cirurgias` / `AppApi.replaceHistory("cirurgias", …)`. O menu fecha ao perder o foco do campo ou do dropdown.
 
 Com duas ou mais entradas no formulário, `updateSurgeryFieldStructure()` exibe outro handle `⋮⋮` à esquerda de cada **campo** (não no dropdown), reorganizando a ordem no painel, no preview e no snapshot — sem alterar `data/cirurgias.json`.
 
@@ -301,7 +292,7 @@ Com duas ou mais entradas no formulário, `updateSurgeryFieldStructure()` exibe 
 
 Com duas ou mais entradas no formulário, `updateHospitalFieldStructure()` exibe outro handle `⋮⋮` à esquerda de cada **campo** de nome (não no dropdown), reorganizando a ordem no painel, no preview e no snapshot — sem alterar `data/hospitais.json`.
 
-`data/tecnologias.json` guarda as tecnologias cadastradas no próprio app. Diferente dos históricos simples, cada item tem `nome` e `valor`, permitindo carregar o valor automaticamente quando a tecnologia é selecionada. O dropdown de histórico também permite reordenar pelo handle `⋮⋮`; ao soltar, `PUT /api/tecnologias` grava a ordem preservando `nome` e `valor` de cada item.
+`data/tecnologias.json` e `data/unimed-n.json` usam o mesmo envelope v2; cada item tem `label` (UI ainda expõe `nome` no cliente) e `valor` opcional para autofill de moeda. Reorder via `PUT` preserva `valor` por `id`.
 
 `data/unimed-n.json` guarda os procedimentos dos subitens `Uni#` (hospitais cujo nome contém `Unimed N`). Cada item tem `nome` e `valor` (número em padrão brasileiro, sem `R$` no input). Detalhes em `docs/unimed-n.md`.
 

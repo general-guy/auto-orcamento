@@ -97,13 +97,93 @@ let hospitalDropdownSuppressClick = false;
 let hospitalDragState = null;
 let patientHistory = [];
 
+function catalogLabel(entry) {
+  return AppApi.catalogLabel(entry);
+}
+
 function patientEntryLabel(entry) {
-  if (entry && typeof entry === "object" && typeof entry.label === "string") {
-    return entry.label;
+  return catalogLabel(entry);
+}
+
+function assignCatalogInputFromOption(input, option) {
+  input.value = option.dataset.value;
+  if (option.dataset.entryId) {
+    input.dataset.entryId = option.dataset.entryId;
+  } else {
+    delete input.dataset.entryId;
+  }
+}
+
+async function saveLabelCatalogBlur({ store, history, value, sourceInput, onUpdated }) {
+  const label = value.trim();
+  if (!label) {
+    return history;
   }
 
-  return typeof entry === "string" ? entry : "";
+  if (sourceInput?.dataset?.skipHistoryValue === normalizeText(label)) {
+    return history;
+  }
+
+  const entryId = sourceInput?.dataset.entryId || "";
+
+  try {
+    if (entryId) {
+      const existing = history.find((item) => item.id === entryId);
+      if (existing && normalizeText(catalogLabel(existing)) === normalizeText(label)) {
+        return history;
+      }
+
+      const next = await AppApi.upsertCatalog(store, { id: entryId, label });
+      onUpdated?.(next);
+      return next;
+    }
+
+    const duplicate = history.some((item) => normalizeText(catalogLabel(item)) === normalizeText(label));
+    if (duplicate) {
+      return history;
+    }
+
+    const next = await AppApi.upsertCatalog(store, { label });
+    onUpdated?.(next);
+    const created = next.find((item) => normalizeText(catalogLabel(item)) === normalizeText(label));
+    if (created && sourceInput) {
+      sourceInput.dataset.entryId = created.id;
+    }
+    return next;
+  } catch {
+    console.warn(`Não foi possível salvar o histórico (${store}).`);
+    return history;
+  }
 }
+
+async function deleteLabelCatalogEntry({ store, history, value, entryId, onUpdated }) {
+  const deletedKey = normalizeText(value);
+  const nextLocal = history.filter(
+    (item) => item.id !== entryId && normalizeText(catalogLabel(item)) !== deletedKey,
+  );
+  onUpdated?.(nextLocal);
+
+  try {
+    const next = await AppApi.removeCatalog(store, {
+      ...(entryId ? { id: entryId } : {}),
+      value,
+    });
+    onUpdated?.(next);
+    return next;
+  } catch {
+    console.warn(`Não foi possível remover do histórico (${store}).`);
+    return nextLocal;
+  }
+}
+
+function applyCatalogDropdownOrder(history, visibleOrderedIds) {
+  const byId = new Map(history.map((entry) => [entry.id, entry]));
+  const visible = visibleOrderedIds.map((id) => byId.get(id)).filter(Boolean);
+  const visibleSet = new Set(visibleOrderedIds);
+  const rest = history.filter((entry) => !visibleSet.has(entry.id));
+  return [...visible, ...rest];
+}
+
 let activePatientInput = null;
 let isInteractingWithPatientDropdown = false;
 let patientDropdownDragState = null;
@@ -911,11 +991,11 @@ function isEditableHospitalProcedureList(input) {
 }
 
 function getUnimedNProcedureName(item) {
-  return typeof item === "string" ? item : item?.nome || "";
+  return catalogLabel(item);
 }
 
 function getUnimedNProcedureValue(item) {
-  return typeof item === "string" ? "" : item?.valor || "";
+  return AppApi.catalogValor(item);
 }
 
 function positionHospitalProcedureDropdown(input) {
@@ -1679,203 +1759,153 @@ async function loadTechnologyHistory() {
 }
 
 async function saveSurgeryToHistory(value, sourceInput = null) {
-  const surgery = value.trim();
-  if (!surgery) {
-    return;
-  }
-
-  if (sourceInput?.dataset.skipHistoryValue === normalizeText(surgery)) {
-    return;
-  }
-
-  const alreadyExists = surgeryHistory.some((item) => normalizeText(item) === normalizeText(surgery));
-  if (alreadyExists) {
-    return;
-  }
-
-  try {
-    surgeryHistory = await AppApi.addHistory("cirurgias", surgery);
-    if (activeSurgeryInput) {
-      updateSurgeryHistoryDropdown(activeSurgeryInput.value);
-    }
-  } catch {
-    console.warn("Não foi possível salvar a cirurgia no histórico local.");
-  }
+  surgeryHistory = await saveLabelCatalogBlur({
+    store: "cirurgias",
+    history: surgeryHistory,
+    value,
+    sourceInput,
+    onUpdated: (next) => {
+      surgeryHistory = next;
+      if (activeSurgeryInput) {
+        updateSurgeryHistoryDropdown(activeSurgeryInput.value);
+      }
+    },
+  });
 }
 
-async function deleteSurgeryFromHistory(value) {
-  const deletedKey = normalizeText(value);
-  surgeryHistory = surgeryHistory.filter((item) => normalizeText(item) !== deletedKey);
-  updateSurgeryHistoryDropdown(activeSurgeryInput?.value || "");
-
-  try {
-    surgeryHistory = await AppApi.removeHistory("cirurgias", value);
-    updateSurgeryHistoryDropdown(activeSurgeryInput?.value || "");
-  } catch {
-    console.warn("Não foi possível remover a cirurgia do histórico local.");
-  }
+async function deleteSurgeryFromHistory(value, entryId = "") {
+  surgeryHistory = await deleteLabelCatalogEntry({
+    store: "cirurgias",
+    history: surgeryHistory,
+    value,
+    entryId,
+    onUpdated: (next) => {
+      surgeryHistory = next;
+      updateSurgeryHistoryDropdown(activeSurgeryInput?.value || "");
+    },
+  });
 }
 
 async function savePaymentToHistory(value, sourceInput = null) {
-  const payment = value.trim();
-  if (!payment) {
-    return;
-  }
-
-  if (sourceInput?.dataset.skipHistoryValue === normalizeText(payment)) {
-    return;
-  }
-
-  const alreadyExists = paymentHistory.some((item) => normalizeText(item) === normalizeText(payment));
-  if (alreadyExists) {
-    return;
-  }
-
-  try {
-    paymentHistory = await AppApi.addHistory("pagamentos", payment);
-    renderPaymentQuickList();
-    if (activePaymentInput) {
-      updatePaymentHistoryDropdown(activePaymentInput.value);
-    }
-  } catch {
-    console.warn("Não foi possível salvar a forma de pagamento no histórico local.");
-  }
+  paymentHistory = await saveLabelCatalogBlur({
+    store: "pagamentos",
+    history: paymentHistory,
+    value,
+    sourceInput,
+    onUpdated: (next) => {
+      paymentHistory = next;
+      renderPaymentQuickList();
+      if (activePaymentInput) {
+        updatePaymentHistoryDropdown(activePaymentInput.value);
+      }
+    },
+  });
 }
 
-async function deletePaymentFromHistory(value) {
+async function deletePaymentFromHistory(value, entryId = "") {
   const deletedKey = normalizeText(value);
-  paymentHistory = paymentHistory.filter((item) => normalizeText(item) !== deletedKey);
   deselectedPaymentQuickItems.delete(deletedKey);
-  renderPaymentQuickList();
-  updatePaymentHistoryDropdown(activePaymentInput?.value || "");
-
-  try {
-    paymentHistory = await AppApi.removeHistory("pagamentos", value);
-    renderPaymentQuickList();
-    updatePaymentHistoryDropdown(activePaymentInput?.value || "");
-  } catch {
-    console.warn("Não foi possível remover a forma de pagamento do histórico local.");
-  }
+  paymentHistory = await deleteLabelCatalogEntry({
+    store: "pagamentos",
+    history: paymentHistory,
+    value,
+    entryId,
+    onUpdated: (next) => {
+      paymentHistory = next;
+      renderPaymentQuickList();
+      updatePaymentHistoryDropdown(activePaymentInput?.value || "");
+    },
+  });
 }
 
 async function saveGuidanceToHistory(value, sourceInput = null) {
-  const guidance = value.trim();
-  if (!guidance) {
-    return;
-  }
-
-  if (sourceInput?.dataset.skipHistoryValue === normalizeText(guidance)) {
-    return;
-  }
-
-  const alreadyExists = guidanceHistory.some((item) => normalizeText(item) === normalizeText(guidance));
-  if (alreadyExists) {
-    return;
-  }
-
-  try {
-    guidanceHistory = await AppApi.addHistory("observacoes", guidance);
-    renderGuidanceQuickList();
-    if (activeGuidanceInput) {
-      updateGuidanceHistoryDropdown(activeGuidanceInput.value);
-    }
-  } catch {
-    console.warn("Não foi possível salvar a observação no histórico local.");
-  }
+  guidanceHistory = await saveLabelCatalogBlur({
+    store: "observacoes",
+    history: guidanceHistory,
+    value,
+    sourceInput,
+    onUpdated: (next) => {
+      guidanceHistory = next;
+      renderGuidanceQuickList();
+      if (activeGuidanceInput) {
+        updateGuidanceHistoryDropdown(activeGuidanceInput.value);
+      }
+    },
+  });
 }
 
-async function deleteGuidanceFromHistory(value) {
+async function deleteGuidanceFromHistory(value, entryId = "") {
   const deletedKey = normalizeText(value);
-  guidanceHistory = guidanceHistory.filter((item) => normalizeText(item) !== deletedKey);
   deselectedGuidanceQuickItems.delete(deletedKey);
-  renderGuidanceQuickList();
-  updateGuidanceHistoryDropdown(activeGuidanceInput?.value || "");
-
-  try {
-    guidanceHistory = await AppApi.removeHistory("observacoes", value);
-    renderGuidanceQuickList();
-    updateGuidanceHistoryDropdown(activeGuidanceInput?.value || "");
-  } catch {
-    console.warn("Não foi possível remover a observação do histórico local.");
-  }
+  guidanceHistory = await deleteLabelCatalogEntry({
+    store: "observacoes",
+    history: guidanceHistory,
+    value,
+    entryId,
+    onUpdated: (next) => {
+      guidanceHistory = next;
+      renderGuidanceQuickList();
+      updateGuidanceHistoryDropdown(activeGuidanceInput?.value || "");
+    },
+  });
 }
 
 async function saveExtrasToHistory(value, sourceInput = null) {
-  const extra = value.trim();
-  if (!extra) {
-    return;
-  }
-
-  if (sourceInput?.dataset.skipHistoryValue === normalizeText(extra)) {
-    return;
-  }
-
-  const alreadyExists = extrasHistory.some((item) => normalizeText(item) === normalizeText(extra));
-  if (alreadyExists) {
-    return;
-  }
-
-  try {
-    extrasHistory = await AppApi.addHistory("extras", extra);
-    renderExtrasQuickList();
-    if (activeExtrasInput) {
-      updateExtrasHistoryDropdown(activeExtrasInput.value);
-    }
-  } catch {
-    console.warn("Não foi possível salvar o extra no histórico local.");
-  }
+  extrasHistory = await saveLabelCatalogBlur({
+    store: "extras",
+    history: extrasHistory,
+    value,
+    sourceInput,
+    onUpdated: (next) => {
+      extrasHistory = next;
+      renderExtrasQuickList();
+      if (activeExtrasInput) {
+        updateExtrasHistoryDropdown(activeExtrasInput.value);
+      }
+    },
+  });
 }
 
-async function deleteExtrasFromHistory(value) {
+async function deleteExtrasFromHistory(value, entryId = "") {
   const deletedKey = normalizeText(value);
-  extrasHistory = extrasHistory.filter((item) => normalizeText(item) !== deletedKey);
   deselectedExtrasQuickItems.delete(deletedKey);
-  renderExtrasQuickList();
-  updateExtrasHistoryDropdown(activeExtrasInput?.value || "");
-
-  try {
-    extrasHistory = await AppApi.removeHistory("extras", value);
-    renderExtrasQuickList();
-    updateExtrasHistoryDropdown(activeExtrasInput?.value || "");
-  } catch {
-    console.warn("Não foi possível remover o extra do histórico local.");
-  }
+  extrasHistory = await deleteLabelCatalogEntry({
+    store: "extras",
+    history: extrasHistory,
+    value,
+    entryId,
+    onUpdated: (next) => {
+      extrasHistory = next;
+      renderExtrasQuickList();
+      updateExtrasHistoryDropdown(activeExtrasInput?.value || "");
+    },
+  });
 }
 
 async function saveHospitalToHistory(value, sourceInput = null) {
-  const hospital = value.trim();
-  if (!hospital) {
-    return;
-  }
-
-  if (sourceInput?.dataset.skipHistoryValue === normalizeText(hospital)) {
-    return;
-  }
-
-  const alreadyExists = hospitalHistory.some((item) => normalizeText(item) === normalizeText(hospital));
-  if (alreadyExists) {
-    return;
-  }
-
-  try {
-    hospitalHistory = await AppApi.addHistory("hospitais", hospital);
-    updateHospitalHistoryDropdown(activeHospitalInput?.value || "");
-  } catch {
-    console.warn("Não foi possível salvar o hospital no histórico local.");
-  }
+  hospitalHistory = await saveLabelCatalogBlur({
+    store: "hospitais",
+    history: hospitalHistory,
+    value,
+    sourceInput,
+    onUpdated: (next) => {
+      hospitalHistory = next;
+      updateHospitalHistoryDropdown(activeHospitalInput?.value || "");
+    },
+  });
 }
 
-async function deleteHospitalFromHistory(value) {
-  const deletedKey = normalizeText(value);
-  hospitalHistory = hospitalHistory.filter((item) => normalizeText(item) !== deletedKey);
-  updateHospitalHistoryDropdown(activeHospitalInput?.value || "");
-
-  try {
-    hospitalHistory = await AppApi.removeHistory("hospitais", value);
-    updateHospitalHistoryDropdown(activeHospitalInput?.value || "");
-  } catch {
-    console.warn("Não foi possível remover o hospital do histórico local.");
-  }
+async function deleteHospitalFromHistory(value, entryId = "") {
+  hospitalHistory = await deleteLabelCatalogEntry({
+    store: "hospitais",
+    history: hospitalHistory,
+    value,
+    entryId,
+    onUpdated: (next) => {
+      hospitalHistory = next;
+      updateHospitalHistoryDropdown(activeHospitalInput?.value || "");
+    },
+  });
 }
 
 async function saveUnimedNToHistory(sourceField = null) {
@@ -2125,15 +2155,19 @@ function showTechnologyHistoryDropdown() {
   updateTechnologyHistoryDropdown(technologyInput.value);
 }
 
-function applyHistoryDropdownOrder(history, visibleOrdered) {
-  const visibleKeys = new Set(visibleOrdered.map((item) => normalizeText(item)));
+function applyHistoryDropdownOrder(history, visibleOrderedLabels) {
+  const lookup = new Map(history.map((entry) => [normalizeText(catalogLabel(entry)), entry]));
+  const visibleObjects = visibleOrderedLabels
+    .map((label) => lookup.get(normalizeText(label)))
+    .filter(Boolean);
+  const visibleKeys = new Set(visibleObjects.map((entry) => normalizeText(catalogLabel(entry))));
   let inserted = false;
   const nextHistory = [];
 
   history.forEach((item) => {
-    if (visibleKeys.has(normalizeText(item))) {
+    if (visibleKeys.has(normalizeText(catalogLabel(item)))) {
       if (!inserted) {
-        nextHistory.push(...visibleOrdered);
+        nextHistory.push(...visibleObjects);
         inserted = true;
       }
 
@@ -2144,16 +2178,20 @@ function applyHistoryDropdownOrder(history, visibleOrdered) {
   });
 
   if (!inserted) {
-    nextHistory.push(...visibleOrdered);
+    nextHistory.push(...visibleObjects);
   }
 
   return nextHistory;
 }
 
-function createReorderableHistoryOption(optionText, deleteAriaLabel, showDragHandles, extraDataset = {}) {
+function createReorderableHistoryOption(entry, deleteAriaLabel, showDragHandles, extraDataset = {}) {
+  const optionText = catalogLabel(entry);
   const option = document.createElement("div");
   option.className = "history-option";
   option.dataset.value = optionText;
+  if (entry && typeof entry === "object" && entry.id) {
+    option.dataset.entryId = entry.id;
+  }
   Object.entries(extraDataset).forEach(([key, value]) => {
     option.dataset[key] = value;
   });
@@ -2375,37 +2413,21 @@ function updateSurgeryHistoryDropdown(query = "") {
 
   const normalizedQuery = normalizeText(query);
   const options = surgeryHistory
-    .filter((item) => !normalizedQuery || normalizeText(item).includes(normalizedQuery))
+    .filter((item) => {
+      const label = catalogLabel(item);
+      return !normalizedQuery || normalizeText(label).includes(normalizedQuery);
+    })
     .slice(0, 12);
   const showDragHandles = options.length >= 2;
 
   surgeryHistoryDropdown.innerHTML = "";
   surgeryHistoryDropdown.hidden = options.length === 0;
 
-  options.forEach((optionText) => {
-    const option = document.createElement("div");
-    option.className = "history-option";
-    option.dataset.value = optionText;
-    option.setAttribute("role", "button");
-    option.setAttribute("tabindex", "0");
-
-    const dragHandle = document.createElement("span");
-    dragHandle.className = "history-drag-handle";
-    dragHandle.setAttribute("aria-hidden", "true");
-    dragHandle.hidden = !showDragHandles;
-
-    const optionLabel = document.createElement("span");
-    optionLabel.className = "history-option-label";
-    optionLabel.textContent = optionText;
-
-    const deleteButton = document.createElement("button");
-    deleteButton.type = "button";
-    deleteButton.className = "history-delete";
-    deleteButton.textContent = "x";
-    deleteButton.setAttribute("aria-label", `Remover ${optionText} do histórico`);
-
-    option.append(dragHandle, optionLabel, deleteButton);
-    surgeryHistoryDropdown.append(option);
+  options.forEach((entry) => {
+    const optionText = catalogLabel(entry);
+    surgeryHistoryDropdown.append(
+      createReorderableHistoryOption(entry, `Remover ${optionText} do histórico`, showDragHandles),
+    );
   });
 }
 
@@ -2422,20 +2444,20 @@ function updatePaymentHistoryDropdown(query = "") {
 
   const normalizedQuery = normalizeText(query);
   const options = paymentHistory
-    .filter((item) => !normalizedQuery || normalizeText(item).includes(normalizedQuery))
+    .filter((item) => {
+      const label = catalogLabel(item);
+      return !normalizedQuery || normalizeText(label).includes(normalizedQuery);
+    })
     .slice(0, 12);
   const showDragHandles = options.length >= 2;
 
   paymentHistoryDropdown.innerHTML = "";
   paymentHistoryDropdown.hidden = options.length === 0;
 
-  options.forEach((optionText) => {
+  options.forEach((entry) => {
+    const optionText = catalogLabel(entry);
     paymentHistoryDropdown.append(
-      createReorderableHistoryOption(
-        optionText,
-        `Remover ${optionText} do histórico`,
-        showDragHandles,
-      ),
+      createReorderableHistoryOption(entry, `Remover ${optionText} do histórico`, showDragHandles),
     );
   });
 }
@@ -2444,7 +2466,8 @@ function renderPaymentQuickList() {
   paymentQuickList.innerHTML = "";
   paymentQuickList.hidden = paymentHistory.length === 0;
 
-  paymentHistory.forEach((optionText) => {
+  paymentHistory.forEach((entry) => {
+    const optionText = catalogLabel(entry);
     const row = document.createElement("label");
     row.className = "payment-quick-option";
     row.dataset.value = optionText;
@@ -2483,20 +2506,20 @@ function updateGuidanceHistoryDropdown(query = "") {
 
   const normalizedQuery = normalizeText(query);
   const options = guidanceHistory
-    .filter((item) => !normalizedQuery || normalizeText(item).includes(normalizedQuery))
+    .filter((item) => {
+      const label = catalogLabel(item);
+      return !normalizedQuery || normalizeText(label).includes(normalizedQuery);
+    })
     .slice(0, 12);
   const showDragHandles = options.length >= 2;
 
   guidanceHistoryDropdown.innerHTML = "";
   guidanceHistoryDropdown.hidden = options.length === 0;
 
-  options.forEach((optionText) => {
+  options.forEach((entry) => {
+    const optionText = catalogLabel(entry);
     guidanceHistoryDropdown.append(
-      createReorderableHistoryOption(
-        optionText,
-        `Remover ${optionText} do histórico`,
-        showDragHandles,
-      ),
+      createReorderableHistoryOption(entry, `Remover ${optionText} do histórico`, showDragHandles),
     );
   });
 }
@@ -2505,7 +2528,8 @@ function renderGuidanceQuickList() {
   guidanceQuickList.innerHTML = "";
   guidanceQuickList.hidden = guidanceHistory.length === 0;
 
-  guidanceHistory.forEach((optionText) => {
+  guidanceHistory.forEach((entry) => {
+    const optionText = catalogLabel(entry);
     const row = document.createElement("label");
     row.className = "quick-option";
     row.dataset.value = optionText;
@@ -2544,20 +2568,20 @@ function updateExtrasHistoryDropdown(query = "") {
 
   const normalizedQuery = normalizeText(query);
   const options = extrasHistory
-    .filter((item) => !normalizedQuery || normalizeText(item).includes(normalizedQuery))
+    .filter((item) => {
+      const label = catalogLabel(item);
+      return !normalizedQuery || normalizeText(label).includes(normalizedQuery);
+    })
     .slice(0, 12);
   const showDragHandles = options.length >= 2;
 
   extrasHistoryDropdown.innerHTML = "";
   extrasHistoryDropdown.hidden = options.length === 0;
 
-  options.forEach((optionText) => {
+  options.forEach((entry) => {
+    const optionText = catalogLabel(entry);
     extrasHistoryDropdown.append(
-      createReorderableHistoryOption(
-        optionText,
-        `Remover ${optionText} do histórico`,
-        showDragHandles,
-      ),
+      createReorderableHistoryOption(entry, `Remover ${optionText} do histórico`, showDragHandles),
     );
   });
 }
@@ -2566,7 +2590,8 @@ function renderExtrasQuickList() {
   extrasQuickList.innerHTML = "";
   extrasQuickList.hidden = extrasHistory.length === 0;
 
-  extrasHistory.forEach((optionText) => {
+  extrasHistory.forEach((entry) => {
+    const optionText = catalogLabel(entry);
     const row = document.createElement("label");
     row.className = "extras-quick-option";
     row.dataset.value = optionText;
@@ -3041,17 +3066,21 @@ function updateHospitalHistoryDropdown(query = "") {
 
   const normalizedQuery = normalizeText(query);
   const options = hospitalHistory
-    .filter((item) => !normalizedQuery || normalizeText(item).includes(normalizedQuery))
+    .filter((item) => {
+      const label = catalogLabel(item);
+      return !normalizedQuery || normalizeText(label).includes(normalizedQuery);
+    })
     .slice(0, 12);
   const showDragHandles = options.length >= 2;
 
   hospitalHistoryDropdown.innerHTML = "";
   hospitalHistoryDropdown.hidden = options.length === 0;
 
-  options.forEach((optionText) => {
+  options.forEach((entry) => {
+    const optionText = catalogLabel(entry);
     hospitalHistoryDropdown.append(
       createReorderableHistoryOption(
-        optionText,
+        entry,
         `Remover ${optionText} do histórico`,
         showDragHandles,
       ),
@@ -3232,9 +3261,9 @@ function endSurgeryDropdownDrag({ shouldCommit = true } = {}) {
   surgeryDropdownSuppressClick = true;
 
   const visibleOrdered = getSurgeryDropdownRows()
-    .map((item) => item.dataset.value)
+    .map((item) => item.dataset.entryId)
     .filter(Boolean);
-  const nextHistory = applyHistoryDropdownOrder(surgeryHistory, visibleOrdered);
+  const nextHistory = applyCatalogDropdownOrder(surgeryHistory, visibleOrdered);
 
   surgeryHistory = nextHistory;
   updateSurgeryHistoryDropdown(activeSurgeryInput?.value || "");
@@ -3341,7 +3370,7 @@ function updateTechnologyHistoryDropdown(query = "") {
   const normalizedQuery = normalizeText(query);
   const options = technologyHistory
     .filter((item) => {
-      const name = item.nome || item;
+      const name = catalogLabel(item);
       return !normalizedQuery || normalizeText(name).includes(normalizedQuery);
     })
     .slice(0, 12);
@@ -3351,14 +3380,11 @@ function updateTechnologyHistoryDropdown(query = "") {
   technologyHistoryDropdown.hidden = options.length === 0;
 
   options.forEach((item) => {
-    const optionText = item.nome || item;
+    const optionText = catalogLabel(item);
     technologyHistoryDropdown.append(
-      createReorderableHistoryOption(
-        optionText,
-        `Remover ${optionText} do histórico`,
-        showDragHandles,
-        { amount: item.valor || "" },
-      ),
+      createReorderableHistoryOption(item, `Remover ${optionText} do histórico`, showDragHandles, {
+        amount: AppApi.catalogValor(item),
+      }),
     );
   });
 }
@@ -3621,7 +3647,7 @@ function selectSurgeryHistoryOption(option, shouldAdvance = false) {
     return;
   }
 
-  input.value = option.dataset.value;
+  assignCatalogInputFromOption(input, option);
   updatePreview();
   isInteractingWithHistoryDropdown = false;
   hideSurgeryHistoryDropdown();
@@ -3640,7 +3666,7 @@ function selectPaymentHistoryOption(option, shouldAdvance = false) {
     return;
   }
 
-  input.value = option.dataset.value;
+  assignCatalogInputFromOption(input, option);
   updatePreview();
   isInteractingWithPaymentDropdown = false;
   hidePaymentHistoryDropdown();
@@ -3659,7 +3685,7 @@ function selectExtrasHistoryOption(option, shouldAdvance = false) {
     return;
   }
 
-  input.value = option.dataset.value;
+  assignCatalogInputFromOption(input, option);
   updatePreview();
   isInteractingWithExtrasDropdown = false;
   hideExtrasHistoryDropdown();
@@ -3678,7 +3704,7 @@ function selectGuidanceHistoryOption(option, shouldAdvance = false) {
     return;
   }
 
-  input.value = option.dataset.value;
+  assignCatalogInputFromOption(input, option);
   updatePreview();
   isInteractingWithGuidanceDropdown = false;
   hideGuidanceHistoryDropdown();
@@ -3697,7 +3723,7 @@ function selectHospitalHistoryOption(option, shouldAdvance = false) {
     return;
   }
 
-  input.value = option.dataset.value;
+  assignCatalogInputFromOption(input, option);
   syncHospitalDetailField(input);
   updatePreview();
   isInteractingWithHospitalDropdown = false;
@@ -3713,12 +3739,7 @@ function selectHospitalHistoryOption(option, shouldAdvance = false) {
 }
 
 function selectPatientHistoryOption(option, shouldAdvance = false) {
-  patientInput.value = option.dataset.value;
-  if (option.dataset.entryId) {
-    patientInput.dataset.entryId = option.dataset.entryId;
-  } else {
-    delete patientInput.dataset.entryId;
-  }
+  assignCatalogInputFromOption(patientInput, option);
   updatePreview();
   isInteractingWithPatientDropdown = false;
   hidePatientHistoryDropdown();

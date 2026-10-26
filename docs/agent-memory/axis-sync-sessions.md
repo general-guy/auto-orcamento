@@ -13,7 +13,7 @@ Cada execução em fila do `axis-sync.js` (`startup`, `pull`, `push`, etc.) grav
 
 Cabeçalho: `started_at` / `finished_at` em **horário local** (`timezone=…`); tarefa, script, argv. Rodapé: `exit_code`, timeout ou erro de spawn.
 
-Toast amarelo `/data/ N conflito(s)` no startup: um ou mais arquivos com **mesmo mtime** (±1 s) e **tamanho ou conteúdo** diferente — o motor não sobrescreve; ver toast por arquivo (`Conflito em /data/…`) quando o hash diverge. Ex.: `pacientes.json` v2 no Atlas e legado no Axis após migração local.
+Toast amarelo `/data/ N conflito(s)` no startup: um ou mais arquivos com **mesmo mtime** (±1 s) e **tamanho ou conteúdo** diferente — o motor não sobrescreve; ver toast por arquivo (`Conflito em /data/…`) quando o hash diverge. Ex.: catálogo v2 no Atlas e legado (`string[]` / `{nome,valor}[]`) no Axis após migração local sem `--push-force-relative`.
 
 Só quando o sync está habilitado (Windows + `BIND_HOST` localhost). Produção no CT **não** gera estes logs.
 

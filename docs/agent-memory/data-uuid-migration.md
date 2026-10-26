@@ -1,8 +1,8 @@
-# Migração `data/` — schema UUID
+# Migração `data/` — schema UUID (catálogos)
 
-**Piloto em andamento:** `pacientes.json` (schema v2). Especificação: [`data-schema-v2.md`](data-schema-v2.md).
+**Estado (2026-10-26):** os oito históricos de blur estão em **schema v2** no Atlas (`C:\auto-orcamento\data\`) e no Axis (push-force de cutover + merge diário por UUID). Especificação: [`data-schema-v2.md`](data-schema-v2.md).
 
-Demais históricos ainda em `string[]` até as fases 2–3. Modelo alvo: **`id` (UUID)**, **`label`**, **`mtime`** (ms) por entrada.
+**Ainda v1:** `settings.json` apenas.
 
 ## Backup antes de migrar
 
@@ -13,18 +13,25 @@ Foto do schema legado ao vivo:
 
 Não confundir com [`../../seed/data/`](../../seed/data/) (seed versionado no Git, não espelho do disco ao vivo).
 
-## Escopo previsto (rascunho)
+## Como migrar / alinhar Axis
 
-| Fase | Conteúdo |
-|------|----------|
-| 1 | Piloto em um arquivo (ex. `pacientes.json`) + merge Python por `id` |
-| 2 | Cirurgias, hospitais, pagamentos, observações, extras |
-| 3 | `tecnologias.json` / `unimed-n.json` (adicionar `id` + `mtime`) |
-| 4 | UI: dropdown por label, `data-uuid` nos inputs, blur = upsert |
+```powershell
+# No clone auto-orcamento (disco ao vivo)
+node scripts/migrate-data-catalogs-v2.js
 
-Conflito: mesmo `id`, `mtime` empate, `label` diferente → toast / resolução manual.
+# No local-atlas — uma vez por arquivo após migrar só no Atlas
+py -3 .\axis\scripts\sync_auto_orcamento.py --push-force-relative data/<arquivo>.json
+```
+
+Depois: blur e `--push-relative` usam merge por `id` (`sync_catalog_v2.py`).
+
+## Conflitos
+
+Mesmo `id`, `mtime` de item empate (±1 s), `label` diferente → toast / entrada local mantida nos ids em conflito.
+
+Conflito de **arquivo** no startup (legado vs v2, mesmo mtime de arquivo): ver [`data-schema-v2.md`](data-schema-v2.md) e [`axis-sync-sessions.md`](axis-sync-sessions.md).
 
 ## Relacionado
 
-- Sync ao vivo hoje: [`axis-data-live-sync.md`](axis-data-live-sync.md)
+- Sync ao vivo: [`axis-data-live-sync.md`](axis-data-live-sync.md)
 - Caminhos: [`output-path.md`](output-path.md)

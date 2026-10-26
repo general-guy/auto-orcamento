@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
  * Migra data/pacientes.json legado (string[]) para schema v2.
+ * Preferir: node scripts/migrate-data-catalogs-v2.js (todos os catálogos).
  * Uso: node scripts/migrate-pacientes-schema-v2.js
  */
 

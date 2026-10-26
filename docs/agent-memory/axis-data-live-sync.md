@@ -30,9 +30,9 @@ Tarefas no log: `pull`, `push`, `startup` — ver [`axis-sync-sessions.md`](axis
 |------|--------|
 | `--pull-if-remote-newer` | Só puxa se remoto mais novo (ou só remoto); não envia |
 | `--push-relative` | Reconcilia um caminho sob `data/`, `output/` ou `export/` |
-| `--push-force-relative` | SFTP sobrescreve o remoto (sem merge); bootstrap ex. `data/pacientes.json` v2 no Axis |
+| `--push-force-relative` | SFTP sobrescreve o remoto (sem merge); cutover v2 no Axis (um arquivo por vez) |
 
-Implementação compartilhada: `sync_one_relative()`; `data/pacientes.json` com `schemaVersion: 2` local → `sync_catalog_v2.py` no push/pull unitário. Merge em massa no `--startup` ainda é por arquivo (`merge_member`).
+Arquivos com `schemaVersion: 2` em `data/` (oito catálogos de histórico — ver [`data-schema-v2.md`](data-schema-v2.md)) → `sync_catalog_v2.py` no push/pull unitário. Demais JSON em `data/` (ex. `settings.json`, tabelas estáticas) → `sync_one_relative()`. Merge em massa no `--startup` continua por arquivo (`merge_member`).
 
 ## Limitações
 

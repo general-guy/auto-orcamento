@@ -1,6 +1,23 @@
 # Schema v2 — catálogos em `data/` (UUID + label + mtime)
 
-Piloto: [`pacientes.json`](../../server/server.js). Backup legado: [`../../backup-legado/README.md`](../../backup-legado/README.md).
+Históricos editados pelo app (blur, dropdown, reorder). Backup legado: [`../../backup-legado/README.md`](../../backup-legado/README.md).
+
+## Arquivos v2 (Atlas + Axis alinhados em 2026-10-26)
+
+| Arquivo | Conteúdo |
+|---------|----------|
+| `pacientes.json` | Nome do paciente |
+| `cirurgias.json` | Cirurgias propostas |
+| `hospitais.json` | Nomes de hospital |
+| `pagamentos.json` | Formas de pagamento |
+| `observacoes.json` | Observações adicionais |
+| `extras.json` | Extras adicionais |
+| `tecnologias.json` | Tecnologia + **`valor`** (R$) |
+| `unimed-n.json` | Procedimento Unimed N + **`valor`** |
+
+**Fora do v2:** `settings.json` (zoom, `lastSnapshotDir`) — objeto simples, sem catálogo UUID.
+
+**Referência estática (sem API de histórico):** `tabelas-hospitalares.json`, `tabela-implantes.json`, `tabela-blanc-2026.json`.
 
 ## Envelope
 
@@ -26,16 +43,28 @@ Piloto: [`pacientes.json`](../../server/server.js). Backup legado: [`../../backu
 | `label` | string | Trim; visível na UI e no PDF |
 | `mtime` | number | Epoch **ms** UTC; atualizar em create, rename, delete, reorder |
 | `deleted` | boolean | Opcional; default `false`. `true` = tombstone (fora do GET/API ativa) |
+| `valor` | string | Opcional; tecnologias e Unimed N (moeda como digitado na UI) |
 
 **Limite:** até **200** entradas ativas (`deleted !== true`). Tombstones não contam para o limite de exibição.
 
-**API GET** devolve `{ schemaVersion: 2, items: CatalogEntry[] }` só com itens ativos.
+**API GET** (todas as rotas `/api/{store}` acima): `{ schemaVersion: 2, items: CatalogEntry[] }` só com itens ativos.
+
+**POST** aceita `{ value }` (label), `{ id, label }` (upsert/rename), ou `{ nome, valor }` (tecnologias / Unimed N — `nome` mapeia para `label`).
 
 **mtime do arquivo no sync:** `max(items[].mtime)` (ver merge no Python).
 
+## Código
+
+| Camada | Módulo |
+|--------|--------|
+| Node | `server/catalog-v2.js`, `server/catalog-http.js`, rotas em `server/server.js` |
+| Web | `web/api.js` (`unwrapCatalogItems`, `upsertCatalog`), `web/app.js` (`dataset.entryId`, blur) |
+| Sync | `local-atlas/axis/scripts/sync_catalog_v2.py` — push/pull unitário dos oito JSON |
+| Migração | `node scripts/migrate-data-catalogs-v2.js` (todos os catálogos); `migrate-pacientes-schema-v2.js` mantido como alias do piloto |
+
 ## Legado
 
-`[]` ou `string[]` → migrar com `scripts/migrate-pacientes-schema-v2.js` ou na primeira leitura do servidor.
+`[]`, `string[]` ou `[{ nome, valor }]` → `parseCatalogRaw` / migração no script ou na primeira leitura da API.
 
 ## Merge (`mergeCatalogV2`)
 
@@ -53,20 +82,18 @@ mergeCatalogV2(localDoc, remoteDoc) -> { doc, conflicts[] }
   doc.items = active in order ++ all tombstones from merged map
 ```
 
-Implementação: `local-atlas/axis/scripts/sync_catalog_v2.py` — ramo em `data/pacientes.json` no push/pull unitário.
-
-**Startup (`merge_member`):** enquanto o Axis ainda tiver `pacientes.json` legado e o Atlas v2 com o **mesmo mtime** de arquivo (±1 s) e **tamanho diferente**, o merge em massa marca **conflito** (toast amarelo) sem sobrescrever.
+**Startup (`merge_member`):** enquanto um lado ainda tiver legado e o outro v2 com **mesmo mtime** de arquivo (±1 s) e **tamanho diferente**, o merge em massa marca **conflito** (toast amarelo) sem sobrescrever.
 
 ## Bootstrap no Axis (one-shot)
 
-Depois de migrar no Atlas (`scripts/migrate-pacientes-schema-v2.js`), enviar o v2 ao CT **sem merge** (sobrescreve o legado):
+Depois de migrar no Atlas, enviar v2 ao CT **sem merge** (sobrescreve legado):
 
 ```powershell
-# local-atlas
-py -3 .\axis\scripts\sync_auto_orcamento.py --push-force-relative data/pacientes.json
+# local-atlas — repetir por arquivo ou em loop
+py -3 .\axis\scripts\sync_auto_orcamento.py --push-force-relative data/cirurgias.json
 ```
 
-Uso pontual. O app e o blur seguem com `--push-relative` → `merge_catalog_v2`. Em 2026-10-26 o Axis foi alinhado assim (49 itens, mesmos UUIDs do Atlas).
+Uso pontual (cutover). O uso diário: `--push-relative` / blur → `merge_catalog_v2`.
 
 ## Relacionado
 

@@ -10,20 +10,27 @@ Os dados ficam em:
 data/unimed-n.json
 ```
 
-O arquivo é uma lista de objetos. Cada item contém:
+O arquivo usa **schema v2** de catálogo (`schemaVersion: 2`, `items[]`). Cada entrada ativa tem:
 
-- `nome`: nome do procedimento exibido no dropdown e no documento.
-- `valor`: valor associado, salvo como texto numérico em padrão brasileiro **sem** o prefixo `R$` (ex.: `7.950,00`). O rótulo `R$` fica ao lado do campo no formulário; no preview/documento o total aparece formatado com `R$`.
+- `id`, `label`, `mtime` (ms), `deleted?` — ver [`docs/agent-memory/data-schema-v2.md`](agent-memory/data-schema-v2.md).
+- `label`: nome do procedimento (a API/UI ainda aceitam `nome` no POST legado).
+- `valor`: opcional; texto numérico em padrão brasileiro **sem** o prefixo `R$` (ex.: `7.950,00`). O rótulo `R$` fica ao lado do campo no formulário; no preview/documento o total aparece formatado com `R$`.
 
-Exemplo:
+Exemplo (trecho):
 
 ```json
-[
-  {
-    "nome": "Abdominoplastia + Lipoaspiração (6h de sala)",
-    "valor": "7.950,00"
-  }
-]
+{
+  "schemaVersion": 2,
+  "items": [
+    {
+      "id": "…",
+      "label": "Abdominoplastia + Lipoaspiração (6h de sala)",
+      "valor": "7.950,00",
+      "mtime": 1761493200123,
+      "deleted": false
+    }
+  ]
+}
 ```
 
 Diferente de `data/tabelas-hospitalares.json` (Regina/Sapiranga/Blanc), este arquivo **não** é uma tabela de referência fixa: o app alimenta e edita a lista pelo uso, no mesmo espírito de pacientes, cirurgias, hospitais e tecnologias.

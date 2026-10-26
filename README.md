@@ -206,7 +206,7 @@ C:\auto-orcamento\data\hospitais.json
 … (históricos, pacientes, settings, tabelas em runtime)
 ```
 
-`pacientes.json` e `settings.json` existem só no disco ao vivo. O exemplo de pacientes está em `seed/data/pacientes.json.example`. Drag and drop nos dropdowns (⋮⋮) persiste a ordem nos JSON correspondentes.
+Históricos (`pacientes`, `cirurgias`, `hospitais`, `pagamentos`, `observacoes`, `extras`, `tecnologias`, `unimed-n`) e `settings.json` existem só no disco ao vivo (`C:\auto-orcamento\data\`); schema dos históricos é **v2** (UUID + label — ver `docs/agent-memory/data-schema-v2.md`). Seed: `seed/data/`. Drag and drop nos dropdowns (⋮⋮) persiste a ordem nos JSON correspondentes.
 
 Tabelas de referência (seed + cópia ao vivo):
 

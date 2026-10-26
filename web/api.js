@@ -42,118 +42,183 @@
     return data;
   }
 
-  async function getHistory(store) {
-    if (store === "pacientes") {
-      const data = await fetchJson("/api/pacientes");
-      return Array.isArray(data?.items) ? data.items : [];
+  function catalogLabel(entry) {
+    if (typeof entry === "string") {
+      return entry.trim();
     }
 
-    return fetchJson(`/api/${store}`);
+    return String(entry?.label ?? entry?.nome ?? "").trim();
+  }
+
+  function catalogValor(entry) {
+    if (!entry || typeof entry === "string") {
+      return "";
+    }
+
+    return String(entry.valor ?? "").trim();
+  }
+
+  function unwrapCatalogItems(data) {
+    return Array.isArray(data?.items) ? data.items : [];
+  }
+
+  function toCatalogPutItems(items) {
+    return items.map((entry) => {
+      if (typeof entry === "string") {
+        return { label: entry };
+      }
+
+      const item = {
+        id: entry.id,
+        label: catalogLabel(entry),
+      };
+      const valor = catalogValor(entry);
+      if (valor) {
+        item.valor = valor;
+      }
+      return item;
+    });
+  }
+
+  async function getHistory(store) {
+    const data = await fetchJson(`/api/${store}`);
+    return unwrapCatalogItems(data);
   }
 
   async function upsertPatient(payload) {
-    return fetchJson("/api/pacientes", {
+    const data = await fetchJson("/api/pacientes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
+    return data;
   }
 
   async function removePatient(payload) {
-    return fetchJson("/api/pacientes", {
+    const data = await fetchJson("/api/pacientes", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
+    return data;
   }
 
   async function replacePatients(items) {
     const data = await fetchJson("/api/pacientes", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items }),
+      body: JSON.stringify({ items: toCatalogPutItems(items) }),
     });
-    return Array.isArray(data?.items) ? data.items : [];
+    return unwrapCatalogItems(data);
+  }
+
+  async function upsertCatalog(store, payload) {
+    const data = await fetchJson(`/api/${store}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    return unwrapCatalogItems(data);
+  }
+
+  async function removeCatalog(store, payload) {
+    const data = await fetchJson(`/api/${store}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    return unwrapCatalogItems(data);
   }
 
   async function addHistory(store, value) {
-    return fetchJson(`/api/${store}`, {
+    const data = await fetchJson(`/api/${store}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ value }),
     });
+    return unwrapCatalogItems(data);
   }
 
   async function removeHistory(store, value) {
-    return fetchJson(`/api/${store}`, {
+    const data = await fetchJson(`/api/${store}`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ value }),
     });
+    return unwrapCatalogItems(data);
   }
 
   async function replaceHistory(store, items) {
-    return fetchJson(`/api/${store}`, {
+    const data = await fetchJson(`/api/${store}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items }),
+      body: JSON.stringify({ items: toCatalogPutItems(items) }),
     });
+    return unwrapCatalogItems(data);
   }
 
   async function getTechnologies() {
-    return fetchJson("/api/tecnologias");
+    const data = await fetchJson("/api/tecnologias");
+    return unwrapCatalogItems(data).map((item) => ({ ...item, nome: catalogLabel(item) }));
   }
 
   async function addTechnology(nome, valor) {
-    return fetchJson("/api/tecnologias", {
+    const data = await fetchJson("/api/tecnologias", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nome, valor }),
     });
+    return unwrapCatalogItems(data).map((item) => ({ ...item, nome: catalogLabel(item) }));
   }
 
   async function removeTechnology(nome) {
-    return fetchJson("/api/tecnologias", {
+    const data = await fetchJson("/api/tecnologias", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nome }),
     });
+    return unwrapCatalogItems(data).map((item) => ({ ...item, nome: catalogLabel(item) }));
   }
 
   async function replaceTechnologies(items) {
-    return fetchJson("/api/tecnologias", {
+    const data = await fetchJson("/api/tecnologias", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items }),
+      body: JSON.stringify({ items: toCatalogPutItems(items) }),
     });
+    return unwrapCatalogItems(data).map((item) => ({ ...item, nome: catalogLabel(item) }));
   }
 
   async function getUnimedNProcedures() {
-    return fetchJson("/api/unimed-n");
+    const data = await fetchJson("/api/unimed-n");
+    return unwrapCatalogItems(data).map((item) => ({ ...item, nome: catalogLabel(item) }));
   }
 
   async function addUnimedNProcedure(nome, valor) {
-    return fetchJson("/api/unimed-n", {
+    const data = await fetchJson("/api/unimed-n", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nome, valor }),
     });
+    return unwrapCatalogItems(data).map((item) => ({ ...item, nome: catalogLabel(item) }));
   }
 
   async function removeUnimedNProcedure(nome) {
-    return fetchJson("/api/unimed-n", {
+    const data = await fetchJson("/api/unimed-n", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ nome }),
     });
+    return unwrapCatalogItems(data).map((item) => ({ ...item, nome: catalogLabel(item) }));
   }
 
   async function replaceUnimedNProcedures(items) {
-    return fetchJson("/api/unimed-n", {
+    const data = await fetchJson("/api/unimed-n", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ items }),
+      body: JSON.stringify({ items: toCatalogPutItems(items) }),
     });
+    return unwrapCatalogItems(data).map((item) => ({ ...item, nome: catalogLabel(item) }));
   }
 
   const ZOOM_MIN = 0.5;
@@ -268,7 +333,11 @@
 
   window.AppApi = {
     waitForBackend,
+    catalogLabel,
+    catalogValor,
     getHistory,
+    upsertCatalog,
+    removeCatalog,
     upsertPatient,
     removePatient,
     replacePatients,
