@@ -86,8 +86,6 @@
   }
 
   async function initZoomControls() {
-    await AppApi.waitForBackend();
-
     const initialZoom = await AppApi.getZoom();
     currentZoom = initialZoom;
 

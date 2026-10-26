@@ -6120,11 +6120,28 @@ printButton.addEventListener("click", async () => {
   window.print();
 });
 
+function logStartupPerf() {
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has("perf")) {
+    return;
+  }
+
+  const nav = performance.getEntriesByType("navigation")[0];
+  const measure = performance.getEntriesByName("ao:init-to-data")[0];
+  const payload = {
+    domContentLoadedMs: nav ? Math.round(nav.domContentLoadedEventEnd) : null,
+    loadEventMs: nav ? Math.round(nav.loadEventEnd) : null,
+    initToDataMs: measure ? Math.round(measure.duration) : null,
+  };
+
+  console.info("[auto-orcamento perf]", payload);
+  window.__autoOrcamentoPerf = payload;
+}
+
 async function initializeApp() {
-  try {
-    await AppApi.waitForBackend();
-  } catch (error) {
-    console.error(error);
+  const perfEnabled = new URLSearchParams(window.location.search).has("perf");
+  if (perfEnabled) {
+    performance.mark("ao:init-start");
   }
 
   updatePreview();
@@ -6140,7 +6157,14 @@ async function initializeApp() {
     loadTechnologyHistory(),
     loadHospitalTables(),
     loadImplantTable(),
-  ]).then(refreshAppDataViews);
+  ]).then(() => {
+    refreshAppDataViews();
+    if (perfEnabled) {
+      performance.mark("ao:data-ready");
+      performance.measure("ao:init-to-data", "ao:init-start", "ao:data-ready");
+      logStartupPerf();
+    }
+  });
 }
 
 function refreshAppDataViews() {

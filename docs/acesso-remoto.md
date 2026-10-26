@@ -12,6 +12,15 @@ O seletor nativo de arquivos (`POST /api/open-snapshot`) só funciona em **local
 
 Em qualquer origem, **Imprimir** grava PDF + JSON em `output/` do servidor e reconstrói o espelho SQLite antes do diálogo de impressão do navegador.
 
+## Primeiro carregamento (Tailscale)
+
+O HTML/CSS aparece antes do `app.js` (~180 KB) e dos catálogos via API. Em `https://axis.tail5fe4b7.ts.net/` **não** há mais `waitForBackend` (legado Tauri/porta 3000) — antes isso atrasava ~5 s a listas rápidas e o zoom.
+
+| Diagnóstico | Como |
+|-------------|------|
+| Rede dos assets | `pwsh ./scripts/bench_web_load.ps1 -BaseUrl https://axis.tail5fe4b7.ts.net/` |
+| Tempo até catálogos na sessão | Abrir `?perf=1` → console `[auto-orcamento perf]` / `window.__autoOrcamentoPerf` (`initToDataMs`) |
+
 ## Legado removido
 
 Tailscale **Funnel** + tokens (`iniciar-acesso-remoto.bat`, `auth-users.json`): ver [`legado-funnel-auth.md`](legado-funnel-auth.md).

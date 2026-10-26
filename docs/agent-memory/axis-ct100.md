@@ -23,6 +23,8 @@ O **seed** versionado continua só no código (`/opt/auto-orcamento/seed/data/`)
 
 ## Rede e processo
 
+- **UI web:** sem `waitForBackend` em produção HTTPS; bench `scripts/bench_web_load.ps1`, perf `?perf=1` — ver `acesso-remoto.md`.
+
 | Item | Valor |
 |------|--------|
 | CT | VMID 100, `app`, LAN `192.168.68.202` |

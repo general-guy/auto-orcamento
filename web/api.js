@@ -1,19 +1,4 @@
 (function () {
-  async function waitForBackend() {
-    if (window.location.port === "3000") {
-      return "web";
-    }
-
-    for (let attempt = 0; attempt < 100; attempt += 1) {
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      if (window.location.port === "3000") {
-        return "web";
-      }
-    }
-
-    throw new Error("Servidor local indisponível na porta 3000.");
-  }
-
   async function fetchJson(url, options = {}) {
     const response = await fetch(url, options);
     const rawText = await response.text();
@@ -348,7 +333,6 @@
   }
 
   window.AppApi = {
-    waitForBackend,
     catalogLabel,
     catalogValor,
     catalogEntryChecked,
