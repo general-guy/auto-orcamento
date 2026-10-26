@@ -55,7 +55,18 @@ mergeCatalogV2(localDoc, remoteDoc) -> { doc, conflicts[] }
 
 Implementação: `local-atlas/axis/scripts/sync_catalog_v2.py` — ramo em `data/pacientes.json` no push/pull unitário.
 
-**Startup (`merge_member`):** enquanto o Axis ainda tiver `pacientes.json` legado e o Atlas v2 com o **mesmo mtime** de arquivo (±1 s) e **tamanho diferente**, o merge em massa marca **conflito** (toast amarelo) sem sobrescrever — migrar o Axis ou alinhar com push manual após resolver.
+**Startup (`merge_member`):** enquanto o Axis ainda tiver `pacientes.json` legado e o Atlas v2 com o **mesmo mtime** de arquivo (±1 s) e **tamanho diferente**, o merge em massa marca **conflito** (toast amarelo) sem sobrescrever.
+
+## Bootstrap no Axis (one-shot)
+
+Depois de migrar no Atlas (`scripts/migrate-pacientes-schema-v2.js`), enviar o v2 ao CT **sem merge** (sobrescreve o legado):
+
+```powershell
+# local-atlas
+py -3 .\axis\scripts\sync_auto_orcamento.py --push-force-relative data/pacientes.json
+```
+
+Uso pontual. O app e o blur seguem com `--push-relative` → `merge_catalog_v2`. Em 2026-10-26 o Axis foi alinhado assim (49 itens, mesmos UUIDs do Atlas).
 
 ## Relacionado
 

@@ -1,5 +1,6 @@
 # Agent memory — changelog
 
+- 2026-10-26: Bootstrap `pacientes.json` v2 no Axis — `--push-force-relative` (local-atlas); depois merge por UUID no `--push-relative`; doc `data-schema-v2.md` / skills ct100.
 - 2026-10-26: UI sync — `--startup` após primeiro SSE; replay de toasts; log de sessão em horário local (`axis-sync-session-log.js`).
 - 2026-10-26: Piloto `pacientes.json` schema v2 — `data-schema-v2.md`, `server/patients-catalog.js`, merge `sync_catalog_v2.py` (local-atlas).
 - 2026-10-26: Backup legado `data/` — `backup-legado/pre-uuid-migration/` + `scripts/backup-live-data-legado.ps1`; stub `data-uuid-migration.md`; `output-path.md` / índice README.
