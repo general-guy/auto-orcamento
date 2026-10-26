@@ -4471,8 +4471,13 @@ async function handleOpenButtonClick() {
 const snapshotPicker = document.querySelector("#snapshotPicker");
 const snapshotPickerList = document.querySelector("#snapshotPickerList");
 const snapshotPickerSearch = document.querySelector("#snapshotPickerSearch");
+const snapshotPickerSortName = document.querySelector("#snapshotPickerSortName");
+const snapshotPickerSortDate = document.querySelector("#snapshotPickerSortDate");
 const snapshotPickerStatus = document.querySelector("#snapshotPickerStatus");
 let snapshotPickerFiles = [];
+let snapshotPickerSortField = "date";
+let snapshotPickerSortNameAsc = true;
+let snapshotPickerSortDateNewestFirst = true;
 
 function setSnapshotPickerStatus(message) {
   if (!snapshotPickerStatus) {
@@ -4498,9 +4503,50 @@ function formatSnapshotDate(isoDate) {
   return Number.isNaN(date.getTime()) ? "" : date.toLocaleString("pt-BR");
 }
 
+function snapshotModifiedTime(file) {
+  const time = new Date(file?.modifiedAt || 0).getTime();
+  return Number.isNaN(time) ? 0 : time;
+}
+
+function compareSnapshotPickerFiles(a, b) {
+  if (snapshotPickerSortField === "name") {
+    const cmp = a.name.localeCompare(b.name, "pt-BR", { sensitivity: "base" });
+    return snapshotPickerSortNameAsc ? cmp : -cmp;
+  }
+
+  const diff = snapshotModifiedTime(b) - snapshotModifiedTime(a);
+  return snapshotPickerSortDateNewestFirst ? diff : -diff;
+}
+
+function updateSnapshotPickerSortButtons() {
+  if (snapshotPickerSortName) {
+    snapshotPickerSortName.textContent = snapshotPickerSortNameAsc ? "Nome A–Z" : "Nome Z–A";
+    snapshotPickerSortName.classList.toggle("is-active", snapshotPickerSortField === "name");
+    snapshotPickerSortName.setAttribute(
+      "aria-pressed",
+      snapshotPickerSortField === "name" ? "true" : "false",
+    );
+  }
+
+  if (snapshotPickerSortDate) {
+    snapshotPickerSortDate.textContent = snapshotPickerSortDateNewestFirst
+      ? "Data: mais recente"
+      : "Data: mais antiga";
+    snapshotPickerSortDate.classList.toggle("is-active", snapshotPickerSortField === "date");
+    snapshotPickerSortDate.setAttribute(
+      "aria-pressed",
+      snapshotPickerSortField === "date" ? "true" : "false",
+    );
+  }
+}
+
 function renderSnapshotPickerList() {
   const filter = normalizeText(snapshotPickerSearch?.value || "");
-  const files = snapshotPickerFiles.filter((file) => normalizeText(file.name).includes(filter));
+  const files = snapshotPickerFiles
+    .filter((file) => normalizeText(file.name).includes(filter))
+    .sort(compareSnapshotPickerFiles);
+
+  updateSnapshotPickerSortButtons();
 
   snapshotPickerList.innerHTML = "";
 
@@ -4561,6 +4607,9 @@ async function openSnapshotPicker() {
   document.addEventListener("keydown", handleSnapshotPickerKeydown);
   snapshotPickerFiles = [];
   snapshotPickerList.innerHTML = "";
+  snapshotPickerSortField = "date";
+  snapshotPickerSortNameAsc = true;
+  snapshotPickerSortDateNewestFirst = true;
   setSnapshotPickerStatus("Carregando…");
 
   if (snapshotPickerSearch) {
@@ -6092,6 +6141,24 @@ if (snapshotPicker) {
     }
   });
   snapshotPickerSearch?.addEventListener("input", renderSnapshotPickerList);
+
+  snapshotPickerSortName?.addEventListener("click", () => {
+    if (snapshotPickerSortField === "name") {
+      snapshotPickerSortNameAsc = !snapshotPickerSortNameAsc;
+    } else {
+      snapshotPickerSortField = "name";
+    }
+    renderSnapshotPickerList();
+  });
+
+  snapshotPickerSortDate?.addEventListener("click", () => {
+    if (snapshotPickerSortField === "date") {
+      snapshotPickerSortDateNewestFirst = !snapshotPickerSortDateNewestFirst;
+    } else {
+      snapshotPickerSortField = "date";
+    }
+    renderSnapshotPickerList();
+  });
 }
 addSurgeryButton.addEventListener("click", createSurgeryField);
 removeSurgeryButton.addEventListener("click", removeLastSurgeryField);

@@ -12,6 +12,7 @@ Para fluxos com plugins (quando pedir o quê, frases úteis): [`docs/cursor-plug
 - Dados ao vivo no Windows: `C:\auto-orcamento\data\` + `output\` + `export\` (ver `docs/agent-memory/output-path.md`). Seed no repo: `seed/data/`. Pasta `data/` no clone é local (`.gitignore`).
 - Sync Atlas↔Axis em background ao abrir o `.bat` (só `127.0.0.1`): `server/axis-sync.js` → `sync_auto_orcamento.py` (wake: `ensure_axis_online.py` no local-atlas); merge no arranque; em `data/` pull se Axis mais novo antes de ler API + reconcile após gravar (não push cego). Gravação no **Axis** avisa o Atlas via `POST /api/sync/notify` (`server/atlas-notify.js`, token em `C:\auto-orcamento\config\atlas-notify.env`) para pull pontual — `docs/agent-memory/atlas-notify.md`, `axis-data-live-sync.md`, `axis-sync-ui.md`.
 - Após mudar código: reabrir o app (`abrir-auto-orcamento.bat` ou `npm start`) — sem build. Deploy manual completo: `local-atlas` → `deploy_auto_orcamento.py`; o sync automático envia diff de código quando o manifesto mudou.
+- UI remota (Tailscale): sem `waitForBackend`; diagnóstico `?perf=1` e `scripts/bench_web_load.ps1`; modal **Abrir** com ordenação — `docs/acesso-remoto.md`.
 - Docs técnicas: `README.md`, `docs/ARCHITECTURE.md`, `docs/atlas-axis.md`, `docs/atlas-axis-sync.md`, `docs/acesso-remoto.md`, `docs/export-sqlite.md`, `docs/tabelas-hospitalares.md`, `docs/unimed-n.md`; memória temática em `docs/agent-memory/README.md`.
 
 ## Plugins Cursor (uso neste repo)

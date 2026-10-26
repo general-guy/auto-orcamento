@@ -424,7 +424,7 @@ Falhas de exportação exibem um `alert` além do log no console. Requer Chrome 
 O botão **Abrir** (`#openButton`, verde, ao lado de **Limpar** no rodapé do formulário) restaura um snapshot JSON no formulário:
 
 - **Uso local:** `AppApi.openSnapshot()` → `POST /api/open-snapshot`. No Windows, `scripts/open-snapshot-dialog.py` usa **pywebview** para diálogo nativo nítido em HiDPI; fallback PowerShell/tkinter. Preferência: `lastSnapshotDir`; fallback `C:\auto-orcamento\output\` (servidor e script Python).
-- **Browser na tailnet (hostname ≠ localhost):** modal `#snapshotPicker` lista `GET /api/snapshots` e carrega `GET /api/snapshots/:nome`. Somente leitura de `output/`; não expõe o sistema de arquivos do servidor.
+- **Browser na tailnet (hostname ≠ localhost):** modal `#snapshotPicker` lista `GET /api/snapshots` e carrega `GET /api/snapshots/:nome` (diálogo largo em flex; ordenação por nome ou data com toggle nos botões `#snapshotPickerSortName` / `#snapshotPickerSortDate`). Somente leitura de `output/`; não expõe o sistema de arquivos do servidor. Detalhe: `docs/acesso-remoto.md`.
 
 **Stack Tauri (congelada):** `export_pdf` gera só PDF; não há snapshot JSON nem importação.
 

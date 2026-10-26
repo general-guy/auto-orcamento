@@ -1,5 +1,6 @@
 # Agent memory — changelog
 
+- 2026-10-26: Modal Abrir (tailnet) — diálogo maior (flex); ordenar por nome (A–Z/Z–A) e data (recente/antiga); doc `acesso-remoto.md` + `ARCHITECTURE.md`.
 - 2026-10-26: UI Tailscale — removido `waitForBackend` (~5 s em HTTPS); `?perf=1` + `scripts/bench_web_load.ps1`; doc `acesso-remoto.md`.
 - 2026-10-26: Notify — URL LAN + listener `0.0.0.0:3010` (CT sem Tailscale); toast e `axis-data-live-sync.md` / `atlas-notify.md`; `install_atlas_notify_env.py` no local-atlas.
 - 2026-10-26: `docs/cursor-plugins.md` — skills CT100 alinhados a UI-first + sync em background (runbooks em agent-memory).
