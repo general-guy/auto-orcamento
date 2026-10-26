@@ -1,6 +1,8 @@
 const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
+
+require("./load-local-env").loadAtlasNotifyEnv();
 const { freeTcpPort } = require("./port-utils");
 
 function isRemoteRequest(request) {

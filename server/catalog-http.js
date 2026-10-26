@@ -105,12 +105,12 @@ async function handleCatalogApi(request, response, filePath, pullFn, afterWrite,
     }
 
     const atlasNotify = await writeCatalog(filePath, next, afterWrite);
-    const payload = toApiPayload(next);
+    const responseBody = toApiPayload(next);
     if (atlasNotify) {
-      payload.atlasNotify = atlasNotify;
+      responseBody.atlasNotify = atlasNotify;
     }
     response.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
-    response.end(JSON.stringify(payload));
+    response.end(JSON.stringify(responseBody));
     return;
   }
 
@@ -128,12 +128,12 @@ async function handleCatalogApi(request, response, filePath, pullFn, afterWrite,
     const doc = await readCatalogFresh(filePath, pullFn);
     const { doc: next } = deleteEntry(doc, { id: id || undefined, value: value || undefined });
     const atlasNotify = await writeCatalog(filePath, next, afterWrite);
-    const payload = toApiPayload(next);
+    const responseBody = toApiPayload(next);
     if (atlasNotify) {
-      payload.atlasNotify = atlasNotify;
+      responseBody.atlasNotify = atlasNotify;
     }
     response.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
-    response.end(JSON.stringify(payload));
+    response.end(JSON.stringify(responseBody));
     return;
   }
 
