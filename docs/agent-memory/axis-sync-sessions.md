@@ -13,7 +13,15 @@ Cada execução em fila do `axis-sync.js` (`startup`, `pull`, `push`, etc.) grav
 
 Cabeçalho: `started_at` / `finished_at` em **horário local** (`timezone=…`); tarefa, script, argv. Rodapé: `exit_code`, timeout ou erro de spawn.
 
-Toast amarelo `/data/ N conflito(s)` no startup: um ou mais arquivos com **mesmo mtime** (±1 s) e **tamanho ou conteúdo** diferente — o motor não sobrescreve; ver toast por arquivo (`Conflito em /data/…`) quando o hash diverge. Ex.: catálogo v2 no Atlas e legado (`string[]` / `{nome,valor}[]`) no Axis após migração local sem `--push-force-relative`.
+Toast amarelo `/data/ N conflito(s)` no startup: um ou mais arquivos com **mesmo mtime de arquivo** (±1 s) e conteúdo considerado diferente — o motor não sobrescreve.
+
+| Caso | O que acontece |
+|------|----------------|
+| Catálogo **v2** (oito JSON de histórico), mtime empate, **tamanho** diferente mas **mesmo catálogo** (só formatação JSON / `st_mtime` subsegundo no Windows) | Desde `sync_catalog_v2.catalogs_semantically_equal` no `merge_member`: conta como **igual**, sem conflito. |
+| v2 legado vs v2 no outro lado, ou dados realmente divergentes | Conflito ou merge por id no `--push-relative`; cutover one-shot: `--push-force-relative`. |
+| Outros JSON em `data/` (tabelas, `settings.json`) | Regra por arquivo: tamanho ou SHA-256 em empate de mtime. |
+
+Exemplo real (2026-10-26): startup com **7 conflitos** nos catálogos (exc. `pacientes.json`) — falso positivo por tamanho; resolvido com ajuste semântico no motor + `--push-force-relative` nos sete para alinhar bytes.
 
 Só quando o sync está habilitado (Windows + `BIND_HOST` localhost). Produção no CT **não** gera estes logs.
 

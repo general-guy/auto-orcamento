@@ -82,7 +82,7 @@ mergeCatalogV2(localDoc, remoteDoc) -> { doc, conflicts[] }
   doc.items = active in order ++ all tombstones from merged map
 ```
 
-**Startup (`merge_member`):** enquanto um lado ainda tiver legado e o outro v2 com **mesmo mtime** de arquivo (±1 s) e **tamanho diferente**, o merge em massa marca **conflito** (toast amarelo) sem sobrescrever.
+**Startup (`merge_member`):** legado vs v2 com mtime de arquivo empate e tamanho diferente → conflito. Dois lados **v2** com o **mesmo catálogo** (digest JSON canônico) mas bytes diferentes → **sem conflito** (`catalogs_semantically_equal` em `sync_catalog_v2.py`, local-atlas).
 
 ## Bootstrap no Axis (one-shot)
 
