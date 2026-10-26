@@ -1,0 +1,42 @@
+# Notify Axis → Atlas (pull pontual na sessão)
+
+Complemento a [`axis-data-live-sync.md`](axis-data-live-sync.md). O **CT** não roda `sync_auto_orcamento.py`; após gravar, avisa o **Atlas** para enfileirar `--pull-if-remote-newer` no caminho informado. Coordenação do merge permanece no Atlas (Python + `axis-sync.js`).
+
+## Fluxo
+
+1. Axis grava em `/data/auto-orcamento/…` (bind axis-data).
+2. `server/atlas-notify.js` envia `POST` com `{ relativePath }` ou `{ relativePaths }`.
+3. Atlas valida token e chama `enqueuePullIfRemoteNewer` em `server/axis-sync.js`.
+4. Resposta API no Axis pode incluir `atlasNotify` → toast (`web/api.js`, `AutoOrcamentoSyncUi` em `web/sync-toasts.js`).
+
+Atlas desligado ou inacessível: toast amarelo no Axis; **sem** fila persistente — merge global no próximo `--startup`.
+
+## Configuração (segredos fora do git)
+
+| Onde | Arquivo / variável |
+|------|---------------------|
+| Atlas | `C:\auto-orcamento\config\atlas-notify.env` — carregado por `server/load-local-env.js` ao subir o Node. Modelo: `config/atlas-notify.env.example` no repo. |
+| Atlas (listener) | `AUTO_ORCAMENTO_ATLAS_NOTIFY_BIND_HOST` (IP Tailscale) + `AUTO_ORCAMENTO_ATLAS_NOTIFY_PORT` (padrão `3010`) — só rota `/api/sync/notify`. App principal pode ficar em `127.0.0.1:3000`. |
+| Axis (CT) | `/etc/auto-orcamento/atlas-notify.env` — `EnvironmentFile=-…` em `auto-orcamento.service` (local-atlas). |
+| Compartilhado | `AUTO_ORCAMENTO_ATLAS_NOTIFY_TOKEN` (header `X-Auto-Orcamento-Notify-Token` ou `Authorization: Bearer`) |
+| Axis URL | `AUTO_ORCAMENTO_ATLAS_NOTIFY_URL` — ex. `http://<tailscale-atlas>:3010/api/sync/notify` |
+
+Instalar ou reenviar token ao CT (reutiliza token do Windows se o arquivo já existir):
+
+```powershell
+py -3 .\axis\scripts\install_atlas_notify_env.py
+```
+
+(clone `local-atlas`; argumentos opcionais: IP Tailscale do Atlas, porta.)
+
+Alternativa: Tailscale Serve no Atlas para `127.0.0.1:3000` e URL `…/api/sync/notify` na porta 3000 (expõe o app inteiro na tailnet).
+
+## Código
+
+| Arquivo | Papel |
+|---------|--------|
+| `server/atlas-notify.js` | Validação de paths, HTTP client (Axis), handler e listener opcional |
+| `server/axis-sync.js` | `enqueuePullIfRemoteNewer` |
+| `server/server.js` | Rota `POST /api/sync/notify` |
+
+Runbook geral: [`../atlas-axis-sync.md`](../atlas-axis-sync.md). CT: [`axis-ct100.md`](axis-ct100.md).

@@ -49,7 +49,7 @@ No **CT 100**, após gravar `data/` (blur/API), `settings` ou impressão (`outpu
 
 Alternativa: Tailscale Serve no Atlas apontando para `127.0.0.1:3000` e URL `…/api/sync/notify` na porta 3000 (expõe o app inteiro na tailnet).
 
-Implementação Node: `server/atlas-notify.js`, `axis-sync.js` (`enqueuePullIfRemoteNewer`), resposta API `atlasNotify` → toast no Axis (`web/api.js`, `web/sync-toasts.js` / `AutoOrcamentoSyncUi.showToast`). Header: `X-Auto-Orcamento-Notify-Token` ou `Authorization: Bearer`.
+Runbook dedicado (env, listener, script de instalação): [`atlas-notify.md`](atlas-notify.md).
 
 ## Limitações
 

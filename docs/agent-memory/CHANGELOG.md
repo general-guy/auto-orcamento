@@ -1,6 +1,6 @@
 # Agent memory — changelog
 
-- 2026-10-26: Notify Axis → Atlas — após gravar no CT, `POST /api/sync/notify` dispara pull pontual no Atlas (`server/atlas-notify.js`); toasts verde/amarelo no Axis; env token + URL/listener; memória `axis-data-live-sync.md`, `atlas-axis-sync.md`, `axis-ct100.md`.
+- 2026-10-26: Notify Axis → Atlas — `server/atlas-notify.js`, `load-local-env.js`, `install_atlas_notify_env.py`; memória `atlas-notify.md`; skills `ct100-webapps` / `ct100-auto-orcamento` (LEARNINGS + SKILL).
 - 2026-10-26: Startup sync — catálogos v2 com mesmo conteúdo e tamanho de arquivo diferente deixam de gerar conflito falso (`catalogs_semantically_equal`, local-atlas); doc `axis-sync-sessions.md`.
 - 2026-10-26: Catálogos v2 — oito JSON de histórico (`catalog-v2.js`, `catalog-http.js`, `migrate-data-catalogs-v2.js`); Axis alinhado com `--push-force-relative`; merge `sync_catalog_v2.py` nos oito; `settings.json` v1; docs + skills ct100.
 - 2026-10-26: Bootstrap `pacientes.json` v2 no Axis — `--push-force-relative` (local-atlas); depois merge por UUID no `--push-relative`; doc `data-schema-v2.md` / skills ct100.

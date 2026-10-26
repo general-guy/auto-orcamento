@@ -100,7 +100,7 @@ Otimizações aplicadas na stack atual: Node e WebView2 em paralelo, liberação
 | Impressão | `@media print` anula zoom da UI — papel alinhado ao PDF automático |
 | Snapshot | Exportação JSON na impressão + botão **Abrir** com seletor nativo HiDPI (pywebview/WebView2) |
 | Export SQLite | Na abertura e após imprimir, reconstrói `orcamentos.sqlite` em `C:\auto-orcamento\export\`; sync envia ao Axis em background |
-| Sync Axis | Wake se necessário, merge no arranque + pull/reconcile por arquivo em `data/` — [`docs/atlas-axis-sync.md`](docs/atlas-axis-sync.md), [`docs/agent-memory/axis-data-live-sync.md`](docs/agent-memory/axis-data-live-sync.md), [`docs/agent-memory/axis-sync-ui.md`](docs/agent-memory/axis-sync-ui.md) |
+| Sync Axis | Wake se necessário, merge no arranque + pull/reconcile por arquivo em `data/` no Atlas; gravação no CT notifica o Atlas (notify HTTP) — [`docs/atlas-axis-sync.md`](docs/atlas-axis-sync.md), [`docs/agent-memory/axis-data-live-sync.md`](docs/agent-memory/axis-data-live-sync.md), [`docs/agent-memory/atlas-notify.md`](docs/agent-memory/atlas-notify.md), [`docs/agent-memory/axis-sync-ui.md`](docs/agent-memory/axis-sync-ui.md) |
 | Documento | Nas observações, `*texto*` (estilo WhatsApp) vira negrito no preview/PDF; o peso padrão do documento é Gotham Medium (`--document-emphasis-weight: 500`), inclusive o rótulo `Tempo previsto` |
 | Robustez | Liberação da porta 3000 no arranque do `server/server.js`; encerramento confiável ao fechar pelo X |
 

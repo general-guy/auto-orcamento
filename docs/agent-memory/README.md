@@ -13,6 +13,7 @@ Memória durável do **Auto Orçamento** (decisões, caminhos, deploy). O plugin
 | CT 100, axis-data, `/opt` vs `/data` | [`axis-ct100.md`](axis-ct100.md) |
 | Sync automático Atlas ↔ Axis (dev) | [`../atlas-axis-sync.md`](../atlas-axis-sync.md) |
 | `data/` ao vivo (blur, pull + reconcile) | [`axis-data-live-sync.md`](axis-data-live-sync.md) |
+| Notify Axis → Atlas (pull na sessão) | [`atlas-notify.md`](atlas-notify.md) |
 | Toasts + histórico na UI (preview) | [`axis-sync-ui.md`](axis-sync-ui.md) |
 | Log das últimas 10 sessões de sync (Atlas) | [`axis-sync-sessions.md`](axis-sync-sessions.md) |
 | Narrativa Atlas/Axis no app | [`../atlas-axis.md`](../atlas-axis.md) |

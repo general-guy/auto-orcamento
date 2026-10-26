@@ -14,4 +14,8 @@ Só em `127.0.0.1` / `localhost` (mesma regra do `axis-sync.js`).
 
 Toasts com `phase: "wake"` vêm de `ensure_axis_online.py` (local-atlas). Amarelo de ligação dura mais na tela (`DISMISS_WAKE_MS`).
 
-Runbook completo: [`../atlas-axis-sync.md`](../atlas-axis-sync.md). `data/` ao vivo: [`axis-data-live-sync.md`](axis-data-live-sync.md). Log de sessões Python: [`axis-sync-sessions.md`](axis-sync-sessions.md).
+## Toasts no Axis (notify)
+
+Quando o CT grava e o Atlas está acessível, a resposta JSON pode trazer `atlasNotify` (`level`: `ok` | `warn`). `web/api.js` chama `window.AutoOrcamentoSyncUi.showToast` (definido em `sync-toasts.js`). Não usa SSE — só mutações que disparam notify (`data/`, settings, impressão).
+
+Runbook completo: [`../atlas-axis-sync.md`](../atlas-axis-sync.md). `data/` ao vivo: [`axis-data-live-sync.md`](axis-data-live-sync.md). Notify: [`atlas-notify.md`](atlas-notify.md). Log de sessões Python: [`axis-sync-sessions.md`](axis-sync-sessions.md).
