@@ -43,10 +43,11 @@ O **seed** versionado continua só no código (`/opt/auto-orcamento/seed/data/`)
 
 ## Implementado (2026-10-25)
 
-- Unit `auto-orcamento.service`: `DATA_DIR`, `OUTPUT_DIR`, `EXPORT_DIR`, `AUTO_ORCAMENTO_DELIVER_SQLITE` em `/data/...`.
+- Unit `auto-orcamento.service`: `DATA_DIR`, `OUTPUT_DIR`, `EXPORT_DIR` em `/data/...` (sem entrega SQLite para dados-clinica no Axis).
 - `server/paths.js`: Linux com bind `/data/auto-orcamento` usa `data/`, `output/`, `export/`; Windows canônico `C:\auto-orcamento\export`.
 - `deploy_auto_orcamento.py`: tar sem `data|output|export`; limpa resíduos em `/opt/auto-orcamento/{data,output,export}`; `mkdir` no bind.
-- `export-sqlite.js`: entrega default CT em `/data/dados-clinica/import/` quando o bind existe.
+- `export-sqlite.js`: no CT (bind axis-data) espelho só em `export/`; entrega a dados-clinica só no Atlas (Windows).
+- CT 100: Node.js 22.x (`prepare_ct100.py` / NodeSource) para `node:sqlite`.
 
 Cutover operacional: `push_axis_data.py --only auto-orcamento` + `deploy_auto_orcamento.py`.
 

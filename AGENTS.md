@@ -43,7 +43,7 @@ Para fluxos com plugins (quando pedir o quê, frases úteis): [`docs/cursor-plug
 - Produção clínica: Axis CT 100 (`192.168.68.202:3000`, `BIND_HOST=192.168.68.202`) + Tailscale Serve no host → `https://axis.tail5fe4b7.ts.net/`. Sem Funnel.
 - Dependência de PDF: `puppeteer-core` + Chrome/Edge instalado.
 - Snapshot JSON (`schemaVersion: 1`) e botão Abrir existem só na stack Node; Abrir lista só os `.json` de `output/` (sem diálogo nativo do sistema).
-- Espelho SQLite é reconstruído a partir de `output/` na abertura do servidor e após imprimir (também `npm run export:sqlite`); cópia em `C:\auto-orcamento\export\` e entrega para `dados-clinica/import/` (no CT: `/data/dados-clinica/import/`).
+- Espelho SQLite é reconstruído a partir de `output/` na abertura do servidor e após imprimir (também `npm run export:sqlite`); cópia em `C:\auto-orcamento\export\` e entrega para `dados-clinica/import/` **só no Atlas**; no CT 100 o espelho fica só em axis-data `export/`.
 - `pacientes.json` ao vivo em `C:\auto-orcamento\data\` (não no Git); seed: `seed/data/pacientes.json.example`.
 - Negrito do documento (observações `*texto*` e rótulo `Tempo previsto`) é Gotham Medium (`--document-emphasis-weight: 500`).
 - CT 100: mutável em axis-data (`/data/auto-orcamento/`), código em `/opt/auto-orcamento`. Deploy tar via `deploy_auto_orcamento.py`; sync automático no Atlas reconcilia `C:\auto-orcamento\` e código incremental (`sync_auto_orcamento.py`); wake do host sob demanda no arranque/push do sync.

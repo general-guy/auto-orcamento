@@ -1,7 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { DatabaseSync } = require("node:sqlite");
-const { defaultWindowsExportDir } = require("./paths");
+const { defaultWindowsExportDir, linuxUsesAxisDataBind } = require("./paths");
 
 const DEFAULT_DB_NAME = "orcamentos.sqlite";
 
@@ -184,15 +184,19 @@ function deliverLetterheadAssets(repoRoot, deliverDir) {
 function defaultDeliverPaths(repoRoot) {
   const envPath = String(process.env.AUTO_ORCAMENTO_DELIVER_SQLITE || "").trim();
   if (envPath) {
+    const lowered = envPath.toLowerCase();
+    if (lowered === "none" || lowered === "false" || envPath === "0") {
+      return [];
+    }
     return [path.resolve(envPath)];
   }
 
-  const axisClinicaImport = path.join("/data/dados-clinica/import", DEFAULT_DB_NAME);
-  if (process.platform !== "win32" && fs.existsSync("/data/dados-clinica")) {
-    return [axisClinicaImport];
+  // CT 100 (axis-data bind): espelho só em export/; sem cópia para dados-clinica.
+  if (linuxUsesAxisDataBind()) {
+    return [];
   }
 
-  // Entrega padrão ao projeto irmão dados-clinica (push, não pull).
+  // Atlas (Windows): entrega ao clone irmão dados-clinica.
   return [path.join(repoRoot, "..", "dados-clinica", "import", DEFAULT_DB_NAME)];
 }
 
@@ -337,8 +341,13 @@ function consolidateOutputToSqlite({
   }
 
   const delivery = deliverSqliteCopy(dbPath, targets);
-  const letterhead = deliverLetterheadAssets(resolvedRepoRoot);
-  const fonts = deliverFontsAssets(resolvedRepoRoot);
+  const skipClinicaDeliver = linuxUsesAxisDataBind();
+  const letterhead = skipClinicaDeliver
+    ? { delivered: [], deliverErrors: [] }
+    : deliverLetterheadAssets(resolvedRepoRoot);
+  const fonts = skipClinicaDeliver
+    ? { delivered: [], deliverErrors: [] }
+    : deliverFontsAssets(resolvedRepoRoot);
 
   return {
     dbPath,

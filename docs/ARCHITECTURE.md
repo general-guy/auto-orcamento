@@ -174,7 +174,7 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 
 - `http` para servir a aplicação;
 - `fs` e `path` para ler e gravar arquivos locais;
-- `node:sqlite` (`DatabaseSync`) na consolidação via `server/export-sqlite.js` (Node 22.5+; experimental);
+- `node:sqlite` (`DatabaseSync`) na consolidação via `server/export-sqlite.js` (Node 22.5+; `--experimental-sqlite` no CT 100);
 - porta fixa `3000`, bind em `BIND_HOST` (padrão `127.0.0.1` no Atlas; `192.168.68.202` no CT 100);
 - `server/pdf-export.js`, `server/snapshot-open-dialog.js` e `server/export-sqlite.js` carregados **sob demanda** (startup mais rápido).
 
@@ -311,7 +311,7 @@ Com duas ou mais entradas no formulário, `updateHospitalFieldStructure()` exibe
 
 A pasta de saída (`outputDir` em `server/paths.js`) guarda os PDFs e snapshots JSON gerados ao clicar em **Imprimir orçamento**. No Windows o padrão é `C:\auto-orcamento\output\`; ela é criada pelo servidor quando necessário e não entra no controle de versão. Cada par usa o mesmo nome base (`.pdf` e `.json`), no formato `{paciente} - {cirurgia} {AAAA-MM-DD HH-mm-ss}` — a primeira cirurgia preenchida no formulário vem do snapshot enviado na impressão.
 
-Os JSON nessa pasta são a **fonte canônica** do banco de arquivos do app (**Abrir**, `GET /api/snapshots*`). A pasta `export/` no repo guarda `orcamentos.sqlite`, um **espelho** reconstruído ao **abrir o app** e a cada impressão local (ou via `npm run export:sqlite`): apaga e reinsere todas as linhas a partir dos JSON atuais — sem histórico legado. Na mesma consolidação, o espelho (e o papel timbrado + fontes) é **entregue** ao projeto irmão `dados-clinica/import/` para a sessão Orçamentos da GUI. Schema e contrato: `docs/export-sqlite.md`.
+Os JSON nessa pasta são a **fonte canônica** do banco de arquivos do app (**Abrir**, `GET /api/snapshots*`). A pasta `export/` no repo guarda `orcamentos.sqlite`, um **espelho** reconstruído ao **abrir o app** e a cada impressão local (ou via `npm run export:sqlite`): apaga e reinsere todas as linhas a partir dos JSON atuais — sem histórico legado. No **Atlas**, na mesma consolidação o espelho (e timbrado + fontes) é **entregue** a `dados-clinica/import/` para a GUI Orçamentos; no **CT 100** só `export/` em axis-data. Schema e contrato: `docs/export-sqlite.md`.
 
 ## Lógica de Cirurgia
 

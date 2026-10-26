@@ -85,6 +85,7 @@ module.exports = {
   resolveOutputDir,
   resolveDataDir,
   resolveExportDir,
+  linuxUsesAxisDataBind,
   defaultLinuxAxisDataRoot,
   defaultWindowsOutputDir,
   defaultWindowsDataDir,
