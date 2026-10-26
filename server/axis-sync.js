@@ -155,7 +155,7 @@ function runPythonSync(argv, { taskName = "sync", timeoutMs = 4 * 60 * 60 * 1000
 }
 
 function enqueue(taskName, argv) {
-  queue = queue
+  const task = queue
     .then(() => runPythonSync(argv, { taskName }))
     .catch((error) => {
       broadcast({
@@ -165,7 +165,11 @@ function enqueue(taskName, argv) {
       });
       return 1;
     });
-  return queue;
+  queue = task.then(
+    () => {},
+    () => {},
+  );
+  return task;
 }
 
 function createAxisSync({ bindHost, dataDir }) {
@@ -199,15 +203,37 @@ function createAxisSync({ bindHost, dataDir }) {
     enqueuePushRelatives([relativePath]);
   }
 
+  function dataRelativePath(filePath) {
+    if (!filePath || !dataDir) {
+      return null;
+    }
+    const rel = path.relative(dataDir, filePath);
+    if (!rel || rel.startsWith("..")) {
+      return null;
+    }
+    return `data/${rel.replace(/\\/g, "/")}`;
+  }
+
+  function pullDataFileIfRemoteNewer(filePath) {
+    if (!enabled) {
+      return Promise.resolve();
+    }
+    const relative = dataRelativePath(filePath);
+    if (!relative) {
+      return Promise.resolve();
+    }
+    return enqueue("pull", ["--pull-if-remote-newer", relative]).then(() => {});
+  }
+
   function afterDataFileWrite(filePath) {
     if (!enabled || !filePath || !dataDir) {
       return;
     }
-    const rel = path.relative(dataDir, filePath);
-    if (!rel || rel.startsWith("..")) {
+    const relative = dataRelativePath(filePath);
+    if (!relative) {
       return;
     }
-    enqueuePushRelative(`data/${rel.replace(/\\/g, "/")}`);
+    enqueuePushRelative(relative);
   }
 
   function afterPdfExport({ filename, jsonFilename }) {
@@ -251,6 +277,7 @@ function createAxisSync({ bindHost, dataDir }) {
     enabled,
     enqueueStartup,
     enqueuePushRelative,
+    pullDataFileIfRemoteNewer,
     afterDataFileWrite,
     afterPdfExport,
     attachSyncEventsRoute,

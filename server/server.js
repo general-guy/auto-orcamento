@@ -243,8 +243,9 @@ function readSettings() {
   return settings;
 }
 
-function writeSettings(patch = {}) {
+async function writeSettings(patch = {}) {
   ensureDataFile();
+  await axisSync.pullDataFileIfRemoteNewer(settingsFile);
   const stored = readSettingsFile();
   const next = { ...stored };
 
@@ -278,6 +279,11 @@ function readJsonList(filePath) {
   } catch {
     return [];
   }
+}
+
+async function readJsonListFresh(filePath) {
+  await axisSync.pullDataFileIfRemoteNewer(filePath);
+  return readJsonList(filePath);
 }
 
 function writeJsonList(filePath, items) {
@@ -412,7 +418,7 @@ async function handleSettingsApi(request, response) {
   if (request.method === "PUT" || request.method === "POST") {
     const body = await collectRequestBody(request, 4096);
     const payload = JSON.parse(body || "{}");
-    const settings = writeSettings(payload);
+    const settings = await writeSettings(payload);
     sendJson(response, 200, settings);
     return;
   }
@@ -465,7 +471,7 @@ async function handlePdfExport(request, response) {
   if (jsonPath) {
     responsePayload.jsonFilename = path.basename(jsonPath);
     responsePayload.jsonPath = jsonPath;
-    writeSettings({ lastSnapshotDir: path.dirname(jsonPath) });
+    await writeSettings({ lastSnapshotDir: path.dirname(jsonPath) });
   }
 
   // Espelha todos os JSON de output/ em export/orcamentos.sqlite (outros webapps).
@@ -521,7 +527,7 @@ async function handleOpenSnapshot(request, response) {
     return;
   }
 
-  writeSettings({ lastSnapshotDir: path.dirname(filePath) });
+  await writeSettings({ lastSnapshotDir: path.dirname(filePath) });
 
   sendJson(response, 200, {
     cancelled: false,
@@ -532,7 +538,7 @@ async function handleOpenSnapshot(request, response) {
 
 async function handleHistoryApi(request, response, filePath, itemLabel) {
   if (request.method === "GET") {
-    sendJson(response, 200, readJsonList(filePath));
+    sendJson(response, 200, await readJsonListFresh(filePath));
     return;
   }
 
@@ -546,7 +552,7 @@ async function handleHistoryApi(request, response, filePath, itemLabel) {
       return;
     }
 
-    const items = readJsonList(filePath);
+    const items = await readJsonListFresh(filePath);
     const alreadyExists = items.some((existingItem) => normalizeText(existingItem) === normalizeText(item));
     const nextItems = alreadyExists ? items : [item, ...items].slice(0, 200);
 
@@ -565,7 +571,7 @@ async function handleHistoryApi(request, response, filePath, itemLabel) {
       return;
     }
 
-    const nextItems = readJsonList(filePath)
+    const nextItems = (await readJsonListFresh(filePath))
       .filter((existingItem) => normalizeText(existingItem) !== normalizeText(item));
 
     writeJsonList(filePath, nextItems);
@@ -794,7 +800,7 @@ async function handleHospitalsApi(request, response) {
 
 async function handleUnimedNApi(request, response) {
   if (request.method === "GET") {
-    sendJson(response, 200, readJsonList(unimedNFile));
+    sendJson(response, 200, await readJsonListFresh(unimedNFile));
     return;
   }
 
@@ -812,7 +818,7 @@ async function handleUnimedNApi(request, response) {
       nome: procedure,
       valor: typeof valor === "string" ? valor.trim() : "",
     };
-    const items = readJsonList(unimedNFile)
+    const items = (await readJsonListFresh(unimedNFile))
       .filter((existingItem) => normalizeText(existingItem.nome || existingItem) !== normalizeText(item.nome));
     const nextItems = [item, ...items].slice(0, 200);
 
@@ -831,7 +837,7 @@ async function handleUnimedNApi(request, response) {
       return;
     }
 
-    const nextItems = readJsonList(unimedNFile)
+    const nextItems = (await readJsonListFresh(unimedNFile))
       .filter((existingItem) => normalizeText(existingItem.nome || existingItem) !== normalizeText(procedure));
 
     writeJsonList(unimedNFile, nextItems);
@@ -880,7 +886,7 @@ async function handleUnimedNApi(request, response) {
 
 async function handleTechnologyApi(request, response) {
   if (request.method === "GET") {
-    sendJson(response, 200, readJsonList(technologiesFile));
+    sendJson(response, 200, await readJsonListFresh(technologiesFile));
     return;
   }
 
@@ -898,7 +904,7 @@ async function handleTechnologyApi(request, response) {
       nome: technology,
       valor: typeof valor === "string" ? valor.trim() : "",
     };
-    const items = readJsonList(technologiesFile)
+    const items = (await readJsonListFresh(technologiesFile))
       .filter((existingItem) => normalizeText(existingItem.nome || existingItem) !== normalizeText(item.nome));
     const nextItems = [item, ...items].slice(0, 200);
 
@@ -917,7 +923,7 @@ async function handleTechnologyApi(request, response) {
       return;
     }
 
-    const nextItems = readJsonList(technologiesFile)
+    const nextItems = (await readJsonListFresh(technologiesFile))
       .filter((existingItem) => normalizeText(existingItem.nome || existingItem) !== normalizeText(technology));
 
     writeJsonList(technologiesFile, nextItems);

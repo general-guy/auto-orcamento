@@ -61,6 +61,6 @@ Ao abrir `abrir-auto-orcamento.bat`, após a porta 3000 subir, o servidor enfile
 |------|--------|
 | Dados | Merge `data` → `output` → `export` entre `C:\auto-orcamento\` e axis-data |
 | Código | Incremental para `/opt/auto-orcamento` + restart se mudou |
-| Uso | Gravar histórico ou imprimir → push só dos arquivos alterados |
+| Uso | Histórico/settings: pull se Axis mais novo, gravar, reconciliar arquivo; imprimir → reconciliar `output/` + sqlite |
 
 Runbook: [`atlas-axis-sync.md`](atlas-axis-sync.md). Axis desligado → toasts vermelhos; app local segue normal.

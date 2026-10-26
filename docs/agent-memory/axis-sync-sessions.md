@@ -1,6 +1,6 @@
 # Sync Axis — log de sessões (Atlas dev)
 
-Cada execução em fila do `axis-sync.js` (startup, push de arquivo, etc.) grava **stdout/stderr** do `sync_auto_orcamento.py`.
+Cada execução em fila do `axis-sync.js` (`startup`, `pull`, `push`, etc.) grava **stdout/stderr** do `sync_auto_orcamento.py`.
 
 ## Onde
 
@@ -17,7 +17,7 @@ Só quando o sync está habilitado (Windows + `BIND_HOST` localhost). Produção
 
 ## Fase wake (Axis desligado)
 
-No início de `--startup` ou push que precisa do PVE, o log pode mostrar linhas JSON de toast (`phase`: `wake`) antes do merge — saída de `ensure_axis_online.py`.
+No início de `--startup`, `--pull-if-remote-newer`, `--push-relative` ou merge que precisa do PVE, o log pode mostrar linhas JSON de toast (`phase`: `wake`) antes do trabalho — saída de `ensure_axis_online.py`.
 
 | Ordem (Axis estava off) | Nível | Mensagem |
 |-------------------------|-------|----------|
@@ -35,7 +35,9 @@ Wake manual para testar: `py -3 local-atlas/axis/scripts/wake_axis.py`.
 
 ## O que não é rsync
 
-O merge de `data` / `output` / `export` no arranque usa **SSH find + SFTP** por arquivo (`sync_auto_orcamento_data.py`), não o rsync em massa do `push_axis_data.py`. O log ainda vale para depurar reenvios e mensagens do motor Python.
+O merge de `data` / `output` / `export` no arranque e a reconciliação por arquivo (`--push-relative`, `--pull-if-remote-newer`) usam **SSH find/stat + SFTP** (`sync_one_relative` em `sync_auto_orcamento_data.py`), não o rsync em massa do `push_axis_data.py`. O log ainda vale para depurar reenvios e mensagens do motor Python.
+
+Durante a sessão, o Node pode enfileirar `pull` imediatamente antes de uma API ler `data/`; o nome da tarefa no log é `pull` (argv `--pull-if-remote-newer`). Ver [`axis-data-live-sync.md`](axis-data-live-sync.md).
 
 Toasts de merge usam **`/data/`**, **`/output/`**, **`/export/`** no texto. Com tudo já sincronizado, a etapa lenta costumava ser `/output/` (centenas de PDFs): o motor comparava hash baixando cada arquivo; agora usa **`sha256sum` no Patriot em lote** (local-atlas).
 

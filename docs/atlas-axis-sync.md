@@ -30,7 +30,7 @@ Ordem fixa:
 
 ## Wake automático
 
-Disparado em `--startup`, `--push-relative`, merge, sync de código e `align-remote-mtimes` (não em `--repair-mtimes`, só local).
+Disparado em `--startup`, `--push-relative`, `--pull-if-remote-newer`, merge, sync de código e `align-remote-mtimes` (não em `--repair-mtimes`, só local).
 
 1. `probe_host_ssh` no PVE (`axis.local.env`).
 2. Se falhar → `wake_axis.py` (SSH no Pi → `POST /axis/wake`).
@@ -41,12 +41,16 @@ Pré-requisitos: Pi na LAN, `raspberry-home-hub/.raspberry-access.local.json`, m
 
 ## Eventos durante o uso
 
+Detalhe do fluxo blur/API em [`docs/agent-memory/axis-data-live-sync.md`](agent-memory/axis-data-live-sync.md).
+
 | Evento | Ação |
 |--------|------|
-| API grava JSON em `data/` (históricos, settings, tabelas) | Push unidirecional **só daquele arquivo** |
-| `POST /api/pdf` (impressão) | Push do par `.pdf` + `.json` em `output/` e `export/orcamentos.sqlite` |
+| API lê/grava JSON em `data/` (históricos, settings, Unimed N, tecnologias) | Antes da leitura: **pull** se o Axis estiver mais novo (`--pull-if-remote-newer`). Após gravar: **reconcilia** aquele arquivo (`--push-relative` → `sync_one_relative`; mesmas regras de mtime do merge; não é push cego). |
+| `POST /api/pdf` (impressão) | Reconciliação do par `.pdf` + `.json` em `output/` e `export/orcamentos.sqlite` |
 
-Toasts: verde (ok), vermelho (Axis offline / falha), amarelo (conflito manual). O `axis-sync.js` define `PYTHONIOENCODING=utf-8` no subprocesso Python (acentos no Windows).
+Ordem típica no blur (ex.: novo paciente no histórico): pull se Axis mais novo → servidor lê JSON atualizado → grava com o novo item → fila reconcilia o mesmo arquivo.
+
+Toasts: verde (ok), vermelho (Axis offline / falha), amarelo (conflito manual). Mensagens de pull: `Atualizado do Axis: …`. O `axis-sync.js` define `PYTHONIOENCODING=utf-8` no subprocesso Python (acentos no Windows).
 
 ## Manual (sem abrir o app)
 
@@ -54,6 +58,7 @@ A partir do `local-atlas`:
 
 ```powershell
 py -3 .\axis\scripts\sync_auto_orcamento.py --startup
+py -3 .\axis\scripts\sync_auto_orcamento.py --pull-if-remote-newer data/pacientes.json
 py -3 .\axis\scripts\sync_auto_orcamento.py --push-relative data/pacientes.json
 py -3 .\axis\scripts\push_axis_data.py --only auto-orcamento
 py -3 .\axis\scripts\deploy_auto_orcamento.py

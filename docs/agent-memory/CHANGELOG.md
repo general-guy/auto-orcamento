@@ -1,5 +1,6 @@
 # Agent memory — changelog
 
+- 2026-10-26: Sync `data/` na sessão — pull `--pull-if-remote-newer` antes de ler APIs; `--push-relative` reconcilia (`sync_one_relative` no local-atlas); memória `axis-data-live-sync.md`; docs e skill `ct100-auto-orcamento` alinhados.
 - 2026-10-25: CT 100 — Node 22 + `experimental-sqlite`; SQLite só em axis-data `export/`; `export-sqlite.js` sem entrega dados-clinica no bind; unit sem `AUTO_ORCAMENTO_DELIVER_SQLITE`; docs `export-sqlite.md`, `axis-ct100.md`.
 - 2026-10-25: Stub `axis-sync-ui.md` + índice README; skills `ct100-webapps` / `ct100-auto-orcamento` alinhados ao fluxo wake + UI.
 - 2026-10-25: UI sync — histórico na toolbar do preview; toasts flutuantes; wake sem erro duplicado (`axis-sync.js`); textos `ensure_axis_online` e `DISMISS_WAKE_MS` — `sync-toasts.js`, `axis-sync-sessions.md`.
