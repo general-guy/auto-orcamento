@@ -287,6 +287,17 @@ function createAxisSync({ bindHost, dataDir }) {
     return `data/${rel.replace(/\\/g, "/")}`;
   }
 
+  function schedulePullDataFileIfRemoteNewer(filePath) {
+    if (!enabled || !filePath) {
+      return;
+    }
+    const relative = dataRelativePath(filePath);
+    if (!relative) {
+      return;
+    }
+    void enqueue("pull", ["--pull-if-remote-newer", relative]);
+  }
+
   function pullDataFileIfRemoteNewer(filePath) {
     if (!enabled) {
       return Promise.resolve();
@@ -371,6 +382,7 @@ function createAxisSync({ bindHost, dataDir }) {
     scheduleStartupWhenUiReady,
     enqueuePushRelative,
     enqueuePullIfRemoteNewer,
+    schedulePullDataFileIfRemoteNewer,
     pullDataFileIfRemoteNewer,
     afterDataFileWrite,
     afterPdfExport,

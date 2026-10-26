@@ -147,9 +147,14 @@ function ensureDataFile() {
   }
 }
 
-function pullCatalog(filePath) {
-  return axisSync.pullDataFileIfRemoteNewer(filePath);
-}
+const catalogPullFns = {
+  schedulePull(filePath) {
+    axisSync.schedulePullDataFileIfRemoteNewer(filePath);
+  },
+  pullBeforeWrite(filePath) {
+    return axisSync.pullDataFileIfRemoteNewer(filePath);
+  },
+};
 
 async function afterCatalogWrite(filePath) {
   axisSync.afterDataFileWrite(filePath);
@@ -565,7 +570,7 @@ async function handleOpenSnapshot(request, response) {
 
 async function handleCatalogRoute(request, response, filePath, optionKey) {
   ensureDataFile();
-  await handleCatalogApi(request, response, filePath, pullCatalog, afterCatalogWrite, catalogApiOptions[optionKey]);
+  await handleCatalogApi(request, response, filePath, catalogPullFns, afterCatalogWrite, catalogApiOptions[optionKey]);
 }
 
 function isPathInsideDir(filePath, dir) {

@@ -216,11 +216,24 @@
     };
   }
 
+  function connectWhenIdle() {
+    const run = () => connect();
+    if (typeof window.requestIdleCallback === "function") {
+      window.requestIdleCallback(run, { timeout: 2500 });
+    } else {
+      window.setTimeout(run, 100);
+    }
+  }
+
   window.AutoOrcamentoSyncUi = {
     showToast,
     ensureContainer,
+    connect,
   };
 
-  // defer no fim do body: conectar SSE antes de app.js disparar GETs com pull.
-  connect();
+  if (document.readyState === "complete") {
+    connectWhenIdle();
+  } else {
+    window.addEventListener("load", connectWhenIdle, { once: true });
+  }
 })();

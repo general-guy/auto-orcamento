@@ -12,7 +12,8 @@ No **Axis**, blur só gravava em `/data/auto-orcamento/` (axis-data); o espelho 
 
 | Etapa | Onde | O quê |
 |-------|------|--------|
-| Leitura (GET / POST / DELETE que lê antes de gravar) | Atlas: `server/server.js` → catálogos / `writeSettings` | `axisSync.pullDataFileIfRemoteNewer` → Python `--pull-if-remote-newer data/…` |
+| Leitura GET (catálogos) | `catalog-http.js` | Responde do disco local; `schedulePullDataFileIfRemoteNewer` enfileira pull em **segundo plano** (não bloqueia a UI) |
+| Leitura antes de gravar (POST / PUT / DELETE) | Atlas: catálogos / `writeSettings` | `pullDataFileIfRemoteNewer` **aguarda** o pull antes de ler/gravar |
 | Gravação | Atlas: `C:\auto-orcamento\data\`; Axis: bind `/data/auto-orcamento/data/` | Disco local em cada host |
 | Pós-gravação (Atlas) | `axisSync.afterDataFileWrite` | Python `--push-relative` = **reconciliação** (`sync_one_relative` / `sync_catalog_v2.py`) |
 | Pós-gravação (Axis) | `server/atlas-notify.js` | `POST` ao Atlas → `POST /api/sync/notify` → fila `--pull-if-remote-newer` no caminho informado |
@@ -25,7 +26,7 @@ Para `data/` e `export/`, mtime = `st_mtime` real. `output/` segue data do docum
 
 `server/axis-sync.js` serializa subprocessos Python; `enqueue` retorna Promise para o servidor **aguardar** o pull antes de ler o JSON. Push/reconcile após gravar continua assíncrono na fila (não bloqueia a resposta HTTP além do pull na leitura).
 
-O `--startup` usa `enqueueAhead` para rodar **antes** de pulls já enfileirados (notify do Axis + GET de catálogo ao abrir a UI). O `web/sync-toasts.js` abre o SSE assim que o script carrega (`defer`), antes do `app.js` disparar os GETs — senão o merge podia terminar sem cliente e os toasts não apareciam. Detalhe UI: [`axis-sync-ui.md`](axis-sync-ui.md).
+O `--startup` usa `enqueueAhead` na fila Python. GET de catálogo **não** espera o pull (só enfileira). O SSE/toasts ligam após a página carregar (`sync-toasts.js`). Detalhe UI: [`axis-sync-ui.md`](axis-sync-ui.md).
 
 Tarefas no log: `pull`, `push`, `startup` — ver [`axis-sync-sessions.md`](axis-sync-sessions.md).
 

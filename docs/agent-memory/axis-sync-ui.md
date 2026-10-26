@@ -7,7 +7,7 @@ Só em `127.0.0.1` / `localhost` (mesma regra do `axis-sync.js`).
 | Peça | Arquivo |
 |------|---------|
 | Fila + SSE | `server/axis-sync.js` — `--startup` após o **primeiro** cliente SSE (fallback 90 s); `enqueueAhead` faz o startup **passar na frente** de pulls já enfileirados; replay de toasts (3 min); fila awaitable (`pull` / `push`) |
-| Toasts ao vivo | `web/sync-toasts.js` — `EventSource` `/api/sync/events` logo ao carregar o script (antes dos GETs de histórico); `position: fixed` (não empurra o preview) |
+| Toasts ao vivo | `web/sync-toasts.js` — `EventSource` após `window.load` + `requestIdleCallback` (sync não atrasa a UI); `position: fixed` (não empurra o preview) |
 | Histórico (10) | Mesmo script — botão na `preview-toolbar` (à direita de “Documento Final”); painel com horário `HH:MM:SS` |
 
 ## Wake na UI

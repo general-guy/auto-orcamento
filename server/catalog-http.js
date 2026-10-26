@@ -9,8 +9,7 @@ const {
   replaceActiveOrder,
 } = require("./catalog-v2");
 
-async function readCatalogFresh(filePath, pullFn) {
-  await pullFn(filePath);
+function readCatalogLocal(filePath) {
   if (!fs.existsSync(filePath)) {
     return readCatalogFile(filePath);
   }
@@ -31,12 +30,19 @@ async function readCatalogFresh(filePath, pullFn) {
   return readCatalogFile(filePath);
 }
 
+async function readCatalogFresh(filePath, pullFn) {
+  await pullFn(filePath);
+  return readCatalogLocal(filePath);
+}
+
 async function writeCatalog(filePath, doc, afterWrite) {
   writeCatalogFile(filePath, doc);
   return afterWrite(filePath);
 }
 
-async function handleCatalogApi(request, response, filePath, pullFn, afterWrite, options) {
+async function handleCatalogApi(request, response, filePath, pullFns, afterWrite, options) {
+  const schedulePull = pullFns?.schedulePull || (() => {});
+  const pullBeforeWrite = pullFns?.pullBeforeWrite || (async () => {});
   const {
     invalidLabelError = "Informe um valor válido.",
     listError = "Informe uma lista válida.",
@@ -44,7 +50,8 @@ async function handleCatalogApi(request, response, filePath, pullFn, afterWrite,
   } = options;
 
   if (request.method === "GET") {
-    const doc = await readCatalogFresh(filePath, pullFn);
+    schedulePull(filePath);
+    const doc = readCatalogLocal(filePath);
     response.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
     response.end(JSON.stringify(toApiPayload(doc)));
     return;
@@ -53,7 +60,7 @@ async function handleCatalogApi(request, response, filePath, pullFn, afterWrite,
   if (request.method === "PUT") {
     const body = await collectRequestBody(request);
     const { items } = JSON.parse(body || "{}");
-    const doc = await readCatalogFresh(filePath, pullFn);
+    const doc = await readCatalogFresh(filePath, pullBeforeWrite);
     const { doc: next, error } = replaceActiveOrder(doc, items, Date.now(), listError);
 
     if (error) {
@@ -91,7 +98,7 @@ async function handleCatalogApi(request, response, filePath, pullFn, afterWrite,
       return;
     }
 
-    const doc = await readCatalogFresh(filePath, pullFn);
+    const doc = await readCatalogFresh(filePath, pullBeforeWrite);
     const upsertPayload = { id: id || undefined, label };
     if (valued || valor) {
       upsertPayload.valor = valor;
@@ -125,7 +132,7 @@ async function handleCatalogApi(request, response, filePath, pullFn, afterWrite,
           ? payload.nome.trim()
           : "";
 
-    const doc = await readCatalogFresh(filePath, pullFn);
+    const doc = await readCatalogFresh(filePath, pullBeforeWrite);
     const { doc: next } = deleteEntry(doc, { id: id || undefined, value: value || undefined });
     const atlasNotify = await writeCatalog(filePath, next, afterWrite);
     const responseBody = toApiPayload(next);
