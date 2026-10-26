@@ -18,7 +18,7 @@ Plugins esperados: **Context7**, **Continual Learning**, **Cursor Team Kit**, **
 
 Memória persistente do agente: [`AGENTS.md`](../AGENTS.md) na raiz; temas em [`docs/agent-memory/README.md`](agent-memory/README.md).
 
-Skills globais CT100 (`ct100-webapps`, `ct100-auto-orcamento`): em `~/.cursor/skills/` — pai coordena infra; filho cobre sync/wake/notify/UI (`ensure_axis_online.py`, `sync_one_relative`, `atlas-notify.js`, `install_atlas_notify_env.py`, `web/sync-toasts.js`). Runbooks: [`atlas-axis-sync.md`](atlas-axis-sync.md), [`agent-memory/axis-data-live-sync.md`](agent-memory/axis-data-live-sync.md), [`agent-memory/atlas-notify.md`](agent-memory/atlas-notify.md), [`agent-memory/axis-sync-ui.md`](agent-memory/axis-sync-ui.md).
+Skills globais CT100 (`ct100-webapps`, `ct100-auto-orcamento`): em `~/.cursor/skills/` (LEARNINGS + SKILL) — pai coordena infra; filho cobre sync/wake/notify/UI (`enqueueAhead`, `schedulePullDataFileIfRemoteNewer`, `atlas-notify.js`, SSE após `load`). Runbooks no repo: [`atlas-axis-sync.md`](atlas-axis-sync.md), [`agent-memory/axis-data-live-sync.md`](agent-memory/axis-data-live-sync.md), [`agent-memory/atlas-notify.md`](agent-memory/atlas-notify.md), [`agent-memory/axis-sync-ui.md`](agent-memory/axis-sync-ui.md).
 
 ## Context7
 
