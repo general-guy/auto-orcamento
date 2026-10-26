@@ -1,5 +1,6 @@
 # Agent memory — changelog
 
+- 2026-10-26: Notify — URL LAN + listener `0.0.0.0:3010` (CT sem Tailscale); toast e `axis-data-live-sync.md` / `atlas-notify.md`; `install_atlas_notify_env.py` no local-atlas.
 - 2026-10-26: `docs/cursor-plugins.md` — skills CT100 alinhados a UI-first + sync em background (runbooks em agent-memory).
 - 2026-10-26: Catálogo v2 — campo `checked` em `pagamentos` / `observacoes` / `extras` (listas rápidas persistem marcação); doc `data-schema-v2.md` (mtime item vs arquivo, tombstones); README + ARCHITECTURE; `axis-data-live-sync.md` (merge v2 por id).
 - 2026-10-26: Abertura Atlas — GET de catálogo lê disco local e pull em background (`schedulePullDataFileIfRemoteNewer`); SSE após `load`; blur/PUT continuam com pull await.

@@ -98,7 +98,8 @@ function toAtlasNotifyPayload(result) {
   if (result.status === "atlas_offline") {
     return {
       level: "warn",
-      message: "Auto-orçamento desligado no Atlas; merge na próxima abertura.",
+      message:
+        "Atlas inacessível para notify (rede ou app fechado); merge na próxima abertura do .bat.",
     };
   }
   return undefined;

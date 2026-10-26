@@ -9,17 +9,17 @@ Complemento a [`axis-data-live-sync.md`](axis-data-live-sync.md). O **CT** não 
 3. Atlas valida token e chama `enqueuePullIfRemoteNewer` em `server/axis-sync.js`.
 4. Resposta API no Axis pode incluir `atlasNotify` → toast (`web/api.js`, `AutoOrcamentoSyncUi` em `web/sync-toasts.js`).
 
-Atlas desligado ou inacessível: toast amarelo no Axis; **sem** fila persistente — merge global no próximo `--startup`.
+Notify inacessível (rede, listener, `.bat` fechado): toast amarelo no Axis; **sem** fila persistente — merge global no próximo `--startup`.
 
 ## Configuração (segredos fora do git)
 
 | Onde | Arquivo / variável |
 |------|---------------------|
 | Atlas | `C:\auto-orcamento\config\atlas-notify.env` — carregado por `server/load-local-env.js` ao subir o Node. Modelo: `config/atlas-notify.env.example` no repo. |
-| Atlas (listener) | `AUTO_ORCAMENTO_ATLAS_NOTIFY_BIND_HOST` (IP Tailscale) + `AUTO_ORCAMENTO_ATLAS_NOTIFY_PORT` (padrão `3010`) — só rota `/api/sync/notify`. App principal pode ficar em `127.0.0.1:3000`. |
+| Atlas (listener) | `AUTO_ORCAMENTO_ATLAS_NOTIFY_BIND_HOST` (`0.0.0.0` recomendado) + `AUTO_ORCAMENTO_ATLAS_NOTIFY_PORT` (padrão `3010`) — só rota `/api/sync/notify`. App principal pode ficar em `127.0.0.1:3000`. |
 | Axis (CT) | `/etc/auto-orcamento/atlas-notify.env` — `EnvironmentFile=-…` em `auto-orcamento.service` (local-atlas). |
 | Compartilhado | `AUTO_ORCAMENTO_ATLAS_NOTIFY_TOKEN` (header `X-Auto-Orcamento-Notify-Token` ou `Authorization: Bearer`) |
-| Axis URL | `AUTO_ORCAMENTO_ATLAS_NOTIFY_URL` — ex. `http://<tailscale-atlas>:3010/api/sync/notify` |
+| Axis URL | `AUTO_ORCAMENTO_ATLAS_NOTIFY_URL` — ex. `http://192.168.68.200:3010/api/sync/notify` (CT 100 sem `tailscale up`) |
 
 Instalar ou reenviar token ao CT (reutiliza token do Windows se o arquivo já existir):
 
@@ -27,7 +27,7 @@ Instalar ou reenviar token ao CT (reutiliza token do Windows se o arquivo já ex
 py -3 .\axis\scripts\install_atlas_notify_env.py
 ```
 
-(clone `local-atlas`; argumentos opcionais: IP Tailscale do Atlas, porta.)
+(clone `local-atlas`; argumentos opcionais: IP LAN do Atlas, porta — padrão `192.168.68.200` e `3010`.)
 
 Alternativa: Tailscale Serve no Atlas para `127.0.0.1:3000` e URL `…/api/sync/notify` na porta 3000 (expõe o app inteiro na tailnet).
 

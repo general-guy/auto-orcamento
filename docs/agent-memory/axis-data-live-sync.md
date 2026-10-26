@@ -42,13 +42,13 @@ Arquivos com `schemaVersion: 2` em `data/` (oito catálogos de histórico — ve
 
 ## Aviso Axis → Atlas (sessão aberta no Atlas)
 
-No **CT 100**, após gravar `data/` (blur/API), `settings` ou impressão (`output/` + sqlite), o Node envia `POST` para o Atlas (`AUTO_ORCAMENTO_ATLAS_NOTIFY_URL`) com token compartilhado. O Atlas enfileira `--pull-if-remote-newer` só para o(s) caminho(s) informado(s). Toast no Axis: verde se entregue, amarelo se o app no Atlas estiver desligado ou inacessível (sem fila persistente; merge global no próximo `--startup`).
+No **CT 100**, após gravar `data/` (blur/API), `settings` ou impressão (`output/` + sqlite), o Node envia `POST` para o Atlas (`AUTO_ORCAMENTO_ATLAS_NOTIFY_URL`) com token compartilhado. O Atlas enfileira `--pull-if-remote-newer` só para o(s) caminho(s) informado(s). Toast no Axis: verde se entregue, amarelo se o notify não alcançar o Atlas (rede, listener ou `.bat` fechado; sem fila persistente; merge global no próximo `--startup`).
 
 | Variável | Onde |
 |----------|------|
 | `AUTO_ORCAMENTO_ATLAS_NOTIFY_TOKEN` | Atlas e Axis (mesmo segredo) |
-| `AUTO_ORCAMENTO_ATLAS_NOTIFY_URL` | Axis — ex. `http://<tailscale-atlas>:3010/api/sync/notify` |
-| `AUTO_ORCAMENTO_ATLAS_NOTIFY_BIND_HOST` + `AUTO_ORCAMENTO_ATLAS_NOTIFY_PORT` (opcional, padrão `3010`) | Atlas — listener só do notify na interface Tailscale (app principal pode continuar em `127.0.0.1:3000`) |
+| `AUTO_ORCAMENTO_ATLAS_NOTIFY_URL` | Axis — ex. `http://192.168.68.200:3010/api/sync/notify` (CT sem Tailscale logado) |
+| `AUTO_ORCAMENTO_ATLAS_NOTIFY_BIND_HOST` + `AUTO_ORCAMENTO_ATLAS_NOTIFY_PORT` (opcional, padrão `3010`) | Atlas — `0.0.0.0` no listener notify (app principal pode continuar em `127.0.0.1:3000`) |
 
 Alternativa: Tailscale Serve no Atlas apontando para `127.0.0.1:3000` e URL `…/api/sync/notify` na porta 3000 (expõe o app inteiro na tailnet).
 
