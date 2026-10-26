@@ -63,6 +63,14 @@
     return String(entry.valor ?? "").trim();
   }
 
+  function catalogEntryChecked(entry) {
+    if (!entry || typeof entry === "string") {
+      return true;
+    }
+
+    return entry.checked !== false;
+  }
+
   function unwrapCatalogItems(data) {
     return Array.isArray(data?.items) ? data.items : [];
   }
@@ -80,6 +88,9 @@
       const valor = catalogValor(entry);
       if (valor) {
         item.valor = valor;
+      }
+      if (typeof entry.checked === "boolean") {
+        item.checked = entry.checked;
       }
       return item;
     });
@@ -340,6 +351,7 @@
     waitForBackend,
     catalogLabel,
     catalogValor,
+    catalogEntryChecked,
     getHistory,
     upsertCatalog,
     removeCatalog,

@@ -44,7 +44,7 @@ Para fluxos com plugins (quando pedir o quê, frases úteis): [`docs/cursor-plug
 - Dependência de PDF: `puppeteer-core` + Chrome/Edge instalado.
 - Snapshot JSON (`schemaVersion: 1`) e botão Abrir existem só na stack Node; Abrir lista só os `.json` de `output/` (sem diálogo nativo do sistema).
 - Espelho SQLite é reconstruído a partir de `output/` na abertura do servidor e após imprimir (também `npm run export:sqlite`); cópia em `C:\auto-orcamento\export\` e entrega para `dados-clinica/import/` **só no Atlas**; no CT 100 o espelho fica só em axis-data `export/`.
-- Históricos em `C:\auto-orcamento\data\` (schema v2 nos oito JSON de catálogo; `settings.json` v1); seed: `seed/data/`; spec `docs/agent-memory/data-schema-v2.md`.
+- Históricos em `C:\auto-orcamento\data\` (schema v2 nos oito JSON de catálogo; `settings.json` v1); `items[].mtime` = epoch ms UTC; tombstones `deleted: true` no sync; `checked` opcional em `pagamentos` / `observacoes` / `extras` (listas rápidas); seed: `seed/data/`; spec `docs/agent-memory/data-schema-v2.md`.
 - Negrito do documento (observações `*texto*` e rótulo `Tempo previsto`) é Gotham Medium (`--document-emphasis-weight: 500`).
 - CT 100: mutável em axis-data (`/data/auto-orcamento/`), código em `/opt/auto-orcamento`. Deploy tar via `deploy_auto_orcamento.py`; sync automático no Atlas reconcilia `C:\auto-orcamento\` e código incremental (`sync_auto_orcamento.py`); wake do host sob demanda no arranque/push do sync.
 - Hospital cujo nome contém Unimed N abre linhas Uni# com valor em R$ (sem multiplicador), histórico em `data/unimed-n.json`.

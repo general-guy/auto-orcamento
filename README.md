@@ -206,7 +206,7 @@ C:\auto-orcamento\data\hospitais.json
 … (históricos, pacientes, settings, tabelas em runtime)
 ```
 
-Históricos (`pacientes`, `cirurgias`, `hospitais`, `pagamentos`, `observacoes`, `extras`, `tecnologias`, `unimed-n`) e `settings.json` existem só no disco ao vivo (`C:\auto-orcamento\data\`); schema dos históricos é **v2** (UUID + label — ver `docs/agent-memory/data-schema-v2.md`). Seed: `seed/data/`. Drag and drop nos dropdowns (⋮⋮) persiste a ordem nos JSON correspondentes.
+Históricos (`pacientes`, `cirurgias`, `hospitais`, `pagamentos`, `observacoes`, `extras`, `tecnologias`, `unimed-n`) e `settings.json` existem só no disco ao vivo (`C:\auto-orcamento\data\`); schema dos históricos é **v2** (UUID + label + `mtime`; opcional `checked` nas listas rápidas de pagamento, observações e extras — ver `docs/agent-memory/data-schema-v2.md`). Seed: `seed/data/`. Drag and drop nos dropdowns (⋮⋮) persiste a ordem nos JSON correspondentes.
 
 Tabelas de referência (seed + cópia ao vivo):
 
@@ -343,7 +343,7 @@ Com duas ou mais cirurgias propostas **nos campos do formulário**, aparece outr
 
 A seção `Extras` é opcional e fica antes de `Pagamento`. Ao marcar o checkbox no título da seção, a lista rápida, os campos adicionais e o bloco correspondente no documento são exibidos e habilitados. Quando desmarcada, o conteúdo da seção fica oculto, o espaçamento vertical é reduzido no painel esquerdo e os extras deixam de aparecer no preview.
 
-No painel esquerdo, `Extras padrão` usa uma lista rápida alimentada por `data/extras.json`, com checkboxes marcados por padrão, botão `×` e drag and drop com persistência da ordem no JSON.
+No painel esquerdo, `Extras padrão` usa uma lista rápida alimentada por `data/extras.json`, com checkboxes marcados por padrão (marcação/desmarcação persiste no JSON como `checked`), botão `×` e drag and drop com persistência da ordem no JSON.
 
 A lista rápida aceita drag and drop para reorganizar os extras. Ao soltar um item em outra posição, a ordem visual, o preview do documento e o arquivo `data/extras.json` são atualizados juntos.
 
@@ -361,7 +361,7 @@ Nos demais campos de texto, `Enter` continua avançando para o próximo campo ha
 
 A seção `Pagamento` reúne somente as formas de pagamento. No painel esquerdo, ela usa campos dinâmicos com botões `+/-`, seguindo o mesmo padrão da seção `Cirurgia`.
 
-Cada forma preenchida pode ser reaproveitada pelo dropdown de histórico, salvo em `data/pagamentos.json`. O dropdown aceita reordenação pelo handle `⋮⋮` (mesmo JSON da lista rápida). As entradas salvas também aparecem como uma lista rápida acima do campo manual, com checkboxes marcados por padrão e botão de exclusão integrado ao histórico.
+Cada forma preenchida pode ser reaproveitada pelo dropdown de histórico, salvo em `data/pagamentos.json`. O dropdown aceita reordenação pelo handle `⋮⋮` (mesmo JSON da lista rápida). As entradas salvas também aparecem como uma lista rápida acima do campo manual, com checkboxes marcados por padrão (estado `checked` persiste entre sessões) e botão de exclusão integrado ao histórico.
 
 A lista rápida aceita drag and drop para reorganizar as formas de pagamento. Ao soltar um item em outra posição, a ordem visual, o preview do documento e o arquivo `data/pagamentos.json` são atualizados juntos.
 
@@ -369,7 +369,7 @@ No documento final, as formas de pagamento preenchidas aparecem como parágrafos
 
 ## Observações
 
-A seção `Observações` usa uma lista rápida de observações padrão alimentada por `data/observacoes.json`. As entradas aparecem com checkboxes marcados por padrão e podem ser removidas do histórico pelo botão `×`.
+A seção `Observações` usa uma lista rápida de observações padrão alimentada por `data/observacoes.json`. As entradas aparecem com checkboxes marcados por padrão (`checked` no catálogo v2), persistem entre aberturas do app e podem ser removidas do histórico pelo botão `×`.
 
 A lista rápida aceita drag and drop para reorganizar as observações. Ao soltar um item em outra posição, a ordem visual, o preview do documento e o arquivo `data/observacoes.json` são atualizados juntos.
 

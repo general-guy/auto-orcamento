@@ -44,21 +44,41 @@ Históricos editados pelo app (blur, dropdown, reorder). Backup legado: [`../../
 | `mtime` | number | Epoch **ms** UTC; atualizar em create, rename, delete, reorder |
 | `deleted` | boolean | Opcional; default `false`. `true` = tombstone (fora do GET/API ativa) |
 | `valor` | string | Opcional; tecnologias e Unimed N (moeda como digitado na UI) |
+| `checked` | boolean | Opcional; listas rápidas com checkbox em `pagamentos.json`, `observacoes.json`, `extras.json`. Ausente = tratado como `true` na UI; `false` persiste desmarcado entre sessões |
 
 **Limite:** até **200** entradas ativas (`deleted !== true`). Tombstones não contam para o limite de exibição.
 
 **API GET** (todas as rotas `/api/{store}` acima): `{ schemaVersion: 2, items: CatalogEntry[] }` só com itens ativos.
 
-**POST** aceita `{ value }` (label), `{ id, label }` (upsert/rename), ou `{ nome, valor }` (tecnologias / Unimed N — `nome` mapeia para `label`).
+**POST** aceita `{ value }` (label), `{ id, label }` (upsert/rename), `{ id, label, checked }` (marcação das listas rápidas), ou `{ nome, valor }` (tecnologias / Unimed N — `nome` mapeia para `label`).
 
-**mtime do arquivo no sync:** `max(items[].mtime)` (ver merge no Python).
+**PUT** `{ items: [{ id, label, checked? }] }` preserva `checked` por id ao reordenar (`pagamentos`, `observacoes`, `extras`).
+
+## `mtime` — item vs arquivo
+
+| Camada | Onde | Significado |
+|--------|------|-------------|
+| **Item** | `items[].mtime` | Epoch **ms** UTC (`Date.now()` no Node ao criar, renomear, apagar, reordenar). Usado no **merge por UUID** (lado com `mtime` maior vence; slop 1 s). Não há ano fixo no código — só números. |
+| **Arquivo** | `st_mtime` do `.json` no disco | Hora da última gravação (`writeFileSync`). No reconcile v2 (`sync_catalog_v2.py`, local-atlas), pode ser ajustado com `utime` para `max(items[].mtime) / 1000` s, alinhando merge **por arquivo** Atlas↔Axis. |
+
+## Tombstones (`deleted: true`)
+
+Entradas apagadas **permanecem** no JSON com `deleted: true` (não são removidas do array). Motivo: no sync bidirecional, se o id sumisse de um lado, o merge reintroduziria a entrada ativa do outro. Tombstone + `mtime` propagam o delete. GET/API listam só itens ativos; tombstones não contam no limite de 200.
+
+## Listas rápidas (`checked`)
+
+Só em **`pagamentos.json`**, **`observacoes.json`** e **`extras.json`**: checkboxes da lista rápida (Extras padrão, Pagamento, Observações padrão).
+
+- Ausente no JSON → UI trata como **marcado** (comportamento legado).
+- `checked: false` → desmarcado na próxima abertura do app (persistido no catálogo, sync incluído).
+- Toggle na UI → `POST` com `id`, `label` e `checked`; não altera o snapshot JSON do orçamento (`schemaVersion: 1`), que continua guardando o estado do formulário por arquivo em `output/`.
 
 ## Código
 
 | Camada | Módulo |
 |--------|--------|
 | Node | `server/catalog-v2.js`, `server/catalog-http.js`, rotas em `server/server.js` |
-| Web | `web/api.js` (`unwrapCatalogItems`, `upsertCatalog`), `web/app.js` (`dataset.entryId`, blur) |
+| Web | `web/api.js` (`catalogEntryChecked`, `upsertCatalog`, `toCatalogPutItems`), `web/app.js` (blur, listas rápidas `checked`, reorder com id) |
 | Sync | `local-atlas/axis/scripts/sync_catalog_v2.py` — push/pull unitário dos oito JSON |
 | Migração | `node scripts/migrate-data-catalogs-v2.js` (todos os catálogos); `migrate-pacientes-schema-v2.js` mantido como alias do piloto |
 

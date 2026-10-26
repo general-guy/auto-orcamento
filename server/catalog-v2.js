@@ -123,6 +123,9 @@ function sanitizeEntry(entry) {
     mtime: Number(entry.mtime) || Date.now(),
     ...(entry.deleted ? { deleted: true } : {}),
   };
+  if (typeof entry.checked === "boolean") {
+    payload.checked = entry.checked;
+  }
   const valor = typeof entry.valor === "string" ? entry.valor.trim() : "";
   if (valor) {
     payload.valor = valor;
@@ -142,7 +145,7 @@ function catalogFileMtimeMs(doc) {
   return times.length ? Math.max(...times) : Date.now();
 }
 
-function createEntry(label, mtime = Date.now(), valor = "") {
+function createEntry(label, mtime = Date.now(), valor = "", checked = undefined) {
   const trimmed = String(label || "").trim();
   if (!trimmed) {
     return null;
@@ -153,6 +156,9 @@ function createEntry(label, mtime = Date.now(), valor = "") {
     mtime,
     deleted: false,
   };
+  if (typeof checked === "boolean") {
+    entry.checked = checked;
+  }
   const amount = typeof valor === "string" ? valor.trim() : "";
   if (amount) {
     entry.valor = amount;
@@ -160,7 +166,15 @@ function createEntry(label, mtime = Date.now(), valor = "") {
   return entry;
 }
 
-function upsertEntry(doc, { id, label, valor }, mtime = Date.now(), invalidLabelError = "Informe um valor válido.") {
+function applyCheckedField(entry, checked) {
+  if (typeof checked !== "boolean") {
+    return entry;
+  }
+
+  return { ...entry, checked };
+}
+
+function upsertEntry(doc, { id, label, valor, checked }, mtime = Date.now(), invalidLabelError = "Informe um valor válido.") {
   const trimmed = String(label || "").trim();
   if (!trimmed) {
     return { doc, error: invalidLabelError };
@@ -176,7 +190,7 @@ function upsertEntry(doc, { id, label, valor }, mtime = Date.now(), invalidLabel
     if (index === -1) {
       return { doc, error: "Item não encontrado." };
     }
-    const next = { ...items[index], label: trimmed, mtime, deleted: false };
+    let next = { ...items[index], label: trimmed, mtime, deleted: false };
     if (amount !== undefined) {
       if (amount) {
         next.valor = amount;
@@ -184,6 +198,7 @@ function upsertEntry(doc, { id, label, valor }, mtime = Date.now(), invalidLabel
         delete next.valor;
       }
     }
+    next = applyCheckedField(next, checked);
     items[index] = next;
     return { doc: { schemaVersion: SCHEMA_VERSION, items } };
   }
@@ -191,7 +206,7 @@ function upsertEntry(doc, { id, label, valor }, mtime = Date.now(), invalidLabel
   const duplicate = active.find((entry) => normalizeText(entry.label) === normalizeText(trimmed));
   if (duplicate) {
     const index = items.findIndex((entry) => entry.id === duplicate.id);
-    const next = { ...items[index], mtime, deleted: false };
+    let next = { ...items[index], mtime, deleted: false };
     if (amount !== undefined) {
       if (amount) {
         next.valor = amount;
@@ -199,11 +214,12 @@ function upsertEntry(doc, { id, label, valor }, mtime = Date.now(), invalidLabel
         delete next.valor;
       }
     }
+    next = applyCheckedField(next, checked);
     items[index] = next;
     return { doc: { schemaVersion: SCHEMA_VERSION, items } };
   }
 
-  const created = createEntry(trimmed, mtime, amount || "");
+  const created = createEntry(trimmed, mtime, amount || "", checked);
   active = [created, ...active].slice(0, MAX_ACTIVE);
   const activeIds = new Set(active.map((entry) => entry.id));
   const keptTomb = tomb.filter((entry) => !activeIds.has(entry.id));
@@ -251,7 +267,7 @@ function replaceActiveOrder(doc, nextActive, mtime = Date.now(), listError = "In
     if (!existing || existing.deleted === true) {
       continue;
     }
-    const next = {
+    let next = {
       id,
       label,
       mtime,
@@ -265,6 +281,11 @@ function replaceActiveOrder(doc, nextActive, mtime = Date.now(), listError = "In
           : "";
     if (valor) {
       next.valor = valor;
+    }
+    if (typeof raw?.checked === "boolean") {
+      next.checked = raw.checked;
+    } else if (typeof existing.checked === "boolean") {
+      next.checked = existing.checked;
     }
     ordered.push(next);
     if (ordered.length >= MAX_ACTIVE) {

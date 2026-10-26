@@ -71,21 +71,18 @@ let surgeryDropdownSuppressClick = false;
 let paymentHistory = [];
 let activePaymentInput = null;
 let isInteractingWithPaymentDropdown = false;
-let deselectedPaymentQuickItems = new Set();
 let paymentDragState = null;
 let paymentDropdownDragState = null;
 let paymentDropdownSuppressClick = false;
 let extrasHistory = [];
 let activeExtrasInput = null;
 let isInteractingWithExtrasDropdown = false;
-let deselectedExtrasQuickItems = new Set();
 let extrasDragState = null;
 let extrasDropdownDragState = null;
 let extrasDropdownSuppressClick = false;
 let guidanceHistory = [];
 let activeGuidanceInput = null;
 let isInteractingWithGuidanceDropdown = false;
-let deselectedGuidanceQuickItems = new Set();
 let guidanceDragState = null;
 let guidanceDropdownDragState = null;
 let guidanceDropdownSuppressClick = false;
@@ -99,6 +96,33 @@ let patientHistory = [];
 
 function catalogLabel(entry) {
   return AppApi.catalogLabel(entry);
+}
+
+function catalogEntryChecked(entry) {
+  return AppApi.catalogEntryChecked(entry);
+}
+
+function reorderCatalogHistory(history, orderedLabels) {
+  const byLabel = new Map(history.map((entry) => [normalizeText(catalogLabel(entry)), entry]));
+
+  return orderedLabels
+    .map((label) => byLabel.get(normalizeText(label)))
+    .filter(Boolean);
+}
+
+async function persistQuickListChecked(store, entry, checked, onUpdated) {
+  const entryId = entry?.id;
+  const label = catalogLabel(entry);
+  if (!entryId || !label) {
+    return;
+  }
+
+  try {
+    const next = await AppApi.upsertCatalog(store, { id: entryId, label, checked });
+    onUpdated?.(next);
+  } catch {
+    console.warn(`Não foi possível salvar marcação em ${store}.`);
+  }
 }
 
 function patientEntryLabel(entry) {
@@ -1803,8 +1827,6 @@ async function savePaymentToHistory(value, sourceInput = null) {
 }
 
 async function deletePaymentFromHistory(value, entryId = "") {
-  const deletedKey = normalizeText(value);
-  deselectedPaymentQuickItems.delete(deletedKey);
   paymentHistory = await deleteLabelCatalogEntry({
     store: "pagamentos",
     history: paymentHistory,
@@ -1835,8 +1857,6 @@ async function saveGuidanceToHistory(value, sourceInput = null) {
 }
 
 async function deleteGuidanceFromHistory(value, entryId = "") {
-  const deletedKey = normalizeText(value);
-  deselectedGuidanceQuickItems.delete(deletedKey);
   guidanceHistory = await deleteLabelCatalogEntry({
     store: "observacoes",
     history: guidanceHistory,
@@ -1867,8 +1887,6 @@ async function saveExtrasToHistory(value, sourceInput = null) {
 }
 
 async function deleteExtrasFromHistory(value, entryId = "") {
-  const deletedKey = normalizeText(value);
-  deselectedExtrasQuickItems.delete(deletedKey);
   extrasHistory = await deleteLabelCatalogEntry({
     store: "extras",
     history: extrasHistory,
@@ -2471,6 +2489,9 @@ function renderPaymentQuickList() {
     const row = document.createElement("label");
     row.className = "payment-quick-option";
     row.dataset.value = optionText;
+    if (entry.id) {
+      row.dataset.entryId = entry.id;
+    }
 
     const optionLabel = document.createElement("span");
     optionLabel.textContent = optionText;
@@ -2479,7 +2500,7 @@ function renderPaymentQuickList() {
     checkbox.type = "checkbox";
     checkbox.name = "paymentQuickItems";
     checkbox.value = optionText;
-    checkbox.checked = !deselectedPaymentQuickItems.has(normalizeText(optionText));
+    checkbox.checked = catalogEntryChecked(entry);
 
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
@@ -2533,6 +2554,9 @@ function renderGuidanceQuickList() {
     const row = document.createElement("label");
     row.className = "quick-option";
     row.dataset.value = optionText;
+    if (entry.id) {
+      row.dataset.entryId = entry.id;
+    }
 
     const optionLabel = document.createElement("span");
     optionLabel.textContent = optionText;
@@ -2541,7 +2565,7 @@ function renderGuidanceQuickList() {
     checkbox.type = "checkbox";
     checkbox.name = "guidanceQuickItems";
     checkbox.value = optionText;
-    checkbox.checked = !deselectedGuidanceQuickItems.has(normalizeText(optionText));
+    checkbox.checked = catalogEntryChecked(entry);
 
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
@@ -2595,6 +2619,9 @@ function renderExtrasQuickList() {
     const row = document.createElement("label");
     row.className = "extras-quick-option";
     row.dataset.value = optionText;
+    if (entry.id) {
+      row.dataset.entryId = entry.id;
+    }
 
     const optionLabel = document.createElement("span");
     optionLabel.textContent = optionText;
@@ -2603,7 +2630,7 @@ function renderExtrasQuickList() {
     checkbox.type = "checkbox";
     checkbox.name = "extrasQuickItems";
     checkbox.value = optionText;
-    checkbox.checked = !deselectedExtrasQuickItems.has(normalizeText(optionText));
+    checkbox.checked = catalogEntryChecked(entry);
 
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
@@ -2685,9 +2712,10 @@ function endPaymentQuickDrag({ shouldCommit = true } = {}) {
     return;
   }
 
-  const nextHistory = getPaymentQuickRows()
-    .map((item) => item.dataset.value)
-    .filter(Boolean);
+  const nextHistory = reorderCatalogHistory(
+    paymentHistory,
+    getPaymentQuickRows().map((item) => item.dataset.value).filter(Boolean),
+  );
 
   paymentHistory = nextHistory;
   updatePaymentHistoryDropdown(activePaymentInput?.value || "");
@@ -2931,9 +2959,10 @@ function endGuidanceQuickDrag({ shouldCommit = true } = {}) {
     return;
   }
 
-  const nextHistory = getGuidanceQuickRows()
-    .map((item) => item.dataset.value)
-    .filter(Boolean);
+  const nextHistory = reorderCatalogHistory(
+    guidanceHistory,
+    getGuidanceQuickRows().map((item) => item.dataset.value).filter(Boolean),
+  );
 
   guidanceHistory = nextHistory;
   updateGuidanceHistoryDropdown(activeGuidanceInput?.value || "");
@@ -3027,9 +3056,10 @@ function endExtrasQuickDrag({ shouldCommit = true } = {}) {
     return;
   }
 
-  const nextHistory = getExtrasQuickRows()
-    .map((item) => item.dataset.value)
-    .filter(Boolean);
+  const nextHistory = reorderCatalogHistory(
+    extrasHistory,
+    getExtrasQuickRows().map((item) => item.dataset.value).filter(Boolean),
+  );
 
   extrasHistory = nextHistory;
   updateExtrasHistoryDropdown(activeExtrasInput?.value || "");
@@ -4213,9 +4243,6 @@ function updatePreview() {
 
 function clearForm() {
   form.reset();
-  deselectedPaymentQuickItems = new Set();
-  deselectedExtrasQuickItems = new Set();
-  deselectedGuidanceQuickItems = new Set();
   renderPaymentQuickList();
   renderExtrasQuickList();
   renderGuidanceQuickList();
@@ -4250,12 +4277,15 @@ function ensureDynamicTextFields(getInputs, createField, values) {
   });
 }
 
-function applyQuickListSelection(quickItems, deselectedSet) {
-  deselectedSet.clear();
+function applyQuickListSelection(quickItems, history) {
+  const selection = new Map(
+    (quickItems || []).map((item) => [normalizeText(item.value), Boolean(item.checked)]),
+  );
 
-  (quickItems || []).forEach((item) => {
-    if (!item?.checked) {
-      deselectedSet.add(normalizeText(item.value));
+  history.forEach((entry) => {
+    const key = normalizeText(catalogLabel(entry));
+    if (selection.has(key)) {
+      entry.checked = selection.get(key);
     }
   });
 }
@@ -4364,17 +4394,17 @@ function applyBudgetSnapshot(snapshotForm) {
 
   const extrasBlock = snapshotForm.extras || {};
   extrasEnabledInput.checked = Boolean(extrasBlock.enabled);
-  applyQuickListSelection(extrasBlock.quickItems, deselectedExtrasQuickItems);
+  applyQuickListSelection(extrasBlock.quickItems, extrasHistory);
   renderExtrasQuickList();
   ensureDynamicTextFields(getExtrasInputs, createExtrasField, extrasBlock.additional);
 
   const paymentBlock = snapshotForm.payment || {};
-  applyQuickListSelection(paymentBlock.quickItems, deselectedPaymentQuickItems);
+  applyQuickListSelection(paymentBlock.quickItems, paymentHistory);
   renderPaymentQuickList();
   ensureDynamicTextFields(getPaymentInputs, createPaymentField, paymentBlock.additional);
 
   const guidanceBlock = snapshotForm.guidance || {};
-  applyQuickListSelection(guidanceBlock.quickItems, deselectedGuidanceQuickItems);
+  applyQuickListSelection(guidanceBlock.quickItems, guidanceHistory);
   renderGuidanceQuickList();
   ensureDynamicTextFields(getGuidanceInputs, createGuidanceField, guidanceBlock.additional);
 
@@ -4671,13 +4701,20 @@ paymentQuickList.addEventListener("change", (event) => {
     return;
   }
 
-  const paymentKey = normalizeText(event.target.value);
-  if (event.target.checked) {
-    deselectedPaymentQuickItems.delete(paymentKey);
-  } else {
-    deselectedPaymentQuickItems.add(paymentKey);
+  const row = event.target.closest(".payment-quick-option");
+  const entryId = row?.dataset.entryId || "";
+  const entry = entryId
+    ? paymentHistory.find((item) => item.id === entryId)
+    : paymentHistory.find((item) => normalizeText(catalogLabel(item)) === normalizeText(event.target.value));
+  if (!entry) {
+    return;
   }
 
+  const checked = event.target.checked;
+  entry.checked = checked;
+  void persistQuickListChecked("pagamentos", entry, checked, (next) => {
+    paymentHistory = next;
+  });
   updatePreview();
 });
 extrasQuickList.addEventListener("change", (event) => {
@@ -4685,13 +4722,20 @@ extrasQuickList.addEventListener("change", (event) => {
     return;
   }
 
-  const extraKey = normalizeText(event.target.value);
-  if (event.target.checked) {
-    deselectedExtrasQuickItems.delete(extraKey);
-  } else {
-    deselectedExtrasQuickItems.add(extraKey);
+  const row = event.target.closest(".extras-quick-option");
+  const entryId = row?.dataset.entryId || "";
+  const entry = entryId
+    ? extrasHistory.find((item) => item.id === entryId)
+    : extrasHistory.find((item) => normalizeText(catalogLabel(item)) === normalizeText(event.target.value));
+  if (!entry) {
+    return;
   }
 
+  const checked = event.target.checked;
+  entry.checked = checked;
+  void persistQuickListChecked("extras", entry, checked, (next) => {
+    extrasHistory = next;
+  });
   updatePreview();
 });
 paymentQuickList.addEventListener("pointerdown", (event) => {
@@ -4747,13 +4791,20 @@ guidanceQuickList.addEventListener("change", (event) => {
     return;
   }
 
-  const guidanceKey = normalizeText(event.target.value);
-  if (event.target.checked) {
-    deselectedGuidanceQuickItems.delete(guidanceKey);
-  } else {
-    deselectedGuidanceQuickItems.add(guidanceKey);
+  const row = event.target.closest(".quick-option");
+  const entryId = row?.dataset.entryId || "";
+  const entry = entryId
+    ? guidanceHistory.find((item) => item.id === entryId)
+    : guidanceHistory.find((item) => normalizeText(catalogLabel(item)) === normalizeText(event.target.value));
+  if (!entry) {
+    return;
   }
 
+  const checked = event.target.checked;
+  entry.checked = checked;
+  void persistQuickListChecked("observacoes", entry, checked, (next) => {
+    guidanceHistory = next;
+  });
   updatePreview();
 });
 guidanceQuickList.addEventListener("pointerdown", (event) => {

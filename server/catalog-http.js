@@ -103,6 +103,9 @@ async function handleCatalogApi(request, response, filePath, pullFns, afterWrite
     if (valued || valor) {
       upsertPayload.valor = valor;
     }
+    if (typeof payload.checked === "boolean") {
+      upsertPayload.checked = payload.checked;
+    }
     const { doc: next, error } = upsertEntry(doc, upsertPayload, Date.now(), invalidLabelError);
 
     if (error) {

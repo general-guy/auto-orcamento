@@ -201,9 +201,9 @@ Endpoints principais:
 - `GET /api/cirurgias`, `POST /api/cirurgias`, `DELETE /api/cirurgias`, `PUT /api/cirurgias`: histórico de cirurgias e persistência da ordem manual no dropdown.
 - `GET /api/hospitais`, `POST /api/hospitais`, `DELETE /api/hospitais`, `PUT /api/hospitais`: histórico de hospitais e persistência da ordem manual no dropdown.
 - `GET /api/pacientes`, `POST /api/pacientes`, `DELETE /api/pacientes`, `PUT /api/pacientes`: histórico de pacientes e persistência da ordem manual no dropdown.
-- `GET /api/pagamentos`, `POST /api/pagamentos`, `DELETE /api/pagamentos`, `PUT /api/pagamentos`: histórico de formas de pagamento e persistência da ordem manual.
-- `GET /api/observacoes`, `POST /api/observacoes`, `DELETE /api/observacoes`, `PUT /api/observacoes`: histórico de observações e persistência da ordem manual.
-- `GET /api/extras`, `POST /api/extras`, `DELETE /api/extras`, `PUT /api/extras`: histórico de extras e persistência da ordem manual.
+- `GET /api/pagamentos`, `POST /api/pagamentos`, `DELETE /api/pagamentos`, `PUT /api/pagamentos`: histórico de formas de pagamento, ordem manual e campo v2 opcional `checked` na lista rápida.
+- `GET /api/observacoes`, `POST /api/observacoes`, `DELETE /api/observacoes`, `PUT /api/observacoes`: histórico de observações, ordem manual e `checked` na lista rápida.
+- `GET /api/extras`, `POST /api/extras`, `DELETE /api/extras`, `PUT /api/extras`: histórico de extras, ordem manual e `checked` na lista rápida.
 - `GET /api/tecnologias`, `POST /api/tecnologias`, `DELETE /api/tecnologias`, `PUT /api/tecnologias`: histórico de tecnologias com valor associado e persistência da ordem manual no dropdown.
 - `GET /api/unimed-n`, `POST /api/unimed-n`, `DELETE /api/unimed-n`, `PUT /api/unimed-n`: procedimentos Unimed N (catálogo v2; POST aceita `{ nome, valor }`).
 - `GET /api/settings`, `PUT /api/settings`: preferências locais (zoom; `lastSnapshotDir` para o botão **Abrir**; grava em `data/settings.json`).
@@ -213,7 +213,7 @@ Endpoints principais:
 - `POST /api/pdf`: gera PDF + snapshot JSON em `output/` (mesmo nome base) e, em seguida, reconstrói `export/orcamentos.sqlite` a partir de todos os JSON de `output/` (falha no SQLite não falha a resposta do PDF).
 - `POST /api/shutdown`: encerra o servidor ao fechar a janela (`launcher/native_launcher.py` ou fallback `launcher/launch-app.js`); bloqueado para visitantes remotos; ignorado com `--keep-server`.
 
-**Catálogos v2** (`data/pacientes.json`, `cirurgias.json`, `hospitais.json`, `pagamentos.json`, `observacoes.json`, `extras.json`, `tecnologias.json`, `unimed-n.json`): envelope `{ schemaVersion: 2, items: [{ id, label, mtime, deleted?, valor? }] }`; GET devolve só itens ativos; blur/reorder via `server/catalog-http.js`; merge por UUID no sync Python (`sync_catalog_v2.py`). `settings.json` permanece objeto simples (zoom / `lastSnapshotDir`). Ver [`docs/agent-memory/data-schema-v2.md`](docs/agent-memory/data-schema-v2.md).
+**Catálogos v2** (`data/pacientes.json`, `cirurgias.json`, `hospitais.json`, `pagamentos.json`, `observacoes.json`, `extras.json`, `tecnologias.json`, `unimed-n.json`): envelope `{ schemaVersion: 2, items: [{ id, label, mtime, deleted?, valor?, checked? }] }`; GET devolve só itens ativos; blur/reorder via `server/catalog-http.js`; merge por UUID no sync Python (`sync_catalog_v2.py`). `checked` só nas listas rápidas de pagamento, observações e extras. `settings.json` permanece objeto simples (zoom / `lastSnapshotDir`). Ver [`docs/agent-memory/data-schema-v2.md`](docs/agent-memory/data-schema-v2.md).
 
 ## Frontend
 
@@ -347,7 +347,7 @@ O campo `Valor:` usa a mesma normalização monetária de tecnologias: valores c
 
 A seção `Extras` é controlada por um checkbox no próprio título. Quando o checkbox está desmarcado, o conteúdo do formulário fica oculto, os controles internos são desabilitados, o fieldset recebe `is-collapsed` e a seção não aparece no documento.
 
-Quando habilitada, a seção é alimentada por `data/extras.json` via `/api/extras` e fica antes de `Pagamento` no formulário e no documento. O conteúdo interno usa `#extrasFormContent` com o mesmo `gap` em grid das outras seções opcionais, mantendo o espaçamento entre `Extras padrão`, a lista rápida e `Extras adicionais` alinhado ao de `Pagamento`. No painel, `renderExtrasQuickList()` exibe as entradas salvas como `Extras padrão`, com checkboxes marcados por padrão e botão de exclusão integrado ao histórico.
+Quando habilitada, a seção é alimentada por `data/extras.json` via `/api/extras` e fica antes de `Pagamento` no formulário e no documento. O conteúdo interno usa `#extrasFormContent` com o mesmo `gap` em grid das outras seções opcionais, mantendo o espaçamento entre `Extras padrão`, a lista rápida e `Extras adicionais` alinhado ao de `Pagamento`. No painel, `renderExtrasQuickList()` exibe as entradas salvas como `Extras padrão`, com checkboxes marcados por padrão (`checked` opcional no v2), persistência da marcação no JSON e botão de exclusão integrado ao histórico.
 
 Os `Extras adicionais` usam uma lista dinâmica de inputs com botões `+/-`. Cada input usa dropdown de histórico alimentado pelo mesmo JSON; com duas ou mais opções visíveis, o handle `⋮⋮` reordena o histórico via `PUT /api/extras` (mesmo arquivo da lista rápida).
 
@@ -361,7 +361,7 @@ A seção `Pagamento` mantém apenas as formas de pagamento. O antigo campo `Ite
 
 No formulário, `Pagamento` usa uma lista dinâmica de inputs com botões `+/-`, no mesmo padrão de `Cirurgia`. Cada input usa dropdown de histórico alimentado por `data/pagamentos.json` via `/api/pagamentos`; o dropdown também aceita reordenação pelo handle `⋮⋮` (`PUT /api/pagamentos`).
 
-As entradas salvas em `data/pagamentos.json` também são renderizadas em uma lista rápida acima do campo manual. Cada item vem marcado por padrão, pode ser desmarcado sem sair do histórico e tem um botão de exclusão que remove a entrada via `/api/pagamentos`.
+As entradas salvas em `data/pagamentos.json` também são renderizadas em uma lista rápida acima do campo manual. Cada item vem marcado por padrão (campo opcional `checked` no v2; ausente = marcado), pode ser desmarcado sem sair do histórico — a marcação persiste no JSON via `POST /api/pagamentos` — e tem um botão de exclusão que remove a entrada via `DELETE`.
 
 A lista rápida usa eventos de ponteiro para permitir drag and drop sem interferir nos checkboxes e no botão de exclusão. Durante o arraste, `app.js` mostra uma linha de encaixe entre os itens; ao soltar, reorganiza `paymentHistory`, atualiza o preview e envia a lista completa para `PUT /api/pagamentos`, que normaliza duplicatas e grava a nova ordem em `data/pagamentos.json`.
 
@@ -369,7 +369,7 @@ No preview, as formas de pagamento preenchidas são renderizadas como parágrafo
 
 ## Lógica de Observações
 
-A seção `Observações` é alimentada por `data/observacoes.json` via `/api/observacoes`. No formulário, `renderGuidanceQuickList()` exibe as entradas salvas como `Observações padrão`, com checkboxes marcados por padrão e botão de exclusão integrado ao histórico.
+A seção `Observações` é alimentada por `data/observacoes.json` via `/api/observacoes`. No formulário, `renderGuidanceQuickList()` exibe as entradas salvas como `Observações padrão`, com checkboxes marcados por padrão (`checked` opcional no v2), persistência da marcação no JSON e botão de exclusão integrado ao histórico.
 
 As `Observações adicionais` usam uma lista dinâmica de inputs com botões `+/-`. Cada input usa dropdown de histórico alimentado pelo mesmo JSON; com duas ou mais opções visíveis, o handle `⋮⋮` reordena via `PUT /api/observacoes`.
 

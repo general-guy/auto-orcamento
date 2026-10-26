@@ -102,9 +102,9 @@ npm install && npm start
 | `/api/cirurgias` | GET, POST, DELETE, PUT | POST/DELETE: `{ value }`; PUT: `{ items: string[] }` |
 | `/api/hospitais` | GET, POST, DELETE, PUT | POST/DELETE: `{ value }`; PUT: `{ items: string[] }` |
 | `/api/pacientes` | GET, POST, DELETE, PUT | POST/DELETE: `{ value }`; PUT: `{ items: string[] }` |
-| `/api/pagamentos` | GET, POST, DELETE, PUT | POST/DELETE: `{ value }`; PUT: `{ items: string[] }` |
-| `/api/observacoes` | GET, POST, DELETE, PUT | Idem pagamentos |
-| `/api/extras` | GET, POST, DELETE, PUT | Idem pagamentos |
+| `/api/pagamentos` | GET, POST, DELETE, PUT | v2: GET `{ items: [{ id, label, mtime?, checked? }] }`; POST `{ value }` ou `{ id, label, checked? }`; PUT `{ items: [{ id, label, checked? }] }` |
+| `/api/observacoes` | GET, POST, DELETE, PUT | Idem pagamentos (catálogo v2 + `checked` na lista rápida) |
+| `/api/extras` | GET, POST, DELETE, PUT | Idem pagamentos (catálogo v2 + `checked` na lista rápida) |
 | `/api/tecnologias` | GET, POST, DELETE, PUT | POST/DELETE: `{ nome, valor }`; PUT: `{ items: [{ nome, valor }] }` |
 | `/api/pdf` | POST | `{ patientName, html }` → `{ filename, path }` |
 | `/api/shutdown` | POST | Encerra o servidor |
