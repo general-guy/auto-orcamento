@@ -37,6 +37,10 @@ Sem override no **win32:** `C:\auto-orcamento\data` e `C:\auto-orcamento\output`
 
 `settings.json` em `dataDir` → `zoom`, `lastSnapshotDir` (pasta do **Abrir**/impressão; legado `{repo}/output` remapeado para `outputDir`).
 
+## Backup legado (pré-migração UUID)
+
+Espelho pontual de `dataDir` em `{repo}/backup-legado/pre-uuid-migration/` (gitignored). Script: `scripts/backup-live-data-legado.ps1`. Detalhes: [`../../backup-legado/README.md`](../../backup-legado/README.md). Próximo schema: [`data-uuid-migration.md`](data-uuid-migration.md).
+
 ## Documentação relacionada
 
 - `docs/export-sqlite.md`

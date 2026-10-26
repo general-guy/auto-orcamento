@@ -16,6 +16,8 @@ Este clone no **Atlas** (Geraldo-Server) é o ambiente de desenvolvimento (`abri
 
 Relação, bind, dados e **sync em background** ao abrir o app: [`docs/atlas-axis.md`](docs/atlas-axis.md), [`docs/atlas-axis-sync.md`](docs/atlas-axis-sync.md).
 
+Antes da migração UUID em `data/`, foto do disco ao vivo: [`backup-legado/README.md`](backup-legado/README.md) (`pwsh -File scripts/backup-live-data-legado.ps1`).
+
 ## Estrutura da raiz
 
 Na raiz ficam só os **atalhos de uso** e o **mínimo para o app Node** rodar:

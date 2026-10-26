@@ -5,4 +5,5 @@ dist/
 __pycache__/
 auto-orcamento.exe
 /data/
+/backup-legado/pre-uuid-migration/
 .cursor/hooks/state/
