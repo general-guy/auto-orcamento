@@ -204,6 +204,24 @@ function enqueue(taskName, argv) {
   return task;
 }
 
+/** Roda antes dos jobs já enfileirados (ex.: startup antes de pulls do carregamento da UI). */
+function enqueueAhead(taskName, argv) {
+  const task = runPythonSync(argv, { taskName }).catch((error) => {
+    broadcast({
+      type: "toast",
+      level: "error",
+      message: `${taskName}: ${error.message}`,
+    });
+    return 1;
+  });
+  const tail = queue;
+  queue = task.then(
+    () => tail,
+    () => tail,
+  );
+  return task;
+}
+
 function createAxisSync({ bindHost, dataDir }) {
   const enabled = isSyncEnabled(bindHost);
   syncLogDir = enabled ? resolveAxisSyncLogDir(dataDir) : null;
@@ -213,7 +231,7 @@ function createAxisSync({ bindHost, dataDir }) {
       return;
     }
     startupQueued = true;
-    enqueue("startup", ["--startup"]);
+    enqueueAhead("startup", ["--startup"]);
   }
 
   function scheduleStartupWhenUiReady() {

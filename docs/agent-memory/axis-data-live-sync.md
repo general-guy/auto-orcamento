@@ -25,6 +25,8 @@ Para `data/` e `export/`, mtime = `st_mtime` real. `output/` segue data do docum
 
 `server/axis-sync.js` serializa subprocessos Python; `enqueue` retorna Promise para o servidor **aguardar** o pull antes de ler o JSON. Push/reconcile após gravar continua assíncrono na fila (não bloqueia a resposta HTTP além do pull na leitura).
 
+O `--startup` usa `enqueueAhead` para rodar **antes** de pulls já enfileirados (notify do Axis + GET de catálogo ao abrir a UI). O `web/sync-toasts.js` abre o SSE assim que o script carrega (`defer`), antes do `app.js` disparar os GETs — senão o merge podia terminar sem cliente e os toasts não apareciam. Detalhe UI: [`axis-sync-ui.md`](axis-sync-ui.md).
+
 Tarefas no log: `pull`, `push`, `startup` — ver [`axis-sync-sessions.md`](axis-sync-sessions.md).
 
 ## Motor Python (local-atlas)

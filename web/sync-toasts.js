@@ -221,9 +221,6 @@
     ensureContainer,
   };
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", connect);
-  } else {
-    connect();
-  }
+  // defer no fim do body: conectar SSE antes de app.js disparar GETs com pull.
+  connect();
 })();
