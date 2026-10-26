@@ -1,6 +1,6 @@
 # Agent memory — changelog
 
-- 2026-10-26: Catálogo v2 — campo `checked` em `pagamentos` / `observacoes` / `extras` (listas rápidas persistem marcação); doc `data-schema-v2.md` (mtime item vs arquivo, tombstones); README + ARCHITECTURE.
+- 2026-10-26: Catálogo v2 — campo `checked` em `pagamentos` / `observacoes` / `extras` (listas rápidas persistem marcação); doc `data-schema-v2.md` (mtime item vs arquivo, tombstones); README + ARCHITECTURE; `axis-data-live-sync.md` (merge v2 por id).
 - 2026-10-26: Abertura Atlas — GET de catálogo lê disco local e pull em background (`schedulePullDataFileIfRemoteNewer`); SSE após `load`; blur/PUT continuam com pull await.
 - 2026-10-26: Toasts Atlas — `enqueueAhead` prioriza `--startup` na fila; docs `axis-sync-ui.md`, `axis-data-live-sync.md`.
 - 2026-10-26: Notify Axis → Atlas — `server/atlas-notify.js`, `load-local-env.js`, `install_atlas_notify_env.py`; memória `atlas-notify.md`; skills `ct100-webapps` / `ct100-auto-orcamento` (LEARNINGS + SKILL).

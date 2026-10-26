@@ -38,7 +38,7 @@ Tarefas no log: `pull`, `push`, `startup` — ver [`axis-sync-sessions.md`](axis
 | `--push-relative` | Reconcilia um caminho sob `data/`, `output/` ou `export/` |
 | `--push-force-relative` | SFTP sobrescreve o remoto (sem merge); cutover v2 no Axis (um arquivo por vez) |
 
-Arquivos com `schemaVersion: 2` em `data/` (oito catálogos de histórico — ver [`data-schema-v2.md`](data-schema-v2.md)) → `sync_catalog_v2.py` no push/pull unitário. Demais JSON em `data/` (ex. `settings.json`, tabelas estáticas) → `sync_one_relative()`. Merge em massa no `--startup` continua por arquivo (`merge_member`).
+Arquivos com `schemaVersion: 2` em `data/` (oito catálogos de histórico — ver [`data-schema-v2.md`](data-schema-v2.md)) → `sync_catalog_v2.py` no push/pull unitário. O merge por **id** leva `label`, `checked` (listas rápidas), `valor`, tombstone `deleted` e `mtime` do item vencedor; após reconcile, o `st_mtime` do arquivo pode ser alinhado a `max(items[].mtime)`. Demais JSON em `data/` (ex. `settings.json`, tabelas estáticas) → `sync_one_relative()`. Merge em massa no `--startup` continua por arquivo (`merge_member`).
 
 ## Aviso Axis → Atlas (sessão aberta no Atlas)
 
