@@ -19,5 +19,6 @@ Memória durável do **Auto Orçamento** (decisões, caminhos, deploy). O plugin
 | Narrativa Atlas/Axis no app | [`../atlas-axis.md`](../atlas-axis.md) |
 | SQLite espelho | [`../export-sqlite.md`](../export-sqlite.md) |
 | Operação Axis (scripts, Pi, PVE) | repositório **`local-atlas`** (`axis/`, `docs/referencias/web-apps-axis.md`) |
+| Skills Cursor (deploy/sync CT100, resumo operacional) | `~/.cursor/skills/ct100-webapps/` + filho `ct100-auto-orcamento/` (runbook longo continua nos `.md` acima) |
 
 Runbooks operacionais de push/deploy manual continuam no **local-atlas**; este repo documenta o que o **Node/WebView** faz ao abrir o app no Atlas.

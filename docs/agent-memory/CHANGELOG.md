@@ -5,6 +5,7 @@
 - 2026-10-26: Abertura Atlas — GET de catálogo lê disco local e pull em background (`schedulePullDataFileIfRemoteNewer`); SSE após `load`; blur/PUT continuam com pull await.
 - 2026-10-26: Toasts Atlas — `enqueueAhead` prioriza `--startup` na fila; docs `axis-sync-ui.md`, `axis-data-live-sync.md`.
 - 2026-10-26: Notify Axis → Atlas — `server/atlas-notify.js`, `load-local-env.js`, `install_atlas_notify_env.py`; memória `atlas-notify.md`; skills `ct100-webapps` / `ct100-auto-orcamento` (LEARNINGS + SKILL).
+- 2026-10-26: Índice agent-memory — referência às skills Cursor ct100; skills filho/pai alinhadas ao merge semântico no startup.
 - 2026-10-26: Startup sync — catálogos v2 com mesmo conteúdo e tamanho de arquivo diferente deixam de gerar conflito falso (`catalogs_semantically_equal`, local-atlas); doc `axis-sync-sessions.md`.
 - 2026-10-26: Catálogos v2 — oito JSON de histórico (`catalog-v2.js`, `catalog-http.js`, `migrate-data-catalogs-v2.js`); Axis alinhado com `--push-force-relative`; merge `sync_catalog_v2.py` nos oito; `settings.json` v1; docs + skills ct100.
 - 2026-10-26: Bootstrap `pacientes.json` v2 no Axis — `--push-force-relative` (local-atlas); depois merge por UUID no `--push-relative`; doc `data-schema-v2.md` / skills ct100.
