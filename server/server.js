@@ -22,6 +22,16 @@ const {
 } = require("./paths");
 const { ensureDataDirReady } = require("./data-bootstrap");
 const { createAxisSync } = require("./axis-sync");
+const {
+  EMPTY_CATALOG,
+  isCatalogV2,
+  readPatientsCatalogFile,
+  writePatientsCatalogFile,
+  toApiPayload,
+  upsertEntry,
+  deleteEntry,
+  replaceActiveOrder,
+} = require("./patients-catalog");
 
 const port = 3000;
 const bindHost = process.env.BIND_HOST || "127.0.0.1";
@@ -126,7 +136,7 @@ function ensureDataFile() {
   }
 
   if (!fs.existsSync(patientsFile)) {
-    fs.writeFileSync(patientsFile, "[]\n", "utf8");
+    fs.writeFileSync(patientsFile, `${JSON.stringify(EMPTY_CATALOG, null, 2)}\n`, "utf8");
   }
 
   if (!fs.existsSync(technologiesFile)) {
@@ -284,6 +294,37 @@ function readJsonList(filePath) {
 async function readJsonListFresh(filePath) {
   await axisSync.pullDataFileIfRemoteNewer(filePath);
   return readJsonList(filePath);
+}
+
+function readPatientsCatalogFromDisk() {
+  ensureDataFile();
+  return readPatientsCatalogFile(patientsFile);
+}
+
+async function readPatientsCatalogFresh() {
+  await axisSync.pullDataFileIfRemoteNewer(patientsFile);
+  ensureDataFile();
+
+  let parsed;
+  try {
+    parsed = JSON.parse(fs.readFileSync(patientsFile, "utf8"));
+  } catch {
+    parsed = [];
+  }
+
+  if (!isCatalogV2(parsed)) {
+    const migrated = readPatientsCatalogFile(patientsFile);
+    writePatientsCatalogFile(patientsFile, migrated);
+    return migrated;
+  }
+
+  return readPatientsCatalogFile(patientsFile);
+}
+
+function writePatientsCatalog(doc) {
+  ensureDataFile();
+  writePatientsCatalogFile(patientsFile, doc);
+  axisSync.afterDataFileWrite(patientsFile);
 }
 
 function writeJsonList(filePath, items) {
@@ -691,39 +732,66 @@ async function handleExtrasApi(request, response) {
 }
 
 async function handlePatientsApi(request, response) {
-  if (request.method === "PUT") {
-    const body = await collectRequestBody(request);
-    const { items } = JSON.parse(body || "{}");
-
-    if (!Array.isArray(items)) {
-      sendJson(response, 400, { error: "Informe uma lista de pacientes." });
-      return;
-    }
-
-    const normalizedKeys = new Set();
-    const nextItems = items
-      .map((item) => (typeof item === "string" ? item.trim() : ""))
-      .filter((item) => {
-        if (!item) {
-          return false;
-        }
-
-        const key = normalizeText(item);
-        if (normalizedKeys.has(key)) {
-          return false;
-        }
-
-        normalizedKeys.add(key);
-        return true;
-      })
-      .slice(0, 200);
-
-    writeJsonList(patientsFile, nextItems);
-    sendJson(response, 200, nextItems);
+  if (request.method === "GET") {
+    const doc = await readPatientsCatalogFresh();
+    sendJson(response, 200, toApiPayload(doc));
     return;
   }
 
-  await handleHistoryApi(request, response, patientsFile, "um paciente válido");
+  if (request.method === "PUT") {
+    const body = await collectRequestBody(request);
+    const { items } = JSON.parse(body || "{}");
+    const doc = await readPatientsCatalogFresh();
+    const { doc: next, error } = replaceActiveOrder(doc, items);
+
+    if (error) {
+      sendJson(response, 400, { error });
+      return;
+    }
+
+    writePatientsCatalog(next);
+    sendJson(response, 200, toApiPayload(next));
+    return;
+  }
+
+  if (request.method === "POST") {
+    const body = await collectRequestBody(request);
+    const payload = JSON.parse(body || "{}");
+    const id = typeof payload.id === "string" ? payload.id.trim() : "";
+    const label =
+      typeof payload.label === "string"
+        ? payload.label.trim()
+        : typeof payload.value === "string"
+          ? payload.value.trim()
+          : "";
+
+    const doc = await readPatientsCatalogFresh();
+    const { doc: next, error } = upsertEntry(doc, { id: id || undefined, label });
+
+    if (error) {
+      sendJson(response, 400, { error });
+      return;
+    }
+
+    writePatientsCatalog(next);
+    sendJson(response, 200, toApiPayload(next));
+    return;
+  }
+
+  if (request.method === "DELETE") {
+    const body = await collectRequestBody(request);
+    const payload = JSON.parse(body || "{}");
+    const id = typeof payload.id === "string" ? payload.id.trim() : "";
+    const value = typeof payload.value === "string" ? payload.value.trim() : "";
+
+    const doc = await readPatientsCatalogFresh();
+    const { doc: next } = deleteEntry(doc, { id: id || undefined, value: value || undefined });
+    writePatientsCatalog(next);
+    sendJson(response, 200, toApiPayload(next));
+    return;
+  }
+
+  sendJson(response, 405, { error: "Método não permitido." });
 }
 
 async function handleSurgeriesApi(request, response) {
@@ -1179,7 +1247,7 @@ async function startServer() {
 
     // Espelho SQLite alinhado a output/ em cada abertura do app (além da impressão).
     consolidateOutputSqliteSafe();
-    setImmediate(() => axisSync.enqueueStartup());
+    axisSync.scheduleStartupWhenUiReady();
   });
 }
 

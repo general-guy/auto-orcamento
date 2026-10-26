@@ -1,6 +1,8 @@
-# Migração `data/` — schema UUID (planejado)
+# Migração `data/` — schema UUID
 
-Estado **futuro**: históricos e listas editáveis passam de `string[]` (ou objetos sem id) para entradas com **`id` (UUID)**, **`label`** (texto visível) e **`mtime`** (ms ou ISO), para merge por item entre Atlas e Axis.
+**Piloto em andamento:** `pacientes.json` (schema v2). Especificação: [`data-schema-v2.md`](data-schema-v2.md).
+
+Demais históricos ainda em `string[]` até as fases 2–3. Modelo alvo: **`id` (UUID)**, **`label`**, **`mtime`** (ms) por entrada.
 
 ## Backup antes de migrar
 

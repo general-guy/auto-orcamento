@@ -211,7 +211,9 @@ Endpoints principais:
 - `POST /api/pdf`: gera PDF + snapshot JSON em `output/` (mesmo nome base) e, em seguida, reconstrói `export/orcamentos.sqlite` a partir de todos os JSON de `output/` (falha no SQLite não falha a resposta do PDF).
 - `POST /api/shutdown`: encerra o servidor ao fechar a janela (`launcher/native_launcher.py` ou fallback `launcher/launch-app.js`); bloqueado para visitantes remotos; ignorado com `--keep-server`.
 
-Os históricos de pacientes, cirurgias, hospitais, extras, pagamentos e observações são listas JSON simples, limitadas a 200 itens por tipo. Os históricos de tecnologias e de procedimentos Unimed N também são limitados a 200 itens, mas cada item é um objeto com `nome` e `valor`.
+**Pacientes** (`data/pacientes.json`): schema **v2** — envelope `{ schemaVersion: 2, items: [{ id, label, mtime, deleted? }] }`; API `/api/pacientes` devolve só itens ativos; merge por UUID no sync Python. Ver [`docs/agent-memory/data-schema-v2.md`](docs/agent-memory/data-schema-v2.md).
+
+Cirurgias, hospitais, extras, pagamentos e observações seguem listas JSON simples (`string[]`), limitadas a 200 itens. Tecnologias e Unimed N: objetos com `nome` e `valor`.
 
 ## Frontend
 
@@ -273,7 +275,7 @@ data/pacientes.json
 data/settings.json
 ```
 
-Se `data/pacientes.json` não existir, `ensureDataFile()` grava `[]`. O formato de referência no Git é `data/pacientes.json.example`.
+Se `data/pacientes.json` não existir, `ensureDataFile()` grava schema v2 vazio. Referência: `seed/data/pacientes.json.example`. Migração legado: `node scripts/migrate-pacientes-schema-v2.js`.
 
 Tabelas de referência estruturadas:
 
@@ -289,7 +291,7 @@ As entradas auxiliares `Reg#`/`Sap#`/`Bla#`/`Uni#` não usam `<datalist>` nativo
 
 `data/tabela-implantes.json` guarda uma tabela independente de implantes, extraída de documento `.doc`, para preenchimento opcional da seção `Implantes`. O dropdown usa `rotulo`, `modelo` e `referencia`; itens com `favorito: true` recebem uma estrela ao final da opção.
 
-`data/pacientes.json` guarda os nomes de pacientes usados no autocomplete. O arquivo **não** entra no Git. O dropdown de histórico do campo **Nome** permite reordenar entradas pelo handle `⋮⋮` (com duas ou mais opções visíveis); ao soltar, `app.js` envia a lista completa via `PUT /api/pacientes` / `AppApi.replaceHistory("pacientes", …)` e grava a ordem em `data/pacientes.json`. O menu fecha ao perder o foco do campo ou do dropdown.
+`data/pacientes.json` guarda o catálogo de pacientes (label + UUID). O arquivo **não** entra no Git. O dropdown do **Nome** usa `dataset.entryId`; reordenar via `PUT /api/pacientes` com `AppApi.replacePatients`. Blur cria ou atualiza via `POST` (`upsertPatient`).
 
 `data/cirurgias.json` guarda as cirurgias cadastradas no formulário. O dropdown de histórico de **Cirurgia proposta** permite reordenar entradas pelo handle `⋮⋮` (com duas ou mais opções visíveis); ao soltar, `app.js` envia a lista via `PUT /api/cirurgias` / `AppApi.replaceHistory("cirurgias", …)` e grava em `data/cirurgias.json`. O menu fecha ao perder o foco do campo ou do dropdown.
 

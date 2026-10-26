@@ -43,7 +43,37 @@
   }
 
   async function getHistory(store) {
+    if (store === "pacientes") {
+      const data = await fetchJson("/api/pacientes");
+      return Array.isArray(data?.items) ? data.items : [];
+    }
+
     return fetchJson(`/api/${store}`);
+  }
+
+  async function upsertPatient(payload) {
+    return fetchJson("/api/pacientes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async function removePatient(payload) {
+    return fetchJson("/api/pacientes", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async function replacePatients(items) {
+    const data = await fetchJson("/api/pacientes", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items }),
+    });
+    return Array.isArray(data?.items) ? data.items : [];
   }
 
   async function addHistory(store, value) {
@@ -239,6 +269,9 @@
   window.AppApi = {
     waitForBackend,
     getHistory,
+    upsertPatient,
+    removePatient,
+    replacePatients,
     addHistory,
     removeHistory,
     replaceHistory,

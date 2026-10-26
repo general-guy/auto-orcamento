@@ -8,7 +8,8 @@ Memória durável do **Auto Orçamento** (decisões, caminhos, deploy). O plugin
 |------|-----------|
 | Dados ao vivo Windows (`C:\auto-orcamento\`) | [`output-path.md`](output-path.md) |
 | Backup legado `data/` (pré-UUID) | [`../../backup-legado/README.md`](../../backup-legado/README.md) |
-| Migração UUID `data/` (planejado) | [`data-uuid-migration.md`](data-uuid-migration.md) |
+| Migração UUID `data/` | [`data-uuid-migration.md`](data-uuid-migration.md) |
+| Schema v2 (catálogo UUID) | [`data-schema-v2.md`](data-schema-v2.md) |
 | CT 100, axis-data, `/opt` vs `/data` | [`axis-ct100.md`](axis-ct100.md) |
 | Sync automático Atlas ↔ Axis (dev) | [`../atlas-axis-sync.md`](../atlas-axis-sync.md) |
 | `data/` ao vivo (blur, pull + reconcile) | [`axis-data-live-sync.md`](axis-data-live-sync.md) |

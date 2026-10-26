@@ -7,11 +7,13 @@ Cada execução em fila do `axis-sync.js` (`startup`, `pull`, `push`, etc.) grav
 | Item | Valor |
 |------|--------|
 | Pasta | `C:\auto-orcamento\logs\axis-sync\` |
-| Arquivos | `session-<ISO>-<tarefa>.log` (ex.: `session-2026-10-25T18-46-00-000Z-startup.log`) |
+| Arquivos | `session-<local>-<tarefa>.log` — horário **local** da máquina (ex.: `session-2026-10-26T14-22-56-329-p0300-startup.log`); corpo com `started_at=…-03:00` e `timezone=America/Sao_Paulo` |
 | Retenção | **10** sessões; ao criar a 11ª, apaga a mais antiga |
 | Código | `server/axis-sync-session-log.js` + `server/axis-sync.js` |
 
-Cabeçalho: horário, tarefa, script, argv. Rodapé: `exit_code`, timeout ou erro de spawn.
+Cabeçalho: `started_at` / `finished_at` em **horário local** (`timezone=…`); tarefa, script, argv. Rodapé: `exit_code`, timeout ou erro de spawn.
+
+Toast amarelo `/data/ N conflito(s)` no startup: um ou mais arquivos com **mesmo mtime** (±1 s) e **tamanho ou conteúdo** diferente — o motor não sobrescreve; ver toast por arquivo (`Conflito em /data/…`) quando o hash diverge. Ex.: `pacientes.json` v2 no Atlas e legado no Axis após migração local.
 
 Só quando o sync está habilitado (Windows + `BIND_HOST` localhost). Produção no CT **não** gera estes logs.
 

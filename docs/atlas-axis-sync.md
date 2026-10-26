@@ -50,7 +50,7 @@ Detalhe do fluxo blur/API em [`docs/agent-memory/axis-data-live-sync.md`](agent-
 
 Ordem típica no blur (ex.: novo paciente no histórico): pull se Axis mais novo → servidor lê JSON atualizado → grava com o novo item → fila reconcilia o mesmo arquivo.
 
-Toasts: verde (ok), vermelho (Axis offline / falha), amarelo (conflito manual). Mensagens de pull: `Atualizado do Axis: …`. O `axis-sync.js` define `PYTHONIOENCODING=utf-8` no subprocesso Python (acentos no Windows).
+Toasts: verde (ok), vermelho (Axis offline / falha), amarelo (conflito manual). O merge no **startup** só começa depois que a UI conecta `/api/sync/events` (senão os avisos se perdem no WebView). Mensagens de pull: `Atualizado do Axis: …`. O `axis-sync.js` define `PYTHONIOENCODING=utf-8` no subprocesso Python (acentos no Windows).
 
 ## Manual (sem abrir o app)
 

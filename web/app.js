@@ -96,6 +96,14 @@ let hospitalDropdownDragState = null;
 let hospitalDropdownSuppressClick = false;
 let hospitalDragState = null;
 let patientHistory = [];
+
+function patientEntryLabel(entry) {
+  if (entry && typeof entry === "object" && typeof entry.label === "string") {
+    return entry.label;
+  }
+
+  return typeof entry === "string" ? entry : "";
+}
 let activePatientInput = null;
 let isInteractingWithPatientDropdown = false;
 let patientDropdownDragState = null;
@@ -1929,30 +1937,54 @@ async function savePatientToHistory(value, sourceInput = null) {
     return;
   }
 
+  const entryId = sourceInput?.dataset.entryId || "";
+
+  if (entryId) {
+    const existing = patientHistory.find((item) => item.id === entryId);
+    if (existing && normalizeText(patientEntryLabel(existing)) === normalizeText(patient)) {
+      return;
+    }
+
+    try {
+      const data = await AppApi.upsertPatient({ id: entryId, label: patient });
+      patientHistory = Array.isArray(data?.items) ? data.items : [];
+      updatePatientHistoryDropdown(patientInput.value);
+    } catch {
+      console.warn("Não foi possível atualizar o paciente no histórico local.");
+    }
+    return;
+  }
+
   if (sourceInput?.dataset.skipHistoryValue === normalizeText(patient)) {
     return;
   }
 
-  const alreadyExists = patientHistory.some((item) => normalizeText(item) === normalizeText(patient));
-  if (alreadyExists) {
-    return;
-  }
-
   try {
-    patientHistory = await AppApi.addHistory("pacientes", patient);
+    const data = await AppApi.upsertPatient({ label: patient });
+    patientHistory = Array.isArray(data?.items) ? data.items : [];
+    const created = patientHistory.find((item) => normalizeText(patientEntryLabel(item)) === normalizeText(patient));
+    if (sourceInput && created?.id) {
+      sourceInput.dataset.entryId = created.id;
+    }
     updatePatientHistoryDropdown(patientInput.value);
   } catch {
     console.warn("Não foi possível salvar o paciente no histórico local.");
   }
 }
 
-async function deletePatientFromHistory(value) {
+async function deletePatientFromHistory(value, entryId = "") {
   const deletedKey = normalizeText(value);
-  patientHistory = patientHistory.filter((item) => normalizeText(item) !== deletedKey);
+  patientHistory = patientHistory.filter(
+    (item) => item.id !== entryId && normalizeText(patientEntryLabel(item)) !== deletedKey,
+  );
   updatePatientHistoryDropdown(patientInput.value);
 
   try {
-    patientHistory = await AppApi.removeHistory("pacientes", value);
+    const data = await AppApi.removePatient({
+      id: entryId || undefined,
+      value: entryId ? undefined : value,
+    });
+    patientHistory = Array.isArray(data?.items) ? data.items : [];
     updatePatientHistoryDropdown(patientInput.value);
   } catch {
     console.warn("Não foi possível remover o paciente do histórico local.");
@@ -3027,13 +3059,17 @@ function updateHospitalHistoryDropdown(query = "") {
   });
 }
 
-function applyPatientDropdownOrder(visibleOrdered) {
-  return applyHistoryDropdownOrder(patientHistory, visibleOrdered);
+function applyPatientDropdownOrder(visibleIds) {
+  const byId = new Map(patientHistory.map((entry) => [entry.id, entry]));
+  const visible = visibleIds.map((id) => byId.get(id)).filter(Boolean);
+  const visibleSet = new Set(visibleIds);
+  const rest = patientHistory.filter((entry) => !visibleSet.has(entry.id));
+  return [...visible, ...rest];
 }
 
 async function savePatientOrderToHistory(items) {
   try {
-    patientHistory = await AppApi.replaceHistory("pacientes", items);
+    patientHistory = await AppApi.replacePatients(items);
     updatePatientHistoryDropdown(patientInput.value);
   } catch {
     console.warn("Não foi possível salvar a ordem dos pacientes.");
@@ -3100,7 +3136,7 @@ function endPatientDropdownDrag({ shouldCommit = true } = {}) {
   patientDropdownSuppressClick = true;
 
   const visibleOrdered = getPatientDropdownRows()
-    .map((item) => item.dataset.value)
+    .map((item) => item.dataset.entryId)
     .filter(Boolean);
   const nextHistory = applyPatientDropdownOrder(visibleOrdered);
 
@@ -3254,17 +3290,22 @@ function updatePatientHistoryDropdown(query = "") {
 
   const normalizedQuery = normalizeText(query);
   const options = patientHistory
-    .filter((item) => !normalizedQuery || normalizeText(item).includes(normalizedQuery))
+    .filter((item) => {
+      const label = patientEntryLabel(item);
+      return !normalizedQuery || normalizeText(label).includes(normalizedQuery);
+    })
     .slice(0, 12);
   const showDragHandles = options.length >= 2;
 
   patientHistoryDropdown.innerHTML = "";
   patientHistoryDropdown.hidden = options.length === 0;
 
-  options.forEach((optionText) => {
+  options.forEach((entry) => {
+    const optionText = patientEntryLabel(entry);
     const option = document.createElement("div");
     option.className = "history-option";
     option.dataset.value = optionText;
+    option.dataset.entryId = entry.id || "";
     option.setAttribute("role", "button");
     option.setAttribute("tabindex", "0");
 
@@ -3673,6 +3714,11 @@ function selectHospitalHistoryOption(option, shouldAdvance = false) {
 
 function selectPatientHistoryOption(option, shouldAdvance = false) {
   patientInput.value = option.dataset.value;
+  if (option.dataset.entryId) {
+    patientInput.dataset.entryId = option.dataset.entryId;
+  } else {
+    delete patientInput.dataset.entryId;
+  }
   updatePreview();
   isInteractingWithPatientDropdown = false;
   hidePatientHistoryDropdown();
@@ -4501,6 +4547,14 @@ form.addEventListener("input", (event) => {
       delete event.target.dataset.skipHistoryValue;
     }
 
+    const linkedId = event.target.dataset.entryId;
+    if (linkedId) {
+      const linked = patientHistory.find((item) => item.id === linkedId);
+      if (!linked || normalizeText(patientEntryLabel(linked)) !== normalizeText(event.target.value)) {
+        delete event.target.dataset.entryId;
+      }
+    }
+
     showPatientHistoryDropdown();
   }
 
@@ -5128,7 +5182,7 @@ patientHistoryDropdown.addEventListener("click", (event) => {
   if (event.target.closest(".history-delete")) {
     event.stopPropagation();
     patientInput.dataset.skipHistoryValue = normalizeText(optionText);
-    deletePatientFromHistory(optionText);
+    deletePatientFromHistory(optionText, option.dataset.entryId || "");
     updatePatientHistoryDropdown(patientInput.value);
     patientInput.focus();
     isInteractingWithPatientDropdown = false;

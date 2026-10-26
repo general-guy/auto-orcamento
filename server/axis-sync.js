@@ -19,6 +19,36 @@ const DEFAULT_LOCAL_ATLAS = path.join(
 const syncClients = new Set();
 let queue = Promise.resolve();
 let syncLogDir = null;
+let startupQueued = false;
+const STARTUP_FALLBACK_MS = 90 * 1000;
+/** @type {{ event: object, at: number }[]} */
+const toastReplayBuffer = [];
+const TOAST_REPLAY_MAX = 15;
+const TOAST_REPLAY_MAX_AGE_MS = 3 * 60 * 1000;
+
+function rememberToast(event) {
+  if (!event || event.type !== "toast") {
+    return;
+  }
+  toastReplayBuffer.push({ event, at: Date.now() });
+  while (toastReplayBuffer.length > TOAST_REPLAY_MAX) {
+    toastReplayBuffer.shift();
+  }
+}
+
+function replayRecentToasts(response) {
+  const now = Date.now();
+  for (const row of toastReplayBuffer) {
+    if (now - row.at > TOAST_REPLAY_MAX_AGE_MS) {
+      continue;
+    }
+    try {
+      response.write(`data: ${JSON.stringify(row.event)}\n\n`);
+    } catch {
+      break;
+    }
+  }
+}
 
 function resolveLocalAtlasRoot() {
   const override = String(process.env.AUTO_ORCAMENTO_LOCAL_ATLAS || "").trim();
@@ -34,6 +64,7 @@ function isSyncEnabled(bindHost) {
 }
 
 function broadcast(event) {
+  rememberToast(event);
   const payload = `data: ${JSON.stringify(event)}\n\n`;
   for (const client of syncClients) {
     try {
@@ -177,10 +208,33 @@ function createAxisSync({ bindHost, dataDir }) {
   syncLogDir = enabled ? resolveAxisSyncLogDir(dataDir) : null;
 
   function enqueueStartup() {
-    if (!enabled) {
+    if (!enabled || startupQueued) {
       return;
     }
+    startupQueued = true;
     enqueue("startup", ["--startup"]);
+  }
+
+  function scheduleStartupWhenUiReady() {
+    if (!enabled || startupQueued) {
+      return;
+    }
+    setTimeout(() => {
+      if (!startupQueued) {
+        enqueueStartup();
+      }
+    }, STARTUP_FALLBACK_MS);
+  }
+
+  function onSyncClientConnected(response) {
+    const hadClients = syncClients.size > 0;
+    const client = { response };
+    syncClients.add(client);
+    replayRecentToasts(response);
+    if (!hadClients) {
+      enqueueStartup();
+    }
+    return client;
   }
 
   function enqueuePushRelatives(relativePaths) {
@@ -265,8 +319,7 @@ function createAxisSync({ bindHost, dataDir }) {
     });
     response.write("\n");
 
-    const client = { response };
-    syncClients.add(client);
+    const client = onSyncClientConnected(response);
     request.on("close", () => {
       syncClients.delete(client);
     });
@@ -276,6 +329,7 @@ function createAxisSync({ bindHost, dataDir }) {
   return {
     enabled,
     enqueueStartup,
+    scheduleStartupWhenUiReady,
     enqueuePushRelative,
     pullDataFileIfRemoteNewer,
     afterDataFileWrite,

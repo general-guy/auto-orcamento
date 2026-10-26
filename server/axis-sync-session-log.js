@@ -20,8 +20,46 @@ function sanitizeLabel(label) {
   return safe || "sync";
 }
 
+function pad2(value) {
+  return String(value).padStart(2, "0");
+}
+
+function pad3(value) {
+  return String(value).padStart(3, "0");
+}
+
+/** ISO-8601 com offset local (ex.: 2026-10-26T14:22:56.329-03:00). */
+function formatLocalDateTime(date = new Date()) {
+  const offsetMinutes = -date.getTimezoneOffset();
+  const sign = offsetMinutes >= 0 ? "+" : "-";
+  const abs = Math.abs(offsetMinutes);
+  const offset = `${sign}${pad2(Math.floor(abs / 60))}:${pad2(abs % 60)}`;
+  return (
+    `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}` +
+    `T${pad2(date.getHours())}:${pad2(date.getMinutes())}:${pad2(date.getSeconds())}.` +
+    `${pad3(date.getMilliseconds())}${offset}`
+  );
+}
+
+function resolveLocalTimeZoneLabel() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "local";
+  } catch {
+    return "local";
+  }
+}
+
+/** Nome de arquivo session-* (sem ':' — legível no Explorer). */
 function formatSessionTimestamp(date = new Date()) {
-  return date.toISOString().replace(/[:.]/g, "-");
+  const offsetMinutes = -date.getTimezoneOffset();
+  const sign = offsetMinutes >= 0 ? "p" : "m";
+  const abs = Math.abs(offsetMinutes);
+  const tzCompact = `${sign}${pad2(Math.floor(abs / 60))}${pad2(abs % 60)}`;
+  return (
+    `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}` +
+    `T${pad2(date.getHours())}-${pad2(date.getMinutes())}-${pad2(date.getSeconds())}-` +
+    `${pad3(date.getMilliseconds())}-${tzCompact}`
+  );
 }
 
 function listSessionLogFiles(logDir) {
@@ -77,11 +115,13 @@ function createAxisSyncSessionLogger(logDir, { taskName, argv, scriptPath }) {
   const stamp = formatSessionTimestamp();
   const fileName = `${SESSION_GLOB_PREFIX}${stamp}-${sanitizeLabel(taskName)}.log`;
   const filePath = path.join(logDir, fileName);
-  const startedAt = new Date().toISOString();
+  const startedAt = formatLocalDateTime();
+  const timeZone = resolveLocalTimeZoneLabel();
   const argvText = (argv || []).map((part) => JSON.stringify(part)).join(" ");
   const header = [
     "# axis-sync session",
     `started_at=${startedAt}`,
+    `timezone=${timeZone}`,
     `task=${taskName || "sync"}`,
     `script=${scriptPath}`,
     `argv=${argvText}`,
@@ -126,7 +166,7 @@ function createAxisSyncSessionLogger(logDir, { taskName, argv, scriptPath }) {
     finish(exitCode, { timedOut = false, spawnError = null } = {}) {
       const lines = [
         "---",
-        `finished_at=${new Date().toISOString()}`,
+        `finished_at=${formatLocalDateTime()}`,
         `exit_code=${exitCode}`,
       ];
       if (timedOut) {

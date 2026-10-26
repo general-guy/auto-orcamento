@@ -1,5 +1,7 @@
 # Agent memory — changelog
 
+- 2026-10-26: UI sync — `--startup` após primeiro SSE; replay de toasts; log de sessão em horário local (`axis-sync-session-log.js`).
+- 2026-10-26: Piloto `pacientes.json` schema v2 — `data-schema-v2.md`, `server/patients-catalog.js`, merge `sync_catalog_v2.py` (local-atlas).
 - 2026-10-26: Backup legado `data/` — `backup-legado/pre-uuid-migration/` + `scripts/backup-live-data-legado.ps1`; stub `data-uuid-migration.md`; `output-path.md` / índice README.
 - 2026-10-26: Sync `data/` na sessão — pull `--pull-if-remote-newer` antes de ler APIs; `--push-relative` reconcilia (`sync_one_relative` no local-atlas); memória `axis-data-live-sync.md`; docs e skill `ct100-auto-orcamento` alinhados.
 - 2026-10-25: CT 100 — Node 22 + `experimental-sqlite`; SQLite só em axis-data `export/`; `export-sqlite.js` sem entrega dados-clinica no bind; unit sem `AUTO_ORCAMENTO_DELIVER_SQLITE`; docs `export-sqlite.md`, `axis-ct100.md`.

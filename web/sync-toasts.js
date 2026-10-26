@@ -184,9 +184,13 @@
     }, hideAfter);
   }
 
+  function isLocalAtlasHost() {
+    const host = String(window.location.hostname || "").toLowerCase();
+    return host === "localhost" || host === "127.0.0.1" || host === "::1";
+  }
+
   function connect() {
-    const host = window.location.hostname;
-    if (!window.EventSource || (host !== "localhost" && host !== "127.0.0.1")) {
+    if (!window.EventSource || !isLocalAtlasHost()) {
       return;
     }
 
@@ -203,6 +207,9 @@
         // ignore
       }
     };
+    source.addEventListener("open", () => {
+      ensureContainer();
+    });
     source.onerror = () => {
       source.close();
       window.setTimeout(connect, 8000);

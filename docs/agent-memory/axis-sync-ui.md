@@ -6,7 +6,7 @@ Só em `127.0.0.1` / `localhost` (mesma regra do `axis-sync.js`).
 
 | Peça | Arquivo |
 |------|---------|
-| Fila + SSE | `server/axis-sync.js` — fila awaitable (`pull` antes de ler JSON, `push` após gravar); não repete toast genérico de falha se o Python já emitiu `error` |
+| Fila + SSE | `server/axis-sync.js` — `--startup` só após o **primeiro** cliente em `/api/sync/events` (fallback 90 s sem UI), para os toasts chegarem com o WebView conectado; replay dos últimos toasts (3 min) ao abrir o SSE; fila awaitable (`pull` / `push`); não repete toast genérico se o Python já emitiu `error` |
 | Toasts ao vivo | `web/sync-toasts.js` — `EventSource` `/api/sync/events`; `position: fixed` (não empurra o preview) |
 | Histórico (10) | Mesmo script — botão na `preview-toolbar` (à direita de “Documento Final”); painel com horário `HH:MM:SS` |
 
