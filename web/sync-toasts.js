@@ -16,10 +16,29 @@
     window.history.replaceState(null, "", next || "/");
   }
 
+  const SKIP_REPLAY_STORAGE_KEY = "axis-sync-skip-toast-replay";
+
   function forceReloadUi() {
+    try {
+      sessionStorage.setItem(SKIP_REPLAY_STORAGE_KEY, "1");
+    } catch {
+      // ignore quota / private mode
+    }
     const url = new URL(window.location.href);
     url.searchParams.set("_r", String(Date.now()));
     window.location.replace(url.toString());
+  }
+
+  function shouldSkipToastReplay() {
+    try {
+      if (sessionStorage.getItem(SKIP_REPLAY_STORAGE_KEY) !== "1") {
+        return false;
+      }
+      sessionStorage.removeItem(SKIP_REPLAY_STORAGE_KEY);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   let historyUi = null;
@@ -224,7 +243,10 @@
 
     ensureHistoryUi();
 
-    const source = new EventSource("/api/sync/events");
+    const eventsUrl = shouldSkipToastReplay()
+      ? "/api/sync/events?skipReplay=1"
+      : "/api/sync/events";
+    const source = new EventSource(eventsUrl);
     source.onmessage = (event) => {
       try {
         const payload = JSON.parse(event.data);

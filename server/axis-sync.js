@@ -245,11 +245,13 @@ function createAxisSync({ bindHost, dataDir }) {
     }, STARTUP_FALLBACK_MS);
   }
 
-  function onSyncClientConnected(response) {
+  function onSyncClientConnected(response, { skipReplay = false } = {}) {
     const hadClients = syncClients.size > 0;
     const client = { response };
     syncClients.add(client);
-    replayRecentToasts(response);
+    if (!skipReplay) {
+      replayRecentToasts(response);
+    }
     if (!hadClients) {
       enqueueStartup();
     }
@@ -311,7 +313,7 @@ function createAxisSync({ bindHost, dataDir }) {
 
   function enqueuePullIfRemoteNewer(relativePaths) {
     if (!enabled) {
-      return [];
+      return { queued: [], done: Promise.resolve(0) };
     }
     const queued = [];
     const argv = [];
@@ -323,10 +325,8 @@ function createAxisSync({ bindHost, dataDir }) {
       queued.push(normalized);
       argv.push("--pull-if-remote-newer", normalized);
     }
-    if (argv.length) {
-      enqueue("pull", argv);
-    }
-    return queued;
+    const done = argv.length ? enqueue("pull", argv) : Promise.resolve(0);
+    return { queued, done };
   }
 
   function afterDataFileWrite(filePath) {
@@ -369,7 +369,15 @@ function createAxisSync({ bindHost, dataDir }) {
     });
     response.write("\n");
 
-    const client = onSyncClientConnected(response);
+    let skipReplay = false;
+    try {
+      const apiUrl = new URL(request.url || "/api/sync/events", "http://127.0.0.1");
+      skipReplay = apiUrl.searchParams.get("skipReplay") === "1";
+    } catch {
+      skipReplay = false;
+    }
+
+    const client = onSyncClientConnected(response, { skipReplay });
     request.on("close", () => {
       syncClients.delete(client);
     });
