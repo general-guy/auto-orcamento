@@ -1,5 +1,5 @@
 # Mede tempo de download dos assets principais da UI (mesma origem).
-# Uso: pwsh ./scripts/bench_web_load.ps1 -BaseUrl https://axis.tail5fe4b7.ts.net/
+# Uso: pwsh ./scripts/bench_web_load.ps1 -BaseUrl https://axis.tail5fe4b7.ts.net:3000/
 #      pwsh ./scripts/bench_web_load.ps1 -BaseUrl http://127.0.0.1:3000/
 
 param(

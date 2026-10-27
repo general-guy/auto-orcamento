@@ -30,7 +30,7 @@ O **seed** versionado continua só no código (`/opt/auto-orcamento/seed/data/`)
 | CT | VMID 100, `app`, LAN `192.168.68.202` |
 | Unit | `auto-orcamento.service` (em `local-atlas/axis/systemd/`) |
 | Bind app | `BIND_HOST=192.168.68.202` (Serve no host `.201` → `:3000`) |
-| URL | `https://axis.tail5fe4b7.ts.net/` (Tailscale Serve, sem Funnel) |
+| URL | `https://axis.tail5fe4b7.ts.net:3000/` (Tailscale Serve, sem Funnel) |
 | PDF | `AUTO_ORCAMENTO_BROWSER=/usr/bin/chromium` |
 | Notify → Atlas | `/etc/auto-orcamento/atlas-notify.env` → `http://192.168.68.200:3010/api/sync/notify` (CT sem `tailscale up`); `install_atlas_notify_env.py` (local-atlas) |
 

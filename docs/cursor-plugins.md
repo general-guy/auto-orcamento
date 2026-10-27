@@ -48,7 +48,7 @@ Não use Context7 para regras de negócio do orçamento (Unimed N, Regina/Sapira
 
 1. Subir o app (`abrir-auto-orcamento.bat` ou `npm start`).
 2. Pedir QA em `http://127.0.0.1:3000` (formulário, preview, zoom, **Abrir**, listas rápidas).
-3. Produção no Axis: `https://axis.tail5fe4b7.ts.net/` (cliente na tailnet). Funnel neste PC só se o legado estiver ativo — ver `docs/atlas-axis.md`.
+3. Produção no Axis: `https://axis.tail5fe4b7.ts.net:3000/` (cliente na tailnet). Funnel neste PC só se o legado estiver ativo — ver `docs/atlas-axis.md`.
 
 **Frases úteis:**
 
@@ -107,7 +107,7 @@ Rules do kit (`no-inline-imports`, `typescript-exhaustive-switch`) aplicam-se po
 
 ### Acesso remoto
 
-1. Produção: `docs/atlas-axis.md` e URL `https://axis.tail5fe4b7.ts.net/`.
+1. Produção: `docs/atlas-axis.md` e URL `https://axis.tail5fe4b7.ts.net:3000/`.
 2. Funnel legado neste PC: `docs/acesso-remoto.md` (token de uso único).
 3. Não misturar teste só-local do WebView2 com a URL do Axis sem documentar a diferença.
 

@@ -12,7 +12,7 @@ O `.bat` abre **sem janelas de terminal visíveis**: relança-se em modo oculto 
 
 ## Atlas e Axis
 
-Este clone no **Atlas** (Geraldo-Server) é o ambiente de desenvolvimento (`abrir-auto-orcamento.bat` → `http://127.0.0.1:3000`). A produção clínica (celular/tablet) corre no **Axis** (Proxmox CT 100): `https://axis.tail5fe4b7.ts.net/` via Tailscale Serve, **sem Funnel**.
+Este clone no **Atlas** (Geraldo-Server) é o ambiente de desenvolvimento (`abrir-auto-orcamento.bat` → `http://127.0.0.1:3000`). A produção clínica (celular/tablet) corre no **Axis** (Proxmox CT 100): `https://axis.tail5fe4b7.ts.net:3000/` via Tailscale Serve, **sem Funnel**.
 
 Relação, bind, dados e **sync em background** ao abrir o app: [`docs/atlas-axis.md`](docs/atlas-axis.md), [`docs/atlas-axis-sync.md`](docs/atlas-axis-sync.md).
 
@@ -58,7 +58,7 @@ O web app (`web/index.html`, `web/app.js`, `web/api.js`, `web/styles.css`, `asse
 | Fluxo | Atalho | Quando usar |
 |-------|--------|-------------|
 | **Node + WebView2** | `abrir-auto-orcamento.bat` | Uso diário e desenvolvimento |
-| **Produção (Axis)** | URL Tailscale | `https://axis.tail5fe4b7.ts.net/` (Serve no Proxmox; ver [`docs/atlas-axis.md`](docs/atlas-axis.md)) |
+| **Produção (Axis)** | URL Tailscale | `https://axis.tail5fe4b7.ts.net:3000/` (Serve no Proxmox; ver [`docs/atlas-axis.md`](docs/atlas-axis.md)) |
 
 Produção e acesso remoto: [`docs/atlas-axis.md`](docs/atlas-axis.md), [`docs/acesso-remoto.md`](docs/acesso-remoto.md). Funnel + tokens (removidos): [`docs/legado-funnel-auth.md`](docs/legado-funnel-auth.md).
 
@@ -273,7 +273,7 @@ O botão **Abrir** (verde, ao lado de **Limpar**) carrega um snapshot JSON gerad
 
 ### Produção no Axis (celular / tablet)
 
-Abrir `https://axis.tail5fe4b7.ts.net/` com Tailscale na mesma tailnet. **Abrir** usa a caixa dedicada com os `.json` de `output/` **no Axis**. Detalhes: [`docs/atlas-axis.md`](docs/atlas-axis.md).
+Abrir `https://axis.tail5fe4b7.ts.net:3000/` com Tailscale na mesma tailnet. **Abrir** usa a caixa dedicada com os `.json` de `output/` **no Axis**. Detalhes: [`docs/atlas-axis.md`](docs/atlas-axis.md).
 
 Campos dinâmicos (cirurgias, hospitais com entradas auxiliares, extras, pagamento, observações), checkboxes de seções opcionais, listas rápidas e equipe são restaurados. Implantes são reassociados pelo índice ou por marca/modelo/referência na tabela local.
 

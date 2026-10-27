@@ -10,7 +10,7 @@ Relação entre este PC (**Atlas** / Geraldo-Server) e o hypervisor **Proxmox Ax
 | **Axis** (Proxmox VE, LAN `192.168.68.201`) | Produção. O guest **CT 100** (`app`, `192.168.68.202`) corre Node em `/opt/auto-orcamento`. |
 | Celular / tablet | Abre a URL do Axis na mesh Tailscale. O cliente precisa estar na mesma tailnet. |
 
-Produção: `https://axis.tail5fe4b7.ts.net/` — Tailscale **Serve** no host Proxmox, apontando para `http://192.168.68.202:3000`. **Sem Funnel.** **Sem bind `0.0.0.0`.**
+Produção: `https://axis.tail5fe4b7.ts.net:3000/` — Tailscale **Serve** no host Proxmox, apontando para `http://192.168.68.202:3000`. **Sem Funnel.** **Sem bind `0.0.0.0`.**
 
 Não há dois servidores oficiais ao mesmo tempo. `.201` é o hypervisor; `.202` vive dentro dele — desligar o Axis desliga o app de produção.
 

@@ -1,6 +1,6 @@
 # Acesso remoto
 
-**Produção clínica:** app na tailnet via **Tailscale Serve** no Axis — `https://axis.tail5fe4b7.ts.net/` (ver [`atlas-axis.md`](atlas-axis.md)). Cliente (celular, tablet ou browser) na **mesma tailnet**. Sem Funnel.
+**Produção clínica:** app na tailnet via **Tailscale Serve** no Axis — `https://axis.tail5fe4b7.ts.net:3000/` (ver [`atlas-axis.md`](atlas-axis.md)). Cliente (celular, tablet ou browser) na **mesma tailnet**. Sem Funnel.
 
 **Desenvolvimento neste PC:** `abrir-auto-orcamento.bat` → `http://127.0.0.1:3000` (WebView2).
 
@@ -26,11 +26,11 @@ Filtro por nome permanece no campo de busca.
 
 ## Primeiro carregamento (Tailscale)
 
-O HTML/CSS aparece antes do `app.js` (~180 KB) e dos catálogos via API. Em `https://axis.tail5fe4b7.ts.net/` **não** há mais `waitForBackend` (legado Tauri/porta 3000) — antes isso atrasava ~5 s a listas rápidas e o zoom.
+O HTML/CSS aparece antes do `app.js` (~180 KB) e dos catálogos via API. Em `https://axis.tail5fe4b7.ts.net:3000/` **não** há mais `waitForBackend` (legado Tauri/porta 3000) — antes isso atrasava ~5 s a listas rápidas e o zoom.
 
 | Diagnóstico | Como |
 |-------------|------|
-| Rede dos assets | `pwsh ./scripts/bench_web_load.ps1 -BaseUrl https://axis.tail5fe4b7.ts.net/` |
+| Rede dos assets | `pwsh ./scripts/bench_web_load.ps1 -BaseUrl https://axis.tail5fe4b7.ts.net:3000/` |
 | Tempo até catálogos na sessão | Abrir `?perf=1` → console `[auto-orcamento perf]` / `window.__autoOrcamentoPerf` (`initToDataMs`) |
 
 ## Legado removido

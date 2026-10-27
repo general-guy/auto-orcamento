@@ -7,7 +7,7 @@ Para fluxos com plugins (quando pedir o quê, frases úteis): [`docs/cursor-plug
 ## Projeto (canônico)
 
 - App local de orçamentos cirúrgicos: **Node.js + WebView2** (`pywebview`) na `main` (desenvolvimento no Atlas).
-- Entrada diária neste PC: `abrir-auto-orcamento.bat` → `127.0.0.1:3000`. Produção: Axis CT 100 (`https://axis.tail5fe4b7.ts.net/`, Tailscale Serve, sem Funnel) — ver `docs/atlas-axis.md`.
+- Entrada diária neste PC: `abrir-auto-orcamento.bat` → `127.0.0.1:3000`. Produção: Axis CT 100 (`https://axis.tail5fe4b7.ts.net:3000/`, Tailscale Serve, sem Funnel) — ver `docs/atlas-axis.md`.
 - Código ativo: `web/`, `server/`, `launcher/`. Tauri e Funnel+token removidos do tree — ver `docs/legado-tauri.md` e `docs/legado-funnel-auth.md`.
 - Dados ao vivo no Windows: `C:\auto-orcamento\data\` + `output\` + `export\` (ver `docs/agent-memory/output-path.md`). Seed no repo: `seed/data/`. Pasta `data/` no clone é local (`.gitignore`).
 - Sync Atlas↔Axis em background ao abrir o `.bat` (só `127.0.0.1`): `server/axis-sync.js` → `sync_auto_orcamento.py` (wake: `ensure_axis_online.py` no local-atlas); merge no arranque; em `data/` pull se Axis mais novo antes de ler API + reconcile após gravar (não push cego). Gravação no **Axis** avisa o Atlas via `POST /api/sync/notify` (`server/atlas-notify.js`, token em `C:\auto-orcamento\config\atlas-notify.env`) para pull pontual — `docs/agent-memory/atlas-notify.md`, `axis-data-live-sync.md`, `axis-sync-ui.md`.
@@ -41,7 +41,7 @@ Para fluxos com plugins (quando pedir o quê, frases úteis): [`docs/cursor-plug
 
 - Stack ativa: Node (`server/server.js`), frontend em `web/`, launcher `launcher/native_launcher.py` (WebView2).
 - Porta local do app: `http://localhost:3000` (ou `127.0.0.1:3000`); bind padrão `127.0.0.1` (`BIND_HOST`).
-- Produção clínica: Axis CT 100 (`192.168.68.202:3000`, `BIND_HOST=192.168.68.202`) + Tailscale Serve no host → `https://axis.tail5fe4b7.ts.net/`. Sem Funnel.
+- Produção clínica: Axis CT 100 (`192.168.68.202:3000`, `BIND_HOST=192.168.68.202`) + Tailscale Serve no host → `https://axis.tail5fe4b7.ts.net:3000/`. Sem Funnel.
 - Dependência de PDF: `puppeteer-core` + Chrome/Edge instalado.
 - Snapshot JSON (`schemaVersion: 1`) e botão Abrir existem só na stack Node; Abrir lista só os `.json` de `output/` (sem diálogo nativo do sistema).
 - Espelho SQLite é reconstruído a partir de `output/` na abertura do servidor e após imprimir (também `npm run export:sqlite`); cópia em `C:\auto-orcamento\export\` e entrega para `dados-clinica/import/` **só no Atlas**; no CT 100 o espelho fica só em axis-data `export/`.

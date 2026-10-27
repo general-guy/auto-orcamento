@@ -5,7 +5,7 @@ O Auto Orçamento é um app de orçamentos cirúrgicos, servido por **Node.js**.
 | Deploy | Entrada | Backend |
 |--------|---------|---------|
 | **Atlas (dev)** | `abrir-auto-orcamento.bat` | `launcher/native_launcher.py` + `server/server.js` em `127.0.0.1:3000` |
-| **Axis (produção)** | systemd no CT 100 | `BIND_HOST=192.168.68.202` + Tailscale Serve no host → `https://axis.tail5fe4b7.ts.net/` |
+| **Axis (produção)** | systemd no CT 100 | `BIND_HOST=192.168.68.202` + Tailscale Serve no host → `https://axis.tail5fe4b7.ts.net:3000/` |
 
 Papel de cada máquina: `docs/atlas-axis.md`. Acesso remoto: `docs/acesso-remoto.md`. Funnel+token removidos: `docs/legado-funnel-auth.md`.
 
@@ -116,9 +116,9 @@ Para forçar um navegador específico no fallback, defina `AUTO_ORCAMENTO_BROWSE
 Produção clínica: CT 100 no Axis, documentado em `docs/atlas-axis.md`.
 
 ```text
-Axis host (192.168.68.201)  tailscale serve --https=443
+Axis host (192.168.68.201)  tailscale serve --https=3000
   -> http://192.168.68.202:3000   (CT 100, BIND_HOST=192.168.68.202)
-  -> https://axis.tail5fe4b7.ts.net/
+  -> https://axis.tail5fe4b7.ts.net:3000/
 ```
 
 No browser na tailnet (hostname ≠ `localhost`), **Abrir** usa `GET /api/snapshots` (lista só `.json` de `output/`). **Imprimir** grava PDF/JSON no `output/` do servidor e reconstrói o SQLite antes de `window.print()`. `POST /api/open-snapshot` (seletor nativo) fica bloqueado quando a requisição traz `x-forwarded-proto` / `x-forwarded-for` (Serve).
