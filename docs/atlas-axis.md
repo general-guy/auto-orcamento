@@ -51,7 +51,7 @@ Pedido explícito, a partir do clone `local-atlas` neste PC:
 py -3 .\axis\scripts\deploy_auto_orcamento.py
 ```
 
-Copia **código** para `/opt/auto-orcamento` (sem `data/`/`output/`/`export/` no tar); dados em axis-data (`push_axis_data.py` + binds). CT: Node 22 em `/usr/local` (`prepare_ct100.py`), `NODE_OPTIONS=--experimental-sqlite`; SQLite espelho só em `/data/auto-orcamento/export/` (sem cópia para dados-clinica). Detalhe: `docs/agent-memory/axis-ct100.md` e `local-atlas/docs/referencias/web-apps-axis.md`.
+Copia **código** para `/opt/auto-orcamento` (sem `data/`/`output/`/`export/` no tar); dados em axis-data (`push_axis_data.py` + binds). CT: Node 22 em `/usr/local` (`prepare_ct100.py`), `NODE_OPTIONS=--experimental-sqlite`; SQLite espelho em `/data/auto-orcamento/export/`. Detalhe: `docs/agent-memory/axis-ct100.md` e `local-atlas/docs/referencias/web-apps-axis.md`.
 
 ## Sync automático (Atlas dev)
 

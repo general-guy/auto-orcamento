@@ -7,8 +7,10 @@ Decisão (2026-10-25): concentrar em `C:\auto-orcamento\` o que muda no dia a di
 ```text
 C:\auto-orcamento\data\          históricos, settings, tabelas em runtime
 C:\auto-orcamento\output\        PDF + snapshot JSON
-C:\auto-orcamento\export\        orcamentos.sqlite (cópia na consolidação)
+C:\auto-orcamento\export\        orcamentos.sqlite (espelho na consolidação)
 ```
+
+Decisão (2026-10-27): a consolidação **não** copia mais SQLite, timbrado nem fontes para `dados-clinica/import/` — só grava em `EXPORT_DIR` (arranque, impressão, `npm run export:sqlite`). Contrato: `docs/export-sqlite.md`.
 
 - **Seed no repo:** `seed/data/` (versionado). `server/data-bootstrap.js` copia para `dataDir` só arquivos que ainda não existem ao vivo.
 - **Legado:** se ainda existir `{repo}/data/`, o bootstrap copia lacunas e **atualiza** destino se o arquivo no clone for mais recente.

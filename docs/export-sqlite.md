@@ -11,8 +11,6 @@ O Auto Orçamento **não** usa este banco como fonte canônica: PDF e JSON na pa
 | `output/*.json` | **Canônico** — banco de arquivos do app; botão **Abrir**, APIs `/api/snapshots*` |
 | `output/*.pdf` | Documento gerado na impressão |
 | `EXPORT_DIR/orcamentos.sqlite` | **Espelho** — `C:\auto-orcamento\export\` (Atlas) ou `/data/auto-orcamento/export/` (axis-data no CT 100) |
-| `../dados-clinica/import/orcamentos.sqlite` | **Entrega** só no **Atlas** (Windows); timbrado + fontes na mesma pasta `import/` |
-| CT 100 (axis-data) | **Sem** entrega para dados-clinica — espelho permanece só em `export/` (`linuxUsesAxisDataBind()` em `export-sqlite.js`) |
 
 ## Quando é atualizado
 
@@ -36,36 +34,14 @@ Se um JSON for apagado de `output/`, a entrada correspondente **desaparece** do 
 ## Localização
 
 ```text
-export/orcamentos.sqlite
-C:\auto-orcamento\export\orcamentos.sqlite   (Windows; cópia na consolidação)
-../dados-clinica/import/orcamentos.sqlite
+C:\auto-orcamento\export\orcamentos.sqlite   (Windows; EXPORT_DIR padrão)
+/data/auto-orcamento/export/orcamentos.sqlite   (CT 100, axis-data)
+{repo}/export/orcamentos.sqlite   (dev sem override win32/axis-data)
 ```
 
-A pasta `export/` está no `.gitignore` (como `output/`).
-A cópia em `dados-clinica/import/` também fica fora do Git.
+A pasta `export/` no clone pode estar no `.gitignore` (como `output/`).
 
-Após cada consolidação no **Atlas (Windows)**, entrega (push) para o dados-clinica:
-
-| Origem | Destino |
-|--------|---------|
-| `export/orcamentos.sqlite` | `C:\auto-orcamento\export\orcamentos.sqlite` |
-| `export/orcamentos.sqlite` | `../dados-clinica/import/orcamentos.sqlite` |
-| `assets/papel-timbrado.pdf` / `.png` | `../dados-clinica/import/` |
-| `assets/fonts/**` (Gotham / Cinzel) | `../dados-clinica/import/fonts/` |
-
-No **CT 100** (bind `/data/auto-orcamento`), nenhuma linha acima — só o espelho em `export/orcamentos.sqlite` no Patriot.
-
-Overrides:
-
-| Variável | Efeito |
-|----------|--------|
-| `AUTO_ORCAMENTO_DELIVER_SQLITE` | Caminho absoluto do `.sqlite` de destino (`none` / `false` desliga); omitido no Axis |
-| `AUTO_ORCAMENTO_DELIVER_IMPORT_DIR` | Pasta `import/` de destino (timbrado + fontes; só Atlas) |
-
-Falha na entrega é registada e **não** falha a consolidação local.
-
-O dados-clinica usa esses ficheiros na sessão **Orçamentos** (preview HTML do
-documento a partir de `payload_json`, sem ler `output/*.pdf`).
+Override: `EXPORT_DIR` (caminho absoluto da pasta do espelho).
 
 ## Schema (`budgets`)
 
@@ -89,7 +65,7 @@ documento a partir de `payload_json`, sem ler `output/*.pdf`).
 
 | Arquivo | Função |
 |---|---|
-| `server/export-sqlite.js` | Lê `output/*.json`, regrava o SQLite e entrega cópia ao dados-clinica |
+| `server/export-sqlite.js` | Lê `output/*.json` e regrava o SQLite em `EXPORT_DIR` |
 | `scripts/consolidate-to-sqlite.js` | CLI (`npm run export:sqlite`) |
 | `server/server.js` | Chama consolidação no arranque (`listen`) e após `/api/pdf` |
 

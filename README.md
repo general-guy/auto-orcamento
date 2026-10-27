@@ -235,7 +235,7 @@ export/orcamentos.sqlite
 C:\auto-orcamento\export\orcamentos.sqlite
 ```
 
-Também fora do Git (incluindo a pasta `export/` no repo). Após cada consolidação, cópias idênticas vão para `C:\auto-orcamento\export\` (Windows) e para `../dados-clinica/import/` (SQLite + papel timbrado + fontes), para a sessão **Orçamentos** da GUI. Detalhes: [`docs/export-sqlite.md`](docs/export-sqlite.md).
+Também fora do Git (incluindo a pasta `export/` no repo). A consolidação grava o espelho diretamente em `EXPORT_DIR` (`C:\auto-orcamento\export\` no Windows). Detalhes: [`docs/export-sqlite.md`](docs/export-sqlite.md).
 
 ## Impressão, PDF e snapshot JSON
 

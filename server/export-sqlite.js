@@ -1,7 +1,6 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { DatabaseSync } = require("node:sqlite");
-const { defaultWindowsExportDir, linuxUsesAxisDataBind } = require("./paths");
 const outputIndex = require("./output-index");
 
 const DEFAULT_DB_NAME = "orcamentos.sqlite";
@@ -101,157 +100,6 @@ function openDatabase(dbPath) {
   return db;
 }
 
-
-function defaultLetterheadSources(repoRoot) {
-  const assetsDir = path.join(repoRoot, "assets");
-  return [
-    path.join(assetsDir, "papel-timbrado.pdf"),
-    path.join(assetsDir, "papel-timbrado.png"),
-  ];
-}
-
-function defaultLetterheadDeliverDir(repoRoot) {
-  const envPath = String(process.env.AUTO_ORCAMENTO_DELIVER_IMPORT_DIR || "").trim();
-  if (envPath) {
-    return path.resolve(envPath);
-  }
-  return path.join(repoRoot, "..", "dados-clinica", "import");
-}
-
-
-function deliverFontsAssets(repoRoot, deliverDir) {
-  const delivered = [];
-  const deliverErrors = [];
-  const sourceRoot = path.join(repoRoot, "assets", "fonts");
-  const targetRoot = path.join(deliverDir || defaultLetterheadDeliverDir(repoRoot), "fonts");
-  if (!fs.existsSync(sourceRoot)) {
-    return { delivered, deliverErrors };
-  }
-
-  function walk(dir, relBase) {
-    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-      const abs = path.join(dir, entry.name);
-      const rel = path.join(relBase, entry.name);
-      if (entry.isDirectory()) {
-        walk(abs, rel);
-        continue;
-      }
-      const dest = path.join(targetRoot, rel);
-      try {
-        fs.mkdirSync(path.dirname(dest), { recursive: true });
-        const tempPath = dest + ".tmp";
-        fs.copyFileSync(abs, tempPath);
-        fs.renameSync(tempPath, dest);
-        delivered.push(dest);
-      } catch (error) {
-        deliverErrors.push({ path: dest, message: error.message });
-      }
-    }
-  }
-
-  walk(sourceRoot, "");
-  return { delivered, deliverErrors };
-}
-
-function deliverLetterheadAssets(repoRoot, deliverDir) {
-  const delivered = [];
-  const deliverErrors = [];
-  const targetDir = deliverDir || defaultLetterheadDeliverDir(repoRoot);
-  try {
-    fs.mkdirSync(targetDir, { recursive: true });
-  } catch (error) {
-    return {
-      delivered,
-      deliverErrors: [{ path: targetDir, message: error.message }],
-    };
-  }
-
-  for (const source of defaultLetterheadSources(repoRoot)) {
-    if (!fs.existsSync(source)) {
-      continue;
-    }
-    const absolute = path.join(targetDir, path.basename(source));
-    try {
-      const tempPath = absolute + ".tmp";
-      fs.copyFileSync(source, tempPath);
-      fs.renameSync(tempPath, absolute);
-      delivered.push(absolute);
-    } catch (error) {
-      deliverErrors.push({ path: absolute, message: error.message });
-    }
-  }
-
-  return { delivered, deliverErrors };
-}
-
-function defaultDeliverPaths(repoRoot) {
-  const envPath = String(process.env.AUTO_ORCAMENTO_DELIVER_SQLITE || "").trim();
-  if (envPath) {
-    const lowered = envPath.toLowerCase();
-    if (lowered === "none" || lowered === "false" || envPath === "0") {
-      return [];
-    }
-    return [path.resolve(envPath)];
-  }
-
-  // CT 100 (axis-data bind): espelho só em export/; sem cópia para dados-clinica.
-  if (linuxUsesAxisDataBind()) {
-    return [];
-  }
-
-  // Atlas (Windows): entrega ao clone irmão dados-clinica.
-  return [path.join(repoRoot, "..", "dados-clinica", "import", DEFAULT_DB_NAME)];
-}
-
-function extraExportSqliteMirrorPath() {
-  if (process.platform === "win32") {
-    return path.join(path.resolve(defaultWindowsExportDir), DEFAULT_DB_NAME);
-  }
-
-  return null;
-}
-
-function withExtraExportDeliverPaths(targets) {
-  const mirrorTarget = extraExportSqliteMirrorPath();
-  if (!mirrorTarget) {
-    return targets;
-  }
-
-  const resolved = new Set((targets || []).map((target) => path.resolve(target)));
-  if (resolved.has(path.resolve(mirrorTarget))) {
-    return targets;
-  }
-
-  return [...(targets || []), mirrorTarget];
-}
-
-function deliverSqliteCopy(dbPath, deliverPaths) {
-  const delivered = [];
-  const deliverErrors = [];
-
-  for (const target of deliverPaths || []) {
-    if (!target) {
-      continue;
-    }
-
-    try {
-      const absolute = path.resolve(target);
-      fs.mkdirSync(path.dirname(absolute), { recursive: true });
-      const tempPath = absolute + ".tmp";
-      fs.copyFileSync(dbPath, tempPath);
-      fs.renameSync(tempPath, absolute);
-      delivered.push(absolute);
-    } catch (error) {
-      deliverErrors.push({
-        path: String(target),
-        message: error.message,
-      });
-    }
-  }
-
-  return { delivered, deliverErrors };
-}
-
 /**
  * Lê todos os JSON em output/ e regrava o SQLite em export/.
  * O banco espelha o conteúdo atual de output/ (reconstrução completa).
@@ -260,8 +108,6 @@ function consolidateOutputToSqlite({
   outputDir,
   exportDir,
   dbName = DEFAULT_DB_NAME,
-  deliverPaths,
-  repoRoot,
 } = {}) {
   if (!outputDir || !exportDir) {
     throw new Error("outputDir e exportDir são obrigatórios.");
@@ -270,10 +116,6 @@ function consolidateOutputToSqlite({
   ensureExportDir(exportDir);
 
   const dbPath = path.join(exportDir, dbName);
-  const resolvedRepoRoot = repoRoot || path.join(exportDir, "..");
-  const targets = withExtraExportDeliverPaths(
-    deliverPaths !== undefined ? deliverPaths : defaultDeliverPaths(resolvedRepoRoot),
-  );
   const jsonPaths = listSnapshotJsonFiles(outputDir);
   const records = [];
   const errors = [];
@@ -343,15 +185,6 @@ function consolidateOutputToSqlite({
     db.close();
   }
 
-  const delivery = deliverSqliteCopy(dbPath, targets);
-  const skipClinicaDeliver = linuxUsesAxisDataBind();
-  const letterhead = skipClinicaDeliver
-    ? { delivered: [], deliverErrors: [] }
-    : deliverLetterheadAssets(resolvedRepoRoot);
-  const fonts = skipClinicaDeliver
-    ? { delivered: [], deliverErrors: [] }
-    : deliverFontsAssets(resolvedRepoRoot);
-
   return {
     dbPath,
     dbRelativeHint: path.join("export", dbName).split(path.sep).join("/"),
@@ -359,8 +192,6 @@ function consolidateOutputToSqlite({
     skipped: errors.length,
     errors,
     consolidatedAt,
-    delivered: delivery.delivered.concat(letterhead.delivered, fonts.delivered),
-    deliverErrors: delivery.deliverErrors.concat(letterhead.deliverErrors, fonts.deliverErrors),
   };
 }
 

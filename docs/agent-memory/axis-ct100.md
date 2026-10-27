@@ -16,7 +16,7 @@ Decisão (2026-10-25): produção no CT 100 segue o mesmo recorte do Atlas — *
 /data/auto-orcamento/
 ├── data/      pacientes, settings, tabelas em runtime (DATA_DIR)
 ├── output/    PDF + snapshot JSON (OUTPUT_DIR)
-└── export/    orcamentos.sqlite (consolidação; espelho para dados-clinica no Axis)
+└── export/    orcamentos.sqlite (consolidação)
 ```
 
 O **seed** versionado continua só no código (`/opt/auto-orcamento/seed/data/`). O bootstrap preenche lacunas em `DATA_DIR` na primeira subida — não sobrescreve produção ao vivo.
@@ -46,10 +46,10 @@ O **seed** versionado continua só no código (`/opt/auto-orcamento/seed/data/`)
 
 ## Implementado (2026-10-25)
 
-- Unit `auto-orcamento.service`: `DATA_DIR`, `OUTPUT_DIR`, `EXPORT_DIR` em `/data/...` (sem entrega SQLite para dados-clinica no Axis).
+- Unit `auto-orcamento.service`: `DATA_DIR`, `OUTPUT_DIR`, `EXPORT_DIR` em `/data/...`.
 - `server/paths.js`: Linux com bind `/data/auto-orcamento` usa `data/`, `output/`, `export/`; Windows canônico `C:\auto-orcamento\export`.
 - `deploy_auto_orcamento.py`: tar sem `data|output|export`; limpa resíduos em `/opt/auto-orcamento/{data,output,export}`; `mkdir` no bind.
-- `export-sqlite.js`: no CT (bind axis-data) espelho só em `export/`; entrega a dados-clinica só no Atlas (Windows).
+- `export-sqlite.js`: espelho só em `EXPORT_DIR` (`export/` no axis-data ou `C:\auto-orcamento\export` no Atlas).
 - CT 100: Node.js 22.x (`prepare_ct100.py` / NodeSource) para `node:sqlite`.
 
 Cutover operacional: `push_axis_data.py --only auto-orcamento` + `deploy_auto_orcamento.py`.

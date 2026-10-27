@@ -309,7 +309,7 @@ Com duas ou mais entradas no formulário, `updateHospitalFieldStructure()` exibe
 
 A pasta de saída (`outputDir` em `server/paths.js`) guarda os PDFs e snapshots JSON gerados ao clicar em **Imprimir orçamento**. No Windows o padrão é `C:\auto-orcamento\output\`; ela é criada pelo servidor quando necessário e não entra no controle de versão. Cada par usa o mesmo nome base (`.pdf` e `.json`), no formato `{paciente} - {cirurgia} {AAAA-MM-DD HH-mm-ss}` — a primeira cirurgia preenchida no formulário vem do snapshot enviado na impressão.
 
-Os JSON nessa pasta são a **fonte canônica** do banco de arquivos do app (**Abrir**, `GET /api/snapshots*`). A pasta `export/` no repo guarda `orcamentos.sqlite`, um **espelho** reconstruído ao **abrir o app** e a cada impressão local (ou via `npm run export:sqlite`): apaga e reinsere todas as linhas a partir dos JSON atuais — sem histórico legado. No **Atlas**, na mesma consolidação o espelho (e timbrado + fontes) é **entregue** a `dados-clinica/import/` para a GUI Orçamentos; no **CT 100** só `export/` em axis-data. Schema e contrato: `docs/export-sqlite.md`.
+Os JSON nessa pasta são a **fonte canônica** do banco de arquivos do app (**Abrir**, `GET /api/snapshots*`). O espelho `orcamentos.sqlite` em `EXPORT_DIR` é reconstruído ao **abrir o app** e a cada impressão local (ou via `npm run export:sqlite`): apaga e reinsere todas as linhas a partir dos JSON atuais — sem histórico legado. Schema e contrato: `docs/export-sqlite.md`.
 
 ## Lógica de Cirurgia
 
