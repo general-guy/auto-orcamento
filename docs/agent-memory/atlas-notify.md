@@ -7,7 +7,7 @@ Complemento a [`axis-data-live-sync.md`](axis-data-live-sync.md). O **CT** não 
 1. Axis grava em `/data/auto-orcamento/…` (bind axis-data).
 2. `server/atlas-notify.js` envia `POST` com `{ relativePath }` ou `{ relativePaths }`.
 3. Atlas valida o token, responde na hora `{ phase: "received" }` e mantém o POST aberto até o `--pull-if-remote-newer` terminar; aí envia `{ phase: "synced" }`.
-4. No Axis, cada linha vira um toast ao vivo no SSE `/api/sync/events` (sem replay de sessões anteriores). Atlas fechado: sem toast. O botão de histórico fica na barra **Documento Final** (também no Tailscale).
+4. No Axis, cada linha vira um toast ao vivo no SSE `/api/sync/events` (sem replay de sessões anteriores). Atlas fechado: sem toast (notify rejeita se `:3000` não estiver ativo; ao fechar a UI, encerrar também `:3010`). O botão de histórico fica na barra **Documento Final** (também no Tailscale).
 
 ## Configuração (segredos fora do git)
 

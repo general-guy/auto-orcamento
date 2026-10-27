@@ -335,6 +335,10 @@
     return fetchJson(`/api/snapshots/${encodeURIComponent(name)}`);
   }
 
+  async function deleteSnapshot(name) {
+    return fetchJson(`/api/snapshots/${encodeURIComponent(name)}`, { method: "DELETE" });
+  }
+
   window.AppApi = {
     catalogLabel,
     catalogValor,
@@ -365,5 +369,6 @@
     openSnapshot,
     listSnapshots,
     loadSnapshot,
+    deleteSnapshot,
   };
 })();

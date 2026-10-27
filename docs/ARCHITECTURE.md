@@ -121,7 +121,7 @@ Axis host (192.168.68.201)  tailscale serve --https=3000
   -> https://axis.tail5fe4b7.ts.net:3000/
 ```
 
-No browser na tailnet (hostname ≠ `localhost`), **Abrir** usa `GET /api/snapshots` (lista só `.json` de `output/`). **Imprimir** grava PDF/JSON no `output/` do servidor e reconstrói o SQLite antes de `window.print()`. `POST /api/open-snapshot` (seletor nativo) fica bloqueado quando a requisição traz `x-forwarded-proto` / `x-forwarded-for` (Serve).
+**Abrir** (Atlas e tailnet) usa o modal `#snapshotPicker` com `GET /api/snapshots` (lista recursiva de `.json` em `output/`, respeitando tombstones em `orcamentos-index.json`) e `DELETE /api/snapshots/:caminho` para **Excluir** (Lixeira no Windows; remoção permanente no Linux/CT). **Imprimir** grava PDF/JSON, atualiza o índice, reconstrói o SQLite e chama `window.print()` (`@media print` oculta toasts de sync). `POST /api/open-snapshot` (seletor nativo) permanece na API; bloqueado em requisições remotas com proxy do Serve.
 
 `abrir-auto-orcamento.bat` reutiliza servidor ativo na porta 3000 (`--keep-server`).
 
@@ -159,7 +159,9 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 | `web/budget-snapshot.js` | Snapshot JSON do formulário na impressão e validação na importação |
 | `server/snapshot-open-dialog.js` | Invoca `scripts/open-snapshot-dialog.py` (pywebview/WebView2) ou PowerShell para seletor nativo de JSON |
 | `server/pdf-export.js` | PDF via Puppeteer + Chrome/Edge; grava JSON ao lado do PDF |
-| `server/export-sqlite.js` | Consolida `output/*.json` em `export/orcamentos.sqlite` (espelho para outros apps) |
+| `server/export-sqlite.js` | Consolida `output/**/*.json` ativos (tombstones no índice) em `export/orcamentos.sqlite` |
+| `server/output-index.js` | `output/orcamentos-index.json` — registro na impressão e tombstones no **Excluir** |
+| `server/trash-file.js` | Lixeira no Windows; `unlink` permanente no Linux (CT) |
 | `scripts/consolidate-to-sqlite.js` | CLI da consolidação (`npm run export:sqlite`) |
 | `assets/launcher.html` | Splash local; detecta servidor e redireciona para o app |
 | `server/port-utils.js` | Liberação da porta 3000 (sondagem TCP assíncrona; fallback `netstat`/`taskkill` no Windows) |
@@ -208,8 +210,9 @@ Endpoints principais:
 - `GET /api/unimed-n`, `POST /api/unimed-n`, `DELETE /api/unimed-n`, `PUT /api/unimed-n`: procedimentos Unimed N (catálogo v2; POST aceita `{ nome, valor }`).
 - `GET /api/settings`, `PUT /api/settings`: preferências locais (zoom; `lastSnapshotDir` para o botão **Abrir**; grava em `data/settings.json`).
 - `POST /api/open-snapshot`: abre seletor nativo de JSON no Windows (`pywebview`/WebView2 via `scripts/open-snapshot-dialog.py`), lê o arquivo, persiste a pasta em `lastSnapshotDir` e devolve o snapshot parseado. **Bloqueado** para requisições remotas (headers de proxy do Serve).
-- `GET /api/snapshots`: lista snapshots `.json` em `output/` (nome, data, tamanho). Somente leitura; seguro para acesso remoto.
-- `GET /api/snapshots/:nome`: lê um snapshot de `output/` com validação estrita de caminho (sem travessia de diretório; só `.json`).
+- `GET /api/snapshots`: lista snapshots ativos em `output/` (caminho relativo, data, tamanho).
+- `GET /api/snapshots/:caminho`: lê um `.json` com validação de caminho (subpastas permitidas; sem `..`).
+- `DELETE /api/snapshots/:caminho`: tombstone em `orcamentos-index.json`, remove par pdf+json (`server/trash-file.js` no Atlas), reconstrói SQLite, enfileira sync/notify.
 - `POST /api/pdf`: gera PDF + snapshot JSON em `output/` (mesmo nome base) e, em seguida, reconstrói `export/orcamentos.sqlite` a partir de todos os JSON de `output/` (falha no SQLite não falha a resposta do PDF).
 - `POST /api/shutdown`: encerra o servidor ao fechar a janela (`launcher/native_launcher.py` ou fallback `launcher/launch-app.js`); bloqueado para visitantes remotos; ignorado com `--keep-server`.
 
@@ -423,8 +426,8 @@ Falhas de exportação exibem um `alert` além do log no console. Requer Chrome 
 
 O botão **Abrir** (`#openButton`, verde, ao lado de **Limpar** no rodapé do formulário) restaura um snapshot JSON no formulário:
 
-- **Uso local:** `AppApi.openSnapshot()` → `POST /api/open-snapshot`. No Windows, `scripts/open-snapshot-dialog.py` usa **pywebview** para diálogo nativo nítido em HiDPI; fallback PowerShell/tkinter. Preferência: `lastSnapshotDir`; fallback `C:\auto-orcamento\output\` (servidor e script Python).
-- **Browser na tailnet (hostname ≠ localhost):** modal `#snapshotPicker` lista `GET /api/snapshots` e carrega `GET /api/snapshots/:nome` (diálogo largo em flex; ordenação por nome ou data com toggle nos botões `#snapshotPickerSortName` / `#snapshotPickerSortDate`). Somente leitura de `output/`; não expõe o sistema de arquivos do servidor. Detalhe: `docs/acesso-remoto.md`.
+- **UI (Atlas + tailnet):** `#openButton` → modal `#snapshotPicker` (`GET /api/snapshots`, `GET`/`DELETE /api/snapshots/:caminho`). Ordenação e **Excluir** sem confirmação. Índice: `server/output-index.js`; sync: `sync_output_index.py` (local-atlas). Detalhe: `docs/agent-memory/output-index-sync.md`, `docs/acesso-remoto.md`.
+- **Legado API:** `POST /api/open-snapshot` + `scripts/open-snapshot-dialog.py` (pywebview); não usado pelo botão **Abrir** atual.
 
 **Stack Tauri (congelada):** `export_pdf` gera só PDF; não há snapshot JSON nem importação.
 

@@ -1,4 +1,6 @@
 # Agent memory — changelog
+- 2026-10-27: Excluir output/ — Lixeira no Atlas (trash-file.js); remocao permanente no CT; skills ct100 atualizados; README/ARCHITECTURE/atlas-axis-sync.
+- 2026-10-27: output/ — orcamentos-index.json (tombstones), modal Abrir com Excluir (Atlas+Axis), merge sync_output_index.py; backfill scripts/backfill-output-index.js; output-index-sync.md.
 - 2026-10-27: Impressão — `@media print` oculta toasts de sync (`.axis-sync-toasts`); evita notify/sync na folha ao imprimir; `axis-sync-ui.md`.
 - 2026-10-26: CT notify SSE — sem replay de toasts; removido toast legado { ok: true } (falso positivo com Atlas fechado).
 - 2026-10-26: Recarregar UI (toolbar) — SSE `skipReplay=1` evita repetir toasts do buffer (ex. conflito `/data/` do startup); `axis-sync-ui.md`.

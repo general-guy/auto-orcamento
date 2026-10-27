@@ -1,4 +1,5 @@
 const { spawn } = require("node:child_process");
+const { freeTcpPortSync } = require("../server/port-utils");
 const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
@@ -91,6 +92,8 @@ function shutdown(exitCode = 0) {
     }
 
     void shutdownExternalServer().finally(() => {
+      freeTcpPortSync(3000);
+      freeTcpPortSync(3010);
       process.exit(exitCode);
     });
     return;

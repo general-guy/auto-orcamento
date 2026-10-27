@@ -418,7 +418,11 @@
           <h2 id="snapshotPickerTitle">Abrir orçamento salvo</h2>
           <button type="button" id="snapshotPickerClose" class="snapshot-picker-close" aria-label="Fechar" data-snapshot-close>×</button>
         </div>
-        <p class="snapshot-picker-hint">Arquivos salvos em <code>output/</code> no computador servidor (somente leitura).</p>
+        <p class="snapshot-picker-hint">
+          Orçamentos em <code>output/</code> neste servidor. <strong>Excluir</strong> registra tombstone em
+          <code>orcamentos-index.json</code> e envia PDF/JSON à <strong>Lixeira</strong> no Atlas (Windows); no CT os arquivos são
+          apagados de forma permanente. Apagar só pelo Explorer não sincroniza o tombstone.
+        </p>
         <input
           type="search"
           id="snapshotPickerSearch"

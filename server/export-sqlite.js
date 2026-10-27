@@ -2,6 +2,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { DatabaseSync } = require("node:sqlite");
 const { defaultWindowsExportDir, linuxUsesAxisDataBind } = require("./paths");
+const outputIndex = require("./output-index");
 
 const DEFAULT_DB_NAME = "orcamentos.sqlite";
 
@@ -10,16 +11,18 @@ function ensureExportDir(exportDir) {
 }
 
 function listSnapshotJsonFiles(outputDir) {
-  let entries;
-  try {
-    entries = fs.readdirSync(outputDir, { withFileTypes: true });
-  } catch {
-    return [];
-  }
+  const doc = outputIndex.readIndexDoc(outputDir);
+  const tombstoned = new Set(
+    (doc.items || [])
+      .filter((item) => item?.deleted === true)
+      .map((item) => outputIndex.normalizeOutputRelative(item?.json))
+      .filter(Boolean),
+  );
 
-  return entries
-    .filter((entry) => entry.isFile() && path.extname(entry.name).toLowerCase() === ".json")
-    .map((entry) => path.join(outputDir, entry.name))
+  return outputIndex
+    .listJsonFilesOnDisk(outputDir)
+    .filter((row) => !tombstoned.has(row.relative))
+    .map((row) => row.fullPath)
     .sort((left, right) => path.basename(left).localeCompare(path.basename(right), "pt-BR"));
 }
 

@@ -26,7 +26,7 @@ Antes de qualquer SSH/rsync: se o PVE não responde, o script chama o mesmo flux
 
 Ordem fixa:
 
-1. **Merge** `data/` → `output/` → `export/` (por arquivo: mtime mais novo vence; empate + SHA diferente → **toast amarelo**, sem overwrite).
+1. **Merge** `data/` → `output/` → `export/` (por arquivo: mtime mais novo vence; empate + SHA diferente → **toast amarelo**, sem overwrite). Em `output/`, reconciliar primeiro `orcamentos-index.json` (`sync_output_index.py` — tombstones de pares pdf+json; ver [`agent-memory/output-index-sync.md`](agent-memory/output-index-sync.md)).
 2. **Código** incremental para `/opt/auto-orcamento` (manifesto local vs CT; `npm install` só se `package.json` / lock mudou; `systemctl restart auto-orcamento` se houve alteração).
 3. **Manifesto** axis-data (`publish_manifest` no script Python).
 
@@ -48,7 +48,8 @@ Detalhe do fluxo blur/API em [`docs/agent-memory/axis-data-live-sync.md`](agent-
 | Evento | Ação |
 |--------|------|
 | API lê/grava JSON em `data/` (históricos, settings, Unimed N, tecnologias) | Antes da leitura: **pull** se o Axis estiver mais novo (`--pull-if-remote-newer`). Após gravar: **reconcilia** aquele arquivo (`--push-relative` → `sync_one_relative`; mesmas regras de mtime do merge; não é push cego). |
-| `POST /api/pdf` (impressão) | Reconciliação do par `.pdf` + `.json` em `output/` e `export/orcamentos.sqlite` |
+| `POST /api/pdf` (impressão) | Par `.pdf` + `.json` em `output/`, entrada no índice, `export/orcamentos.sqlite` |
+| `DELETE /api/snapshots/...` (modal **Excluir**) | Tombstone no índice; push do índice; apagado físico (Lixeira Atlas / `rm` no CT) |
 
 Ordem típica no blur (ex.: novo paciente no histórico): pull se Axis mais novo → servidor lê JSON atualizado → grava com o novo item → fila reconcilia o mesmo arquivo.
 

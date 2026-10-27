@@ -3,10 +3,6 @@ const printButton = document.querySelector("#printButton");
 const openButton = document.querySelector("#openButton");
 const openSnapshotInput = document.querySelector("#openSnapshotInput");
 
-function usesSnapshotPickerForOpen() {
-  const host = window.location.hostname;
-  return host !== "127.0.0.1" && host !== "localhost";
-}
 const clearButton = document.querySelector("#clearButton");
 const addSurgeryButton = document.querySelector("#addSurgeryButton");
 const removeSurgeryButton = document.querySelector("#removeSurgeryButton");
@@ -4444,28 +4440,7 @@ async function openBudgetSnapshotFile(file) {
 }
 
 async function handleOpenButtonClick() {
-  // No acesso remoto usamos a caixa dedicada (somente leitura de output/), que
-  // não expõe o sistema de arquivos do servidor.
-  if (usesSnapshotPickerForOpen()) {
-    await openSnapshotPicker();
-    return;
-  }
-
-  try {
-    const result = await AppApi.openSnapshot();
-    if (result.cancelled) {
-      return;
-    }
-
-    if (result.error) {
-      window.alert(result.error);
-      return;
-    }
-
-    await applySnapshotPayload(result.snapshot);
-  } catch (error) {
-    window.alert(`Não foi possível abrir o seletor de arquivos.\n\n${error.message}`);
-  }
+  await openSnapshotPicker();
 }
 
 const snapshotPicker = document.querySelector("#snapshotPicker");
@@ -4564,6 +4539,8 @@ function renderSnapshotPickerList() {
 
   for (const file of files) {
     const item = document.createElement("li");
+    item.className = "snapshot-picker-row";
+
     const button = document.createElement("button");
     button.type = "button";
     button.className = "snapshot-picker-item";
@@ -4578,8 +4555,29 @@ function renderSnapshotPickerList() {
     meta.textContent = formatSnapshotDate(file.modifiedAt);
 
     button.append(name, meta);
-    item.appendChild(button);
+
+    const deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "snapshot-picker-delete";
+    deleteButton.dataset.snapshotName = file.name;
+    deleteButton.setAttribute("aria-label", `Excluir ${file.name.replace(/\.json$/i, "")}`);
+    deleteButton.textContent = "Excluir";
+
+    item.append(button, deleteButton);
     snapshotPickerList.appendChild(item);
+  }
+}
+
+async function deleteSnapshotFromServer(name) {
+  setSnapshotPickerStatus("Excluindo…");
+
+  try {
+    await AppApi.deleteSnapshot(name);
+    snapshotPickerFiles = snapshotPickerFiles.filter((file) => file.name !== name);
+    renderSnapshotPickerList();
+    setSnapshotPickerStatus("");
+  } catch (error) {
+    setSnapshotPickerStatus(`Não foi possível excluir.\n${error.message}`);
   }
 }
 
@@ -6132,6 +6130,12 @@ if (snapshotPicker) {
   snapshotPicker.addEventListener("click", (event) => {
     if (event.target.closest("[data-snapshot-close]")) {
       closeSnapshotPicker();
+      return;
+    }
+
+    const deleteControl = event.target.closest(".snapshot-picker-delete");
+    if (deleteControl?.dataset.snapshotName) {
+      void deleteSnapshotFromServer(deleteControl.dataset.snapshotName);
       return;
     }
 

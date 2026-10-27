@@ -344,7 +344,7 @@ function createAxisSync({ bindHost, dataDir }) {
     if (!enabled) {
       return;
     }
-    const paths = [];
+    const paths = ["output/orcamentos-index.json"];
     if (filename) {
       paths.push(`output/${filename}`);
     }
@@ -353,6 +353,13 @@ function createAxisSync({ bindHost, dataDir }) {
     }
     paths.push("export/orcamentos.sqlite");
     enqueuePushRelatives(paths);
+  }
+
+  function afterOutputIndexChange() {
+    if (!enabled) {
+      return;
+    }
+    enqueuePushRelatives(["output/orcamentos-index.json", "export/orcamentos.sqlite"]);
   }
 
   function attachSyncEventsRoute(request, response) {
@@ -394,6 +401,7 @@ function createAxisSync({ bindHost, dataDir }) {
     pullDataFileIfRemoteNewer,
     afterDataFileWrite,
     afterPdfExport,
+    afterOutputIndexChange,
     attachSyncEventsRoute,
   };
 }

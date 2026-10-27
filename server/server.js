@@ -3,7 +3,7 @@ const http = require("node:http");
 const path = require("node:path");
 
 require("./load-local-env").loadAtlasNotifyEnv();
-const { freeTcpPort } = require("./port-utils");
+const { freeTcpPort, freeTcpPortSync } = require("./port-utils");
 
 function isRemoteRequest(request) {
   if (request.headers["x-forwarded-proto"] === "https") {
@@ -33,12 +33,14 @@ const {
 } = require("./atlas-notify");
 const { EMPTY_CATALOG } = require("./catalog-v2");
 const { readCatalogFresh, writeCatalog, handleCatalogApi } = require("./catalog-http");
+const outputIndex = require("./output-index");
 
 const port = 3000;
 const bindHost = process.env.BIND_HOST || "127.0.0.1";
 const axisSync = createAxisSync({ bindHost, dataDir });
 const atlasNotifyRoots = { dataDir, outputDir, exportDir };
-const handleAtlasNotifyRequest = createAtlasNotifyRequestHandler({ axisSync });
+let handleAtlasNotifyRequest;
+let notifyHttpServer = null;
 const surgeriesFile = path.join(dataDir, "cirurgias.json");
 const hospitalsFile = path.join(dataDir, "hospitais.json");
 const patientsFile = path.join(dataDir, "pacientes.json");
@@ -339,68 +341,29 @@ function ensureOutputDir() {
   fs.mkdirSync(outputDir, { recursive: true });
 }
 
-// Resolve um nome de arquivo para dentro de output/, rejeitando travessia de
-// diretórios e qualquer coisa que não seja um .json na própria pasta.
 function resolveOutputSnapshotPath(rawName) {
-  if (typeof rawName !== "string" || !rawName) {
+  const relative = outputIndex.normalizeOutputRelative(rawName);
+  if (!relative) {
     return null;
   }
 
-  const name = path.basename(rawName);
-  if (name !== rawName || name.includes("/") || name.includes("\\") || name.includes("..")) {
-    return null;
-  }
-
-  if (path.extname(name).toLowerCase() !== ".json") {
-    return null;
-  }
-
-  const resolved = path.resolve(outputDir, name);
-  const base = path.resolve(outputDir);
-  if (resolved !== path.join(base, name) || !resolved.startsWith(base + path.sep)) {
+  const resolved = path.resolve(outputDir, relative);
+  if (!isPathInsideDir(resolved, outputDir)) {
     return null;
   }
 
   return resolved;
 }
 
-function listOutputSnapshots() {
-  ensureOutputDir();
-
-  let entries;
-  try {
-    entries = fs.readdirSync(outputDir, { withFileTypes: true });
-  } catch {
-    return [];
-  }
-
-  return entries
-    .filter((entry) => entry.isFile() && path.extname(entry.name).toLowerCase() === ".json")
-    .map((entry) => {
-      const fullPath = path.join(outputDir, entry.name);
-      let modifiedAt = null;
-      let size = 0;
-      try {
-        const stats = fs.statSync(fullPath);
-        modifiedAt = stats.mtime.toISOString();
-        size = stats.size;
-      } catch {
-        // arquivo removido entre readdir e stat
-      }
-
-      return { name: entry.name, modifiedAt, size };
-    })
-    .sort((left, right) => String(right.modifiedAt).localeCompare(String(left.modifiedAt)));
-}
-
 async function handleSnapshotsApi(request, response, pathname) {
-  if (request.method !== "GET") {
-    sendJson(response, 405, { error: "Método não permitido." });
-    return;
-  }
-
   if (pathname === "/api/snapshots") {
-    sendJson(response, 200, { files: listOutputSnapshots() });
+    if (request.method !== "GET") {
+      sendJson(response, 405, { error: "Método não permitido." });
+      return;
+    }
+
+    ensureOutputDir();
+    sendJson(response, 200, { files: outputIndex.listVisibleSnapshots(outputDir) });
     return;
   }
 
@@ -410,6 +373,47 @@ async function handleSnapshotsApi(request, response, pathname) {
 
   if (!filePath) {
     sendJson(response, 400, { error: "Nome de arquivo inválido." });
+    return;
+  }
+
+  if (request.method === "DELETE") {
+    const tombstone = outputIndex.tombstoneByJsonRelative(outputDir, requestedName);
+    if (tombstone.error) {
+      sendJson(response, 400, { error: tombstone.error });
+      return;
+    }
+
+    const removed = outputIndex.removePairFiles(
+      outputDir,
+      tombstone.jsonRelative,
+      tombstone.pdfRelative,
+    );
+    consolidateOutputSqliteSafe();
+    axisSync.afterOutputIndexChange();
+
+    const notifyPaths = [
+      `output/${outputIndex.indexRelativePath()}`,
+      ...removed.map((rel) => `output/${rel.replace(/\\/g, "/")}`),
+    ];
+    const atlasNotify = await notifyAtlasRelativePaths(notifyPaths);
+
+    sendJson(response, 200, {
+      ok: true,
+      removed,
+      jsonRelative: tombstone.jsonRelative,
+      atlasNotify,
+    });
+    return;
+  }
+
+  if (request.method !== "GET") {
+    sendJson(response, 405, { error: "Método não permitido." });
+    return;
+  }
+
+  const doc = outputIndex.readIndexDoc(outputDir);
+  if (outputIndex.isJsonTombstoned(doc, requestedName)) {
+    sendJson(response, 404, { error: "Orçamento removido." });
     return;
   }
 
@@ -426,7 +430,7 @@ async function handleSnapshotsApi(request, response, pathname) {
     return;
   }
 
-  sendJson(response, 200, { name: path.basename(filePath), snapshot });
+  sendJson(response, 200, { name: outputIndex.normalizeOutputRelative(requestedName), snapshot });
 }
 
 async function handleSettingsApi(request, response) {
@@ -492,6 +496,10 @@ async function handlePdfExport(request, response) {
     responsePayload.jsonFilename = path.basename(jsonPath);
     responsePayload.jsonPath = jsonPath;
     await writeSettings({ lastSnapshotDir: path.dirname(jsonPath) });
+    outputIndex.registerExportPair(outputDir, {
+      jsonAbsolute: jsonPath,
+      pdfAbsolute: outputPath,
+    });
   }
 
   // Espelha todos os JSON de output/ em export/orcamentos.sqlite (outros webapps).
@@ -507,12 +515,13 @@ async function handlePdfExport(request, response) {
     jsonFilename: responsePayload.jsonFilename,
   });
 
-  const notifyPaths = [];
+  const notifyPaths = [`output/${outputIndex.indexRelativePath()}`];
   if (responsePayload.filename) {
     notifyPaths.push(`output/${responsePayload.filename}`);
   }
   if (responsePayload.jsonFilename) {
-    notifyPaths.push(`output/${responsePayload.jsonFilename}`);
+    const jsonRel = outputIndex.toPosixRelative(outputDir, jsonPath);
+    notifyPaths.push(`output/${jsonRel || responsePayload.jsonFilename}`);
   }
   notifyPaths.push("export/orcamentos.sqlite");
   const atlasNotify = await notifyAtlasRelativePaths(notifyPaths);
@@ -708,7 +717,7 @@ const server = http.createServer(async (request, response) => {
 
       sendJson(response, 200, { ok: true });
       setTimeout(() => {
-        server.close(() => process.exit(0));
+        shutdownAtlasServers();
       }, 100);
       return;
     }
@@ -764,7 +773,6 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (request.url.startsWith("/api/snapshots")) {
-      // Lista/leitura somente-leitura de output/ (seguro para acesso remoto).
       const snapshotsPath = new URL(request.url, "http://localhost").pathname;
       await handleSnapshotsApi(request, response, snapshotsPath);
       return;
@@ -798,6 +806,29 @@ const server = http.createServer(async (request, response) => {
   }
 });
 
+handleAtlasNotifyRequest = createAtlasNotifyRequestHandler({
+  axisSync,
+  isAppSessionActive: () => Boolean(server.listening),
+});
+
+function shutdownAtlasServers() {
+  const notifyPort = Number(process.env.AUTO_ORCAMENTO_ATLAS_NOTIFY_PORT || 3010);
+  const finish = () => {
+    if (process.platform === "win32" && Number.isFinite(notifyPort)) {
+      freeTcpPortSync(notifyPort);
+    }
+    process.exit(0);
+  };
+  const closeMain = () => {
+    server.close(() => finish());
+  };
+  if (notifyHttpServer) {
+    notifyHttpServer.close(() => closeMain());
+    return;
+  }
+  closeMain();
+}
+
 async function startServer() {
   const bootstrap = ensureDataDirReady({
     dataDir,
@@ -817,6 +848,7 @@ async function startServer() {
 
   ensureDataFile();
   ensureOutputDir();
+  outputIndex.ensureIndexCoversDisk(outputDir);
   await freeTcpPort(port);
   server.listen(port, bindHost, () => {
     console.log(`Auto Orçamento disponível em http://${bindHost}:${port}`);
@@ -826,7 +858,7 @@ async function startServer() {
     // Espelho SQLite alinhado a output/ em cada abertura do app (além da impressão).
     consolidateOutputSqliteSafe();
     axisSync.scheduleStartupWhenUiReady();
-    startAtlasNotifyListener({ axisSync, handler: handleAtlasNotifyRequest });
+    notifyHttpServer = startAtlasNotifyListener({ axisSync, handler: handleAtlasNotifyRequest });
   });
 }
 

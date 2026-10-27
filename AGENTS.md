@@ -12,7 +12,7 @@ Para fluxos com plugins (quando pedir o quê, frases úteis): [`docs/cursor-plug
 - Dados ao vivo no Windows: `C:\auto-orcamento\data\` + `output\` + `export\` (ver `docs/agent-memory/output-path.md`). Seed no repo: `seed/data/`. Pasta `data/` no clone é local (`.gitignore`).
 - Sync Atlas↔Axis em background ao abrir o `.bat` (só `127.0.0.1`): `server/axis-sync.js` → `sync_auto_orcamento.py` (wake: `ensure_axis_online.py` no local-atlas); merge no arranque; em `data/` pull se Axis mais novo antes de ler API + reconcile após gravar (não push cego). Gravação no **Axis** avisa o Atlas via `POST /api/sync/notify` (`server/atlas-notify.js`, token em `C:\auto-orcamento\config\atlas-notify.env`) para pull pontual — `docs/agent-memory/atlas-notify.md`, `axis-data-live-sync.md`, `axis-sync-ui.md`.
 - Após mudar código: reabrir o app (`abrir-auto-orcamento.bat` ou `npm start`) — sem build. Deploy manual completo: `local-atlas` → `deploy_auto_orcamento.py`; o sync automático envia diff de código quando o manifesto mudou.
-- UI remota (Tailscale): sem `waitForBackend`; diagnóstico `?perf=1` e `scripts/bench_web_load.ps1`; modal **Abrir** com ordenação — `docs/acesso-remoto.md`.
+- UI remota (Tailscale): sem `waitForBackend`; diagnóstico `?perf=1` e `scripts/bench_web_load.ps1`; modal **Abrir** (também no Atlas local) com ordenação e **Excluir** — tombstones em `output/orcamentos-index.json`; Lixeira no Windows, apagado permanente no CT — `docs/acesso-remoto.md`, `docs/agent-memory/output-index-sync.md`.
 - Docs técnicas: `README.md`, `docs/ARCHITECTURE.md`, `docs/atlas-axis.md`, `docs/atlas-axis-sync.md`, `docs/acesso-remoto.md`, `docs/export-sqlite.md`, `docs/tabelas-hospitalares.md`, `docs/unimed-n.md`; memória temática em `docs/agent-memory/README.md`.
 
 ## Plugins Cursor (uso neste repo)
@@ -43,7 +43,7 @@ Para fluxos com plugins (quando pedir o quê, frases úteis): [`docs/cursor-plug
 - Porta local do app: `http://localhost:3000` (ou `127.0.0.1:3000`); bind padrão `127.0.0.1` (`BIND_HOST`).
 - Produção clínica: Axis CT 100 (`192.168.68.202:3000`, `BIND_HOST=192.168.68.202`) + Tailscale Serve no host → `https://axis.tail5fe4b7.ts.net:3000/`. Sem Funnel.
 - Dependência de PDF: `puppeteer-core` + Chrome/Edge instalado.
-- Snapshot JSON (`schemaVersion: 1`) e botão Abrir existem só na stack Node; Abrir lista só os `.json` de `output/` (sem diálogo nativo do sistema).
+- Snapshot JSON (`schemaVersion: 1`) e botão **Abrir** (modal `#snapshotPicker`, lista recursiva de `output/`) existem só na stack Node; índice de sync `output/orcamentos-index.json` (tombstones de pares pdf+json).
 - Espelho SQLite é reconstruído a partir de `output/` na abertura do servidor e após imprimir (também `npm run export:sqlite`); cópia em `C:\auto-orcamento\export\` e entrega para `dados-clinica/import/` **só no Atlas**; no CT 100 o espelho fica só em axis-data `export/`.
 - Históricos em `C:\auto-orcamento\data\` (schema v2 nos oito JSON de catálogo; `settings.json` v1); `items[].mtime` = epoch ms UTC; tombstones `deleted: true` no sync; `checked` opcional em `pagamentos` / `observacoes` / `extras` (listas rápidas); seed: `seed/data/`; spec `docs/agent-memory/data-schema-v2.md`.
 - Negrito do documento (observações `*texto*` e rótulo `Tempo previsto`) é Gotham Medium (`--document-emphasis-weight: 500`).

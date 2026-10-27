@@ -98,7 +98,7 @@ Otimizações aplicadas na stack atual: Node e WebView2 em paralelo, liberação
 | Launcher | Janela **WebView2 nativa** (`launcher/native_launcher.py`), **maximizada ao abrir**, consola oculta (`launcher/launch-hidden.vbs`), ícone `.ico` na barra de tarefas |
 | Startup | Node em background + `--external-server`; poll breve pelo Node; splash `assets/launcher.html`; módulos pesados lazy no servidor; scripts com `defer` |
 | Impressão | `@media print` anula zoom da UI — papel alinhado ao PDF automático |
-| Snapshot | Exportação JSON na impressão + botão **Abrir** com seletor nativo HiDPI (pywebview/WebView2) |
+| Snapshot | JSON na impressão + **Abrir** (modal com lista, ordenação e **Excluir**); índice `output/orcamentos-index.json` para sync de apagados |
 | Export SQLite | Na abertura e após imprimir, reconstrói `orcamentos.sqlite` em `C:\auto-orcamento\export\`; sync envia ao Axis em background |
 | Sync Axis | Wake se necessário, merge no arranque + pull/reconcile por arquivo em `data/` no Atlas; gravação no CT notifica o Atlas (notify HTTP) — [`docs/atlas-axis-sync.md`](docs/atlas-axis-sync.md), [`docs/agent-memory/axis-data-live-sync.md`](docs/agent-memory/axis-data-live-sync.md), [`docs/agent-memory/atlas-notify.md`](docs/agent-memory/atlas-notify.md), [`docs/agent-memory/axis-sync-ui.md`](docs/agent-memory/axis-sync-ui.md) |
 | Documento | Nas observações, `*texto*` (estilo WhatsApp) vira negrito no preview/PDF; o peso padrão do documento é Gotham Medium (`--document-emphasis-weight: 500`), inclusive o rótulo `Tempo previsto` |
@@ -263,17 +263,15 @@ Depois de alterar código, **reabra** o app (`abrir-auto-orcamento.bat`) para ca
 
 ## Abrir orçamento salvo
 
-O botão **Abrir** (verde, ao lado de **Limpar**) carrega um snapshot JSON gerado na impressão (ex.: `output/Maria da Silva - Abdominoplastia 2026-06-26 14-30-05.json`).
+O botão **Abrir** (verde, ao lado de **Limpar**) abre o modal com os snapshots em `output/` (subpastas incluídas). **Excluir** remove o par PDF+JSON, grava tombstone em `orcamentos-index.json` e sincroniza com o Axis; no **Atlas** os arquivos vão para a **Lixeira**; no **CT** a remoção é **permanente**. Apagar só pelo Explorer não registra tombstone — ver [`docs/agent-memory/output-index-sync.md`](docs/agent-memory/output-index-sync.md).
 
-### Uso local
+### Atlas e Axis (mesmo modal)
 
-1. No Windows, o servidor Node abre um **seletor nativo** via **pywebview** (WebView2, mesma stack do app; nítido em telas HiDPI), com fallback para PowerShell e tkinter.
-2. A pasta inicial é a **última usada** (`lastSnapshotDir` em `data/settings.json`), com fallback em `C:\auto-orcamento\output\`; a raiz do perfil do usuário (`C:\Users\...`) nunca é reutilizada como pasta salva. Após imprimir, essa pasta de saída também é gravada automaticamente.
-3. Ao escolher um arquivo, o app valida `schemaVersion: 1`, repopula o formulário e atualiza a pré-visualização.
+1. Lista via `GET /api/snapshots` (busca e ordenação por nome ou data).
+2. Clique na linha para carregar (`schemaVersion: 1`); **Excluir** na mesma lista.
+3. No **Atlas** (`127.0.0.1`) e na **tailnet** (`https://axis.tail5fe4b7.ts.net:3000/`) o fluxo é o mesmo; os arquivos vêm do `output/` **da máquina que serve a URL**.
 
-### Produção no Axis (celular / tablet)
-
-Abrir `https://axis.tail5fe4b7.ts.net:3000/` com Tailscale na mesma tailnet. **Abrir** usa a caixa dedicada com os `.json` de `output/` **no Axis**. Detalhes: [`docs/atlas-axis.md`](docs/atlas-axis.md).
+Legado: `POST /api/open-snapshot` (seletor nativo pywebview) permanece na API, mas o botão **Abrir** da UI não o usa. Detalhes: [`docs/acesso-remoto.md`](docs/acesso-remoto.md).
 
 Campos dinâmicos (cirurgias, hospitais com entradas auxiliares, extras, pagamento, observações), checkboxes de seções opcionais, listas rápidas e equipe são restaurados. Implantes são reassociados pelo índice ou por marca/modelo/referência na tabela local.
 

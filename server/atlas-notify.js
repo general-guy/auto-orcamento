@@ -334,10 +334,15 @@ function sendJson(response, statusCode, data) {
   response.end(payload);
 }
 
-function createAtlasNotifyRequestHandler({ axisSync }) {
+function createAtlasNotifyRequestHandler({ axisSync, isAppSessionActive }) {
   return async function handleAtlasNotifyRequest(request, response) {
     if (request.method !== "POST") {
       sendJson(response, 405, { error: "Método não permitido." });
+      return;
+    }
+
+    if (typeof isAppSessionActive === "function" && !isAppSessionActive()) {
+      sendJson(response, 503, { error: "Auto Orçamento fechado no Atlas." });
       return;
     }
 

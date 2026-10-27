@@ -6,7 +6,7 @@
 
 ## Abrir orçamento salvo (browser na tailnet)
 
-O seletor nativo de arquivos (`POST /api/open-snapshot`) só funciona em **localhost** no servidor. Em hostname remoto (ex.: URL do Axis), o botão **Abrir** usa a **lista de `.json` em `output/`** (`GET /api/snapshots*`), somente leitura.
+No **Atlas** e na **tailnet**, o botão **Abrir** usa o mesmo modal (`GET /api/snapshots*`) com **Excluir** (`DELETE`) — tombstone em `output/orcamentos-index.json`. O seletor nativo (`POST /api/open-snapshot`) permanece só para uso legado em localhost, fora do fluxo do botão **Abrir**.
 
 ## Impressão
 
@@ -22,7 +22,7 @@ No hostname remoto, **Abrir** usa `#snapshotPicker` (`GET /api/snapshots`). O di
 | Nome | A–Z ↔ Z–A |
 | Data | mais recente ↔ mais antiga (padrão ao abrir) |
 
-Filtro por nome permanece no campo de busca.
+Filtro por nome permanece no campo de busca. **Excluir** remove PDF+JSON no servidor e registra apagado para o sync (ver [`agent-memory/output-index-sync.md`](agent-memory/output-index-sync.md)).
 
 ## Primeiro carregamento (Tailscale)
 

@@ -1491,6 +1491,33 @@ body.login-page {
   padding: 2px;
 }
 
+.snapshot-picker-row {
+  display: flex;
+  gap: 8px;
+  list-style: none;
+}
+
+.snapshot-picker-row .snapshot-picker-item {
+  flex: 1;
+  min-width: 0;
+}
+
+.snapshot-picker-delete {
+  background: transparent;
+  border: 1px solid rgba(180, 35, 24, 0.35);
+  border-radius: 10px;
+  color: #b42318;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 10px 12px;
+}
+
+.snapshot-picker-delete:hover {
+  background: rgba(180, 35, 24, 0.08);
+}
+
 .snapshot-picker-item {
   align-items: center;
   background: var(--soft);

@@ -18,6 +18,7 @@ ICON_PATH = PROJECT_ROOT / "assets" / "app-icon.ico"
 LAUNCHER_PAGE = PROJECT_ROOT / "assets" / "launcher.html"
 APP_HOST = "127.0.0.1"
 APP_PORT = 3000
+NOTIFY_PORT = 3010
 APP_URL = f"http://{APP_HOST}:{APP_PORT}"
 APP_READY_URL = f"{APP_URL}/api/settings"
 APP_USER_MODEL_ID = "auto-orcamento.app"
@@ -143,10 +144,12 @@ def shutdown_server_via_api() -> bool:
 def ensure_server_stopped(owns_server: bool, server_process: subprocess.Popen[str] | None) -> None:
     if owns_server:
         stop_node_server(server_process)
+        free_tcp_port(NOTIFY_PORT)
         return
 
     if not shutdown_server_via_api():
         free_tcp_port(APP_PORT)
+    free_tcp_port(NOTIFY_PORT)
 
 
 def is_server_ready() -> bool:
