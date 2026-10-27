@@ -41,7 +41,7 @@ Wake manual para testar: `py -3 local-atlas/axis/scripts/wake_axis.py`.
 
 ## Histórico na UI (preview)
 
-`web/sync-toasts.js` grava cada toast em memória (máx. **10**) e expõe o botão de histórico na `preview-toolbar` do painel “Documento Final”. Os toasts ao vivo **não** entram no fluxo do documento (não empurram a folha); só o painel dropdown lista mensagem + `HH:MM:SS`.
+`web/sync-toasts.js` grava cada toast em memória (máx. **10**) e expõe na `preview-toolbar` do painel “Documento Final” o botão de recarregar a interface (à esquerda) e o de histórico. Os toasts ao vivo **não** entram no fluxo do documento (não empurram a folha); só o painel dropdown lista mensagem + `HH:MM:SS`.
 
 ## O que não é rsync
 

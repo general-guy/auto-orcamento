@@ -12,7 +12,7 @@ Abrir o app **sem bloquear a UI** no Axis; em segundo plano reconciliar `C:\auto
 |------|---------|
 | Fila + SSE | [`server/axis-sync.js`](../server/axis-sync.js) |
 | Log de sessões (10 últimas) | `C:\auto-orcamento\logs\axis-sync\session-*.log` — stdout/stderr de cada execução do Python (`startup`, `push`, …) |
-| Toasts UI | [`web/sync-toasts.js`](../web/sync-toasts.js), `GET /api/sync/events` — toasts flutuantes (`position: fixed`); ícone de histórico na **toolbar do preview** (à direita de “Documento Final”), painel com os **10** últimos toasts + horário |
+| Toasts UI | [`web/sync-toasts.js`](../web/sync-toasts.js), `GET /api/sync/events` — toasts flutuantes (`position: fixed`); na **toolbar do preview** (à direita de “Documento Final”), botão de recarregar a interface e, à direita dele, o ícone de histórico (painel com os **10** últimos toasts + horário) |
 | Motor merge + código | `local-atlas/axis/scripts/sync_auto_orcamento.py` |
 | Wake PVE (se offline) | `local-atlas/axis/scripts/ensure_axis_online.py` (`wake_axis.py` + `probe_host_ssh` em `ct_access.py`) |
 

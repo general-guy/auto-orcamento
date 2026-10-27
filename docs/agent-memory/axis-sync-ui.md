@@ -9,6 +9,7 @@ Só em `127.0.0.1` / `localhost` (mesma regra do `axis-sync.js`).
 | Fila + SSE | `server/axis-sync.js` — `--startup` após o **primeiro** cliente SSE (fallback 90 s); `enqueueAhead` faz o startup **passar na frente** de pulls já enfileirados; replay de toasts (3 min); fila awaitable (`pull` / `push`) |
 | Toasts ao vivo | `web/sync-toasts.js` — `EventSource` após `window.load` + `requestIdleCallback` (sync não atrasa a UI); `position: fixed` (não empurra o preview) |
 | Histórico (10) | Mesmo script — botão na `preview-toolbar` (à direita de “Documento Final”); painel com horário `HH:MM:SS` |
+| Recarregar | `web/sync-toasts.js` — botão à esquerda do histórico; `location.replace` com `?_r=`; `server/server.js` responde HTML com `Cache-Control: no-store` e `stampLocalAssets` (`?v=` no mtime de `.js`/`.css`); o script remove `_r` da URL após carregar |
 
 ## Wake na UI
 

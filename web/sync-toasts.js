@@ -6,6 +6,22 @@
   /** @type {{ at: Date, level: string, message: string, phase?: string }[]} */
   const historyEntries = [];
 
+  function clearForcedReloadParam() {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("_r")) {
+      return;
+    }
+    url.searchParams.delete("_r");
+    const next = `${url.pathname}${url.search}${url.hash}`;
+    window.history.replaceState(null, "", next || "/");
+  }
+
+  function forceReloadUi() {
+    const url = new URL(window.location.href);
+    url.searchParams.set("_r", String(Date.now()));
+    window.location.replace(url.toString());
+  }
+
   let historyUi = null;
 
   function ensureContainer() {
@@ -110,12 +126,21 @@
     const wrap = document.createElement("div");
     wrap.className = "axis-sync-history-wrap";
 
+    const reloadButton = document.createElement("button");
+    reloadButton.type = "button";
+    reloadButton.className = "axis-sync-reload-btn";
+    reloadButton.setAttribute("aria-label", "Recarregar a interface");
+    reloadButton.title = "Recarregar a interface";
+    reloadButton.innerHTML =
+      '<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+      '<path fill="currentColor" d="M17.65 6.35A7.96 7.96 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>';
+
     const button = document.createElement("button");
     button.type = "button";
     button.className = "axis-sync-history-btn";
     button.setAttribute("aria-expanded", "false");
     button.setAttribute("aria-controls", "axis-sync-history-panel");
-    button.setAttribute("aria-label", "Histórico dos avisos de sincronização com o Axis");
+    button.setAttribute("aria-label", "Histórico dos avisos de sincronização");
     button.title = "Histórico de sync";
     button.innerHTML =
       '<svg class="axis-sync-history-icon" width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
@@ -134,7 +159,14 @@
     list.className = "axis-sync-history-list";
 
     panel.append(title, list);
-    wrap.append(button, panel);
+    wrap.append(reloadButton, button, panel);
+
+    reloadButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      reloadButton.disabled = true;
+      forceReloadUi();
+    });
 
     const toolbar = document.querySelector(".preview-toolbar");
     if (toolbar) {
@@ -184,13 +216,9 @@
     }, hideAfter);
   }
 
-  function isLocalAtlasHost() {
-    const host = String(window.location.hostname || "").toLowerCase();
-    return host === "localhost" || host === "127.0.0.1" || host === "::1";
-  }
-
   function connect() {
-    if (!window.EventSource || !isLocalAtlasHost()) {
+    if (!window.EventSource) {
+      ensureHistoryUi();
       return;
     }
 
@@ -225,11 +253,15 @@
     }
   }
 
+  clearForcedReloadParam();
+
   window.AutoOrcamentoSyncUi = {
     showToast,
     ensureContainer,
     connect,
   };
+
+  ensureHistoryUi();
 
   if (document.readyState === "complete") {
     connectWhenIdle();

@@ -1530,11 +1530,15 @@ body.login-page {
 }
 
 .axis-sync-history-wrap {
+  align-items: flex-start;
+  display: flex;
   flex-shrink: 0;
+  gap: 8px;
   position: relative;
 }
 
-.axis-sync-history-btn {
+.axis-sync-history-btn,
+.axis-sync-reload-btn {
   align-items: center;
   background: var(--panel);
   border: 1px solid rgba(31, 41, 51, 0.12);
@@ -1549,9 +1553,14 @@ body.login-page {
   width: 36px;
 }
 
-.axis-sync-history-btn:hover {
+.axis-sync-history-btn:hover,
+.axis-sync-reload-btn:hover {
   background: var(--soft);
   color: var(--text);
+}
+
+.axis-sync-reload-btn:disabled {
+  cursor: progress;
 }
 
 .axis-sync-history-btn[aria-expanded="true"] {

@@ -1,5 +1,5 @@
 # Agent memory — changelog
-
+- 2026-10-26: Toolbar do preview — botão de refresh (F5 forçado, `?_r=`) à esquerda do histórico de toasts.
 - 2026-10-26: producao Tailscale `https://axis.tail5fe4b7.ts.net:3000/` (HTTPS explicito; 443 desligada).
 - 2026-10-26: Modal Abrir (tailnet) — diálogo maior (flex); ordenar por nome (A–Z/Z–A) e data (recente/antiga); doc `acesso-remoto.md` + `ARCHITECTURE.md`.
 - 2026-10-26: UI Tailscale — removido `waitForBackend` (~5 s em HTTPS); `?perf=1` + `scripts/bench_web_load.ps1`; doc `acesso-remoto.md`.

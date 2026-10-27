@@ -618,6 +618,28 @@ function resolveStaticPath(requestedPath) {
   return { filePath, urlPath };
 }
 
+function stampLocalAssets(html) {
+  return html.replace(/\b(src|href)="([A-Za-z0-9._/-]+\.(?:js|css))"/g, (match, attr, assetPath) => {
+    if (assetPath.startsWith("/") || assetPath.includes("..")) {
+      return match;
+    }
+
+    const filePath = path.resolve(webDir, assetPath);
+    if (!isPathInsideDir(filePath, webDir)) {
+      return match;
+    }
+
+    let version = "0";
+    try {
+      version = String(Math.round(fs.statSync(filePath).mtimeMs));
+    } catch {
+      return match;
+    }
+
+    return `${attr}="${assetPath}?v=${version}"`;
+  });
+}
+
 function serveStaticFile(request, response) {
   const url = new URL(request.url, `http://${request.headers.host}`);
   const requestedPath = decodeURIComponent(url.pathname === "/" ? "/index.html" : url.pathname);
@@ -639,10 +661,16 @@ function serveStaticFile(request, response) {
     }
 
     const extension = path.extname(filePath);
-    response.writeHead(200, {
+    const headers = {
       "Content-Type": contentTypes[extension] || "application/octet-stream",
-    });
-    response.end(content);
+    };
+    let body = content;
+    if (extension === ".html" && url.searchParams.has("_r")) {
+      body = Buffer.from(stampLocalAssets(content.toString("utf8")), "utf8");
+      headers["Cache-Control"] = "no-store";
+    }
+    response.writeHead(200, headers);
+    response.end(body);
   });
 }
 
