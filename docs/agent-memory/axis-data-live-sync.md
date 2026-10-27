@@ -42,7 +42,7 @@ Arquivos com `schemaVersion: 2` em `data/` (oito catálogos de histórico — ve
 
 ## Aviso Axis → Atlas (sessão aberta no Atlas)
 
-No **CT 100**, após gravar `data/` (blur/API), `settings` ou impressão (`output/` + sqlite), o Node envia `POST` para o Atlas (`AUTO_ORCAMENTO_ATLAS_NOTIFY_URL`) com token compartilhado. O Atlas enfileira `--pull-if-remote-newer` só para o(s) caminho(s) informado(s). Toast no Axis: verde se entregue, amarelo se o notify não alcançar o Atlas (rede, listener ou `.bat` fechado; sem fila persistente; merge global no próximo `--startup`).
+No **CT 100**, após gravar `data/` (blur/API), `settings` ou impressão (`output/` + sqlite), o Node envia `POST` para o Atlas (`AUTO_ORCAMENTO_ATLAS_NOTIFY_URL`) com token compartilhado. O Atlas enfileira `--pull-if-remote-newer` só para o(s) caminho(s) informado(s). Toast no Axis via SSE `/api/sync/events` (`attachNotifyToastRoute` no CT; só eventos ao vivo, sem replay). Verde em `received` / `synced` no POST NDJSON. Atlas fechado ou falha de rede antes da primeira linha → sem toast (gravação no CT já está no axis-data; merge no próximo `--startup`). Se a conexão cair depois do recebimento, toast amarelo.
 
 | Variável | Onde |
 |----------|------|

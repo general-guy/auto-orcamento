@@ -1,8 +1,12 @@
 const http = require("node:http");
 const path = require("node:path");
 const { linuxUsesAxisDataBind } = require("./paths");
+const { freeTcpPortSync } = require("./port-utils");
 
-const NOTIFY_TIMEOUT_MS = 4500;
+const NOTIFY_FIRST_BYTE_MS = 12000;
+const NOTIFY_SYNC_MS = 15 * 60 * 1000;
+
+const notifyToastClients = new Set();
 
 function readNotifyToken() {
   return String(process.env.AUTO_ORCAMENTO_ATLAS_NOTIFY_TOKEN || "").trim();
@@ -85,24 +89,92 @@ function readNotifyUrl() {
   return String(process.env.AUTO_ORCAMENTO_ATLAS_NOTIFY_URL || "").trim();
 }
 
-function toAtlasNotifyPayload(result) {
-  if (!result) {
-    return undefined;
+function toastFromNotifyEvent(event) {
+  if (!event || typeof event !== "object") {
+    return null;
   }
-  if (result.status === "delivered") {
+  if (event.phase === "received" && event.ok === true) {
     return {
       level: "ok",
-      message: "Atlas avisado; atualização enfileirada.",
+      phase: "notify",
+      message: "Atlas recebeu; sincronização em andamento.",
     };
   }
-  if (result.status === "atlas_offline") {
+  if (event.phase === "synced" && event.ok === true) {
     return {
-      level: "warn",
-      message:
-        "Atlas inacessível para notify (rede ou app fechado); merge na próxima abertura do .bat.",
+      level: "ok",
+      phase: "notify",
+      message: "Sincronização com o Atlas concluída.",
     };
   }
-  return undefined;
+  if (event.phase === "synced") {
+    return {
+      level: "error",
+      phase: "notify",
+      message: event.message || "A sincronização no Atlas falhou.",
+    };
+  }
+  return null;
+}
+
+function publishNotifyToast(toast) {
+  if (!toast?.message) {
+    return;
+  }
+  const event = {
+    type: "toast",
+    level: toast.level || "ok",
+    message: toast.message,
+    phase: toast.phase || "notify",
+  };
+  const payload = `data: ${JSON.stringify(event)}\n\n`;
+  for (const client of notifyToastClients) {
+    try {
+      client.response.write(payload);
+    } catch {
+      notifyToastClients.delete(client);
+    }
+  }
+}
+
+function attachNotifyToastRoute(request, response) {
+  response.writeHead(200, {
+    "Content-Type": "text/event-stream; charset=utf-8",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
+  });
+  response.write("\n");
+
+  const client = { response };
+  notifyToastClients.add(client);
+  const ping = setInterval(() => {
+    try {
+      response.write(": ping\n\n");
+    } catch {
+      clearInterval(ping);
+    }
+  }, 20000);
+  request.on("close", () => {
+    clearInterval(ping);
+    notifyToastClients.delete(client);
+  });
+}
+
+function consumeNotifyLines(buffer, onEvent) {
+  const lines = buffer.split("\n");
+  const rest = lines.pop() ?? "";
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      continue;
+    }
+    try {
+      onEvent(JSON.parse(trimmed));
+    } catch {
+      // linha incompleta ou lixo
+    }
+  }
+  return rest;
 }
 
 async function postNotifyToAtlas(relativePaths) {
@@ -145,29 +217,79 @@ async function postNotifyToAtlas(relativePaths) {
         "Content-Length": Buffer.byteLength(body),
         "X-Auto-Orcamento-Notify-Token": token,
       },
-      timeout: NOTIFY_TIMEOUT_MS,
+    };
+
+    let sawEvent = false;
+    let settled = false;
+    let interruptToastSent = false;
+    const finish = (status) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      resolve({ status });
+    };
+    const warnInterrupted = () => {
+      if (!sawEvent || interruptToastSent) {
+        return;
+      }
+      interruptToastSent = true;
+      publishNotifyToast({
+        level: "warn",
+        phase: "notify",
+        message: "A conexão com o Atlas caiu antes de concluir a sincronização.",
+      });
     };
 
     const transport = target.protocol === "https:" ? require("node:https") : http;
     const req = transport.request(requestOptions, (res) => {
-      res.resume();
-      if (res.statusCode >= 200 && res.statusCode < 300) {
-        resolve({ status: "delivered" });
-        return;
-      }
       if (res.statusCode === 401 || res.statusCode === 403) {
-        resolve({ status: "auth_error" });
+        res.resume();
+        finish("auth_error");
         return;
       }
-      resolve({ status: "atlas_offline" });
+      if (res.statusCode < 200 || res.statusCode >= 300) {
+        res.resume();
+        finish("atlas_offline");
+        return;
+      }
+
+      let pending = "";
+      const onEvent = (event) => {
+        const toast = toastFromNotifyEvent(event);
+        if (!toast) {
+          return;
+        }
+        sawEvent = true;
+        req.setTimeout(NOTIFY_SYNC_MS);
+        publishNotifyToast(toast);
+      };
+
+      res.on("data", (chunk) => {
+        pending = consumeNotifyLines(pending + chunk.toString("utf8"), onEvent);
+      });
+      res.on("end", () => {
+        const tail = pending.trim();
+        if (tail) {
+          try {
+            onEvent(JSON.parse(tail));
+          } catch {
+            // corpo legado ilegível
+          }
+        }
+        finish(sawEvent ? "delivered" : "atlas_offline");
+      });
     });
 
+    req.setTimeout(NOTIFY_FIRST_BYTE_MS);
     req.on("timeout", () => {
       req.destroy();
-      resolve({ status: "atlas_offline" });
+      warnInterrupted();
+      finish(sawEvent ? "interrupted" : "atlas_offline");
     });
     req.on("error", () => {
-      resolve({ status: "atlas_offline" });
+      warnInterrupted();
+      finish(sawEvent ? "interrupted" : "atlas_offline");
     });
     req.write(body);
     req.end();
@@ -179,13 +301,13 @@ async function notifyAtlasAfterFileWrite(filePath, roots) {
   if (!relative) {
     return undefined;
   }
-  const result = await postNotifyToAtlas([relative]);
-  return toAtlasNotifyPayload(result);
+  await postNotifyToAtlas([relative]);
+  return undefined;
 }
 
 async function notifyAtlasRelativePaths(relativePaths) {
-  const result = await postNotifyToAtlas(relativePaths);
-  return toAtlasNotifyPayload(result);
+  await postNotifyToAtlas(relativePaths);
+  return undefined;
 }
 
 function collectRequestBody(request, maxBytes = 4096) {
@@ -251,13 +373,58 @@ function createAtlasNotifyRequestHandler({ axisSync }) {
       rawPaths.push(...payload.relativePaths);
     }
 
-    const queued = axisSync.enqueuePullIfRemoteNewer(rawPaths);
+    const pull = axisSync.enqueuePullIfRemoteNewer(rawPaths) || {};
+    const queued = Array.isArray(pull) ? pull : pull.queued || [];
+    const done = Array.isArray(pull) ? Promise.resolve(0) : pull.done;
     if (!queued.length) {
       sendJson(response, 400, { error: "Caminho inválido." });
       return;
     }
 
-    sendJson(response, 200, { ok: true, queued });
+    response.writeHead(200, {
+      "Content-Type": "application/x-ndjson; charset=utf-8",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    });
+    if (response.socket) {
+      response.socket.setNoDelay(true);
+    }
+
+    const writeEvent = (event) => {
+      if (response.writableEnded || response.destroyed) {
+        return;
+      }
+      try {
+        response.write(`${JSON.stringify(event)}\n`);
+      } catch {
+        // cliente Axis desconectou
+      }
+    };
+
+    writeEvent({ phase: "received", ok: true, queued });
+    let code = 1;
+    try {
+      code = await done;
+    } catch (error) {
+      writeEvent({
+        phase: "synced",
+        ok: false,
+        message: error?.message || "A sincronização no Atlas falhou.",
+      });
+      response.end();
+      return;
+    }
+
+    writeEvent({
+      phase: "synced",
+      ok: code === 0,
+      ...(code === 0 ? {} : { message: "A sincronização no Atlas falhou." }),
+    });
+    try {
+      response.end();
+    } catch {
+      // cliente Axis desconectou
+    }
   };
 }
 
@@ -282,17 +449,33 @@ function startAtlasNotifyListener({ axisSync, handler }) {
       return;
     }
     void handler(request, response).catch((error) => {
+      if (response.headersSent) {
+        response.destroy();
+        return;
+      }
       sendJson(response, 500, { error: error.message });
     });
   });
 
-  server.listen(port, bindHost, () => {
+  const onListening = () => {
     console.log(`Atlas notify em http://${bindHost}:${port}/api/sync/notify`);
-  });
+  };
 
+  let retried = false;
   server.on("error", (error) => {
+    if (error.code === "EADDRINUSE" && !retried) {
+      retried = true;
+      freeTcpPortSync(port);
+      setTimeout(() => {
+        server.listen(port, bindHost, onListening);
+      }, 300);
+      return;
+    }
     console.error(`[atlas-notify] Falha ao abrir ${bindHost}:${port}: ${error.message}`);
   });
+
+  freeTcpPortSync(port);
+  server.listen(port, bindHost, onListening);
 
   return server;
 }
@@ -303,7 +486,9 @@ module.exports = {
   normalizeNotifyRelativePath,
   filePathToNotifyRelative,
   shouldNotifyAtlasFromAxis,
-  toAtlasNotifyPayload,
+  toastFromNotifyEvent,
+  publishNotifyToast,
+  attachNotifyToastRoute,
   notifyAtlasAfterFileWrite,
   notifyAtlasRelativePaths,
   createAtlasNotifyRequestHandler,

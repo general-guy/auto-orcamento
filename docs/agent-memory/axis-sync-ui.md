@@ -21,6 +21,6 @@ Toasts com `phase: "wake"` vêm de `ensure_axis_online.py` (local-atlas). Amarel
 
 ## Toasts no Axis (notify)
 
-Quando o CT grava e o Atlas está acessível, a resposta JSON pode trazer `atlasNotify` (`level`: `ok` | `warn`). `web/api.js` chama `window.AutoOrcamentoSyncUi.showToast` (definido em `sync-toasts.js`). Não usa SSE — só mutações que disparam notify (`data/`, settings, impressão).
+No CT, `GET /api/sync/events` usa `attachNotifyToastRoute` (sem replay em memória — só eventos ao vivo). Ao gravar com o Atlas acessível, `postNotifyToAtlas` publica toasts quando o POST NDJSON traz `phase: "received"` / `"synced"`. Atlas fechado ou POST sem resposta válida: sem toast. Replay de 3 min existe só no Atlas (`axis-sync.js`).
 
 Runbook completo: [`../atlas-axis-sync.md`](../atlas-axis-sync.md). `data/` ao vivo: [`axis-data-live-sync.md`](axis-data-live-sync.md). Notify: [`atlas-notify.md`](atlas-notify.md). Log de sessões Python: [`axis-sync-sessions.md`](axis-sync-sessions.md).

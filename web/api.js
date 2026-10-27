@@ -26,7 +26,10 @@
 
     const notify = data?.atlasNotify;
     if (notify && window.AutoOrcamentoSyncUi?.showToast) {
-      window.AutoOrcamentoSyncUi.showToast(notify);
+      const level = String(notify.level || "").toLowerCase();
+      if (level === "ok" || level === "success") {
+        window.AutoOrcamentoSyncUi.showToast(notify);
+      }
     }
 
     return data;

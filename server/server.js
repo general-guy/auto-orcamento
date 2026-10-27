@@ -25,6 +25,7 @@ const {
 const { ensureDataDirReady } = require("./data-bootstrap");
 const { createAxisSync } = require("./axis-sync");
 const {
+  attachNotifyToastRoute,
   createAtlasNotifyRequestHandler,
   notifyAtlasAfterFileWrite,
   notifyAtlasRelativePaths,
@@ -683,11 +684,19 @@ const server = http.createServer(async (request, response) => {
     }
 
     if (request.url.startsWith("/api/sync/events")) {
-      if (request.method !== "GET" || isRemoteRequest(request)) {
-        sendJson(response, 403, { error: "Sync disponível só no Atlas local." });
+      if (request.method !== "GET") {
+        sendJson(response, 405, { error: "Método não permitido." });
         return;
       }
-      axisSync.attachSyncEventsRoute(request, response);
+      if (axisSync.enabled) {
+        if (isRemoteRequest(request)) {
+          sendJson(response, 403, { error: "Sync disponível só no Atlas local." });
+          return;
+        }
+        axisSync.attachSyncEventsRoute(request, response);
+        return;
+      }
+      attachNotifyToastRoute(request, response);
       return;
     }
 
