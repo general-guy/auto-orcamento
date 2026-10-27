@@ -1156,7 +1156,8 @@ th {
   .form-panel,
   .panel-resize-handle,
   .preview-toolbar,
-  .zoom-flag {
+  .zoom-flag,
+  .axis-sync-toasts {
     display: none !important;
   }
 

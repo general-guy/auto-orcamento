@@ -1,4 +1,5 @@
 # Agent memory — changelog
+- 2026-10-27: Impressão — `@media print` oculta toasts de sync (`.axis-sync-toasts`); evita notify/sync na folha ao imprimir; `axis-sync-ui.md`.
 - 2026-10-26: CT notify SSE — sem replay de toasts; removido toast legado { ok: true } (falso positivo com Atlas fechado).
 - 2026-10-26: Recarregar UI (toolbar) — SSE `skipReplay=1` evita repetir toasts do buffer (ex. conflito `/data/` do startup); `axis-sync-ui.md`.
 - 2026-10-26: Toolbar do preview — botão de refresh (F5 forçado, `?_r=`) à esquerda do histórico de toasts.
