@@ -1,6 +1,6 @@
 # Agent memory — índice
 
-Memória durável do **Auto Orçamento** (decisões, caminhos, deploy). O plugin Continual Learning atualiza `AGENTS.md` na raiz; temas longos ficam aqui + linha em [`CHANGELOG.md`](CHANGELOG.md).
+Memória durável do **Auto Orçamento** (decisões, caminhos, deploy). Cada tema daqui é um stub ou aponta o runbook. O plugin Continual Learning só mexe nas seções Learned de `AGENTS.md`; esta pasta é curada no `/doc-update` e não depende do hook. Linha nova em [`CHANGELOG.md`](CHANGELOG.md).
 
 ## Fonte de verdade
 
@@ -18,7 +18,7 @@ Memória durável do **Auto Orçamento** (decisões, caminhos, deploy). O plugin
 | Tombstones `output/` (`orcamentos-index.json`) | [`output-index-sync.md`](output-index-sync.md) |
 | Log das últimas 10 sessões de sync (Atlas) | [`axis-sync-sessions.md`](axis-sync-sessions.md) |
 | Narrativa Atlas/Axis no app | [`../atlas-axis.md`](../atlas-axis.md) |
-| SQLite espelho | [`../export-sqlite.md`](../export-sqlite.md) |
+| SQLite para o dados-clinica (leitura unidirecional) | [`../export-sqlite.md`](../export-sqlite.md) |
 | Operação Axis (scripts, Pi, PVE) | repositório **`local-atlas`** (`axis/`, `docs/referencias/web-apps-axis.md`) |
 | Skills Cursor (deploy/sync CT100, resumo operacional) | `~/.cursor/skills/ct100-webapps/` + filho `ct100-auto-orcamento/` (runbook longo continua nos `.md` acima) |
 

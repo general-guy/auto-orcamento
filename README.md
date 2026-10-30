@@ -99,7 +99,7 @@ Otimizações aplicadas na stack atual: Node e WebView2 em paralelo, liberação
 | Startup | Node em background + `--external-server`; poll breve pelo Node; splash `assets/launcher.html`; módulos pesados lazy no servidor; scripts com `defer` |
 | Impressão | `@media print` anula zoom da UI — papel alinhado ao PDF automático |
 | Snapshot | JSON na impressão + **Abrir** (modal com lista, ordenação e **Excluir**); índice `output/orcamentos-index.json` para sync de apagados |
-| Export SQLite | Na abertura e após imprimir, reconstrói `orcamentos.sqlite` em `C:\auto-orcamento\export\`; sync envia ao Axis em background |
+| Export SQLite | Na abertura e após imprimir, reconstrói `orcamentos.sqlite` em `C:\auto-orcamento\export\` (no CT, `/data/auto-orcamento/export/`). O dados-clinica lê esse arquivo; sync envia ao Axis em background |
 | Sync Axis | Wake se necessário, merge no arranque + pull/reconcile por arquivo em `data/` no Atlas; gravação no CT notifica o Atlas (notify HTTP) — [`docs/atlas-axis-sync.md`](docs/atlas-axis-sync.md), [`docs/agent-memory/axis-data-live-sync.md`](docs/agent-memory/axis-data-live-sync.md), [`docs/agent-memory/atlas-notify.md`](docs/agent-memory/atlas-notify.md), [`docs/agent-memory/axis-sync-ui.md`](docs/agent-memory/axis-sync-ui.md) |
 | Documento | Nas observações, `*texto*` (estilo WhatsApp) vira negrito no preview/PDF; o peso padrão do documento é Gotham Medium (`--document-emphasis-weight: 500`), inclusive o rótulo `Tempo previsto` |
 | Robustez | Liberação da porta 3000 no arranque do `server/server.js`; encerramento confiável ao fechar pelo X |

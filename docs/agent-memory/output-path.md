@@ -1,5 +1,7 @@
 # Dados ao vivo fora do repo (Atlas / Windows)
 
+Runbook do contrato com o dados-clinica: [`../export-sqlite.md`](../export-sqlite.md).
+
 Decisão (2026-10-25): concentrar em `C:\auto-orcamento\` o que muda no dia a dia e pode sincronizar no futuro.
 
 ## Caminhos canônicos
@@ -10,7 +12,7 @@ C:\auto-orcamento\output\        PDF + snapshot JSON
 C:\auto-orcamento\export\        orcamentos.sqlite (espelho na consolidação)
 ```
 
-Decisão (2026-10-27): a consolidação **não** copia mais SQLite, timbrado nem fontes para `dados-clinica/import/` — só grava em `EXPORT_DIR` (arranque, impressão, `npm run export:sqlite`). Contrato: `docs/export-sqlite.md`.
+Decisão (2026-10-27): a consolidação **não** copia SQLite, timbrado nem fontes para `dados-clinica/import/` — só grava em `EXPORT_DIR` (arranque, impressão, `npm run export:sqlite`). O dados-clinica lê esse arquivo no lugar (Atlas: `C:\auto-orcamento\export\orcamentos.sqlite`; CT: `/data/auto-orcamento/export/orcamentos.sqlite`). Contrato: `docs/export-sqlite.md`.
 
 - **Seed no repo:** `seed/data/` (versionado). `server/data-bootstrap.js` copia para `dataDir` só arquivos que ainda não existem ao vivo.
 - **Legado:** se ainda existir `{repo}/data/`, o bootstrap copia lacunas e **atualiza** destino se o arquivo no clone for mais recente.

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-30
+
+- Contrato do `orcamentos.sqlite`: o auto-orçamento grava em `export/`; o dados-clinica lê o mesmo arquivo (Atlas `C:\auto-orcamento\export\`, CT `/data/auto-orcamento/export/`), sem cópia. Doc: `docs/export-sqlite.md`.
+
 ## 2026-10-27
 
 - Consolidação SQLite só em `EXPORT_DIR` (`C:\auto-orcamento\export\` no Atlas); removida entrega a `dados-clinica/import/` (SQLite, timbrado e fontes). Docs: `export-sqlite.md`, `README.md`, `AGENTS.md`.

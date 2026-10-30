@@ -1,8 +1,23 @@
 # Exportação SQLite (`export/orcamentos.sqlite`)
 
-Espelho consolidado dos snapshots JSON da pasta de saída (`C:\auto-orcamento\output` no Windows; ver `server/paths.js`), para consumo por **outros webapps**.
+Espelho consolidado dos snapshots JSON da pasta de saída (`C:\auto-orcamento\output` no Windows; ver `server/paths.js`).
 
 O Auto Orçamento **não** usa este banco como fonte canônica: PDF e JSON na pasta de saída continuam a ser gerados, nomeados e abertos como antes.
+
+## Contrato com o dados-clinica
+
+Sentido único: este app grava; a GUI do dados-clinica só lê.
+
+| Host | Arquivo |
+|------|---------|
+| Atlas | `C:\auto-orcamento\export\orcamentos.sqlite` |
+| CT 100 | `/data/auto-orcamento/export/orcamentos.sqlite` |
+
+A GUI abre o arquivo no lugar (`DADOS_CLINICA_ORCAMENTOS_SQLITE` no CT; padrão `C:\auto-orcamento\export\orcamentos.sqlite` no Atlas), em modo somente leitura. Não há cópia para o repositório do dados-clinica. Ela não lê `output/*.pdf` nem `output/*.json`.
+
+`payload_json` é o formulário inteiro (`schemaVersion: 1`), inclusive implante (`valorAVista`, `valorCartao7x`). As outras colunas são índice (nome, data, primeira cirurgia, arquivo).
+
+O merge Atlas↔Axis de `export/` é sync deste app. A GUI não escreve no arquivo.
 
 ## Fonte canônica vs espelho
 
@@ -82,4 +97,4 @@ const rows = db.prepare(
 db.close();
 ```
 
-O payload completo está em `payload_json` — mesmo formato de `web/budget-snapshot.js` (`schemaVersion: 1`).
+O payload completo está em `payload_json` — mesmo formato de `web/budget-snapshot.js` (`schemaVersion: 1`). O leitor do dados-clinica é `gui/orcamento_loader.py`.

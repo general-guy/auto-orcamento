@@ -495,7 +495,8 @@ async function handlePdfExport(request, response) {
     });
   }
 
-  // Espelha todos os JSON de output/ em export/orcamentos.sqlite (outros webapps).
+  // Espelha output/*.json em EXPORT_DIR/orcamentos.sqlite.
+  // Leitor: dados-clinica, somente leitura, no mesmo arquivo.
   // Não bloqueia a impressão/PDF se a consolidação falhar.
   const sqliteResult = consolidateOutputSqliteSafe();
   if (sqliteResult) {

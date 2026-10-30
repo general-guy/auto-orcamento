@@ -309,7 +309,7 @@ Com duas ou mais entradas no formulário, `updateHospitalFieldStructure()` exibe
 
 A pasta de saída (`outputDir` em `server/paths.js`) guarda os PDFs e snapshots JSON gerados ao clicar em **Imprimir orçamento**. No Windows o padrão é `C:\auto-orcamento\output\`; ela é criada pelo servidor quando necessário e não entra no controle de versão. Cada par usa o mesmo nome base (`.pdf` e `.json`), no formato `{paciente} - {cirurgia} {AAAA-MM-DD HH-mm-ss}` — a primeira cirurgia preenchida no formulário vem do snapshot enviado na impressão.
 
-Os JSON nessa pasta são a **fonte canônica** do banco de arquivos do app (**Abrir**, `GET /api/snapshots*`). O espelho `orcamentos.sqlite` em `EXPORT_DIR` é reconstruído ao **abrir o app** e a cada impressão local (ou via `npm run export:sqlite`): apaga e reinsere todas as linhas a partir dos JSON atuais — sem histórico legado. Schema e contrato: `docs/export-sqlite.md`.
+Os JSON nessa pasta são a **fonte canônica** do banco de arquivos do app (**Abrir**, `GET /api/snapshots*`). O espelho `orcamentos.sqlite` em `EXPORT_DIR` é reconstruído ao **abrir o app** e a cada impressão local (ou via `npm run export:sqlite`): apaga e reinsere todas as linhas a partir dos JSON atuais — sem histórico legado. O dados-clinica lê esse arquivo no lugar, somente leitura. Schema e contrato: `docs/export-sqlite.md`.
 
 ## Lógica de Cirurgia
 
@@ -520,7 +520,7 @@ A ordem final é: pacotes, cirurgias associadas, taxas, meia hora excedente de c
 
 - O frontend é HTML, CSS e JavaScript em `web/`, servido por `server/server.js` — **sem build step**.
 - Fluxo diário: `abrir-auto-orcamento.bat` → WebView2 + `http://localhost:3000`.
-- O estado persistente do app fica em JSON local (`data/`, `output/`). `export/orcamentos.sqlite` é espelho derivado para outros webapps (`docs/export-sqlite.md`).
+- O estado persistente do app fica em JSON local (`data/`, `output/`). `export/orcamentos.sqlite` é o espelho que o dados-clinica lê (`docs/export-sqlite.md`).
 - `data/pacientes.json` e `data/settings.json` não entram no Git.
 - Negrito do documento: `strong`/`b` em `.document-content` usam `--document-emphasis-weight` (Gotham Medium, `500`).
 - Alterações no preview devem chamar `updatePreview()` quando mudarem campos programaticamente.
