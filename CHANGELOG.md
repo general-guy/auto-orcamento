@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-01
+
+- Notify no CT: sem a primeira resposta do Atlas em 5 segundos, toast amarelo «O Atlas não respondeu em 5 segundos.» A gravação no axis-data segue. Doc: `docs/agent-memory/atlas-notify.md`.
+
 ## 2026-10-30
 
 - Contrato do `orcamentos.sqlite`: o auto-orçamento grava em `export/`; o dados-clinica lê o mesmo arquivo (Atlas `C:\auto-orcamento\export\`, CT `/data/auto-orcamento/export/`), sem cópia. Doc: `docs/export-sqlite.md`.

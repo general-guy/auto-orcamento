@@ -3,7 +3,7 @@ const path = require("node:path");
 const { linuxUsesAxisDataBind } = require("./paths");
 const { freeTcpPortSync } = require("./port-utils");
 
-const NOTIFY_FIRST_BYTE_MS = 12000;
+const NOTIFY_FIRST_BYTE_MS = 5000;
 const NOTIFY_SYNC_MS = 15 * 60 * 1000;
 
 const notifyToastClients = new Set();
@@ -180,7 +180,9 @@ function consumeNotifyLines(buffer, onEvent) {
 async function postNotifyToAtlas(relativePaths) {
   const urlText = readNotifyUrl();
   const token = readNotifyToken();
-  if (!shouldNotifyAtlasFromAxis() || !urlText || !token) {
+  const allowed =
+    shouldNotifyAtlasFromAxis() || process.env.AUTO_ORCAMENTO_NOTIFY_TEST === "1";
+  if (!allowed || !urlText || !token) {
     return null;
   }
 
@@ -221,7 +223,7 @@ async function postNotifyToAtlas(relativePaths) {
 
     let sawEvent = false;
     let settled = false;
-    let interruptToastSent = false;
+    let warnSent = false;
     const finish = (status) => {
       if (settled) {
         return;
@@ -229,12 +231,28 @@ async function postNotifyToAtlas(relativePaths) {
       settled = true;
       resolve({ status });
     };
-    const warnInterrupted = () => {
-      if (!sawEvent || interruptToastSent) {
+    const warnOnce = (toast) => {
+      if (warnSent) {
         return;
       }
-      interruptToastSent = true;
-      publishNotifyToast({
+      warnSent = true;
+      publishNotifyToast(toast);
+    };
+    const warnNoResponse = () => {
+      if (sawEvent) {
+        return;
+      }
+      warnOnce({
+        level: "warn",
+        phase: "notify",
+        message: "O Atlas não respondeu em 5 segundos.",
+      });
+    };
+    const warnInterrupted = () => {
+      if (!sawEvent) {
+        return;
+      }
+      warnOnce({
         level: "warn",
         phase: "notify",
         message: "A conexão com o Atlas caiu antes de concluir a sincronização.",
@@ -277,6 +295,9 @@ async function postNotifyToAtlas(relativePaths) {
             // corpo legado ilegível
           }
         }
+        if (!sawEvent) {
+          warnNoResponse();
+        }
         finish(sawEvent ? "delivered" : "atlas_offline");
       });
     });
@@ -284,11 +305,19 @@ async function postNotifyToAtlas(relativePaths) {
     req.setTimeout(NOTIFY_FIRST_BYTE_MS);
     req.on("timeout", () => {
       req.destroy();
-      warnInterrupted();
+      if (sawEvent) {
+        warnInterrupted();
+      } else {
+        warnNoResponse();
+      }
       finish(sawEvent ? "interrupted" : "atlas_offline");
     });
     req.on("error", () => {
-      warnInterrupted();
+      if (sawEvent) {
+        warnInterrupted();
+      } else {
+        warnNoResponse();
+      }
       finish(sawEvent ? "interrupted" : "atlas_offline");
     });
     req.write(body);
@@ -496,6 +525,7 @@ module.exports = {
   attachNotifyToastRoute,
   notifyAtlasAfterFileWrite,
   notifyAtlasRelativePaths,
+  postNotifyToAtlas,
   createAtlasNotifyRequestHandler,
   startAtlasNotifyListener,
 };
