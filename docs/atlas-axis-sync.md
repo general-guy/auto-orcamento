@@ -18,7 +18,7 @@ Abrir o app **sem bloquear a UI** no Axis; em segundo plano reconciliar `C:\auto
 
 Variável opcional: `AUTO_ORCAMENTO_LOCAL_ATLAS` → pasta do clone `local-atlas` (padrão: `...\2.Projetos\local-atlas`).
 
-**Notify Axis → Atlas** (pull pontual enquanto o `.bat` está aberto): `POST /api/sync/notify` no Atlas com token compartilhado; listener opcional na Tailscale (`3010`). Instalação: `local-atlas/axis/scripts/install_atlas_notify_env.py`. Detalhe: [`agent-memory/atlas-notify.md`](agent-memory/atlas-notify.md).
+**Notify Axis → Atlas** (pull pontual enquanto o `.bat` está aberto): `POST /api/sync/notify` no Atlas com token compartilhado. No Atlas o segredo fica em `config/atlas-notify.env` (gitignored); o tar de código não leva esse arquivo. Listener opcional na LAN (`3010`). Instalação: `local-atlas/axis/scripts/install_atlas_notify_env.py`. Detalhe: [`agent-memory/atlas-notify.md`](agent-memory/atlas-notify.md).
 
 ## Pipeline no arranque (`--startup`)
 

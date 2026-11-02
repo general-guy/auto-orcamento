@@ -13,7 +13,7 @@ Memória durável do **Auto Orçamento** (decisões, caminhos, deploy). Cada tem
 | CT 100, axis-data, `/opt` vs `/data` | [`axis-ct100.md`](axis-ct100.md) |
 | Sync automático Atlas ↔ Axis (dev) | [`../atlas-axis-sync.md`](../atlas-axis-sync.md) |
 | `data/` ao vivo (blur, pull + reconcile) | [`axis-data-live-sync.md`](axis-data-live-sync.md) |
-| Notify Axis → Atlas (pull na sessão) | [`atlas-notify.md`](atlas-notify.md) |
+| Notify Axis → Atlas (pull na sessão; token em `config/atlas-notify.env`, gitignored) | [`atlas-notify.md`](atlas-notify.md) |
 | Toasts + histórico na UI (preview) | [`axis-sync-ui.md`](axis-sync-ui.md) |
 | Tombstones `output/` (`orcamentos-index.json`) | [`output-index-sync.md`](output-index-sync.md) |
 | Log das últimas 10 sessões de sync (Atlas) | [`axis-sync-sessions.md`](axis-sync-sessions.md) |

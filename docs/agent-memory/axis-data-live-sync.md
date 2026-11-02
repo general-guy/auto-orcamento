@@ -46,7 +46,7 @@ No **CT 100**, após gravar `data/` (blur/API), `settings` ou impressão (`outpu
 
 | Variável | Onde |
 |----------|------|
-| `AUTO_ORCAMENTO_ATLAS_NOTIFY_TOKEN` | Atlas e Axis (mesmo segredo) |
+| `AUTO_ORCAMENTO_ATLAS_NOTIFY_TOKEN` | Atlas: `config/atlas-notify.env` no clone (gitignored). Axis: `/etc/auto-orcamento/atlas-notify.env`. Mesmo segredo |
 | `AUTO_ORCAMENTO_ATLAS_NOTIFY_URL` | Axis — ex. `http://192.168.68.200:3010/api/sync/notify` (CT sem Tailscale logado) |
 | `AUTO_ORCAMENTO_ATLAS_NOTIFY_BIND_HOST` + `AUTO_ORCAMENTO_ATLAS_NOTIFY_PORT` (opcional, padrão `3010`) | Atlas — `0.0.0.0` no listener notify (app principal pode continuar em `127.0.0.1:3000`) |
 

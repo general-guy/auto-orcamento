@@ -2,7 +2,7 @@
 
 Runbook do contrato com o dados-clinica: [`../export-sqlite.md`](../export-sqlite.md).
 
-Decisão (2026-10-25): concentrar em `C:\auto-orcamento\` o que muda no dia a dia e pode sincronizar no futuro.
+Decisão (2026-10-25): concentrar em `C:\auto-orcamento\` o que muda no dia a dia e pode sincronizar no futuro. O token do notify não entra aí: fica no clone, gitignored (`config/atlas-notify.env`). Runbook: [`atlas-notify.md`](atlas-notify.md).
 
 ## Caminhos canônicos
 

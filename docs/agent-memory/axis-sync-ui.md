@@ -1,5 +1,7 @@
 # Sync Axis — UI no Atlas (toasts e histórico)
 
+Stub. Runbook: [`../atlas-axis-sync.md`](../atlas-axis-sync.md). Notify: [`atlas-notify.md`](atlas-notify.md).
+
 Só em `127.0.0.1` / `localhost` (mesma regra do `axis-sync.js`).
 
 ## Componentes

@@ -8,7 +8,7 @@ const NOTIFY_ENV_KEYS = new Set([
   "AUTO_ORCAMENTO_ATLAS_NOTIFY_URL",
 ]);
 
-const WINDOWS_NOTIFY_ENV_FILE = path.join("C:", "auto-orcamento", "config", "atlas-notify.env");
+const NOTIFY_ENV_FILE = path.join(__dirname, "..", "config", "atlas-notify.env");
 
 function applyEnvLine(line) {
   const trimmed = String(line || "").trim();
@@ -31,10 +31,10 @@ function loadAtlasNotifyEnv() {
   if (process.platform !== "win32") {
     return;
   }
-  if (!fs.existsSync(WINDOWS_NOTIFY_ENV_FILE)) {
+  if (!fs.existsSync(NOTIFY_ENV_FILE)) {
     return;
   }
-  const text = fs.readFileSync(WINDOWS_NOTIFY_ENV_FILE, "utf8");
+  const text = fs.readFileSync(NOTIFY_ENV_FILE, "utf8");
   for (const line of text.split(/\r?\n/)) {
     applyEnvLine(line);
   }
@@ -42,5 +42,5 @@ function loadAtlasNotifyEnv() {
 
 module.exports = {
   loadAtlasNotifyEnv,
-  WINDOWS_NOTIFY_ENV_FILE,
+  NOTIFY_ENV_FILE,
 };

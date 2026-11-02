@@ -1,4 +1,5 @@
 output/
+config/atlas-notify.env
 export/
 node_modules/
 dist/

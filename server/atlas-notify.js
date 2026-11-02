@@ -4,7 +4,7 @@ const { linuxUsesAxisDataBind } = require("./paths");
 const { freeTcpPortSync } = require("./port-utils");
 
 const NOTIFY_FIRST_BYTE_MS = 5000;
-const NOTIFY_SYNC_MS = 15 * 60 * 1000;
+const NOTIFY_SYNC_MS = 60 * 1000;
 
 const notifyToastClients = new Set();
 

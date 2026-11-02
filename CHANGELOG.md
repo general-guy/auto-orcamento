@@ -2,6 +2,8 @@
 
 ## 2026-11-01
 
+- Token do notify no Atlas: `config/atlas-notify.env` no clone, gitignored (mesmo desenho do dados-clinica). O deploy de código não envia esse arquivo ao CT.
+- Notify no CT: depois de `received`, a espera do `synced` é de 1 min (antes 15). O pull no Atlas segue se o prazo estourar.
 - Notify no CT: sem a primeira resposta do Atlas em 5 segundos, toast amarelo «O Atlas não respondeu em 5 segundos.» A gravação no axis-data segue. Doc: `docs/agent-memory/atlas-notify.md`.
 
 ## 2026-10-30
