@@ -392,6 +392,7 @@ docs/ARCHITECTURE.md
 docs/atlas-axis.md
 docs/export-sqlite.md
 docs/acesso-remoto.md
+docs/agent-memory/ui-layout-mobile.md
 ```
 
 Detalhes sobre a origem e manutenção das tabelas hospitalares ficam em:

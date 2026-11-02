@@ -15,6 +15,7 @@ Memória durável do **Auto Orçamento** (decisões, caminhos, deploy). Cada tem
 | `data/` ao vivo (blur, pull + reconcile) | [`axis-data-live-sync.md`](axis-data-live-sync.md) |
 | Notify Axis → Atlas (pull na sessão; token em `config/atlas-notify.env`, gitignored) | [`atlas-notify.md`](atlas-notify.md) |
 | Toasts + histórico na UI (preview) | [`axis-sync-ui.md`](axis-sync-ui.md) |
+| Layout mobile / preview A4 em tela estreita | [`ui-layout-mobile.md`](ui-layout-mobile.md) |
 | Tombstones `output/` (`orcamentos-index.json`) | [`output-index-sync.md`](output-index-sync.md) |
 | Log das últimas 10 sessões de sync (Atlas) | [`axis-sync-sessions.md`](axis-sync-sessions.md) |
 | Narrativa Atlas/Axis no app | [`../atlas-axis.md`](../atlas-axis.md) |

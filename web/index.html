@@ -323,79 +323,81 @@
           </div>
         </div>
 
-        <article class="print-page" id="printPage">
-          <img
-            class="letterhead-background"
-            src="assets/papel-timbrado.png"
-            alt=""
-            aria-hidden="true"
-          />
+        <div class="preview-pages" id="previewPages">
+          <article class="print-page" id="printPage">
+            <img
+              class="letterhead-background"
+              src="assets/papel-timbrado.png"
+              alt=""
+              aria-hidden="true"
+            />
 
-          <div class="document-content">
-            <div id="documentFlow" class="document-flow">
-              <dl class="summary-list">
-                <div class="summary-stacked">
-                  <dt>Paciente</dt>
-                  <dd data-preview="patientName">Nome da paciente</dd>
-                </div>
-                <div class="summary-stacked">
-                  <dt>Cirurgia</dt>
-                  <dd data-preview="surgery">Cirurgia proposta</dd>
-                </div>
-                <div class="summary-stacked hospital-summary">
-                  <dt>Hospital</dt>
-                  <dd class="summary-inline"><strong>Tempo previsto</strong> <span data-preview="hospitalStay">Tempo previsto de hospital</span></dd>
-                  <dd class="hospital-preview-item" data-preview="hospital">Hospital</dd>
-                </div>
-              </dl>
+            <div class="document-content">
+              <div id="documentFlow" class="document-flow">
+                <dl class="summary-list">
+                  <div class="summary-stacked">
+                    <dt>Paciente</dt>
+                    <dd data-preview="patientName">Nome da paciente</dd>
+                  </div>
+                  <div class="summary-stacked">
+                    <dt>Cirurgia</dt>
+                    <dd data-preview="surgery">Cirurgia proposta</dd>
+                  </div>
+                  <div class="summary-stacked hospital-summary">
+                    <dt>Hospital</dt>
+                    <dd class="summary-inline"><strong>Tempo previsto</strong> <span data-preview="hospitalStay">Tempo previsto de hospital</span></dd>
+                    <dd class="hospital-preview-item" data-preview="hospital">Hospital</dd>
+                  </div>
+                </dl>
 
-              <section id="implantsPreviewSection" class="document-section" hidden>
-                <h3>Implantes</h3>
-                <div class="implant-preview-box" data-preview="implantSummary">Selecione um implante.</div>
-              </section>
+                <section id="implantsPreviewSection" class="document-section" hidden>
+                  <h3>Implantes</h3>
+                  <div class="implant-preview-box" data-preview="implantSummary">Selecione um implante.</div>
+                </section>
 
-              <section id="technologiesPreviewSection" class="document-section" hidden>
-                <h3>Tecnologias</h3>
-                <div class="technology-preview-box">
-                  <span data-preview="technologyName">Selecione uma tecnologia.</span>
-                  <span data-preview="technologyValue">R$</span>
-                </div>
-              </section>
+                <section id="technologiesPreviewSection" class="document-section" hidden>
+                  <h3>Tecnologias</h3>
+                  <div class="technology-preview-box">
+                    <span data-preview="technologyName">Selecione uma tecnologia.</span>
+                    <span data-preview="technologyValue">R$</span>
+                  </div>
+                </section>
 
-              <section class="document-section">
-                <h3>Equipe</h3>
-                <div class="team-preview-box">
-                  <span data-preview="teamItems">Equipe</span>
-                  <span data-preview="teamValue">R$</span>
-                </div>
-              </section>
+                <section class="document-section">
+                  <h3>Equipe</h3>
+                  <div class="team-preview-box">
+                    <span data-preview="teamItems">Equipe</span>
+                    <span data-preview="teamValue">R$</span>
+                  </div>
+                </section>
 
-              <section id="extrasPreviewSection" class="document-section" hidden>
-                <h3>Extras</h3>
-                <ul id="extrasPreview">
-                  <li>Selecione os extras desejados.</li>
-                </ul>
-              </section>
+                <section id="extrasPreviewSection" class="document-section" hidden>
+                  <h3>Extras</h3>
+                  <ul id="extrasPreview">
+                    <li>Selecione os extras desejados.</li>
+                  </ul>
+                </section>
 
-              <section class="document-section">
-                <h3>Formas de Pagamento</h3>
-                <div id="paymentPreview" class="payment-preview-list">
-                  <p>Preencha as formas de pagamento.</p>
-                </div>
-              </section>
+                <section class="document-section">
+                  <h3>Formas de Pagamento</h3>
+                  <div id="paymentPreview" class="payment-preview-list">
+                    <p>Preencha as formas de pagamento.</p>
+                  </div>
+                </section>
 
-              <section class="document-section">
-                <h3>Observações</h3>
-                <ul id="guidancePreview">
-                  <li>Selecione as observações desejadas.</li>
-                </ul>
-              </section>
+                <section class="document-section">
+                  <h3>Observações</h3>
+                  <ul id="guidancePreview">
+                    <li>Selecione as observações desejadas.</li>
+                  </ul>
+                </section>
+              </div>
+
+              <p class="document-page-counter" data-preview="pageCounter" hidden></p>
+              <p class="document-date" data-preview="budgetDate"></p>
             </div>
-
-            <p class="document-page-counter" data-preview="pageCounter" hidden></p>
-            <p class="document-date" data-preview="budgetDate"></p>
-          </div>
-        </article>
+          </article>
+        </div>
       </section>
     </main>
 

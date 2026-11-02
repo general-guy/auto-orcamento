@@ -8,6 +8,19 @@
 
 No **Atlas** e na **tailnet**, o botão **Abrir** usa o mesmo modal (`GET /api/snapshots*`) com **Excluir** (`DELETE`) — tombstone em `output/orcamentos-index.json`. O seletor nativo (`POST /api/open-snapshot`) permanece só para uso legado em localhost, fora do fluxo do botão **Abrir**.
 
+
+## Tela estreita (celular na tailnet)
+
+No viewport estreito (`max-width: 1180px`) o formulario e o preview empilham. Regras que evitam os bugs comuns no iPhone:
+
+| Area | Comportamento |
+|------|----------------|
+| Botoes **Abrir** / **Limpar** / **Imprimir** | No fim do formulario (sem `position: sticky`) |
+| Campo **Data** | Respeita a largura do card (`min-width: 0` / `overflow-x` no painel) |
+| Preview A4 | Escala para caber na largura (`#previewPages` / `updatePreviewFitScale`); a folha continua `210mm`×`297mm` para PDF |
+
+Detalhe e arquivos: [`agent-memory/ui-layout-mobile.md`](agent-memory/ui-layout-mobile.md).
+
 ## Impressão
 
 Em qualquer origem, **Imprimir** grava PDF + JSON em `output/` do servidor e reconstrói o espelho SQLite antes do diálogo de impressão do navegador.

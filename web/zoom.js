@@ -71,6 +71,7 @@
     }
 
     showZoomFlag({ persistent: !isDefaultZoom(scale) });
+    window.dispatchEvent(new Event("resize"));
   }
 
   async function adjustZoom(delta) {

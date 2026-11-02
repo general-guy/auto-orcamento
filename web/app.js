@@ -27,6 +27,7 @@ const extrasPreview = document.querySelector("#extrasPreview");
 const appShell = document.querySelector(".app-shell");
 const panelResizeHandle = document.querySelector("#panelResizeHandle");
 const previewPanel = document.querySelector(".preview-panel");
+const previewPages = document.querySelector("#previewPages");
 const printPage = document.querySelector("#printPage");
 const documentFlow = document.querySelector("#documentFlow");
 const surgeryList = document.querySelector("#surgeryList");
@@ -4154,12 +4155,43 @@ function createDocumentPage() {
 
   content.append(flow, pageCounter, date);
   page.append(background, content);
-  previewPanel.append(page);
+  (previewPages || previewPanel).append(page);
 
   return page;
 }
 
+let previewFitObserver = null;
+let previewFitLock = false;
+
+function updatePreviewFitScale() {
+  if (!previewPages || !printPage || previewFitLock) {
+    return;
+  }
+
+  previewFitLock = true;
+  previewFitObserver?.unobserve(previewPanel);
+
+  previewPages.style.setProperty("--preview-fit-scale", "1");
+  void previewPages.offsetWidth;
+
+  const availableWidth = previewPages.clientWidth;
+  const paperWidth = printPage.offsetWidth;
+  const nextScale = availableWidth && paperWidth ? Math.min(1, availableWidth / paperWidth) : 1;
+  previewPages.style.setProperty("--preview-fit-scale", String(Math.floor(nextScale * 1000) / 1000));
+
+  requestAnimationFrame(() => {
+    if (previewFitObserver && previewPanel) {
+      previewFitObserver.observe(previewPanel);
+    }
+    previewFitLock = false;
+  });
+}
+
 function paginateDocument() {
+  if (previewPages) {
+    previewPages.style.setProperty("--preview-fit-scale", "1");
+  }
+
   const pages = [printPage, ...document.querySelectorAll(".generated-print-page")];
   const blocks = pages.flatMap((page) => [...page.querySelector(".document-flow").children]);
   document.querySelectorAll(".generated-print-page").forEach((page) => page.remove());
@@ -4187,6 +4219,7 @@ function paginateDocument() {
 
   updateDocumentDates();
   updateDocumentPageCounters();
+  updatePreviewFitScale();
 }
 
 function restorePreviewScroll(scrollTop, scrollLeft) {
@@ -6027,10 +6060,18 @@ document.addEventListener("pointerdown", (event) => {
   hideTechnologyHistoryDropdown();
 });
 window.addEventListener("resize", () => {
+  updatePreviewFitScale();
   if (activeHospitalDetailInput && !hospitalProcedureDropdown.hidden) {
     positionHospitalProcedureDropdown(activeHospitalDetailInput);
   }
 });
+
+if (previewPanel && typeof ResizeObserver === "function") {
+  previewFitObserver = new ResizeObserver(() => {
+    updatePreviewFitScale();
+  });
+  previewFitObserver.observe(previewPanel);
+}
 document.querySelector(".form-panel")?.addEventListener("scroll", () => {
   if (activeHospitalDetailInput && !hospitalProcedureDropdown.hidden) {
     positionHospitalProcedureDropdown(activeHospitalDetailInput);

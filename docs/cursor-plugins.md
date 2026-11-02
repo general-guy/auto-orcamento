@@ -55,6 +55,7 @@ Não use Context7 para regras de negócio do orçamento (Unimed N, Regina/Sapira
 - "Com Browser Use, abre o app local e confere se a seção Equipe aparece no preview."
 - "Tira screenshot da pré-visualização após carregar um JSON de `output/`."
 - "Preenche hospital Blanc, dois pacotes e uma associada, clica no botão verde e confere multiplicadores 1 / 0.6 / 1 e o total no preview."
+- "No celular/viewport estreito, confere se Data respeita a borda e se o preview A4 cabe sem corte (fit `#previewPages`)."
 
 O app em WebView2 nativo **não** é o mesmo processo do Chrome do Browser Use; para UI nativa (ícone da barra, maximizado), o teste manual pelo `.bat` continua necessário. Browser Use cobre o **mesmo HTML/JS** servido em `localhost:3000`.
 

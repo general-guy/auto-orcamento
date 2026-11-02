@@ -1,4 +1,5 @@
 # Agent memory — changelog
+- 2026-11-02: UI mobile — `.actions` sem sticky; date `min-width:0`; preview A4 com `#previewPages` + `updatePreviewFitScale`; stub `ui-layout-mobile.md`.
 - 2026-11-01: Token notify do Atlas em `config/atlas-notify.env` no clone (gitignored). Deploy pula o arquivo. CT segue em `/etc/auto-orcamento/atlas-notify.env`.
 - 2026-11-01: Notify no CT — toast amarelo se o Atlas não responde em 5 s (`atlas-notify.js`, `atlas-notify.md`).
 - 2026-10-30: Contrato com o dados-clinica — leitura unidirecional de `EXPORT_DIR/orcamentos.sqlite` (sem cópia). Doc: `export-sqlite.md`.
