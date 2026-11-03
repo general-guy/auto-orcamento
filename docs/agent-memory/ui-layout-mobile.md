@@ -8,7 +8,7 @@ Stub + runbook curto da coluna de formulario e da pre-visualizacao A4 no celular
 |------|--------|
 | Botoes **Abrir** / **Limpar** / **Imprimir** | Ficam no fluxo normal no fim de `#budget-form` (`.actions`). **Nao** usar `position: sticky; bottom: 0` — na coluna com `overflow` (desktop) ou no scroll mobile os botoes grudavam no meio do formulario |
 | Campo **Data** | Em Safari/iOS, `input[type=date]` tem largura/fonte nativas. Usar `appearance: none` + `border-radius: 12px` + `font: inherit`; `label:has` com `overflow: hidden`; `.form-panel` com `overflow-x: hidden` |
-| Texto / paginação A4 | Folha **794×1123px**, tipografia **14px**, probe offscreen com largura forçada (Safari nao pode espremer ao viewport). Altura util fixa; se o total cabe, 1 folha. HTML sempre com `?v=mtime` nos assets |
+| Texto / paginação A4 | Folha **794×1123px**, tipografia **14px** / line-height 1.3 e gaps apertados (15px inchava Observacoes e a pagina vazia ia a 2 folhas nos dois). Probe offscreen com largura forçada; altura util fixa; HTML com `?v=mtime`. Meta: pagina vazia = **1 folha** igual no PC e no iPhone |
 | Preview **Documento Final** | A folha continua A4 (`--paper-width` / `--paper-height` = `210mm` × `297mm`) para o PDF e a paginacao. **Nao** redesenhar com flex fluido. Envolver as `.print-page` em `#previewPages` e escalar com `transform: scale(var(--preview-fit-scale))` (escala ≤ 1; **nao** CSS `zoom` — falha no Safari/iOS e mede mal com UI zoom) |
 | Escala | `updatePreviewFitScale()` em `web/app.js`: mede largura do `.preview-panel` (padding incluso), define `--preview-fit-scale` + `margin-bottom` para colapsar o layout box; `ResizeObserver` + `resize`; durante `paginateDocument()` a escala volta a `1` |
 | UI zoom | Preferencia em `settings.json`; em `max-width: 1180px` o body **nao** aplica `transform: scale` (evita estourar form/preview no celular). `AppApi.reapplyWebZoom` no breakpoint |
@@ -33,5 +33,4 @@ Stub + runbook curto da coluna de formulario e da pre-visualizacao A4 no celular
 3. Scroll do formulario: botoes so aparecem apos o ultimo fieldset.
 4. Preview mostra a folha inteira na largura (sem corte a direita); impressao/PDF segue A4.
 5. Com UI zoom ≠ 100% no desktop, no celular o body fica em 100% e o A4 ainda cabe.
-6. Pagina vazia padrao: mesma contagem de folhas no Atlas e no iPhone (tipografia pt / fonts.ready).
-6. Mesma pagina vazia: 1 folha no PC e no iPhone (probe 794px + altura fixa; hard refresh se o Safari cachear).
+6. Pagina vazia padrao: **1 folha** no PC e no iPhone (tipografia 14px + probe 794px + altura fixa; hard refresh se o Safari cachear). Contagem deve ser igual entre telas.
