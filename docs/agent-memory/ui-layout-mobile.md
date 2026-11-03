@@ -2,6 +2,8 @@
 
 Stub + runbook curto da coluna de formulario e da pre-visualizacao A4 no celular (Tailscale) e em viewport estreita. Indice: [`README.md`](README.md).
 
+**Confirmado 2026-11-03 (producao):** no celular (Chrome na URL do Axis) a pagina vazia padrao cabe em **uma unica folha**, igual ao PC — tipografia 14px + probe 794px + CSS/JS sincronizados no CT (`--sync-code`).
+
 ## Decisoes
 
 | Tema | Regra |

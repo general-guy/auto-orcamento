@@ -385,7 +385,7 @@ No preview, `updateGuidance()` combina as observações padrão marcadas com as 
 
 ## Paginação do Documento
 
-O documento é composto por uma página base (`#printPage`) e páginas geradas dinamicamente quando necessário. A função de paginação coleta os blocos existentes, remove páginas geradas anteriormente, esvazia o fluxo da primeira página e redistribui os blocos em ordem.
+O documento é composto por uma página base (`#printPage`) e páginas geradas dinamicamente quando necessário. A função de paginação coleta os blocos existentes, remove páginas geradas anteriormente, esvazia o fluxo da primeira página e redistribui os blocos em ordem. A medicao usa `#paginationProbe` offscreen com folha **794×1123px** e altura util fixa (nao o viewport); tipografia do documento em **14px** para a pagina vazia caber em uma folha no Atlas e no celular (Axis). Se PC e celular divergirem apos mudanca de CSS/JS, sincronizar codigo no CT (`--sync-code`) antes de reabrir a logica de paginacao.
 
 Cada seção do documento é tratada como bloco indivisível. Se uma seção não cabe antes da área reservada à data, ela é movida inteira para a próxima página. A data é renderizada no rodapé de cada página gerada.
 
