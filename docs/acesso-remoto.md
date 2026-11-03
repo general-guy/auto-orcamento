@@ -20,6 +20,8 @@ No viewport estreito (`max-width: 1180px`) o formulario e o preview empilham. Re
 | Preview A4 | Fit visual (`transform: scale`); folha **794×1123px** tipografia **14px**; paginacao no probe (largura forçada + altura util fixa); pagina vazia = 1 folha igual no PC/iPhone; HTML com `?v=mtime` |
 | UI zoom | Preferencia do desktop fica em 100% no body sob 1180px (`reapplyWebZoom`) |
 
+
+Se o celular no Axis divergir do Atlas local na contagem de folhas apos um ajuste de CSS/JS, o CT pode estar atrasado: `sync_auto_orcamento.py --sync-code` + hard refresh (ver [`agent-memory/ui-layout-mobile.md`](agent-memory/ui-layout-mobile.md)).
 Detalhe e arquivos: [`agent-memory/ui-layout-mobile.md`](agent-memory/ui-layout-mobile.md).
 
 ## Impressão

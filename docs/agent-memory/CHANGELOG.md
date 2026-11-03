@@ -1,4 +1,5 @@
 # Agent memory — changelog
+- 2026-11-03: Paginacao — PC 1 folha / Chrome celular 2: Axis ainda com CSS 15px (Atlas ja em 14px). Nao era viewport; `--sync-code` no CT + hard refresh. Docs: `ui-layout-mobile.md`.
 - 2026-11-03: Paginacao — apos PC/iPhone iguais em 2 folhas, tipografia 14px + gaps menores; pagina vazia volta a 1 folha nos dois (medido no Axis).
 - 2026-11-03: Paginacao iPhone — probe 794px forcado + altura util fixa + tipografia 15px; HTML carimba `?v=` nos assets (cache Safari). Docs: `ui-layout-mobile.md`, `acesso-remoto.md`, `axis-sync-ui.md`.
 - 2026-11-03: Paginacao A4 — folha em px canonicos (794×1123) + probe offscreen; elimina 2 paginas no iPhone vs 1 no PC para o mesmo conteudo.
