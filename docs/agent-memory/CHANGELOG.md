@@ -1,4 +1,6 @@
 # Agent memory — changelog
+- 2026-11-03: Paginacao A4 — tipografia do documento em pt (nao rem); text-size-adjust none; reflow + fonts.ready antes de contar paginas (mesmo conteudo Atlas vs iPhone).
+- 2026-11-03: UI mobile — date iOS com `appearance: none` (borda arredondada + fonte igual); flag de zoom oculto sob 1180px.
 - 2026-11-03: UI mobile — preview A4 com `transform: scale` (nao CSS zoom); fit mede `.preview-panel`; data iOS com overflow no label; UI zoom ignorado sob 1180px. Docs: `ui-layout-mobile.md`, `acesso-remoto.md`, skills `ct100-auto-orcamento`.
 - 2026-11-03: reauditoria Atlas↔Axis — P0/P1 reconfirmados; ranking P2 revisado (batch Imprimir no topo); P3-a spawn unificado; canvas + roadmap; ARCHITECTURE notify `:3010` LAN.
 - 2026-11-02: sync — coalesce push/pull (~400 ms) em axis-sync.js; cache Axis online 45s (stamp); doc PUT (pull + UI stale); http-utils + limpeza addHistory/atlasNotify JSON; roadmap em `auditoria-atlas-axis-roadmap.md`.

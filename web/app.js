@@ -4198,10 +4198,14 @@ function updatePreviewFitScale() {
   });
 }
 
+let paginateFontsHooked = false;
+
 function paginateDocument() {
   if (previewPages) {
     previewPages.style.setProperty("--preview-fit-scale", "1");
     previewPages.style.marginBottom = "0px";
+    // Reflow antes de medir: escala previa (mobile) nao pode contaminar alturas.
+    void previewPages.offsetWidth;
   }
 
   const pages = [printPage, ...document.querySelectorAll(".generated-print-page")];
@@ -4232,6 +4236,14 @@ function paginateDocument() {
   updateDocumentDates();
   updateDocumentPageCounters();
   updatePreviewFitScale();
+
+  // Gotham/Cinzel mudam a altura dos blocos; remarcar uma vez quando as fontes chegarem.
+  if (!paginateFontsHooked && document.fonts?.ready) {
+    paginateFontsHooked = true;
+    document.fonts.ready.then(() => {
+      paginateDocument();
+    });
+  }
 }
 
 function restorePreviewScroll(scrollTop, scrollLeft) {

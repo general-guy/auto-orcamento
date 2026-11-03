@@ -221,7 +221,7 @@ textarea {
   width: 100%;
 }
 
-/* iOS Safari: date control tem largura intrínseca grande (ex. "3 de nov. de 2026"). */
+/* iOS Safari: date nativo ignora border-radius e usa fonte/tamanho do sistema. */
 label:has(> input[type="date"]) {
   max-width: 100%;
   min-width: 0;
@@ -229,7 +229,13 @@ label:has(> input[type="date"]) {
 }
 
 input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 12px;
+  color: var(--text);
   display: block;
+  font: inherit;
+  line-height: 1.25;
   max-width: 100%;
   min-width: 0;
   width: 100%;
@@ -240,14 +246,18 @@ input[type="date"]::-webkit-date-and-time-value {
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
   flex-shrink: 0;
   margin: 0;
+  opacity: 0.65;
 }
 
 input[type="date"]::-webkit-datetime-edit {
+  font: inherit;
   max-width: 100%;
   min-width: 0;
   overflow: hidden;
+  padding: 0;
 }
 
 input:focus,
@@ -842,8 +852,17 @@ textarea:focus {
   z-index: 0;
 }
 
+.print-page,
+.document-content {
+  /* none: iOS Safari nao infla texto dentro da folha A4 (paginacao depende da altura). */
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
+}
+
 .document-content {
   font-family: var(--brand-font-primary);
+  /* pt (nao rem): mesma metrica no Atlas desktop e no iPhone; rem segue a UI/Safari. */
+  font-size: 11pt;
   inset: 38mm 20mm 28mm;
   position: absolute;
   z-index: 1;
@@ -862,7 +881,7 @@ textarea:focus {
 .document-date,
 .document-page-counter {
   bottom: 0;
-  font-size: 0.88rem;
+  font-size: 10pt;
   margin: 0;
   position: absolute;
 }
@@ -882,7 +901,7 @@ textarea:focus {
 .document-content h2 {
   color: #192036;
   font-family: var(--brand-font-highlight);
-  font-size: 1.35rem;
+  font-size: 16pt;
   font-weight: 600;
   letter-spacing: 0.02em;
   margin: 0 0 6px;
@@ -978,7 +997,7 @@ textarea:focus {
 
 dt,
 dd {
-  font-size: 0.9rem;
+  font-size: 1em;
   margin: 0;
   padding: 7px 10px;
   white-space: pre-line;
@@ -1001,7 +1020,7 @@ dt {
 .document-section h3 {
   color: #192036;
   font-family: var(--brand-font-highlight);
-  font-size: 0.9rem;
+  font-size: 1em;
   font-weight: 600;
   letter-spacing: 0.02em;
   margin: 0;
@@ -1009,7 +1028,7 @@ dt {
 
 .document-section p,
 .document-section ul {
-  font-size: 0.9rem;
+  font-size: 1em;
   margin: 0;
   white-space: pre-line;
 }
@@ -1017,6 +1036,13 @@ dt {
 .payment-preview-list {
   display: grid;
   gap: 6px;
+  font-size: 1em;
+}
+
+.payment-preview-list p {
+  font-size: inherit;
+  margin: 0;
+  white-space: pre-line;
 }
 
 #extrasPreview,
@@ -1030,7 +1056,7 @@ dt {
   border-radius: 9px;
   display: grid;
   column-gap: 8px;
-  font-size: 0.9rem;
+  font-size: 1em;
   grid-template-columns: minmax(0, 1fr) auto;
   line-height: 1.35;
   padding: 8px 10px;
@@ -1056,7 +1082,7 @@ dt {
   border: 1px solid rgba(31, 41, 51, 0.22);
   border-radius: 9px;
   display: grid;
-  font-size: 0.9rem;
+  font-size: 1em;
   gap: 8px;
   grid-template-columns: minmax(0, 1fr) auto;
   line-height: 1.35;
@@ -1187,6 +1213,11 @@ th {
 
   .preview-panel {
     overflow-x: hidden;
+  }
+
+  /* Preferência de zoom do desktop não aparece no celular (body já fica em 100%). */
+  .zoom-flag {
+    display: none !important;
   }
 }
 
