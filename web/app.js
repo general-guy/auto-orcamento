@@ -4231,8 +4231,25 @@ function ensurePaginationProbe() {
   return probe;
 }
 
+const DOCUMENT_PAPER_HEIGHT_PX = 1123;
+const DOCUMENT_INSET_TOP_PX = 144;
+const DOCUMENT_INSET_BOTTOM_PX = 106;
+const DOCUMENT_DATE_RESERVE_PX = 32;
+
+function getDocumentFlowMaxHeight() {
+  return DOCUMENT_PAPER_HEIGHT_PX - DOCUMENT_INSET_TOP_PX - DOCUMENT_INSET_BOTTOM_PX - DOCUMENT_DATE_RESERVE_PX;
+}
+
+function measureBlockBottom(flow) {
+  const visible = [...flow.children].filter((block) => block.offsetHeight > 0);
+  if (visible.length === 0) {
+    return 0;
+  }
+  const last = visible[visible.length - 1];
+  return last.offsetTop + last.offsetHeight;
+}
+
 function paginateDocument() {
-  // Fit visual nao participa da medicao — probe offscreen nunca tem transform.
   if (previewPages) {
     previewPages.style.setProperty("--preview-fit-scale", "1");
     previewPages.style.marginBottom = "0px";
@@ -4246,31 +4263,40 @@ function paginateDocument() {
   updateDocumentDates();
 
   const probe = ensurePaginationProbe();
+  const probePage = probe.querySelector(".print-page");
   const probeFlow = probe.querySelector(".document-flow");
-  const probeContent = probe.querySelector(".document-content");
-  const probeDate = probe.querySelector(".document-date");
+  probePage.style.width = "794px";
+  probePage.style.minWidth = "794px";
+  probePage.style.height = "1123px";
   probeFlow.replaceChildren();
   void probe.offsetWidth;
 
-  const reservedDateSpace = (probeDate?.offsetHeight || 17) + 14;
-  const availableHeight = probeContent.clientHeight - reservedDateSpace;
+  // Altura util fixa (nao clientHeight do Safari, que varia com o viewport).
+  const availableHeight = getDocumentFlowMaxHeight();
 
-  const pageGroups = [[]];
-  probeFlow.replaceChildren();
+  // 1) Tudo cabe em uma folha? (evita falso split quando o probe ja foi medido estreito)
+  probeFlow.replaceChildren(...blocks);
+  void probe.offsetWidth;
+  const totalBottom = measureBlockBottom(probeFlow);
 
-  blocks.forEach((block) => {
-    const group = pageGroups[pageGroups.length - 1];
-    probeFlow.append(block);
-
-    if (block.offsetTop + block.offsetHeight <= availableHeight || probeFlow.children.length === 1) {
-      group.push(block);
-      return;
-    }
-
-    probeFlow.removeChild(block);
-    pageGroups.push([block]);
-    probeFlow.replaceChildren(block);
-  });
+  let pageGroups;
+  if (totalBottom <= availableHeight) {
+    pageGroups = [blocks];
+  } else {
+    pageGroups = [[]];
+    probeFlow.replaceChildren();
+    blocks.forEach((block) => {
+      const group = pageGroups[pageGroups.length - 1];
+      probeFlow.append(block);
+      if (block.offsetTop + block.offsetHeight <= availableHeight || probeFlow.children.length === 1) {
+        group.push(block);
+        return;
+      }
+      probeFlow.removeChild(block);
+      pageGroups.push([block]);
+      probeFlow.replaceChildren(block);
+    });
+  }
 
   probeFlow.replaceChildren();
 

@@ -640,9 +640,12 @@ function serveStaticFile(request, response) {
       "Content-Type": contentTypes[extension] || "application/octet-stream",
     };
     let body = content;
-    if (extension === ".html" && url.searchParams.has("_r")) {
+    if (extension === ".html") {
+      // Sempre ?v=mtime nos assets — Safari iOS cacheia app.js/css com forca.
       body = Buffer.from(stampLocalAssets(content.toString("utf8")), "utf8");
       headers["Cache-Control"] = "no-store";
+    } else if (extension === ".js" || extension === ".css") {
+      headers["Cache-Control"] = "no-cache";
     }
     response.writeHead(200, headers);
     response.end(body);
