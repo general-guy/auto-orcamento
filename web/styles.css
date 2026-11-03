@@ -48,8 +48,14 @@
   --brand-font-highlight: "Cinzel Local", "Cinzel", "Times New Roman", Georgia, serif;
   --document-emphasis-weight: 500;
   --form-panel-width: 560px;
-  --paper-width: 210mm;
-  --paper-height: 297mm;
+  /* A4 em px CSS canonicos (96dpi): evita mm/pt diferirem entre Safari iOS e Chrome. */
+  --paper-width: 794px;
+  --paper-height: 1123px;
+  --doc-inset-top: 144px;
+  --doc-inset-x: 76px;
+  --doc-inset-bottom: 106px;
+  --doc-label-col: 159px;
+  --doc-hospital-side: 129px;
 }
 
 * {
@@ -807,6 +813,15 @@ textarea:focus {
   padding: 22px;
 }
 
+.pagination-probe {
+  left: -12000px;
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  visibility: hidden;
+  z-index: -1;
+}
+
 .preview-pages {
   --preview-fit-scale: 1;
   align-items: center;
@@ -863,7 +878,7 @@ textarea:focus {
   font-family: var(--brand-font-primary);
   /* pt (nao rem): mesma metrica no Atlas desktop e no iPhone; rem segue a UI/Safari. */
   font-size: 11pt;
-  inset: 38mm 20mm 28mm;
+  inset: var(--doc-inset-top) var(--doc-inset-x) var(--doc-inset-bottom);
   position: absolute;
   z-index: 1;
 }
@@ -918,7 +933,7 @@ textarea:focus {
   border: 1px solid rgba(31, 41, 51, 0.22);
   border-radius: 9px;
   display: grid;
-  grid-template-columns: 42mm 1fr;
+  grid-template-columns: var(--doc-label-col) 1fr;
   overflow: hidden;
 }
 
@@ -961,7 +976,7 @@ textarea:focus {
 .summary-stacked .hospital-preview-item {
   display: grid;
   column-gap: 8px;
-  grid-template-columns: 34mm minmax(0, 1fr) 34mm;
+  grid-template-columns: var(--doc-hospital-side) minmax(0, 1fr) var(--doc-hospital-side);
   row-gap: 4px;
 }
 
@@ -986,7 +1001,7 @@ textarea:focus {
 
 .summary-stacked .summary-inline {
   display: grid;
-  grid-template-columns: 42mm 1fr;
+  grid-template-columns: var(--doc-label-col) 1fr;
   padding: 0;
 }
 
@@ -1111,7 +1126,7 @@ td {
 th {
   background: rgba(255, 255, 255, 0.72);
   color: #192036;
-  width: 42mm;
+  width: var(--doc-label-col);
 }
 
 .total-row th,
@@ -1287,7 +1302,7 @@ th {
   }
 
   .document-content {
-    inset: 38mm 20mm 28mm;
+    inset: var(--doc-inset-top) var(--doc-inset-x) var(--doc-inset-bottom);
     position: absolute;
   }
 

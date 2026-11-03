@@ -1,4 +1,5 @@
 # Agent memory — changelog
+- 2026-11-03: Paginacao A4 — folha em px canonicos (794×1123) + probe offscreen; elimina 2 paginas no iPhone vs 1 no PC para o mesmo conteudo.
 - 2026-11-03: Paginacao A4 — tipografia do documento em pt (nao rem); text-size-adjust none; reflow + fonts.ready antes de contar paginas (mesmo conteudo Atlas vs iPhone).
 - 2026-11-03: UI mobile — date iOS com `appearance: none` (borda arredondada + fonte igual); flag de zoom oculto sob 1180px.
 - 2026-11-03: UI mobile — preview A4 com `transform: scale` (nao CSS zoom); fit mede `.preview-panel`; data iOS com overflow no label; UI zoom ignorado sob 1180px. Docs: `ui-layout-mobile.md`, `acesso-remoto.md`, skills `ct100-auto-orcamento`.

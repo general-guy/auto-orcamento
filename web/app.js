@@ -4200,11 +4200,42 @@ function updatePreviewFitScale() {
 
 let paginateFontsHooked = false;
 
+function ensurePaginationProbe() {
+  let probe = document.getElementById("paginationProbe");
+  if (probe) {
+    return probe;
+  }
+
+  probe = document.createElement("div");
+  probe.id = "paginationProbe";
+  probe.className = "pagination-probe";
+  probe.setAttribute("aria-hidden", "true");
+
+  const page = document.createElement("article");
+  page.className = "print-page";
+
+  const content = document.createElement("div");
+  content.className = "document-content";
+
+  const flow = document.createElement("div");
+  flow.className = "document-flow";
+
+  const date = document.createElement("p");
+  date.className = "document-date";
+  date.textContent = "00/00/0000";
+
+  content.append(flow, date);
+  page.append(content);
+  probe.append(page);
+  document.body.append(probe);
+  return probe;
+}
+
 function paginateDocument() {
+  // Fit visual nao participa da medicao — probe offscreen nunca tem transform.
   if (previewPages) {
     previewPages.style.setProperty("--preview-fit-scale", "1");
     previewPages.style.marginBottom = "0px";
-    // Reflow antes de medir: escala previa (mobile) nao pode contaminar alturas.
     void previewPages.offsetWidth;
   }
 
@@ -4214,30 +4245,44 @@ function paginateDocument() {
   documentFlow.replaceChildren();
   updateDocumentDates();
 
-  let currentPage = printPage;
-  let currentFlow = documentFlow;
-  const content = currentPage.querySelector(".document-content");
-  const date = currentPage.querySelector(".document-date");
-  const reservedDateSpace = date.offsetHeight + 14;
-  const availableHeight = content.clientHeight - reservedDateSpace;
+  const probe = ensurePaginationProbe();
+  const probeFlow = probe.querySelector(".document-flow");
+  const probeContent = probe.querySelector(".document-content");
+  const probeDate = probe.querySelector(".document-date");
+  probeFlow.replaceChildren();
+  void probe.offsetWidth;
+
+  const reservedDateSpace = (probeDate?.offsetHeight || 17) + 14;
+  const availableHeight = probeContent.clientHeight - reservedDateSpace;
+
+  const pageGroups = [[]];
+  probeFlow.replaceChildren();
 
   blocks.forEach((block) => {
-    currentFlow.append(block);
+    const group = pageGroups[pageGroups.length - 1];
+    probeFlow.append(block);
 
-    if (block.offsetTop + block.offsetHeight <= availableHeight || currentFlow.children.length === 1) {
+    if (block.offsetTop + block.offsetHeight <= availableHeight || probeFlow.children.length === 1) {
+      group.push(block);
       return;
     }
 
-    currentPage = createDocumentPage();
-    currentFlow = currentPage.querySelector(".document-flow");
-    currentFlow.append(block);
+    probeFlow.removeChild(block);
+    pageGroups.push([block]);
+    probeFlow.replaceChildren(block);
+  });
+
+  probeFlow.replaceChildren();
+
+  pageGroups.forEach((group, index) => {
+    const page = index === 0 ? printPage : createDocumentPage();
+    page.querySelector(".document-flow").replaceChildren(...group);
   });
 
   updateDocumentDates();
   updateDocumentPageCounters();
   updatePreviewFitScale();
 
-  // Gotham/Cinzel mudam a altura dos blocos; remarcar uma vez quando as fontes chegarem.
   if (!paginateFontsHooked && document.fonts?.ready) {
     paginateFontsHooked = true;
     document.fonts.ready.then(() => {
