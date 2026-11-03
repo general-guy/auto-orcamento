@@ -8,7 +8,7 @@ Stub + runbook curto da coluna de formulario e da pre-visualizacao A4 no celular
 |------|--------|
 | Botoes **Abrir** / **Limpar** / **Imprimir** | Ficam no fluxo normal no fim de `#budget-form` (`.actions`). **Nao** usar `position: sticky; bottom: 0` — na coluna com `overflow` (desktop) ou no scroll mobile os botoes grudavam no meio do formulario |
 | Campo **Data** | Em Safari/iOS, `input[type=date]` tem largura/fonte nativas. Usar `appearance: none` + `border-radius: 12px` + `font: inherit`; `label:has` com `overflow: hidden`; `.form-panel` com `overflow-x: hidden` |
-| Texto / paginação A4 | Folha **794×1123px**, tipografia **15px**, probe offscreen com largura forçada (Safari nao pode espremer ao viewport). Altura util fixa; se o total cabe, 1 folha. HTML sempre com `?v=mtime` nos assets |
+| Texto / paginação A4 | Folha **794×1123px**, tipografia **14px**, probe offscreen com largura forçada (Safari nao pode espremer ao viewport). Altura util fixa; se o total cabe, 1 folha. HTML sempre com `?v=mtime` nos assets |
 | Preview **Documento Final** | A folha continua A4 (`--paper-width` / `--paper-height` = `210mm` × `297mm`) para o PDF e a paginacao. **Nao** redesenhar com flex fluido. Envolver as `.print-page` em `#previewPages` e escalar com `transform: scale(var(--preview-fit-scale))` (escala ≤ 1; **nao** CSS `zoom` — falha no Safari/iOS e mede mal com UI zoom) |
 | Escala | `updatePreviewFitScale()` em `web/app.js`: mede largura do `.preview-panel` (padding incluso), define `--preview-fit-scale` + `margin-bottom` para colapsar o layout box; `ResizeObserver` + `resize`; durante `paginateDocument()` a escala volta a `1` |
 | UI zoom | Preferencia em `settings.json`; em `max-width: 1180px` o body **nao** aplica `transform: scale` (evita estourar form/preview no celular). `AppApi.reapplyWebZoom` no breakpoint |
@@ -17,7 +17,7 @@ Stub + runbook curto da coluna de formulario e da pre-visualizacao A4 no celular
 
 ## Arquivos
 
-- `web/styles.css` — A4 794×1123, `.pagination-probe` (largura forçada), tipografia 15px
+- `web/styles.css` — A4 794×1123, `.pagination-probe` (largura forçada), tipografia 14px
 - `web/index.html` — `#previewPages` (assets com `?v=` via `server.js`)
 - `web/app.js` — `paginateDocument` (altura util fixa + probe; `fonts.ready`)
 - `server/server.js` — HTML sempre `stampLocalAssets` + `Cache-Control: no-store`
