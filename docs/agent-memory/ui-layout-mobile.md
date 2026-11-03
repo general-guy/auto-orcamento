@@ -17,9 +17,10 @@ Stub + runbook curto da coluna de formulario e da pre-visualizacao A4 no celular
 
 ## Arquivos
 
-- `web/styles.css` — A4 em px (794×1123), date, `.preview-pages` / `.pagination-probe`, tipografia pt
-- `web/index.html` — `#previewPages`
-- `web/app.js` — `updatePreviewFitScale`; `paginateDocument` via `#paginationProbe` + `fonts.ready`
+- `web/styles.css` — A4 794×1123, `.pagination-probe` (largura forçada), tipografia 15px
+- `web/index.html` — `#previewPages` (assets com `?v=` via `server.js`)
+- `web/app.js` — `paginateDocument` (altura util fixa + probe; `fonts.ready`)
+- `server/server.js` — HTML sempre `stampLocalAssets` + `Cache-Control: no-store`
 - `web/api.js` — `applyWebZoom` / `reapplyWebZoom` (body scale=1 sob 1180px)
 - `web/zoom.js` — `resize` apos zoom; `matchMedia` reaplica no breakpoint
 - Narrativa remota: [`../acesso-remoto.md`](../acesso-remoto.md)
@@ -33,4 +34,4 @@ Stub + runbook curto da coluna de formulario e da pre-visualizacao A4 no celular
 4. Preview mostra a folha inteira na largura (sem corte a direita); impressao/PDF segue A4.
 5. Com UI zoom ≠ 100% no desktop, no celular o body fica em 100% e o A4 ainda cabe.
 6. Pagina vazia padrao: mesma contagem de folhas no Atlas e no iPhone (tipografia pt / fonts.ready).
-6. Mesma pagina vazia: 1 folha no PC e no iPhone (probe offscreen / px canonicos).
+6. Mesma pagina vazia: 1 folha no PC e no iPhone (probe 794px + altura fixa; hard refresh se o Safari cachear).

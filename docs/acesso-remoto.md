@@ -17,7 +17,7 @@ No viewport estreito (`max-width: 1180px`) o formulario e o preview empilham. Re
 |------|----------------|
 | Botoes **Abrir** / **Limpar** / **Imprimir** | No fim do formulario (sem `position: sticky`) |
 | Campo **Data** | Contido no card (`min-width: 0`, `overflow` no label da data / painel) — iOS localiza a data e estoura sem isso |
-| Preview A4 | Fit visual com `transform: scale`; folha **794×1123px**; paginacao no probe offscreen (mesma contagem PC/iPhone) |
+| Preview A4 | Fit visual (`transform: scale`); folha **794×1123px**; paginacao no probe com largura forçada + altura util fixa; HTML com `?v=mtime` (cache Safari) |
 | UI zoom | Preferencia do desktop fica em 100% no body sob 1180px (`reapplyWebZoom`) |
 
 Detalhe e arquivos: [`agent-memory/ui-layout-mobile.md`](agent-memory/ui-layout-mobile.md).

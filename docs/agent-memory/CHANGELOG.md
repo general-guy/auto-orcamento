@@ -1,5 +1,5 @@
 # Agent memory — changelog
-- 2026-11-03: Paginacao iPhone — probe 794px forcado + altura util fixa + tipografia 15px; HTML carimba `?v=` nos assets (cache Safari).
+- 2026-11-03: Paginacao iPhone — probe 794px forcado + altura util fixa + tipografia 15px; HTML carimba `?v=` nos assets (cache Safari). Docs: `ui-layout-mobile.md`, `acesso-remoto.md`, `axis-sync-ui.md`.
 - 2026-11-03: Paginacao A4 — folha em px canonicos (794×1123) + probe offscreen; elimina 2 paginas no iPhone vs 1 no PC para o mesmo conteudo.
 - 2026-11-03: Paginacao A4 — tipografia do documento em pt (nao rem); text-size-adjust none; reflow + fonts.ready antes de contar paginas (mesmo conteudo Atlas vs iPhone).
 - 2026-11-03: UI mobile — date iOS com `appearance: none` (borda arredondada + fonte igual); flag de zoom oculto sob 1180px.
