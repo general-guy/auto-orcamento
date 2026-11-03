@@ -151,10 +151,11 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 | `web/app.js` | Lógica de UI, preview, históricos, autofill |
 | `server/paths.js` | Raiz do repo, `data/`, `export/` e `outputDir` (`C:\auto-orcamento\output` no Windows; `OUTPUT_DIR` opcional) |
 | `server/server.js` | Servidor na porta 3000 (`BIND_HOST`), APIs REST |
-| `server/axis-sync.js` | Fila sync Atlas↔Axis (só Windows localhost): `--startup`, `--pull-if-remote-newer` (antes de ler `data/`), `--push-relative` (reconcilia após gravar), `enqueuePullIfRemoteNewer` (notify); SSE `/api/sync/events`; wake via `ensure_axis_online.py` no local-atlas; log em `C:\auto-orcamento\logs\axis-sync\` |
+| `server/axis-sync.js` | Fila sync Atlas↔Axis (só Windows localhost): coalesce ~400 ms; `--startup`, `--pull-if-remote-newer`, `--push-relative`, `enqueuePullIfRemoteNewer` (notify); SSE `/api/sync/events`; wake + stamp online 45s via `ensure_axis_online.py`; log em `C:\auto-orcamento\logs\axis-sync\` |
 | `server/atlas-notify.js` | Notify Axis→Atlas: `POST /api/sync/notify`, listener opcional na Tailscale; cliente HTTP no CT após gravar |
+| `server/http-utils.js` | `normalizeText` + `collectRequestBody` compartilhados (server/catalog/notify) |
 | `server/load-local-env.js` | Carrega `config/atlas-notify.env` no clone (gitignored) no Atlas |
-| `web/sync-toasts.js` | Toasts SSE no Atlas + `AutoOrcamentoSyncUi` para `atlasNotify` no Axis; histórico (10) e botão de recarregar na `preview-toolbar`; ver `docs/agent-memory/axis-sync-ui.md` |
+| `web/sync-toasts.js` | Toasts SSE (`/api/sync/events`) no Atlas e no Axis; histórico (10) e botão de recarregar na `preview-toolbar`; ver `docs/agent-memory/axis-sync-ui.md` |
 | `docs/atlas-axis.md` | Relação Atlas (dev) × Axis (produção) |
 | `web/budget-snapshot.js` | Snapshot JSON do formulário na impressão e validação na importação |
 | `server/snapshot-open-dialog.js` | Invoca `scripts/open-snapshot-dialog.py` (pywebview/WebView2) ou PowerShell para seletor nativo de JSON |

@@ -24,7 +24,7 @@ Para `data/` e `export/`, mtime = `st_mtime` real. `output/` segue data do docum
 
 ## Fila no Node
 
-`server/axis-sync.js` serializa subprocessos Python; `enqueue` retorna Promise para o servidor **aguardar** o pull antes de ler o JSON. Push/reconcile após gravar continua assíncrono na fila (não bloqueia a resposta HTTP além do pull na leitura).
+`server/axis-sync.js` serializa subprocessos Python; `enqueue` retorna Promise para o servidor **aguardar** o pull antes de ler o JSON. Push/reconcile após gravar continua assíncrono na fila (não bloqueia a resposta HTTP além do pull na leitura). Blurs rápidos **coalescem** pushes/pulls (~400 ms) num único spawn; pulls aguardados (`pullBeforeWrite`, notify) fazem flush imediato do bucket pendente.
 
 O `--startup` usa `enqueueAhead` na fila Python. GET de catálogo **não** espera o pull (só enfileira). O SSE/toasts ligam após a página carregar (`sync-toasts.js`). Detalhe UI: [`axis-sync-ui.md`](axis-sync-ui.md).
 
@@ -50,7 +50,7 @@ No **CT 100**, após gravar `data/` (blur/API), `settings` ou impressão (`outpu
 | `AUTO_ORCAMENTO_ATLAS_NOTIFY_URL` | Axis — ex. `http://192.168.68.200:3010/api/sync/notify` (CT sem Tailscale logado) |
 | `AUTO_ORCAMENTO_ATLAS_NOTIFY_BIND_HOST` + `AUTO_ORCAMENTO_ATLAS_NOTIFY_PORT` (opcional, padrão `3010`) | Atlas — `0.0.0.0` no listener notify (app principal pode continuar em `127.0.0.1:3000`) |
 
-Alternativa: Tailscale Serve no Atlas apontando para `127.0.0.1:3000` e URL `…/api/sync/notify` na porta 3000 (expõe o app inteiro na tailnet).
+Caminho canônico do notify: listener `:3010` (ver [`atlas-notify.md`](atlas-notify.md)); a rota no `:3000` é o mesmo handler, mas não é o deploy padrão do CT.
 
 Runbook dedicado (env, listener, script de instalação): [`atlas-notify.md`](atlas-notify.md).
 
@@ -58,7 +58,7 @@ Runbook dedicado (env, listener, script de instalação): [`atlas-notify.md`](at
 
 | Caso | Comportamento |
 |------|----------------|
-| **PUT** com lista inteira (reordenar histórico na UI) | Body vem da memória do browser; **não** há pull antes do PUT. Preferir blur/POST ou recarregar a página após editar no Axis. |
+| **PUT** com lista inteira (reordenar histórico na UI) | Há `pullBeforeWrite` antes de ler o disco (`readCatalogFresh`), mas o body ainda traz **labels/ordem da memória do browser**. Após editar no outro host, preferir recarregar a UI (ou blur/POST) antes de reordenar — senão o PUT pode reaplicar estado stale sobre o doc fresco. |
 | **Mesmo arquivo** editado nos dois lados com mtime empate e conteúdo diferente | Toast de conflito; resolução manual. |
 | **Axis offline** no pull | Bind falha → segue JSON local; sem fila persistente de pushes pendentes. |
 | **`tabelas-hospitalares.json`** | Servido estático; não passa por estas APIs — só entra no merge do arranque ou edição manual + sync manual. |

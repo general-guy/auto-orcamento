@@ -1,3 +1,4 @@
+const { collectRequestBody } = require("./http-utils");
 const fs = require("node:fs");
 const {
   isCatalogV2,
@@ -69,11 +70,8 @@ async function handleCatalogApi(request, response, filePath, pullFns, afterWrite
       return;
     }
 
-    const atlasNotify = await writeCatalog(filePath, next, afterWrite);
+    await writeCatalog(filePath, next, afterWrite);
     const payload = toApiPayload(next);
-    if (atlasNotify) {
-      payload.atlasNotify = atlasNotify;
-    }
     response.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
     response.end(JSON.stringify(payload));
     return;
@@ -114,11 +112,8 @@ async function handleCatalogApi(request, response, filePath, pullFns, afterWrite
       return;
     }
 
-    const atlasNotify = await writeCatalog(filePath, next, afterWrite);
+    await writeCatalog(filePath, next, afterWrite);
     const responseBody = toApiPayload(next);
-    if (atlasNotify) {
-      responseBody.atlasNotify = atlasNotify;
-    }
     response.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
     response.end(JSON.stringify(responseBody));
     return;
@@ -137,11 +132,8 @@ async function handleCatalogApi(request, response, filePath, pullFns, afterWrite
 
     const doc = await readCatalogFresh(filePath, pullBeforeWrite);
     const { doc: next } = deleteEntry(doc, { id: id || undefined, value: value || undefined });
-    const atlasNotify = await writeCatalog(filePath, next, afterWrite);
+    await writeCatalog(filePath, next, afterWrite);
     const responseBody = toApiPayload(next);
-    if (atlasNotify) {
-      responseBody.atlasNotify = atlasNotify;
-    }
     response.writeHead(200, { "Content-Type": "application/json; charset=utf-8" });
     response.end(JSON.stringify(responseBody));
     return;
@@ -149,24 +141,6 @@ async function handleCatalogApi(request, response, filePath, pullFns, afterWrite
 
   response.writeHead(405, { "Content-Type": "application/json; charset=utf-8" });
   response.end(JSON.stringify({ error: "Método não permitido." }));
-}
-
-function collectRequestBody(request, maxBytes = 1024 * 32) {
-  return new Promise((resolve, reject) => {
-    let body = "";
-
-    request.on("data", (chunk) => {
-      body += chunk;
-
-      if (body.length > maxBytes) {
-        request.destroy();
-        reject(new Error("Request body too large"));
-      }
-    });
-
-    request.on("end", () => resolve(body));
-    request.on("error", reject);
-  });
 }
 
 module.exports = {

@@ -18,6 +18,7 @@ Memória durável do **Auto Orçamento** (decisões, caminhos, deploy). Cada tem
 | Layout mobile / preview A4 em tela estreita | [`ui-layout-mobile.md`](ui-layout-mobile.md) |
 | Tombstones `output/` (`orcamentos-index.json`) | [`output-index-sync.md`](output-index-sync.md) |
 | Log das últimas 10 sessões de sync (Atlas) | [`axis-sync-sessions.md`](axis-sync-sessions.md) |
+| Auditoria sync + roadmap simplificação (P0–P3) | [`auditoria-atlas-axis-roadmap.md`](auditoria-atlas-axis-roadmap.md) |
 | Narrativa Atlas/Axis no app | [`../atlas-axis.md`](../atlas-axis.md) |
 | SQLite para o dados-clinica (leitura unidirecional) | [`../export-sqlite.md`](../export-sqlite.md) |
 | Operação Axis (scripts, Pi, PVE) | repositório **`local-atlas`** (`axis/`, `docs/referencias/web-apps-axis.md`) |

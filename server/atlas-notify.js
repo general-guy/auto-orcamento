@@ -2,6 +2,7 @@ const http = require("node:http");
 const path = require("node:path");
 const { linuxUsesAxisDataBind } = require("./paths");
 const { freeTcpPortSync } = require("./port-utils");
+const { collectRequestBody } = require("./http-utils");
 
 const NOTIFY_FIRST_BYTE_MS = 5000;
 const NOTIFY_SYNC_MS = 60 * 1000;
@@ -337,21 +338,6 @@ async function notifyAtlasAfterFileWrite(filePath, roots) {
 async function notifyAtlasRelativePaths(relativePaths) {
   await postNotifyToAtlas(relativePaths);
   return undefined;
-}
-
-function collectRequestBody(request, maxBytes = 4096) {
-  return new Promise((resolve, reject) => {
-    let body = "";
-    request.on("data", (chunk) => {
-      body += chunk;
-      if (body.length > maxBytes) {
-        request.destroy();
-        reject(new Error("Request body too large"));
-      }
-    });
-    request.on("end", () => resolve(body));
-    request.on("error", reject);
-  });
 }
 
 function sendJson(response, statusCode, data) {

@@ -24,14 +24,6 @@
       throw new Error(message);
     }
 
-    const notify = data?.atlasNotify;
-    if (notify && window.AutoOrcamentoSyncUi?.showToast) {
-      const level = String(notify.level || "").toLowerCase();
-      if (level === "ok" || level === "success") {
-        window.AutoOrcamentoSyncUi.showToast(notify);
-      }
-    }
-
     return data;
   }
 
@@ -130,24 +122,6 @@
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
-    });
-    return unwrapCatalogItems(data);
-  }
-
-  async function addHistory(store, value) {
-    const data = await fetchJson(`/api/${store}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ value }),
-    });
-    return unwrapCatalogItems(data);
-  }
-
-  async function removeHistory(store, value) {
-    const data = await fetchJson(`/api/${store}`, {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ value }),
     });
     return unwrapCatalogItems(data);
   }
@@ -323,6 +297,7 @@
     });
   }
 
+  /** Legado: diálogo nativo. Preferir listSnapshots/loadSnapshot (modal Abrir). */
   async function openSnapshot() {
     return fetchJson("/api/open-snapshot", { method: "POST" });
   }
@@ -349,8 +324,6 @@
     upsertPatient,
     removePatient,
     replacePatients,
-    addHistory,
-    removeHistory,
     replaceHistory,
     getTechnologies,
     addTechnology,

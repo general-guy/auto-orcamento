@@ -34,6 +34,7 @@ const {
 const { EMPTY_CATALOG } = require("./catalog-v2");
 const { readCatalogFresh, writeCatalog, handleCatalogApi } = require("./catalog-http");
 const outputIndex = require("./output-index");
+const { normalizeText, collectRequestBody } = require("./http-utils");
 
 const port = 3000;
 const bindHost = process.env.BIND_HOST || "127.0.0.1";
@@ -115,12 +116,6 @@ const contentTypes = {
   ".webmanifest": "application/manifest+json; charset=utf-8",
 };
 
-function normalizeText(value) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-}
 
 function ensureDataFile() {
   fs.mkdirSync(dataDir, { recursive: true });
@@ -299,12 +294,8 @@ async function writeSettings(patch = {}) {
 
   fs.writeFileSync(settingsFile, `${JSON.stringify(next, null, 2)}\n`, "utf8");
   axisSync.afterDataFileWrite(settingsFile);
-  const atlasNotify = await notifyAtlasAfterFileWrite(settingsFile, atlasNotifyRoots);
-  const settings = readSettings();
-  if (atlasNotify) {
-    settings.atlasNotify = atlasNotify;
-  }
-  return settings;
+  await notifyAtlasAfterFileWrite(settingsFile, atlasNotifyRoots);
+  return readSettings();
 }
 
 function sendJson(response, statusCode, data) {
@@ -312,23 +303,6 @@ function sendJson(response, statusCode, data) {
   response.end(JSON.stringify(data));
 }
 
-function collectRequestBody(request, maxBytes = 1024 * 32) {
-  return new Promise((resolve, reject) => {
-    let body = "";
-
-    request.on("data", (chunk) => {
-      body += chunk;
-
-      if (body.length > maxBytes) {
-        request.destroy();
-        reject(new Error("Request body too large"));
-      }
-    });
-
-    request.on("end", () => resolve(body));
-    request.on("error", reject);
-  });
-}
 
 function ensureOutputDir() {
   fs.mkdirSync(outputDir, { recursive: true });
@@ -388,13 +362,12 @@ async function handleSnapshotsApi(request, response, pathname) {
       `output/${outputIndex.indexRelativePath()}`,
       ...removed.map((rel) => `output/${rel.replace(/\\/g, "/")}`),
     ];
-    const atlasNotify = await notifyAtlasRelativePaths(notifyPaths);
+    await notifyAtlasRelativePaths(notifyPaths);
 
     sendJson(response, 200, {
       ok: true,
       removed,
       jsonRelative: tombstone.jsonRelative,
-      atlasNotify,
     });
     return;
   }
@@ -518,14 +491,12 @@ async function handlePdfExport(request, response) {
     notifyPaths.push(`output/${jsonRel || responsePayload.jsonFilename}`);
   }
   notifyPaths.push("export/orcamentos.sqlite");
-  const atlasNotify = await notifyAtlasRelativePaths(notifyPaths);
-  if (atlasNotify) {
-    responsePayload.atlasNotify = atlasNotify;
-  }
+  await notifyAtlasRelativePaths(notifyPaths);
 
   sendJson(response, 200, responsePayload);
 }
 
+/** Legado: seletor nativo Windows. O botão Abrir usa o modal #snapshotPicker (listSnapshots/loadSnapshot). */
 async function handleOpenSnapshot(request, response) {
   if (request.method !== "POST") {
     sendJson(response, 405, { error: "Método não permitido." });

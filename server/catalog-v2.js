@@ -1,3 +1,5 @@
+const { normalizeText } = require("./http-utils");
+
 const crypto = require("node:crypto");
 const fs = require("node:fs");
 
@@ -8,13 +10,6 @@ const EMPTY_CATALOG = {
   schemaVersion: SCHEMA_VERSION,
   items: [],
 };
-
-function normalizeText(value) {
-  return String(value || "")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-}
 
 function isCatalogV2(parsed) {
   return (

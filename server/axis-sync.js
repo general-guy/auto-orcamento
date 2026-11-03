@@ -26,6 +26,27 @@ const STARTUP_FALLBACK_MS = 90 * 1000;
 const toastReplayBuffer = [];
 const TOAST_REPLAY_MAX = 15;
 const TOAST_REPLAY_MAX_AGE_MS = 3 * 60 * 1000;
+/** Debounce window to merge rapid push/pull into one Python spawn. */
+const COALESCE_MS = 400;
+
+/**
+ * @typedef {{ flag: string, paths: Set<string>, waiters: Array<(code: number) => void>, timer: ReturnType<typeof setTimeout> | null }} CoalesceBucket
+ * @type {{ push: CoalesceBucket, pull: CoalesceBucket }}
+ */
+const coalesceBuckets = {
+  push: {
+    flag: "--push-relative",
+    paths: new Set(),
+    waiters: [],
+    timer: null,
+  },
+  pull: {
+    flag: "--pull-if-remote-newer",
+    paths: new Set(),
+    waiters: [],
+    timer: null,
+  },
+};
 
 function rememberToast(event) {
   if (!event || event.type !== "toast") {
@@ -222,6 +243,78 @@ function enqueueAhead(taskName, argv) {
   return task;
 }
 
+function normalizeSyncRelativePath(raw) {
+  return normalizeNotifyRelativePath(raw);
+}
+
+function flushCoalesceBucket(taskName) {
+  const bucket = coalesceBuckets[taskName];
+  if (!bucket) {
+    return Promise.resolve(0);
+  }
+  if (bucket.timer) {
+    clearTimeout(bucket.timer);
+    bucket.timer = null;
+  }
+  const paths = [...bucket.paths];
+  bucket.paths.clear();
+  const waiters = bucket.waiters.splice(0);
+  if (!paths.length) {
+    for (const resolve of waiters) {
+      resolve(0);
+    }
+    return Promise.resolve(0);
+  }
+  const argv = [];
+  for (const relative of paths) {
+    argv.push(bucket.flag, relative);
+  }
+  const task = enqueue(taskName, argv);
+  void task.then(
+    (code) => {
+      for (const resolve of waiters) {
+        resolve(code);
+      }
+    },
+    () => {
+      for (const resolve of waiters) {
+        resolve(1);
+      }
+    },
+  );
+  return task;
+}
+
+/**
+ * Merge relative paths into one spawn. Awaited callers use flushNow to avoid
+ * artificial delay; fire-and-forget callers debounce COALESCE_MS.
+ */
+function enqueueCoalesced(taskName, relativePaths, { flushNow = false } = {}) {
+  const bucket = coalesceBuckets[taskName];
+  if (!bucket) {
+    return Promise.resolve(0);
+  }
+  for (const raw of relativePaths || []) {
+    const normalized = normalizeSyncRelativePath(raw);
+    if (normalized) {
+      bucket.paths.add(normalized);
+    }
+  }
+  return new Promise((resolve) => {
+    bucket.waiters.push(resolve);
+    if (flushNow) {
+      void flushCoalesceBucket(taskName);
+      return;
+    }
+    if (bucket.timer) {
+      clearTimeout(bucket.timer);
+    }
+    bucket.timer = setTimeout(() => {
+      void flushCoalesceBucket(taskName);
+    }, COALESCE_MS);
+  });
+}
+
 function createAxisSync({ bindHost, dataDir }) {
   const enabled = isSyncEnabled(bindHost);
   syncLogDir = enabled ? resolveAxisSyncLogDir(dataDir) : null;
@@ -258,25 +351,17 @@ function createAxisSync({ bindHost, dataDir }) {
     return client;
   }
 
-  function enqueuePushRelatives(relativePaths) {
+  function enqueuePushRelatives(relativePaths, { flushNow = false } = {}) {
     if (!enabled || !relativePaths?.length) {
-      return;
+      return Promise.resolve(0);
     }
-    const argv = [];
-    for (const relativePath of relativePaths) {
-      const normalized = String(relativePath).replace(/\\/g, "/").replace(/^\/+/, "");
-      if (normalized) {
-        argv.push("--push-relative", normalized);
-      }
-    }
-    if (argv.length) {
-      enqueue("push", argv);
-    }
+    return enqueueCoalesced("push", relativePaths, { flushNow });
   }
 
   function enqueuePushRelative(relativePath) {
-    enqueuePushRelatives([relativePath]);
+    return enqueuePushRelatives([relativePath]);
   }
+
 
   function dataRelativePath(filePath) {
     if (!filePath || !dataDir) {
@@ -297,7 +382,7 @@ function createAxisSync({ bindHost, dataDir }) {
     if (!relative) {
       return;
     }
-    void enqueue("pull", ["--pull-if-remote-newer", relative]);
+    void enqueueCoalesced("pull", [relative], { flushNow: false });
   }
 
   function pullDataFileIfRemoteNewer(filePath) {
@@ -308,7 +393,8 @@ function createAxisSync({ bindHost, dataDir }) {
     if (!relative) {
       return Promise.resolve();
     }
-    return enqueue("pull", ["--pull-if-remote-newer", relative]).then(() => {});
+    // Flush pending pulls immediately so awaited writes are not delayed by debounce.
+    return enqueueCoalesced("pull", [relative], { flushNow: true }).then(() => {});
   }
 
   function enqueuePullIfRemoteNewer(relativePaths) {
@@ -316,18 +402,18 @@ function createAxisSync({ bindHost, dataDir }) {
       return { queued: [], done: Promise.resolve(0) };
     }
     const queued = [];
-    const argv = [];
-    for (const raw of relativePaths) {
-      const normalized = normalizeNotifyRelativePath(raw);
-      if (!normalized) {
-        continue;
+    for (const raw of relativePaths || []) {
+      const normalized = normalizeSyncRelativePath(raw);
+      if (normalized) {
+        queued.push(normalized);
       }
-      queued.push(normalized);
-      argv.push("--pull-if-remote-newer", normalized);
     }
-    const done = argv.length ? enqueue("pull", argv) : Promise.resolve(0);
+    const done = queued.length
+      ? enqueueCoalesced("pull", queued, { flushNow: true })
+      : Promise.resolve(0);
     return { queued, done };
   }
+
 
   function afterDataFileWrite(filePath) {
     if (!enabled || !filePath || !dataDir) {
@@ -352,14 +438,14 @@ function createAxisSync({ bindHost, dataDir }) {
       paths.push(`output/${jsonFilename}`);
     }
     paths.push("export/orcamentos.sqlite");
-    enqueuePushRelatives(paths);
+    void enqueuePushRelatives(paths, { flushNow: true });
   }
 
   function afterOutputIndexChange() {
     if (!enabled) {
       return;
     }
-    enqueuePushRelatives(["output/orcamentos-index.json", "export/orcamentos.sqlite"]);
+    void enqueuePushRelatives(["output/orcamentos-index.json", "export/orcamentos.sqlite"], { flushNow: true });
   }
 
   function attachSyncEventsRoute(request, response) {

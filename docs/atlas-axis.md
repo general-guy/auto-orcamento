@@ -64,4 +64,4 @@ Ao abrir `abrir-auto-orcamento.bat`, após a porta 3000 subir, o servidor enfile
 | Uso | Histórico/settings: pull se Axis mais novo, gravar, reconciliar arquivo; imprimir → reconciliar `output/` + sqlite |
 | Uso (Axis) | Gravar no CT → notify HTTP ao Atlas (se aberto) para pull do mesmo arquivo; ver [`agent-memory/atlas-notify.md`](agent-memory/atlas-notify.md) |
 
-Runbook: [`atlas-axis-sync.md`](atlas-axis-sync.md). Axis desligado → toasts vermelhos no Atlas. No CT, sem resposta do Atlas em 5 segundos → toast amarelo.
+Runbook: [`atlas-axis-sync.md`](atlas-axis-sync.md); roadmap [`agent-memory/auditoria-atlas-axis-roadmap.md`](agent-memory/auditoria-atlas-axis-roadmap.md). Axis desligado → wake/toasts no Atlas (cache online ~45 s). No CT, notify canônico `:3010`; sem resposta em 5 s → toast amarelo.

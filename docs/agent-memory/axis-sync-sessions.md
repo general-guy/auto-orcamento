@@ -6,7 +6,7 @@ Cada execução em fila do `axis-sync.js` (`startup`, `pull`, `push`, etc.) grav
 
 | Item | Valor |
 |------|--------|
-| Pasta | `C:\auto-orcamento\logs\axis-sync\` |
+| Pasta | `C:\auto-orcamento\logs\axis-sync\` (também `axis-online.stamp` — cache 45 s «Axis online» entre spawns) |
 | Arquivos | `session-<local>-<tarefa>.log` — horário **local** da máquina (ex.: `session-2026-10-26T14-22-56-329-p0300-startup.log`); corpo com `started_at=…-03:00` e `timezone=America/Sao_Paulo` |
 | Retenção | **10** sessões; ao criar a 11ª, apaga a mais antiga |
 | Código | `server/axis-sync-session-log.js` + `server/axis-sync.js` |
@@ -47,7 +47,7 @@ Wake manual para testar: `py -3 local-atlas/axis/scripts/wake_axis.py`.
 
 O merge de `data` / `output` / `export` no arranque e a reconciliação por arquivo (`--push-relative`, `--pull-if-remote-newer`) usam **SSH find/stat + SFTP** (`sync_one_relative` em `sync_auto_orcamento_data.py`), não o rsync em massa do `push_axis_data.py`. O log ainda vale para depurar reenvios e mensagens do motor Python.
 
-Durante a sessão, o Node pode enfileirar `pull` imediatamente antes de uma API ler `data/`; o nome da tarefa no log é `pull` (argv `--pull-if-remote-newer`). Ver [`axis-data-live-sync.md`](axis-data-live-sync.md).
+Durante a sessão, o Node **coalesca** pushes/pulls rápidos (~400 ms) num único spawn (`enqueueCoalesced` em `axis-sync.js`); pulls aguardados e notify fazem flush imediato. O nome da tarefa no log continua `pull` / `push`. Ver [`axis-data-live-sync.md`](axis-data-live-sync.md).
 
 Toasts de merge usam **`/data/`**, **`/output/`**, **`/export/`** no texto. Com tudo já sincronizado, a etapa lenta costumava ser `/output/` (centenas de PDFs): o motor comparava hash baixando cada arquivo; agora usa **`sha256sum` no Patriot em lote** (local-atlas).
 

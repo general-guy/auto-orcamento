@@ -29,7 +29,7 @@ py -3 .\axis\scripts\install_atlas_notify_env.py
 
 (clone `local-atlas`; argumentos opcionais: IP LAN do Atlas, porta — padrão `192.168.68.200` e `3010`.)
 
-Alternativa: Tailscale Serve no Atlas para `127.0.0.1:3000` e URL `…/api/sync/notify` na porta 3000 (expõe o app inteiro na tailnet).
+**Canônico neste ambiente:** listener LAN `:3010` (`AUTO_ORCAMENTO_ATLAS_NOTIFY_URL=http://192.168.68.200:3010/api/sync/notify`). A rota `POST /api/sync/notify` no app `:3000` existe (mesmo handler), mas não é o caminho de produção do CT — alternativa só se o Atlas publicar Tailscale Serve em `127.0.0.1:3000` (expõe o app inteiro na tailnet).
 
 ## Código
 
