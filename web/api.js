@@ -216,8 +216,12 @@
   }
 
   function applyWebZoom(scale) {
-    const zoom = clampZoom(scale);
-    webZoomFactor = zoom;
+    const preferred = clampZoom(scale);
+    // Em viewport estreita o scale do body combina mal com o fit A4 e estoura o form (iOS/Tailscale).
+    const narrow =
+      typeof window.matchMedia === "function" && window.matchMedia("(max-width: 1180px)").matches;
+    const zoom = narrow ? ZOOM_DEFAULT : preferred;
+    webZoomFactor = preferred;
     document.documentElement.style.setProperty("--ui-zoom", String(zoom));
     document.documentElement.style.zoom = "";
 
@@ -233,11 +237,15 @@
     }
 
     window.dispatchEvent(new Event("resize"));
-    return zoom;
+    return preferred;
   }
 
   function getWebZoomFactor() {
     return webZoomFactor;
+  }
+
+  function reapplyWebZoom() {
+    return applyWebZoom(webZoomFactor);
   }
 
   async function getZoom() {
@@ -338,6 +346,7 @@
     setZoom,
     adjustZoom,
     getWebZoomFactor,
+    reapplyWebZoom,
     exportPdf,
     openSnapshot,
     listSnapshots,

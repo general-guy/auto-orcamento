@@ -160,7 +160,7 @@ Removido do tree atual. Ver [`docs/legado-tauri.md`](docs/legado-tauri.md), tag 
 
 `Ctrl` + roda do mouse, `Ctrl` + `+` / `Ctrl` + `-` (passos de 10%, entre 50% e 200%) e `Ctrl` + `0` para voltar a 100%. O nível fica salvo em `C:\auto-orcamento\data\settings.json` (Windows). Um indicador flutuante (estilo Chrome) mostra a porcentagem, botões `−`/`+` e **Redefinir**. No fallback `launcher/launch-app.js` (Chrome/Edge), vale o zoom nativo do navegador.
 
-No **Node (WebView2)**, o zoom escala só a interface na tela (`transform: scale()` no `body`). A **impressão do navegador** (`window.print()`) ignora esse zoom: `@media print` em `styles.css` restaura dimensões A4 e anula o transform, para o papel sair igual ao PDF automático.
+No **Node (WebView2)**, o zoom escala só a interface na tela (`transform: scale()` no `body`). Em viewport estreita (`max-width: 1180px`, celular na tailnet) o body fica em 100% mesmo com preferência ≠ 100% salva — evita estourar o formulário e o fit A4. A **impressão do navegador** (`window.print()`) ignora esse zoom: `@media print` em `styles.css` restaura dimensões A4 e anula o transform, para o papel sair igual ao PDF automático. O preview A4 em tela estreita usa `transform: scale` em `#previewPages` (não CSS `zoom`); ver `docs/agent-memory/ui-layout-mobile.md`.
 
 Preferências locais (zoom e última pasta do botão **Abrir**) ficam em `settings.json` dentro de `C:\auto-orcamento\data\`.
 

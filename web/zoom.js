@@ -151,6 +151,15 @@
         void resetZoom();
       }
     });
+
+    if (typeof window.matchMedia === "function") {
+      window.matchMedia("(max-width: 1180px)").addEventListener("change", () => {
+        if (typeof AppApi.reapplyWebZoom === "function") {
+          AppApi.reapplyWebZoom();
+          updateZoomFlag(AppApi.getWebZoomFactor());
+        }
+      });
+    }
   }
 
   void initZoomControls();

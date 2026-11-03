@@ -18,7 +18,7 @@ Plugins esperados: **Context7**, **Continual Learning**, **Cursor Team Kit**, **
 
 Memória persistente do agente: [`AGENTS.md`](../AGENTS.md) na raiz; temas em [`docs/agent-memory/README.md`](agent-memory/README.md).
 
-Skills globais CT100 (`ct100-webapps`, `ct100-auto-orcamento`): em `~/.cursor/skills/` (LEARNINGS + SKILL) — pai coordena infra; filho cobre sync/wake/notify/UI (`enqueueAhead`, coalesce ~400 ms, `schedulePullDataFileIfRemoteNewer`, cache `axis-online.stamp`, `atlas-notify.js` canônico `:3010`, SSE após `load`; token em `config/atlas-notify.env`, gitignored). O `orcamentos.sqlite` em `export/` é leitura unidirecional do dados-clinica (sem cópia). Runbooks: [`atlas-axis-sync.md`](atlas-axis-sync.md), [`agent-memory/axis-data-live-sync.md`](agent-memory/axis-data-live-sync.md), [`agent-memory/atlas-notify.md`](agent-memory/atlas-notify.md), [`agent-memory/auditoria-atlas-axis-roadmap.md`](agent-memory/auditoria-atlas-axis-roadmap.md), [`agent-memory/axis-sync-ui.md`](agent-memory/axis-sync-ui.md), [`export-sqlite.md`](export-sqlite.md).
+Skills globais CT100 (`ct100-webapps`, `ct100-auto-orcamento`): em `~/.cursor/skills/` (LEARNINGS + SKILL) — pai coordena infra; filho cobre sync/wake/notify/UI (`enqueueAhead`, coalesce ~400 ms, `schedulePullDataFileIfRemoteNewer`, cache `axis-online.stamp`, `atlas-notify.js` canônico `:3010`, SSE após `load`; token em `config/atlas-notify.env`, gitignored). O `orcamentos.sqlite` em `export/` é leitura unidirecional do dados-clinica (sem cópia). Runbooks: [`atlas-axis-sync.md`](atlas-axis-sync.md), [`agent-memory/axis-data-live-sync.md`](agent-memory/axis-data-live-sync.md), [`agent-memory/atlas-notify.md`](agent-memory/atlas-notify.md), [`agent-memory/auditoria-atlas-axis-roadmap.md`](agent-memory/auditoria-atlas-axis-roadmap.md), [`agent-memory/axis-sync-ui.md`](agent-memory/axis-sync-ui.md), [`agent-memory/ui-layout-mobile.md`](agent-memory/ui-layout-mobile.md), [`export-sqlite.md`](export-sqlite.md).
 
 ## Context7
 
@@ -55,7 +55,7 @@ Não use Context7 para regras de negócio do orçamento (Unimed N, Regina/Sapira
 - "Com Browser Use, abre o app local e confere se a seção Equipe aparece no preview."
 - "Tira screenshot da pré-visualização após carregar um JSON de `output/`."
 - "Preenche hospital Blanc, dois pacotes e uma associada, clica no botão verde e confere multiplicadores 1 / 0.6 / 1 e o total no preview."
-- "No celular/viewport estreito, confere se Data respeita a borda e se o preview A4 cabe sem corte (fit `#previewPages`)."
+- "No celular/viewport estreito, confere se Data respeita a borda, se o preview A4 cabe com transform:scale (sem corte) e se o UI zoom do body fica em 100%."
 
 O app em WebView2 nativo **não** é o mesmo processo do Chrome do Browser Use; para UI nativa (ícone da barra, maximizado), o teste manual pelo `.bat` continua necessário. Browser Use cobre o **mesmo HTML/JS** servido em `localhost:3000`.
 

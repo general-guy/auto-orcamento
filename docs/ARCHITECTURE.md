@@ -152,7 +152,7 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 | `server/paths.js` | Raiz do repo, `data/`, `export/` e `outputDir` (`C:\auto-orcamento\output` no Windows; `OUTPUT_DIR` opcional) |
 | `server/server.js` | Servidor na porta 3000 (`BIND_HOST`), APIs REST |
 | `server/axis-sync.js` | Fila sync Atlas↔Axis (só Windows localhost): coalesce ~400 ms; `--startup`, `--pull-if-remote-newer`, `--push-relative`, `enqueuePullIfRemoteNewer` (notify); SSE `/api/sync/events`; wake + stamp online 45s via `ensure_axis_online.py`; log em `C:\auto-orcamento\logs\axis-sync\` |
-| `server/atlas-notify.js` | Notify Axis→Atlas: `POST /api/sync/notify`, listener opcional na Tailscale; cliente HTTP no CT após gravar |
+| `server/atlas-notify.js` | Notify Axis→Atlas: `POST /api/sync/notify`, listener canônico LAN `:3010` (`0.0.0.0`); cliente HTTP no CT após gravar |
 | `server/http-utils.js` | `normalizeText` + `collectRequestBody` compartilhados (server/catalog/notify) |
 | `server/load-local-env.js` | Carrega `config/atlas-notify.env` no clone (gitignored) no Atlas |
 | `web/sync-toasts.js` | Toasts SSE (`/api/sync/events`) no Atlas e no Axis; histórico (10) e botão de recarregar na `preview-toolbar`; ver `docs/agent-memory/axis-sync-ui.md` |
@@ -231,7 +231,7 @@ Endpoints principais:
 - layout em colunas com painel esquerdo redimensionável; em `max-width: 1180px` empilha formulário + preview;
 - visual dos campos, botões, dropdowns e pré-visualização; `input[type=date]` com `min-width: 0` / `max-width: 100%` para não estourar a borda no iOS;
 - agrupamento visual das seções do formulário com bordas cinza discretas;
-- papel A4 com imagem de fundo do papel timbrado; em tela estreita `#previewPages` aplica `zoom: var(--preview-fit-scale)` (ver `updatePreviewFitScale()` em `app.js`) sem alterar o tamanho lógico da folha;
+- papel A4 com imagem de fundo do papel timbrado; em tela estreita `#previewPages` aplica `transform: scale(var(--preview-fit-scale))` (ver `updatePreviewFitScale()` em `app.js`) sem alterar o tamanho lógico da folha; UI zoom do body fica em 100% sob 1180px;
 - negrito do documento: `strong`/`b` em `.document-content` usam `--document-emphasis-weight` (Gotham Medium, `500`), inclusive o rótulo `Tempo previsto` e os trechos `*texto*` das observações;
 - regras específicas de impressão (`@media print`): oculta formulário e chrome da UI; força A4 (`210mm` × `297mm`); anula o zoom da interface (`transform: none` no `body`), o fit do preview (`zoom: 1` em `#previewPages`) e alturas mínimas (`100vh`) que distorcem o diálogo **Imprimir** no WebView2.
 

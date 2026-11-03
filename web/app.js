@@ -4172,12 +4172,23 @@ function updatePreviewFitScale() {
   previewFitObserver?.unobserve(previewPanel);
 
   previewPages.style.setProperty("--preview-fit-scale", "1");
+  previewPages.style.marginBottom = "0px";
   void previewPages.offsetWidth;
 
-  const availableWidth = previewPages.clientWidth;
+  // Medir o painel (não #previewPages): com scale/zoom o clientWidth do wrapper mente.
+  const panelStyles = previewPanel ? getComputedStyle(previewPanel) : null;
+  const padX = panelStyles
+    ? (Number.parseFloat(panelStyles.paddingLeft) || 0) + (Number.parseFloat(panelStyles.paddingRight) || 0)
+    : 0;
+  const availableWidth = previewPanel ? Math.max(0, previewPanel.clientWidth - padX) : previewPages.clientWidth;
   const paperWidth = printPage.offsetWidth;
   const nextScale = availableWidth && paperWidth ? Math.min(1, availableWidth / paperWidth) : 1;
-  previewPages.style.setProperty("--preview-fit-scale", String(Math.floor(nextScale * 1000) / 1000));
+  const roundedScale = Math.floor(nextScale * 1000) / 1000;
+  previewPages.style.setProperty("--preview-fit-scale", String(roundedScale));
+
+  // transform não encolhe o layout box — colapsar o espaço sobrado abaixo das folhas.
+  const layoutHeight = previewPages.offsetHeight;
+  previewPages.style.marginBottom = `${layoutHeight * (roundedScale - 1)}px`;
 
   requestAnimationFrame(() => {
     if (previewFitObserver && previewPanel) {
@@ -4190,6 +4201,7 @@ function updatePreviewFitScale() {
 function paginateDocument() {
   if (previewPages) {
     previewPages.style.setProperty("--preview-fit-scale", "1");
+    previewPages.style.marginBottom = "0px";
   }
 
   const pages = [printPage, ...document.querySelectorAll(".generated-print-page")];
