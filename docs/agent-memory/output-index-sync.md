@@ -36,7 +36,7 @@ No clone, com disco ao vivo montado:
 node scripts/backfill-output-index.js
 ```
 
-O arranque do servidor também chama `ensureIndexCoversDisk` (só adiciona entradas para JSON no disco que ainda não estão no índice).
+O arranque do servidor também chama `ensureIndexCoversDisk` (só adiciona entradas para JSON no disco que ainda não estão no índice). A gravação do índice usa `server/fs-write.js` (temp+rename): no CT, ficheiros sync `nobody`/0644 não aceitam `writeFileSync` (EACCES); `chmod` dentro do LXC idmapped falha — no host: `chmod -R a+rwX /var/lib/axis-data/auto-orcamento`. Falha no arranque é logada e não derruba o serviço.
 
 ## Recuperar caso “apaguei no Explorer”
 

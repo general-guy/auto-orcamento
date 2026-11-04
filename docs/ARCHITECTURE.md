@@ -256,7 +256,7 @@ Runbook mobile/estreito: [`docs/agent-memory/ui-layout-mobile.md`](agent-memory/
 - redimensionamento do painel;
 - impressão e exportação automática de PDF + snapshot JSON.
 
-`pdf-export.js` usa o Chrome ou Edge instalado localmente, via `puppeteer-core`, para renderizar o HTML paginado recebido do frontend. O CSS, fontes e imagens do timbrado são embutidos a partir dos arquivos locais do projeto em base64, evitando depender de novas requisições HTTP enquanto o servidor processa a exportação. O nome do PDF segue `{paciente} - {cirurgia} {data} {hora}` (sem cirurgia: só `{paciente} {data} {hora}`); a cirurgia é a primeira linha preenchida em `snapshot.form.surgeries`. O launcher do navegador usa perfil temporário, tenta Chrome e depois Edge, e roda em `headless: "shell"`. Colisões de nome recebem sufixo `(2)`, `(3)`, etc.
+`pdf-export.js` usa o Chrome ou Edge instalado localmente, via `puppeteer-core`, para renderizar o HTML paginado recebido do frontend. O CSS, fontes e imagens do timbrado são embutidos a partir dos arquivos locais do projeto em base64, evitando depender de novas requisições HTTP enquanto o servidor processa a exportação. O nome do PDF segue `{paciente} - {cirurgia} {data} {hora}` (sem cirurgia: só `{paciente} {data} {hora}`); a cirurgia é a primeira linha preenchida em `snapshot.form.surgeries`. O launcher do navegador usa perfil temporário, tenta Chrome e depois Edge, e roda em `headless: "shell"`. No Linux (CT como root) passa `--no-sandbox` e `--disable-setuid-sandbox` — o Chromium recusa subir sem isso. JSON de índice/catálogo/settings/snapshot e o overwrite seguro no axis-data usam `server/fs-write.js` (temp+rename; evita EACCES em ficheiros `nobody` 0644). Colisões de nome recebem sufixo `(2)`, `(3)`, etc.
 
 ## Dados
 

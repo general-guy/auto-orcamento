@@ -37,6 +37,8 @@ No browser na tailnet (ex.: Axis via Serve), a impressão chama `/api/pdf` no se
 
 Falhas na consolidação são registadas no log do servidor e **não** bloqueiam a impressão nem a gravação em `output/`.
 
+No CT, sidecars `-wal`/`-shm` herdados do sync (`nobody`/0644) podem deixar o SQLite *readonly*; `export-sqlite.js` remove esses sidecars e, se ainda falhar a escrita, recria o `.sqlite`.
+
 ## Estratégia de sincronização
 
 A cada consolidação o banco é **reconstruído por completo**:

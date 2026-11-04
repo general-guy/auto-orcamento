@@ -2,6 +2,7 @@ const crypto = require("node:crypto");
 const fs = require("node:fs");
 const path = require("node:path");
 
+const { writeTextFileReplace } = require("./fs-write");
 const { trashOrUnlink } = require("./trash-file");
 
 const SCHEMA_VERSION = 1;
@@ -97,7 +98,7 @@ function writeIndexDoc(outputDir, doc) {
     schemaVersion: SCHEMA_VERSION,
     items: Array.isArray(doc.items) ? doc.items : [],
   };
-  fs.writeFileSync(filePath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+  writeTextFileReplace(filePath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
   const maxMtimeMs = payload.items.reduce(
     (best, item) => Math.max(best, Number(item?.mtime) || 0),
     0,

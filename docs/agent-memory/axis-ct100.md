@@ -31,7 +31,8 @@ O **seed** versionado continua só no código (`/opt/auto-orcamento/seed/data/`)
 | Unit | `auto-orcamento.service` (em `local-atlas/axis/systemd/`) |
 | Bind app | `BIND_HOST=192.168.68.202` (Serve no host `.201` → `:3000`) |
 | URL | `https://axis.tail5fe4b7.ts.net:3000/` (Tailscale Serve, sem Funnel) |
-| PDF | `AUTO_ORCAMENTO_BROWSER=/usr/bin/chromium` |
+| PDF | `AUTO_ORCAMENTO_BROWSER=/usr/bin/chromium`; Puppeteer em Linux usa `--no-sandbox` (serviço root) |
+| Permissões axis-data | Ficheiros sync muitas vezes `nobody` 0644; CT idmapped não faz `chmod`. App grava via temp+rename (`server/fs-write.js`). No host: `chmod -R a+rwX /var/lib/axis-data/auto-orcamento` |
 | Notify → Atlas | CT: `/etc/auto-orcamento/atlas-notify.env` → `http://192.168.68.200:3010/api/sync/notify` (sem `tailscale up`). Atlas: `config/atlas-notify.env` no clone (gitignored); o tar não inclui o arquivo. `install_atlas_notify_env.py` (local-atlas) |
 
 ## Sincronização (sentido único)

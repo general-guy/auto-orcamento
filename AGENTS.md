@@ -43,7 +43,8 @@ Para fluxos com plugins (quando pedir o quê, frases úteis): [`docs/cursor-plug
 - Stack ativa: Node (`server/server.js`), frontend em `web/`, launcher `launcher/native_launcher.py` (WebView2).
 - Porta local do app: `http://localhost:3000` (ou `127.0.0.1:3000`); bind padrão `127.0.0.1` (`BIND_HOST`).
 - Produção clínica: Axis CT 100 (`192.168.68.202:3000`, `BIND_HOST=192.168.68.202`) + Tailscale Serve no host → `https://axis.tail5fe4b7.ts.net:3000/`. Sem Funnel.
-- Dependência de PDF: `puppeteer-core` + Chrome/Edge instalado.
+- Dependência de PDF: `puppeteer-core` + Chrome/Edge (Atlas) ou Chromium (`AUTO_ORCAMENTO_BROWSER`) no CT; Linux/root usa `--no-sandbox`.
+- Gravação em axis-data no CT: `server/fs-write.js` (temp+rename) — ficheiros sync `nobody`/0644; `chmod` só no host Patriot.
 - Snapshot JSON (`schemaVersion: 1`) e botão **Abrir** (modal `#snapshotPicker`, lista recursiva de `output/`) existem só na stack Node; índice de sync `output/orcamentos-index.json` (tombstones de pares pdf+json).
 - Espelho SQLite é reconstruído a partir de `output/` na abertura do servidor e após imprimir (também `npm run export:sqlite`); gravado só em `EXPORT_DIR` (`C:\auto-orcamento\export\` no Atlas, `/data/auto-orcamento/export/` no CT 100). O dados-clinica lê esse arquivo no lugar, somente leitura — ver `docs/export-sqlite.md`.
 - Históricos em `C:\auto-orcamento\data\` (schema v2 nos oito JSON de catálogo; `settings.json` v1); `items[].mtime` = epoch ms UTC; tombstones `deleted: true` no sync; `checked` opcional em `pagamentos` / `observacoes` / `extras` (listas rápidas); seed: `seed/data/`; spec `docs/agent-memory/data-schema-v2.md`.

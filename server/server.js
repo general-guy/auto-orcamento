@@ -35,6 +35,7 @@ const { EMPTY_CATALOG } = require("./catalog-v2");
 const { readCatalogFresh, writeCatalog, handleCatalogApi } = require("./catalog-http");
 const outputIndex = require("./output-index");
 const { normalizeText, collectRequestBody } = require("./http-utils");
+const { writeTextFileReplace } = require("./fs-write");
 
 const port = 3000;
 const bindHost = process.env.BIND_HOST || "127.0.0.1";
@@ -133,7 +134,7 @@ function ensureDataFile() {
 
   for (const filePath of catalogFiles) {
     if (!fs.existsSync(filePath)) {
-      fs.writeFileSync(filePath, `${JSON.stringify(EMPTY_CATALOG, null, 2)}\n`, "utf8");
+      writeTextFileReplace(filePath, `${JSON.stringify(EMPTY_CATALOG, null, 2)}\n`, "utf8");
     }
   }
 }
@@ -292,7 +293,7 @@ async function writeSettings(patch = {}) {
     }
   }
 
-  fs.writeFileSync(settingsFile, `${JSON.stringify(next, null, 2)}\n`, "utf8");
+  writeTextFileReplace(settingsFile, `${JSON.stringify(next, null, 2)}\n`, "utf8");
   axisSync.afterDataFileWrite(settingsFile);
   await notifyAtlasAfterFileWrite(settingsFile, atlasNotifyRoots);
   return readSettings();
@@ -816,7 +817,11 @@ async function startServer() {
 
   ensureDataFile();
   ensureOutputDir();
-  outputIndex.ensureIndexCoversDisk(outputDir);
+  try {
+    outputIndex.ensureIndexCoversDisk(outputDir);
+  } catch (error) {
+    console.error(`Falha ao atualizar orcamentos-index.json: ${error.message}`);
+  }
   await freeTcpPort(port);
   server.listen(port, bindHost, () => {
     console.log(`Auto Orçamento disponível em http://${bindHost}:${port}`);

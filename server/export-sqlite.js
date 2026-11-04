@@ -116,6 +116,55 @@ function consolidateOutputToSqlite({
   ensureExportDir(exportDir);
 
   const dbPath = path.join(exportDir, dbName);
+
+  function unlinkSqliteArtifacts() {
+    for (const suffix of ["", "-wal", "-shm"]) {
+      try {
+        fs.unlinkSync(dbPath + suffix);
+      } catch (error) {
+        if (error.code !== "ENOENT") {
+          throw error;
+        }
+      }
+    }
+  }
+
+  function openWritableDatabase() {
+    // Sidecars WAL nobody/0644 no CT idmapped → SQLITE_READONLY.
+    try {
+      fs.unlinkSync(dbPath + "-wal");
+    } catch (error) {
+      if (error.code !== "ENOENT") {
+        throw error;
+      }
+    }
+    try {
+      fs.unlinkSync(dbPath + "-shm");
+    } catch (error) {
+      if (error.code !== "ENOENT") {
+        throw error;
+      }
+    }
+
+    const db = openDatabase(dbPath);
+    try {
+      db.exec("BEGIN IMMEDIATE; ROLLBACK;");
+      return db;
+    } catch (error) {
+      try {
+        db.close();
+      } catch {
+        // ignore
+      }
+      const message = String(error?.message || error);
+      if (!/readonly|EACCES|SQLITE_READONLY/i.test(message)) {
+        throw error;
+      }
+      unlinkSqliteArtifacts();
+      return openDatabase(dbPath);
+    }
+  }
+
   const jsonPaths = listSnapshotJsonFiles(outputDir);
   const records = [];
   const errors = [];
@@ -132,7 +181,7 @@ function consolidateOutputToSqlite({
   }
 
   const consolidatedAt = new Date().toISOString();
-  const db = openDatabase(dbPath);
+  const db = openWritableDatabase();
 
   try {
     db.exec("BEGIN");

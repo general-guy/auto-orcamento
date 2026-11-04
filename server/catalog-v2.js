@@ -1,4 +1,5 @@
 const { normalizeText } = require("./http-utils");
+const { writeTextFileReplace } = require("./fs-write");
 
 const crypto = require("node:crypto");
 const fs = require("node:fs");
@@ -98,7 +99,7 @@ function readCatalogFile(filePath) {
 
 function writeCatalogFile(filePath, doc) {
   const normalized = isCatalogV2(doc) ? doc : migrateLegacyToV2(doc);
-  fs.writeFileSync(filePath, `${JSON.stringify(normalized, null, 2)}\n`, "utf8");
+  writeTextFileReplace(filePath, `${JSON.stringify(normalized, null, 2)}\n`, "utf8");
   return normalized;
 }
 

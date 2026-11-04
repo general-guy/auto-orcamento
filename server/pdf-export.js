@@ -2,6 +2,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const puppeteer = require("puppeteer-core");
+const { writeTextFileReplace } = require("./fs-write");
 
 const browserCandidates = [
   process.env.AUTO_ORCAMENTO_BROWSER,
@@ -60,6 +61,24 @@ function removeBrowserProfileDir(profileDir) {
   }
 }
 
+function buildPdfBrowserArgs() {
+  const args = [
+    "--disable-dev-shm-usage",
+    "--no-first-run",
+    "--no-default-browser-check",
+    "--disable-extensions",
+  ];
+
+  // Chromium no Linux (CT/LXC como root) recusa subir sem isto.
+  const runningAsRoot =
+    typeof process.getuid === "function" && process.getuid() === 0;
+  if (process.platform === "linux" || runningAsRoot) {
+    args.push("--no-sandbox", "--disable-setuid-sandbox");
+  }
+
+  return args;
+}
+
 async function launchPdfBrowser() {
   const browserPaths = getBrowserPaths();
   if (browserPaths.length === 0) {
@@ -67,6 +86,7 @@ async function launchPdfBrowser() {
   }
 
   let lastError = null;
+  const args = buildPdfBrowserArgs();
 
   for (const executablePath of browserPaths) {
     const profileDir = createBrowserProfileDir();
@@ -76,12 +96,7 @@ async function launchPdfBrowser() {
         executablePath,
         headless: "shell",
         userDataDir: profileDir,
-        args: [
-          "--disable-dev-shm-usage",
-          "--no-first-run",
-          "--no-default-browser-check",
-          "--disable-extensions",
-        ],
+        args,
       });
 
       return { browser, profileDir };
@@ -240,7 +255,7 @@ function writeBudgetSnapshotJson(outputPath, snapshot) {
   }
 
   const jsonPath = outputPath.replace(/\.pdf$/i, ".json");
-  fs.writeFileSync(jsonPath, `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
+  writeTextFileReplace(jsonPath, `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
   return jsonPath;
 }
 

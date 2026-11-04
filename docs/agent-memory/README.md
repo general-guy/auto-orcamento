@@ -10,7 +10,7 @@ Memória durável do **Auto Orçamento** (decisões, caminhos, deploy). Cada tem
 | Backup legado `data/` (pré-UUID) | [`../../backup-legado/README.md`](../../backup-legado/README.md) |
 | Migração UUID `data/` | [`data-uuid-migration.md`](data-uuid-migration.md) |
 | Schema v2 (catálogo UUID) | [`data-schema-v2.md`](data-schema-v2.md) |
-| CT 100, axis-data, `/opt` vs `/data` | [`axis-ct100.md`](axis-ct100.md) |
+| CT 100, axis-data, `/opt` vs `/data` (PDF sandbox; permissões nobody/`fs-write.js`) | [`axis-ct100.md`](axis-ct100.md) |
 | Sync automático Atlas ↔ Axis (dev) | [`../atlas-axis-sync.md`](../atlas-axis-sync.md) |
 | `data/` ao vivo (blur, pull + reconcile) | [`axis-data-live-sync.md`](axis-data-live-sync.md) |
 | Notify Axis → Atlas (pull na sessão; token em `config/atlas-notify.env`, gitignored) | [`atlas-notify.md`](atlas-notify.md) |
