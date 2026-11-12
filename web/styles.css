@@ -91,22 +91,6 @@ textarea {
   padding: 20px;
 }
 
-/* Desktop: o scroll fica nos painéis. Sem isto, UI zoom (body scale) ou 100vh+padding
-   deixam uma faixa vazia rolável abaixo da frontpage. Mobile (<1180px) precisa scroll da página. */
-@media (min-width: 1181px) {
-  html,
-  body {
-    height: 100%;
-    max-height: 100%;
-    overflow: hidden;
-  }
-
-  .app-shell {
-    height: 100%;
-    min-height: 0;
-  }
-}
-
 .panel {
   background: var(--panel);
   border: 1px solid rgba(31, 41, 51, 0.06);

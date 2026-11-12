@@ -1,5 +1,5 @@
 # Agent memory — changelog
-- 2026-11-12: Desktop — trava scroll do documento (`overflow: hidden` ≥1181px + `applyWebZoom`) para UI zoom ≠ 100% nao revelar faixa vazia; docs ui-layout/AGENTS/ARCHITECTURE/acesso-remoto + skill ct100.
+- 2026-11-12: UI zoom — regressao da faixa cinza fixa: `max-height`/`overflow` no body prendia o scale; corrigido com `overflow` só no `html` + `height: 100/zoom vh` em `applyWebZoom`. Docs ui-layout/AGENTS/ARCHITECTURE.
 - 2026-11-12: Excluir no modal Abrir — DELETE responde na hora; SQLite/notify em background; UI otimista. Docs README/AGENTS/ARCHITECTURE/acesso-remoto/export-sqlite/output-index-sync/atlas-notify/cursor-plugins + skills ct100.
 - 2026-11-04: CT — PDF Chromium `--no-sandbox`; Abrir EACCES no índice → `fs-write.js` + chmod no host Patriot; SQLite recria se readonly. Skills ct100 + `axis-ct100.md`.
 - 2026-11-03: Confirmado no celular (Chrome/Axis): pagina vazia do orçamento cabe em **1 folha**. Cadeia: folha 794×1123px + probe + tipografia 14px + `--sync-code` no CT. Docs/skills alinhados.

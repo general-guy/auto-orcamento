@@ -231,16 +231,17 @@
       document.body.style.removeProperty("width");
       document.body.style.removeProperty("height");
       document.documentElement.style.removeProperty("overflow");
-      document.body.style.removeProperty("overflow");
+      document.documentElement.style.removeProperty("height");
     } else {
-      // scale encolhe o visual, mas width/height 100/zoom% infla o layout box.
-      // Sem travar overflow no documento, a roda do mouse revela faixa vazia abaixo da UI.
+      // scale encolhe o visual; width/height compensam para preencher a viewport.
+      // overflow só no <html> (não max-height/overflow no body): senão o scale
+      // fica preso em 90% da tela com faixa cinza fixa e o zoom parece morto.
       document.body.style.transformOrigin = "top left";
       document.body.style.transform = `scale(${zoom})`;
       document.body.style.width = `${100 / zoom}%`;
-      document.body.style.height = `${100 / zoom}%`;
+      document.body.style.height = `${100 / zoom}vh`;
+      document.documentElement.style.height = "100%";
       document.documentElement.style.overflow = "hidden";
-      document.body.style.overflow = "hidden";
     }
 
     window.dispatchEvent(new Event("resize"));

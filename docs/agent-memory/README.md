@@ -15,7 +15,7 @@ Memória durável do **Auto Orçamento** (decisões, caminhos, deploy). Cada tem
 | `data/` ao vivo (blur, pull + reconcile) | [`axis-data-live-sync.md`](axis-data-live-sync.md) |
 | Notify Axis → Atlas (pull na sessão; token em `config/atlas-notify.env`, gitignored) | [`atlas-notify.md`](atlas-notify.md) |
 | Toasts + histórico na UI (preview) | [`axis-sync-ui.md`](axis-sync-ui.md) |
-| Layout mobile / preview A4 (`transform: scale`, folha 794×1123px / tipografia 14px, pagina vazia 1 folha PC+celular, data iOS, UI zoom off sob 1180px; desktop overflow hidden anti-faixa vazia; CT atrasado → `--sync-code`) | [`ui-layout-mobile.md`](ui-layout-mobile.md) |
+| Layout mobile / preview A4 (`transform: scale`, folha 794×1123px / tipografia 14px, pagina vazia 1 folha PC+celular, data iOS, UI zoom off sob 1180px; zoom≠1 overflow no `html` anti-faixa vazia; CT atrasado → `--sync-code`) | [`ui-layout-mobile.md`](ui-layout-mobile.md) |
 | Tombstones `output/` (`orcamentos-index.json`; Excluir não espera notify/SQLite) | [`output-index-sync.md`](output-index-sync.md) |
 | Log das últimas 10 sessões de sync (Atlas) | [`axis-sync-sessions.md`](axis-sync-sessions.md) |
 | Auditoria sync + roadmap simplificação (P0–P3) | [`auditoria-atlas-axis-roadmap.md`](auditoria-atlas-axis-roadmap.md) |
