@@ -231,7 +231,7 @@ Endpoints principais:
 - layout em colunas com painel esquerdo redimensionável; em `max-width: 1180px` empilha formulário + preview;
 - visual dos campos, botões, dropdowns e pré-visualização; `input[type=date]` com `min-width: 0` / `max-width: 100%` para não estourar a borda no iOS;
 - agrupamento visual das seções do formulário com bordas cinza discretas;
-- papel A4 com imagem de fundo do papel timbrado; em tela estreita `#previewPages` aplica `transform: scale(var(--preview-fit-scale))` (ver `updatePreviewFitScale()` em `app.js`) sem alterar o tamanho lógico da folha; UI zoom do body fica em 100% sob 1180px;
+- papel A4 com imagem de fundo do papel timbrado; em tela estreita `#previewPages` aplica `transform: scale(var(--preview-fit-scale))` (ver `updatePreviewFitScale()` em `app.js`) sem alterar o tamanho lógico da folha; UI zoom do body fica em 100% sob 1180px; no desktop (`min-width: 1181px`) `html`/`body` usam `overflow: hidden` para o scale do zoom não criar scroll de faixa vazia;
 - negrito do documento: `strong`/`b` em `.document-content` usam `--document-emphasis-weight` (Gotham Medium, `500`), inclusive o rótulo `Tempo previsto` e os trechos `*texto*` das observações;
 - regras específicas de impressão (`@media print`): oculta formulário e chrome da UI; força A4 (`210mm` × `297mm`); anula o zoom da interface (`transform: none` no `body`), o fit do preview (`zoom: 1` em `#previewPages`) e alturas mínimas (`100vh`) que distorcem o diálogo **Imprimir** no WebView2.
 

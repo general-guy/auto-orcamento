@@ -18,7 +18,7 @@ No viewport estreito (`max-width: 1180px`) o formulario e o preview empilham. Re
 | Botoes **Abrir** / **Limpar** / **Imprimir** | No fim do formulario (sem `position: sticky`) |
 | Campo **Data** | Contido no card (`min-width: 0`, `overflow` no label da data / painel) — iOS localiza a data e estoura sem isso |
 | Preview A4 | Fit visual (`transform: scale`); folha **794×1123px** tipografia **14px**; paginacao no probe (largura forçada + altura util fixa); **confirmado 2026-11-03:** pagina vazia = 1 folha no PC e no Chrome celular (Axis); HTML com `?v=mtime` |
-| UI zoom | Preferencia do desktop fica em 100% no body sob 1180px (`reapplyWebZoom`) |
+| UI zoom | Preferencia do desktop fica em 100% no body sob 1180px (`reapplyWebZoom`); no desktop largo o documento nao rola (anti-faixa vazia com scale) |
 
 
 Se o celular no Axis divergir do Atlas local na contagem de folhas apos um ajuste de CSS/JS, o CT pode estar atrasado: `sync_auto_orcamento.py --sync-code` + hard refresh (ver [`agent-memory/ui-layout-mobile.md`](agent-memory/ui-layout-mobile.md)).

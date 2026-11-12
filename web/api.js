@@ -227,13 +227,20 @@
 
     if (zoom === 1) {
       document.body.style.removeProperty("transform");
+      document.body.style.removeProperty("transform-origin");
       document.body.style.removeProperty("width");
       document.body.style.removeProperty("height");
+      document.documentElement.style.removeProperty("overflow");
+      document.body.style.removeProperty("overflow");
     } else {
+      // scale encolhe o visual, mas width/height 100/zoom% infla o layout box.
+      // Sem travar overflow no documento, a roda do mouse revela faixa vazia abaixo da UI.
       document.body.style.transformOrigin = "top left";
       document.body.style.transform = `scale(${zoom})`;
       document.body.style.width = `${100 / zoom}%`;
       document.body.style.height = `${100 / zoom}%`;
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
     }
 
     window.dispatchEvent(new Event("resize"));
