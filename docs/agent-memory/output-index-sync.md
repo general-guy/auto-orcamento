@@ -16,11 +16,13 @@ Sync do índice: merge por `id` no motor Python (`sync_output_index.py`, local-a
 |------|----------------|
 | Impressão | `server/output-index.js` registra/atualiza o par no índice |
 | **Abrir** (Atlas e Axis / tailnet) | Modal `#snapshotPicker` — lista recursiva, **Excluir** por linha |
-| `DELETE /api/snapshots/{caminho.json}` | Tombstone + remove pdf/json locais (**Lixeira no Windows/Atlas**; **permanente no Linux/CT**) + SQLite + push do índice + notify |
+| `DELETE /api/snapshots/{caminho.json}` | Tombstone + remove pdf/json locais (**Lixeira no Windows/Atlas**; **permanente no Linux/CT**); responde na hora; SQLite + push/notify em background (modal Abrir não espera o Atlas) |
 
 **Abrir** no Atlas deixou de usar o diálogo nativo (`/api/open-snapshot`) no fluxo normal — mesmo modal que na tailnet.
 
 Apagar pelo **Explorer** não grava tombstone; o sync pode reintroduzir arquivos. Use **Excluir** no modal.
+
+**Latência UI (2026-11-12):** no Axis, o `DELETE` deixava de responder só depois do `await notifyAtlasRelativePaths` (pull no Atlas até ~60 s) e do rebuild completo do SQLite. Agora a resposta sai após tombstone + remoção local; SQLite + push/notify rodam em `setImmediate`. O modal remove a linha de forma otimista (`web/app.js`).
 
 ## Motor Python (local-atlas)
 

@@ -9,6 +9,8 @@ Complemento a [`axis-data-live-sync.md`](axis-data-live-sync.md). O **CT** não 
 3. Atlas valida o token, responde na hora `{ phase: "received" }` e mantém o POST aberto até o `--pull-if-remote-newer` terminar; aí envia `{ phase: "synced" }`. O CT espera no máximo 1 minuto depois do `received`.
 4. No Axis, cada linha vira um toast ao vivo no SSE `/api/sync/events` (sem replay de sessões anteriores). Sem resposta do Atlas em 5 segundos, toast amarelo «O Atlas não respondeu em 5 segundos.» (a gravação local segue). Ao fechar a UI, encerrar também `:3010`. O botão de histórico fica na barra **Documento Final** (também no Tailscale).
 
+**Excluir no modal Abrir:** `DELETE /api/snapshots/...` não espera o notify/`synced` — responde após tombstone+remoção local e dispara o POST em background (evita o modal ficar em «Excluindo…» até o pull no Atlas). Ver [`output-index-sync.md`](output-index-sync.md).
+
 ## Configuração (segredos fora do git)
 
 | Onde | Arquivo / variável |

@@ -31,7 +31,8 @@ O merge Atlas↔Axis de `export/` é sync deste app. A GUI não escreve no arqui
 
 1. **Na abertura do app** — ao subir `server/server.js` (após escutar a porta 3000).
 2. **Automaticamente** após `POST /api/pdf` (clique em **Imprimir orçamento** no uso local) — depois de gravar PDF/JSON.
-3. **Manualmente:** `npm run export:sqlite` (`scripts/consolidate-to-sqlite.js`).
+3. **Automaticamente** após `DELETE /api/snapshots/...` (**Excluir** no modal Abrir) — em background (`setImmediate`), sem segurar a resposta HTTP.
+4. **Manualmente:** `npm run export:sqlite` (`scripts/consolidate-to-sqlite.js`).
 
 No browser na tailnet (ex.: Axis via Serve), a impressão chama `/api/pdf` no servidor e atualiza `output/` + SQLite **no host que serve o app**. Ao **iniciar** o Node, a consolidação na abertura já espelha o `output/` local. Também se pode consolidar imprimindo ou rodando `npm run export:sqlite`.
 

@@ -1,4 +1,5 @@
 # Agent memory — changelog
+- 2026-11-12: Excluir no modal Abrir — DELETE responde na hora; SQLite/notify em background; UI otimista. Docs README/AGENTS/ARCHITECTURE/acesso-remoto/export-sqlite/output-index-sync/atlas-notify/cursor-plugins + skills ct100.
 - 2026-11-04: CT — PDF Chromium `--no-sandbox`; Abrir EACCES no índice → `fs-write.js` + chmod no host Patriot; SQLite recria se readonly. Skills ct100 + `axis-ct100.md`.
 - 2026-11-03: Confirmado no celular (Chrome/Axis): pagina vazia do orçamento cabe em **1 folha**. Cadeia: folha 794×1123px + probe + tipografia 14px + `--sync-code` no CT. Docs/skills alinhados.
 - 2026-11-03: Paginacao — PC 1 folha / Chrome celular 2: Axis ainda com CSS 15px (Atlas ja em 14px). Nao era viewport; `--sync-code` no CT + hard refresh. Docs: `ui-layout-mobile.md`.

@@ -4697,14 +4697,16 @@ function renderSnapshotPickerList() {
 }
 
 async function deleteSnapshotFromServer(name) {
-  setSnapshotPickerStatus("Excluindo…");
+  const previous = snapshotPickerFiles;
+  snapshotPickerFiles = snapshotPickerFiles.filter((file) => file.name !== name);
+  renderSnapshotPickerList();
+  setSnapshotPickerStatus("");
 
   try {
     await AppApi.deleteSnapshot(name);
-    snapshotPickerFiles = snapshotPickerFiles.filter((file) => file.name !== name);
-    renderSnapshotPickerList();
-    setSnapshotPickerStatus("");
   } catch (error) {
+    snapshotPickerFiles = previous;
+    renderSnapshotPickerList();
     setSnapshotPickerStatus(`Não foi possível excluir.\n${error.message}`);
   }
 }

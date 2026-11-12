@@ -263,7 +263,7 @@ Depois de alterar código, **reabra** o app (`abrir-auto-orcamento.bat`) para ca
 
 ## Abrir orçamento salvo
 
-O botão **Abrir** (verde, ao lado de **Limpar**) abre o modal com os snapshots em `output/` (subpastas incluídas). **Excluir** remove o par PDF+JSON, grava tombstone em `orcamentos-index.json` e sincroniza com o Axis; no **Atlas** os arquivos vão para a **Lixeira**; no **CT** a remoção é **permanente**. Apagar só pelo Explorer não registra tombstone — ver [`docs/agent-memory/output-index-sync.md`](docs/agent-memory/output-index-sync.md).
+O botão **Abrir** (verde, ao lado de **Limpar**) abre o modal com os snapshots em `output/` (subpastas incluídas). **Excluir** tira a linha na hora, remove o par PDF+JSON, grava tombstone em `orcamentos-index.json` e deixa SQLite/sync/notify em background; no **Atlas** os arquivos vão para a **Lixeira**; no **CT** a remoção é **permanente**. Apagar só pelo Explorer não registra tombstone — ver [`docs/agent-memory/output-index-sync.md`](docs/agent-memory/output-index-sync.md).
 
 ### Atlas e Axis (mesmo modal)
 

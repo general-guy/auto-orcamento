@@ -121,7 +121,7 @@ Axis host (192.168.68.201)  tailscale serve --https=3000
   -> https://axis.tail5fe4b7.ts.net:3000/
 ```
 
-**Abrir** (Atlas e tailnet) usa o modal `#snapshotPicker` com `GET /api/snapshots` (lista recursiva de `.json` em `output/`, respeitando tombstones em `orcamentos-index.json`) e `DELETE /api/snapshots/:caminho` para **Excluir** (Lixeira no Windows; remoção permanente no Linux/CT). **Imprimir** grava PDF/JSON, atualiza o índice, reconstrói o SQLite e chama `window.print()` (`@media print` oculta toasts de sync). `POST /api/open-snapshot` (seletor nativo) permanece na API; bloqueado em requisições remotas com proxy do Serve.
+**Abrir** (Atlas e tailnet) usa o modal `#snapshotPicker` com `GET /api/snapshots` (lista recursiva de `.json` em `output/`, respeitando tombstones em `orcamentos-index.json`) e `DELETE /api/snapshots/:caminho` para **Excluir** (Lixeira no Windows; remoção permanente no Linux/CT; UI otimista; SQLite/notify em background). **Imprimir** grava PDF/JSON, atualiza o índice, reconstrói o SQLite e chama `window.print()` (`@media print` oculta toasts de sync). `POST /api/open-snapshot` (seletor nativo) permanece na API; bloqueado em requisições remotas com proxy do Serve.
 
 `abrir-auto-orcamento.bat` reutiliza servidor ativo na porta 3000 (`--keep-server`).
 
@@ -213,7 +213,7 @@ Endpoints principais:
 - `POST /api/open-snapshot`: abre seletor nativo de JSON no Windows (`pywebview`/WebView2 via `scripts/open-snapshot-dialog.py`), lê o arquivo, persiste a pasta em `lastSnapshotDir` e devolve o snapshot parseado. **Bloqueado** para requisições remotas (headers de proxy do Serve).
 - `GET /api/snapshots`: lista snapshots ativos em `output/` (caminho relativo, data, tamanho).
 - `GET /api/snapshots/:caminho`: lê um `.json` com validação de caminho (subpastas permitidas; sem `..`).
-- `DELETE /api/snapshots/:caminho`: tombstone em `orcamentos-index.json`, remove par pdf+json (`server/trash-file.js` no Atlas), reconstrói SQLite, enfileira sync/notify.
+- `DELETE /api/snapshots/:caminho`: tombstone em `orcamentos-index.json`, remove par pdf+json (`server/trash-file.js` no Atlas), responde na hora; reconstrói SQLite e enfileira sync/notify em background.
 - `POST /api/pdf`: gera PDF + snapshot JSON em `output/` (mesmo nome base) e, em seguida, reconstrói `export/orcamentos.sqlite` a partir de todos os JSON de `output/` (falha no SQLite não falha a resposta do PDF).
 - `POST /api/shutdown`: encerra o servidor ao fechar a janela (`launcher/native_launcher.py` ou fallback `launcher/launch-app.js`); bloqueado para visitantes remotos; ignorado com `--keep-server`.
 
@@ -429,7 +429,7 @@ Falhas de exportação exibem um `alert` além do log no console. Requer Chrome 
 
 O botão **Abrir** (`#openButton`, verde, ao lado de **Limpar** no rodapé do formulário) restaura um snapshot JSON no formulário:
 
-- **UI (Atlas + tailnet):** `#openButton` → modal `#snapshotPicker` (`GET /api/snapshots`, `GET`/`DELETE /api/snapshots/:caminho`). Ordenação e **Excluir** sem confirmação. Índice: `server/output-index.js`; sync: `sync_output_index.py` (local-atlas). Detalhe: `docs/agent-memory/output-index-sync.md`, `docs/acesso-remoto.md`.
+- **UI (Atlas + tailnet):** `#openButton` → modal `#snapshotPicker` (`GET /api/snapshots`, `GET`/`DELETE /api/snapshots/:caminho`). Ordenação e **Excluir** sem confirmação (linha some na hora; sync/SQLite fora do caminho crítico). Índice: `server/output-index.js`; sync: `sync_output_index.py` (local-atlas). Detalhe: `docs/agent-memory/output-index-sync.md`, `docs/acesso-remoto.md`.
 - **Legado API:** `POST /api/open-snapshot` + `scripts/open-snapshot-dialog.py` (pywebview); não usado pelo botão **Abrir** atual.
 
 **Stack Tauri (congelada):** `export_pdf` gera só PDF; não há snapshot JSON nem importação.

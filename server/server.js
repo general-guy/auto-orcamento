@@ -356,19 +356,23 @@ async function handleSnapshotsApi(request, response, pathname) {
       tombstone.jsonRelative,
       tombstone.pdfRelative,
     );
-    consolidateOutputSqliteSafe();
-    axisSync.afterOutputIndexChange();
 
-    const notifyPaths = [
-      `output/${outputIndex.indexRelativePath()}`,
-      ...removed.map((rel) => `output/${rel.replace(/\\/g, "/")}`),
-    ];
-    await notifyAtlasRelativePaths(notifyPaths);
-
+    // Responde já: SQLite + notify/Atlas não devem segurar o modal Abrir.
     sendJson(response, 200, {
       ok: true,
       removed,
       jsonRelative: tombstone.jsonRelative,
+    });
+
+    setImmediate(() => {
+      consolidateOutputSqliteSafe();
+      axisSync.afterOutputIndexChange();
+      const notifyPaths = [
+        `output/${outputIndex.indexRelativePath()}`,
+        ...removed.map((rel) => `output/${rel.replace(/\\/g, "/")}`),
+        "export/orcamentos.sqlite",
+      ];
+      void notifyAtlasRelativePaths(notifyPaths);
     });
     return;
   }

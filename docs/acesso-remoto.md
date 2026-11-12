@@ -38,7 +38,7 @@ No hostname remoto, **Abrir** usa `#snapshotPicker` (`GET /api/snapshots`). O di
 | Nome | A–Z ↔ Z–A |
 | Data | mais recente ↔ mais antiga (padrão ao abrir) |
 
-Filtro por nome permanece no campo de busca. **Excluir** remove PDF+JSON no servidor e registra apagado para o sync (ver [`agent-memory/output-index-sync.md`](agent-memory/output-index-sync.md)).
+Filtro por nome permanece no campo de busca. **Excluir** remove a linha na hora (otimista), apaga PDF+JSON no servidor e registra tombstone; SQLite/notify ao Atlas seguem em background (ver [`agent-memory/output-index-sync.md`](agent-memory/output-index-sync.md)).
 
 ## Primeiro carregamento (Tailscale)
 
