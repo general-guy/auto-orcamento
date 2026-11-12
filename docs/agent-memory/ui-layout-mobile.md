@@ -14,7 +14,7 @@ Stub + runbook curto da coluna de formulario e da pre-visualizacao A4 no celular
 | Atlas vs Axis (mesmo URL) | Se o **PC local** mostra 1 folha e o **celular no Axis** mostra 2, conferir `styles.css?v=` / `font-size` no DevTools antes de mexer na paginacao: o CT pode estar com tipografia antiga. Forcar `sync_auto_orcamento.py --sync-code` (reinicia o servico) + hard refresh |
 | Preview **Documento Final** | A folha continua A4 (`--paper-width` / `--paper-height` = `210mm` × `297mm`) para o PDF e a paginacao. **Nao** redesenhar com flex fluido. Envolver as `.print-page` em `#previewPages` e escalar com `transform: scale(var(--preview-fit-scale))` (escala ≤ 1; **nao** CSS `zoom` — falha no Safari/iOS e mede mal com UI zoom) |
 | Escala | `updatePreviewFitScale()` em `web/app.js`: mede largura do `.preview-panel` (padding incluso), define `--preview-fit-scale` + `margin-bottom` para colapsar o layout box; `ResizeObserver` + `resize`; durante `paginateDocument()` a escala volta a `1` |
-| UI zoom | Preferencia em `settings.json`; escala em `#uiZoomRoot` (nao no `body` — senao `#zoomFlag` fixed perde o clique). Em `max-width: 1180px` força 100%. Com zoom ≠ 1: `scale` + `height: 100/zoom vh` no root e `overflow: hidden` no `html`. `AppApi.reapplyWebZoom` no breakpoint |
+| UI zoom | Preferencia em `settings.json`; escala em `#uiZoomRoot` (nao no `body` — senao `#zoomFlag` fixed perde o clique). Em `max-width: 1180px` força 100%. Com zoom ≠ 1: `scale` + `height: 100/zoom vh` no root e `overflow: hidden` no `html`. UI aplica zoom na hora; PUT só-`zoom` no servidor nao espera pull/notify (sync em background) — senao os botoes pareciam mortos durante o sync. `AppApi.reapplyWebZoom` no breakpoint |
 | Impressao / PDF | `@media print` zera `transform` em `#previewPages`. PDF automatico (`pdf-export.js`) usa HTML isolado das `.print-page` — nao herda o fit da UI |
 | Breakpoint | `@media (max-width: 1180px)`: uma coluna; handle de resize oculto |
 
@@ -24,7 +24,7 @@ Stub + runbook curto da coluna de formulario e da pre-visualizacao A4 no celular
 - `web/index.html` — `#uiZoomRoot` envolve `.app-shell`; `#previewPages` (assets com `?v=` via `server.js`)
 - `web/app.js` — `paginateDocument` (altura util fixa + probe; `fonts.ready`)
 - `server/server.js` — HTML sempre `stampLocalAssets` + `Cache-Control: no-store`
-- `web/api.js` — `applyWebZoom` / `reapplyWebZoom` (escala `#uiZoomRoot`, nao `body`; sob 1180px = 100%; zoom ≠ 1 → overflow no `html` + height vh)
+- `web/api.js` — `applyWebZoom` otimista; `server/server.js` `writeSettings` zoom-only sem await pull/notify
 - `web/zoom.js` — `resize` apos zoom; `matchMedia` reaplica no breakpoint
 - Sync tipografia no CT: `local-atlas/axis/scripts/sync_auto_orcamento.py --sync-code` (nao so git push)
 - Narrativa remota: [`../acesso-remoto.md`](../acesso-remoto.md)

@@ -273,13 +273,18 @@
   }
 
   async function setZoom(scale) {
-    const data = await fetchJson("/api/settings", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ zoom: scale }),
-    });
-
-    return applyWebZoom(data.zoom);
+    // Aplica na hora: o PUT ainda pode esperar sync/notify no servidor.
+    const preferred = applyWebZoom(scale);
+    try {
+      const data = await fetchJson("/api/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ zoom: preferred }),
+      });
+      return applyWebZoom(data.zoom ?? preferred);
+    } catch (error) {
+      return preferred;
+    }
   }
 
   async function adjustZoom(delta) {

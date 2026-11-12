@@ -274,7 +274,16 @@ function readSettings() {
 
 async function writeSettings(patch = {}) {
   ensureDataFile();
-  await axisSync.pullDataFileIfRemoteNewer(settingsFile);
+  const patchKeys = Object.keys(patch || {});
+  // Só zoom: não bloquear a UI no pull/notify (botões do canto ficavam “mortos” até o sync).
+  const zoomOnly = patchKeys.length === 1 && patchKeys[0] === "zoom";
+
+  if (zoomOnly) {
+    axisSync.schedulePullDataFileIfRemoteNewer(settingsFile);
+  } else {
+    await axisSync.pullDataFileIfRemoteNewer(settingsFile);
+  }
+
   const stored = readSettingsFile();
   const next = { ...stored };
 
@@ -295,7 +304,11 @@ async function writeSettings(patch = {}) {
 
   writeTextFileReplace(settingsFile, `${JSON.stringify(next, null, 2)}\n`, "utf8");
   axisSync.afterDataFileWrite(settingsFile);
-  await notifyAtlasAfterFileWrite(settingsFile, atlasNotifyRoots);
+  if (zoomOnly) {
+    void notifyAtlasAfterFileWrite(settingsFile, atlasNotifyRoots);
+  } else {
+    await notifyAtlasAfterFileWrite(settingsFile, atlasNotifyRoots);
+  }
   return readSettings();
 }
 
