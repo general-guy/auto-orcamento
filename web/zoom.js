@@ -36,10 +36,22 @@
     return Math.abs(scale - ZOOM_DEFAULT) < 0.001;
   }
 
+  function isDesktopZoomUi() {
+    return typeof window.matchMedia === "function" && window.matchMedia("(min-width: 1181px)").matches;
+  }
+
   function showZoomFlag(options = {}) {
     const { persistent = false } = options;
 
     if (!flagEl) {
+      return;
+    }
+
+    // Mobile esconde o controle (CSS). No desktop fica sempre à mão — a 100%
+    // sumia e parecia que o zoom tinha quebrado.
+    if (!isDesktopZoomUi()) {
+      flagEl.classList.remove("is-visible");
+      flagEl.hidden = true;
       return;
     }
 
@@ -52,10 +64,8 @@
     }
 
     if (!persistent && isDefaultZoom(currentZoom)) {
-      hideTimer = window.setTimeout(() => {
-        flagEl.classList.remove("is-visible");
-        flagEl.hidden = true;
-      }, ZOOM_FLAG_HIDE_MS);
+      // Ainda assim mantém visível no desktop; o timer só existia para não poluir a 100%.
+      hideTimer = null;
     }
   }
 
@@ -98,7 +108,7 @@
       resetButton.hidden = isDefaultZoom(initialZoom);
     }
 
-    if (flagEl && !isDefaultZoom(initialZoom)) {
+    if (flagEl && isDesktopZoomUi()) {
       flagEl.hidden = false;
       flagEl.classList.add("is-visible");
     }
@@ -157,6 +167,8 @@
         if (typeof AppApi.reapplyWebZoom === "function") {
           AppApi.reapplyWebZoom();
           updateZoomFlag(AppApi.getWebZoomFactor());
+        } else {
+          showZoomFlag({ persistent: true });
         }
       });
     }

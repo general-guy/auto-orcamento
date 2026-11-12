@@ -95,6 +95,28 @@ textarea {
   padding: 20px;
 }
 
+/* Desktop: altura travada na viewport → scroll independente form/preview.
+   Sem isto, #uiZoomRoot só com min-height deixa o shell crescer e a página inteira rola.
+   Nao usar max-height no body/root (prende o scale do zoom). Mobile continua com scroll de página. */
+@media (min-width: 1181px) {
+  html,
+  body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  #uiZoomRoot {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .app-shell {
+    height: 100%;
+    min-height: 0;
+  }
+}
+
 .panel {
   background: var(--panel);
   border: 1px solid rgba(31, 41, 51, 0.06);

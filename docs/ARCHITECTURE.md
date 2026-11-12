@@ -231,7 +231,7 @@ Endpoints principais:
 - layout em colunas com painel esquerdo redimensionável; em `max-width: 1180px` empilha formulário + preview;
 - visual dos campos, botões, dropdowns e pré-visualização; `input[type=date]` com `min-width: 0` / `max-width: 100%` para não estourar a borda no iOS;
 - agrupamento visual das seções do formulário com bordas cinza discretas;
-- papel A4 com imagem de fundo do papel timbrado; em tela estreita `#previewPages` aplica `transform: scale(var(--preview-fit-scale))` (ver `updatePreviewFitScale()` em `app.js`) sem alterar o tamanho lógico da folha; UI zoom escala `#uiZoomRoot` (não o `body`, para `#zoomFlag` fixed continuar clicável) e fica em 100% sob 1180px; com zoom ≠ 1 trava `overflow` no `html` (height em vh);
+- papel A4 com imagem de fundo do papel timbrado; em tela estreita `#previewPages` aplica `transform: scale(var(--preview-fit-scale))` (ver `updatePreviewFitScale()` em `app.js`) sem alterar o tamanho lógico da folha; UI zoom escala `#uiZoomRoot` (não o `body`); no desktop ≥1181px a viewport trava altura/`overflow` para scroll independente form/preview e `#zoomFlag` fica sempre visível; sob 1180px zoom=100%; PUT só-`zoom` não espera notify;
 - negrito do documento: `strong`/`b` em `.document-content` usam `--document-emphasis-weight` (Gotham Medium, `500`), inclusive o rótulo `Tempo previsto` e os trechos `*texto*` das observações;
 - regras específicas de impressão (`@media print`): oculta formulário e chrome da UI; força A4 (`210mm` × `297mm`); anula o zoom da interface (`transform: none` em `#uiZoomRoot`/`body`), o fit do preview e alturas mínimas (`100vh`) que distorcem o diálogo **Imprimir** no WebView2.
 

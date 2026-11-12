@@ -244,9 +244,11 @@
       root.style.removeProperty("transform-origin");
       root.style.removeProperty("width");
       root.style.removeProperty("height");
+      // Desktop: overflow/height ficam no CSS (@media min-width 1181px).
       document.documentElement.style.removeProperty("overflow");
       document.documentElement.style.removeProperty("height");
     } else {
+      // Compensa o scale sem max-height no body (isso prendia faixa cinza).
       root.style.transformOrigin = "top left";
       root.style.transform = `scale(${zoom})`;
       root.style.width = `${100 / zoom}%`;

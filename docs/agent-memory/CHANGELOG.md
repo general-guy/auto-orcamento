@@ -1,4 +1,5 @@
 # Agent memory — changelog
+- 2026-11-12: UI zoom/layout final — desktop `height:100%`+`overflow:hidden` restaura scroll independente form/preview; `#zoomFlag` sempre no desktop; escala `#uiZoomRoot`; zoom otimista + PUT so-zoom sem await notify. Docs/skill ct100.
 - 2026-11-12: UI zoom — botoes pareciam travados durante sync: PUT settings aguardava pull/notify. Fix: `applyWebZoom` otimista + `writeSettings` zoom-only em background.
 - 2026-11-12: UI zoom — escala em `#uiZoomRoot` (nao no `body`); transform no body quebrava clique do `#zoomFlag` fixed. `applyWebZoom` + `@media print` alinhados.
 - 2026-11-12: UI zoom — regressao da faixa cinza fixa: `max-height`/`overflow` no body prendia o scale; corrigido com `overflow` só no `html` + `height: 100/zoom vh` em `applyWebZoom`. Docs ui-layout/AGENTS/ARCHITECTURE.
