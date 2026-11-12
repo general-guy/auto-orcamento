@@ -4333,7 +4333,7 @@ function getPrintPagesHtml() {
 async function exportPdfDocument() {
   const pagesHtml = getPrintPagesHtml();
   if (!pagesHtml) {
-    return;
+    return null;
   }
 
   const snapshot = window.BudgetSnapshot?.collect({
@@ -4346,10 +4346,70 @@ async function exportPdfDocument() {
     if (result.jsonPath) {
       console.info(`JSON salvo em ${result.jsonPath}`);
     }
+    return result && result.filename ? result : null;
   } catch (error) {
     console.warn("Não foi possível gerar o PDF automaticamente.", error);
     window.alert(`Não foi possível salvar o PDF/JSON em output/.\n\n${error.message}`);
+    return null;
   }
+}
+
+/**
+ * Abre o diálogo nativo de impressão sobre o PDF já gerado em output/
+ * (evita window.print() no HTML com timbrado/fontes → spool PCL instável).
+ */
+async function printGeneratedPdf(filename) {
+  const name = String(filename || "").trim();
+  if (!name) {
+    throw new Error("Nome do PDF ausente.");
+  }
+
+  const response = await fetch(`/output/${encodeURIComponent(name)}`);
+  if (!response.ok) {
+    throw new Error(`Não foi possível carregar o PDF (${response.status}).`);
+  }
+
+  const blob = await response.blob();
+  const blobUrl = URL.createObjectURL(blob);
+
+  await new Promise((resolve, reject) => {
+    const iframe = document.createElement("iframe");
+    iframe.setAttribute("aria-hidden", "true");
+    iframe.style.cssText =
+      "position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden;pointer-events:none;";
+
+    let settled = false;
+    const finish = (error) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      window.setTimeout(() => {
+        URL.revokeObjectURL(blobUrl);
+        iframe.remove();
+      }, 60_000);
+      if (error) {
+        reject(error);
+      } else {
+        resolve();
+      }
+    };
+
+    iframe.onload = () => {
+      window.setTimeout(() => {
+        try {
+          iframe.contentWindow?.focus();
+          iframe.contentWindow?.print();
+          finish();
+        } catch (error) {
+          finish(error instanceof Error ? error : new Error(String(error)));
+        }
+      }, 250);
+    };
+    iframe.onerror = () => finish(new Error("Falha ao abrir o PDF para impressão."));
+    document.body.appendChild(iframe);
+    iframe.src = blobUrl;
+  });
 }
 
 function updatePreview() {
@@ -6325,8 +6385,16 @@ printButton.addEventListener("click", async () => {
       saveTechnologyToHistory(),
     ]
   );
-  await exportPdfDocument();
-  window.print();
+  const exported = await exportPdfDocument();
+  if (!exported?.filename) {
+    return;
+  }
+  try {
+    await printGeneratedPdf(exported.filename);
+  } catch (error) {
+    console.warn("Não foi possível imprimir o PDF gerado.", error);
+    window.alert(`Não foi possível abrir a impressão do PDF.\n\n${error.message}`);
+  }
 });
 
 function logStartupPerf() {

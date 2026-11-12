@@ -13,7 +13,7 @@ Complemento a [`axis-data-live-sync.md`](axis-data-live-sync.md). O **CT** não 
 
 **Excluir no modal Abrir:** `DELETE /api/snapshots/...` não espera o notify/`synced` — responde após tombstone+remoção local e dispara o POST em background (evita o modal ficar em «Excluindo…» até o pull no Atlas). Ver [`output-index-sync.md`](output-index-sync.md).
 
-**Imprimir (`POST /api/pdf`):** responde após gravar PDF/JSON/índice/SQLite; `writeSettings(lastSnapshotDir)` com `deferNotify` e o notify dos paths de output/export rodam em background (evita o diálogo de impressão esperar 5s–60s pelo Atlas).
+**Imprimir (`POST /api/pdf`):** responde após gravar PDF/JSON/índice/SQLite; `writeSettings(lastSnapshotDir)` com `deferNotify` e o notify dos paths de output/export rodam em background (evita esperar 5s–60s pelo Atlas). O diálogo nativo depois consome o PDF via `GET /output/...` — ver [`print-via-pdf.md`](print-via-pdf.md).
 
 ## Configuração (segredos fora do git)
 

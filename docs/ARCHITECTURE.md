@@ -121,7 +121,7 @@ Axis host (192.168.68.201)  tailscale serve --https=3000
   -> https://axis.tail5fe4b7.ts.net:3000/
 ```
 
-**Abrir** (Atlas e tailnet) usa o modal `#snapshotPicker` com `GET /api/snapshots` (lista recursiva de `.json` em `output/`, respeitando tombstones em `orcamentos-index.json`) e `DELETE /api/snapshots/:caminho` para **Excluir** (Lixeira no Windows; remoção permanente no Linux/CT; UI otimista; SQLite/notify em background). **Imprimir** grava PDF/JSON, atualiza o índice, reconstrói o SQLite e chama `window.print()` (`@media print` oculta toasts de sync). `POST /api/open-snapshot` (seletor nativo) permanece na API; bloqueado em requisições remotas com proxy do Serve.
+**Abrir** (Atlas e tailnet) usa o modal `#snapshotPicker` com `GET /api/snapshots` (lista recursiva de `.json` em `output/`, respeitando tombstones em `orcamentos-index.json`) e `DELETE /api/snapshots/:caminho` para **Excluir** (Lixeira no Windows; remoção permanente no Linux/CT; UI otimista; SQLite/notify em background). **Imprimir** grava PDF/JSON, atualiza o índice, reconstrói o SQLite e abre o diálogo nativo sobre o PDF em `output/` (não `window.print()` no HTML). `POST /api/open-snapshot` (seletor nativo) permanece na API; bloqueado em requisições remotas com proxy do Serve.
 
 `abrir-auto-orcamento.bat` reutiliza servidor ativo na porta 3000 (`--keep-server`).
 
@@ -233,7 +233,7 @@ Endpoints principais:
 - agrupamento visual das seções do formulário com bordas cinza discretas;
 - papel A4 com imagem de fundo do papel timbrado; em tela estreita `#previewPages` aplica `transform: scale(var(--preview-fit-scale))` (ver `updatePreviewFitScale()` em `app.js`) sem alterar o tamanho lógico da folha; UI zoom escala `#uiZoomRoot` (não o `body`); no desktop ≥1181px a viewport trava altura/`overflow` para scroll independente form/preview e `#zoomFlag` fica sempre visível; sob 1180px zoom=100%; PUT só-`zoom` não espera notify;
 - negrito do documento: `strong`/`b` em `.document-content` usam `--document-emphasis-weight` (Gotham Medium, `500`), inclusive o rótulo `Tempo previsto` e os trechos `*texto*` das observações;
-- regras específicas de impressão (`@media print`): oculta formulário e chrome da UI; força A4 (`210mm` × `297mm`); anula o zoom da interface (`transform: none` em `#uiZoomRoot`/`body`), o fit do preview e alturas mínimas (`100vh`) que distorcem o diálogo **Imprimir** no WebView2.
+- regras `@media print` (legado / preview): ocultam formulário e chrome; o botão **Imprimir** imprime o PDF em `output/` (`printGeneratedPdf`), não o DOM — ver [`docs/agent-memory/print-via-pdf.md`](docs/agent-memory/print-via-pdf.md).
 
 Runbook mobile/estreito: [`docs/agent-memory/ui-layout-mobile.md`](agent-memory/ui-layout-mobile.md).
 
@@ -401,7 +401,7 @@ Durante `updatePreview()`, o app salva `scrollTop` e `scrollLeft` do painel de p
 
 ## Exportação de PDF e snapshot JSON
 
-Quando o usuário clica em `Imprimir orçamento`, `app.js` salva os históricos pendentes, **aguarda** a exportação (`await exportPdfDocument()`) e só então chama `window.print()`.
+Quando o usuário clica em `Imprimir orçamento`, `app.js` salva os históricos pendentes, **aguarda** a exportação (`await exportPdfDocument()`) e só então abre o diálogo nativo sobre o PDF gerado (`printGeneratedPdf` → `GET /output/{filename}`).
 
 `budget-snapshot.js` monta um snapshot estruturado (`schemaVersion: 1`) com o estado atual do formulário: textos (incluindo linhas vazias nos campos dinâmicos), checkboxes de seções opcionais, itens das listas rápidas (marcados e desmarcados), equipe, hospitais com entradas auxiliares e implante selecionado.
 
@@ -415,16 +415,18 @@ exportPdfDocument()
   -> pdf-export.js: buildPdfFilename + buildPdfDocumentHtml + puppeteer-core
   -> output/{paciente} - {cirurgia} {data} {hora}.pdf + .json
   -> export-sqlite.js: reconstrói export/orcamentos.sqlite (espelho de todos os JSON)
-  -> responde JSON; notify Axis→Atlas em background (não bloqueia window.print)
+  -> responde JSON; notify Axis→Atlas em background
+printGeneratedPdf(filename)
+  -> GET /output/{filename} (blob) → iframe oculto → contentWindow.print()
 ```
 
 A consolidação SQLite também corre no **arranque** de `server/server.js` (callback de `listen`), para alinhar `export/` mesmo sem imprimir.
 
 `pdf-build.js` permanece no projeto para referência do Tauri congelado (carregado sob demanda por `api.js` no modo Tauri); na stack Node ativa, a montagem do HTML autocontido ocorre **no servidor** (`pdf-export.js`).
 
-Falhas de exportação exibem um `alert` além do log no console. Requer Chrome ou Edge instalado.
+Falhas de exportação exibem um `alert` além do log no console e **não** abrem o diálogo de impressão. Requer Chrome ou Edge instalado.
 
-**Impressão no navegador:** após a exportação, `window.print()` usa o DOM visível. O zoom da UI (Node: `transform: scale()` em `api.js`) afeta só a tela; `@media print` em `styles.css` restaura layout A4 sem escala. O PDF automático nunca passa por esse transform — `pdf-export.js` monta HTML autocontido só com as `.print-page`.
+**Impressão no navegador:** o diálogo nativo (impressora, cor, A4) consome o PDF já gerado — evita rasterizar o HTML com timbrado/fontes (spool PCL instável em algumas HPs). O preview na tela continua usando o DOM; `@media print` no CSS permanece para casos legados, mas o botão **Imprimir** não chama mais `window.print()` na página.
 
 ## Importação de snapshot JSON
 

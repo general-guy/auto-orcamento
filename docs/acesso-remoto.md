@@ -26,7 +26,7 @@ Detalhe e arquivos: [`agent-memory/ui-layout-mobile.md`](agent-memory/ui-layout-
 
 ## Impressão
 
-Em qualquer origem, **Imprimir** grava PDF + JSON em `output/` do servidor e reconstrói o espelho SQLite antes do diálogo de impressão do navegador. No Axis, o notify ao Atlas roda em background (não segura o `window.print()`).
+Em qualquer origem, **Imprimir** grava PDF + JSON em `output/` do servidor e abre o diálogo nativo sobre esse PDF (`GET /output/...`), não sobre o HTML da UI. No Axis, o notify ao Atlas roda em background (não segura o diálogo).
 
 
 ## Modal Abrir orçamento salvo (tailnet)

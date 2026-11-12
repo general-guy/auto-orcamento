@@ -160,7 +160,7 @@ Removido do tree atual. Ver [`docs/legado-tauri.md`](docs/legado-tauri.md), tag 
 
 `Ctrl` + roda do mouse, `Ctrl` + `+` / `Ctrl` + `-` (passos de 10%, entre 50% e 200%) e `Ctrl` + `0` para voltar a 100%. O nível fica salvo em `C:\auto-orcamento\data\settings.json` (Windows). Um indicador flutuante (estilo Chrome) mostra a porcentagem, botões `−`/`+` e **Redefinir**. No fallback `launcher/launch-app.js` (Chrome/Edge), vale o zoom nativo do navegador.
 
-No **Node (WebView2)**, o zoom escala só a interface na tela (`transform: scale()` no `body`). Em viewport estreita (`max-width: 1180px`, celular na tailnet) o body fica em 100% mesmo com preferência ≠ 100% salva — evita estourar o formulário e o fit A4. A **impressão do navegador** (`window.print()`) ignora esse zoom: `@media print` em `styles.css` restaura dimensões A4 e anula o transform, para o papel sair igual ao PDF automático. O preview A4 em tela estreita usa `transform: scale` em `#previewPages` (não CSS `zoom`). A paginação mede a folha em px canônicos (794×1123) com tipografia 14px — a página vazia cabe em **uma folha** no PC e no celular; ver `docs/agent-memory/ui-layout-mobile.md`.
+No **Node (WebView2)**, o zoom escala a interface em `#uiZoomRoot` (não no `body`). Em viewport estreita (`max-width: 1180px`, celular na tailnet) fica em 100% mesmo com preferência ≠ 100% salva — evita estourar o formulário e o fit A4. O botão **Imprimir** abre o diálogo nativo sobre o **PDF** em `output/` (não `window.print()` no HTML); o zoom da UI não entra no papel. O preview A4 em tela estreita usa `transform: scale` em `#previewPages` (não CSS `zoom`). A paginação mede a folha em px canônicos (794×1123) com tipografia 14px — a página vazia cabe em **uma folha** no PC e no celular; ver `docs/agent-memory/ui-layout-mobile.md` e `docs/agent-memory/print-via-pdf.md`.
 
 Preferências locais (zoom e última pasta do botão **Abrir**) ficam em `settings.json` dentro de `C:\auto-orcamento\data\`.
 
@@ -244,13 +244,13 @@ Ao clicar em `Imprimir orçamento`:
 1. `app.js` salva históricos pendentes.
 2. `budget-snapshot.js` monta o snapshot do formulário (`schemaVersion: 1`).
 3. `AppApi.exportPdf()` envia `pagesHtml` + `snapshot` para `POST /api/pdf` (sem montar PDF no browser — isso fica no servidor).
-4. `server/server.js` + `server/pdf-export.js` gravam **PDF** e **JSON** em `output/` (mesmo nome base) — comportamento canônico inalterado.
-5. `server/export-sqlite.js` reconstrói `export/orcamentos.sqlite` a partir de **todos** os JSON atuais em `output/` (falha aqui não impede a impressão). A mesma consolidação também corre **ao abrir o app** (arranque de `server/server.js`).
-6. Só então abre `window.print()`.
+4. `server/server.js` + `server/pdf-export.js` gravam **PDF** e **JSON** em `output/` (mesmo nome base); notify Axis→Atlas em background.
+5. `server/export-sqlite.js` reconstrói `export/orcamentos.sqlite` a partir de **todos** os JSON atuais em `output/` (falha aqui não impede a resposta). A mesma consolidação também corre **ao abrir o app** (arranque de `server/server.js`).
+6. `printGeneratedPdf` busca `GET /output/{filename}` e abre o diálogo nativo sobre esse PDF (blob + iframe).
 
-Se a exportação de PDF/JSON falhar (ex.: Chrome/Edge ausente ou bloqueado pelo sistema), aparece um **alert** com a mensagem de erro. Consolidação manual: `npm run export:sqlite`.
+Se a exportação de PDF/JSON falhar (ex.: Chrome/Edge ausente ou bloqueado pelo sistema), aparece um **alert** e o diálogo de impressão **não** abre. Consolidação manual: `npm run export:sqlite`.
 
-**Impressão vs PDF:** o PDF em `output/` é renderizado no servidor (HTML isolado, sem zoom da UI). O diálogo **Imprimir** usa o DOM da janela; por isso `@media print` anula o `transform` de zoom e `min-height` da shell — evita conteúdo deslocado e folha em branco extra quando o zoom não está em 100%.
+**Impressão = PDF gerado:** o papel sai do artefato em `output/` (Chromium no servidor, HTML isolado). Evita spool PCL instável ao rasterizar o HTML da UI (timbrado/fontes). Detalhe: [`docs/agent-memory/print-via-pdf.md`](docs/agent-memory/print-via-pdf.md).
 
 - **PDF:** HTML paginado da pré-visualização; timbrado, fontes e estilos embutidos no servidor (Puppeteer + Chrome/Edge).
 - **JSON:** textos, checkboxes de seções opcionais, listas rápidas (marcados e desmarcados), equipe, hospitais com detalhes/multiplicadores, implante selecionado, etc. Ex.: `Maria da Silva - Abdominoplastia 2026-06-26 14-30-05.json`.

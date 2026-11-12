@@ -30,7 +30,7 @@ O merge Atlas↔Axis de `export/` é sync deste app. A GUI não escreve no arqui
 ## Quando é atualizado
 
 1. **Na abertura do app** — ao subir `server/server.js` (após escutar a porta 3000).
-2. **Automaticamente** após `POST /api/pdf` (clique em **Imprimir orçamento** no uso local) — depois de gravar PDF/JSON.
+2. **Automaticamente** após `POST /api/pdf` (clique em **Imprimir orçamento**) — depois de gravar PDF/JSON; o diálogo de impressão usa esse PDF (ver [`agent-memory/print-via-pdf.md`](agent-memory/print-via-pdf.md)).
 3. **Automaticamente** após `DELETE /api/snapshots/...` (**Excluir** no modal Abrir) — em background (`setImmediate`), sem segurar a resposta HTTP.
 4. **Manualmente:** `npm run export:sqlite` (`scripts/consolidate-to-sqlite.js`).
 

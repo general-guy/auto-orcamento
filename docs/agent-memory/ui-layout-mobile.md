@@ -15,7 +15,7 @@ Stub + runbook curto da coluna de formulario e da pre-visualizacao A4 no celular
 | Preview **Documento Final** | A folha continua A4 (`--paper-width` / `--paper-height` = `210mm` × `297mm`) para o PDF e a paginacao. **Nao** redesenhar com flex fluido. Envolver as `.print-page` em `#previewPages` e escalar com `transform: scale(var(--preview-fit-scale))` (escala ≤ 1; **nao** CSS `zoom` — falha no Safari/iOS e mede mal com UI zoom) |
 | Escala | `updatePreviewFitScale()` em `web/app.js`: mede largura do `.preview-panel` (padding incluso), define `--preview-fit-scale` + `margin-bottom` para colapsar o layout box; `ResizeObserver` + `resize`; durante `paginateDocument()` a escala volta a `1` |
 | UI zoom | Preferencia em `settings.json`; escala em `#uiZoomRoot` (nunca no `body` — senao `#zoomFlag` fixed perde clique). Desktop ≥1181px: `html`/`body`/`#uiZoomRoot`/` .app-shell` com `height: 100%` + `overflow: hidden` (scroll so nos paineis; sem `max-height` no body). Zoom ≠ 1: `scale` + `height: 100/zoom vh` no root. `#zoomFlag` sempre visivel no desktop. UI aplica zoom na hora; PUT so-`zoom` sem await pull/notify. Sob 1180px forca 100% e esconde a flag |
-| Impressao / PDF | `@media print` zera `transform` em `#previewPages`. PDF automatico (`pdf-export.js`) usa HTML isolado das `.print-page` — nao herda o fit da UI |
+| Impressao / PDF | Botão **Imprimir** imprime o PDF em `output/` (`printGeneratedPdf`), não o HTML. `@media print` ainda zera `transform` no preview (legado). PDF (`pdf-export.js`) usa HTML isolado das `.print-page`. Ver [`print-via-pdf.md`](print-via-pdf.md) |
 | Breakpoint | `@media (max-width: 1180px)`: uma coluna; handle de resize oculto |
 
 ## Arquivos
