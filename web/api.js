@@ -215,9 +215,13 @@
     return Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, rounded));
   }
 
+  function getUiZoomRoot() {
+    return document.getElementById("uiZoomRoot") || document.body;
+  }
+
   function applyWebZoom(scale) {
     const preferred = clampZoom(scale);
-    // Em viewport estreita o scale do body combina mal com o fit A4 e estoura o form (iOS/Tailscale).
+    // Em viewport estreita o scale combina mal com o fit A4 e estoura o form (iOS/Tailscale).
     const narrow =
       typeof window.matchMedia === "function" && window.matchMedia("(max-width: 1180px)").matches;
     const zoom = narrow ? ZOOM_DEFAULT : preferred;
@@ -225,21 +229,28 @@
     document.documentElement.style.setProperty("--ui-zoom", String(zoom));
     document.documentElement.style.zoom = "";
 
-    if (zoom === 1) {
+    const root = getUiZoomRoot();
+    // Zoom no #uiZoomRoot — nunca no <body>: transform no body quebra position:fixed
+    // do #zoomFlag (botões no canto) e dos toasts.
+    if (root !== document.body) {
       document.body.style.removeProperty("transform");
       document.body.style.removeProperty("transform-origin");
       document.body.style.removeProperty("width");
       document.body.style.removeProperty("height");
+    }
+
+    if (zoom === 1) {
+      root.style.removeProperty("transform");
+      root.style.removeProperty("transform-origin");
+      root.style.removeProperty("width");
+      root.style.removeProperty("height");
       document.documentElement.style.removeProperty("overflow");
       document.documentElement.style.removeProperty("height");
     } else {
-      // scale encolhe o visual; width/height compensam para preencher a viewport.
-      // overflow só no <html> (não max-height/overflow no body): senão o scale
-      // fica preso em 90% da tela com faixa cinza fixa e o zoom parece morto.
-      document.body.style.transformOrigin = "top left";
-      document.body.style.transform = `scale(${zoom})`;
-      document.body.style.width = `${100 / zoom}%`;
-      document.body.style.height = `${100 / zoom}vh`;
+      root.style.transformOrigin = "top left";
+      root.style.transform = `scale(${zoom})`;
+      root.style.width = `${100 / zoom}%`;
+      root.style.height = `${100 / zoom}vh`;
       document.documentElement.style.height = "100%";
       document.documentElement.style.overflow = "hidden";
     }
@@ -272,8 +283,8 @@
   }
 
   async function adjustZoom(delta) {
-    const current = await getZoom();
-    return setZoom(current + Number(delta || 0));
+    // Usa o fator em memória — getZoom() re-lia settings e atrasava/mascarava o clique.
+    return setZoom(webZoomFactor + Number(delta || 0));
   }
 
   async function loadTable(table) {

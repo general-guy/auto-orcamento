@@ -82,6 +82,10 @@ textarea {
   font: inherit;
 }
 
+#uiZoomRoot {
+  min-height: 100%;
+}
+
 .app-shell {
   display: grid;
   grid-template-columns: minmax(320px, var(--form-panel-width)) 10px minmax(640px, 1fr);
@@ -1251,9 +1255,10 @@ th {
 }
 
 @media print {
-  /* Zoom da UI (transform: scale no body) não deve afetar a impressão — o PDF já usa HTML isolado. */
+  /* Zoom da UI (transform em #uiZoomRoot) não deve afetar a impressão — o PDF já usa HTML isolado. */
   html,
-  body {
+  body,
+  #uiZoomRoot {
     background: #ffffff;
     height: auto !important;
     min-height: 0 !important;

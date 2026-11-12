@@ -1,4 +1,5 @@
 # Agent memory — changelog
+- 2026-11-12: UI zoom — escala em `#uiZoomRoot` (nao no `body`); transform no body quebrava clique do `#zoomFlag` fixed. `applyWebZoom` + `@media print` alinhados.
 - 2026-11-12: UI zoom — regressao da faixa cinza fixa: `max-height`/`overflow` no body prendia o scale; corrigido com `overflow` só no `html` + `height: 100/zoom vh` em `applyWebZoom`. Docs ui-layout/AGENTS/ARCHITECTURE.
 - 2026-11-12: Excluir no modal Abrir — DELETE responde na hora; SQLite/notify em background; UI otimista. Docs README/AGENTS/ARCHITECTURE/acesso-remoto/export-sqlite/output-index-sync/atlas-notify/cursor-plugins + skills ct100.
 - 2026-11-04: CT — PDF Chromium `--no-sandbox`; Abrir EACCES no índice → `fs-write.js` + chmod no host Patriot; SQLite recria se readonly. Skills ct100 + `axis-ct100.md`.
