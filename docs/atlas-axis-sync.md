@@ -48,7 +48,7 @@ Detalhe do fluxo blur/API em [`docs/agent-memory/axis-data-live-sync.md`](agent-
 | Evento | Ação |
 |--------|------|
 | API lê/grava JSON em `data/` (históricos, settings, Unimed N, tecnologias) | Antes da leitura: **pull** se o Axis estiver mais novo (`--pull-if-remote-newer`). Após gravar: **reconcilia** aquele arquivo (`--push-relative` → `sync_one_relative`; mesmas regras de mtime do merge; não é push cego). |
-| `POST /api/pdf` (impressão) | Par `.pdf` + `.json` em `output/`, entrada no índice, `export/orcamentos.sqlite` |
+| `POST /api/pdf` (impressão) | Par `.pdf` + `.json` em `output/`, entrada no índice, `export/orcamentos.sqlite`; responde na hora; notify em background |
 | `DELETE /api/snapshots/...` (modal **Excluir**) | Tombstone + apagado físico na hora (Lixeira Atlas / `rm` no CT); SQLite + push/notify em background |
 
 Ordem típica no blur (ex.: novo paciente no histórico): pull se Axis mais novo → servidor lê JSON atualizado → grava com o novo item → fila reconcilia o mesmo arquivo.

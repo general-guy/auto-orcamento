@@ -1,4 +1,5 @@
 # Agent memory — changelog
+- 2026-11-12: Imprimir no Axis — POST /api/pdf aguardava notify (e settings lastSnapshotDir); diálogo travava 5s–60s. Fix: responde após gravar; notify/settings defer em background.
 - 2026-11-12: UI zoom/layout final — desktop `height:100%`+`overflow:hidden` restaura scroll independente form/preview; `#zoomFlag` sempre no desktop; escala `#uiZoomRoot`; zoom otimista + PUT so-zoom sem await notify. Docs/skill ct100.
 - 2026-11-12: UI zoom — botoes pareciam travados durante sync: PUT settings aguardava pull/notify. Fix: `applyWebZoom` otimista + `writeSettings` zoom-only em background.
 - 2026-11-12: UI zoom — escala em `#uiZoomRoot` (nao no `body`); transform no body quebrava clique do `#zoomFlag` fixed. `applyWebZoom` + `@media print` alinhados.

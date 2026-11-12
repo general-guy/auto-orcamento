@@ -272,11 +272,12 @@ function readSettings() {
   return settings;
 }
 
-async function writeSettings(patch = {}) {
+async function writeSettings(patch = {}, { deferNotify = false } = {}) {
   ensureDataFile();
   const patchKeys = Object.keys(patch || {});
   // Só zoom: não bloquear a UI no pull/notify (botões do canto ficavam “mortos” até o sync).
   const zoomOnly = patchKeys.length === 1 && patchKeys[0] === "zoom";
+  const skipAwaitNotify = zoomOnly || deferNotify;
 
   if (zoomOnly) {
     axisSync.schedulePullDataFileIfRemoteNewer(settingsFile);
@@ -304,7 +305,7 @@ async function writeSettings(patch = {}) {
 
   writeTextFileReplace(settingsFile, `${JSON.stringify(next, null, 2)}\n`, "utf8");
   axisSync.afterDataFileWrite(settingsFile);
-  if (zoomOnly) {
+  if (skipAwaitNotify) {
     void notifyAtlasAfterFileWrite(settingsFile, atlasNotifyRoots);
   } else {
     await notifyAtlasAfterFileWrite(settingsFile, atlasNotifyRoots);
@@ -479,7 +480,8 @@ async function handlePdfExport(request, response) {
   if (jsonPath) {
     responsePayload.jsonFilename = path.basename(jsonPath);
     responsePayload.jsonPath = jsonPath;
-    await writeSettings({ lastSnapshotDir: path.dirname(jsonPath) });
+    // Não await notify do settings: Imprimir no Axis não pode esperar o Atlas.
+    await writeSettings({ lastSnapshotDir: path.dirname(jsonPath) }, { deferNotify: true });
     outputIndex.registerExportPair(outputDir, {
       jsonAbsolute: jsonPath,
       pdfAbsolute: outputPath,
@@ -509,9 +511,12 @@ async function handlePdfExport(request, response) {
     notifyPaths.push(`output/${jsonRel || responsePayload.jsonFilename}`);
   }
   notifyPaths.push("export/orcamentos.sqlite");
-  await notifyAtlasRelativePaths(notifyPaths);
 
+  // Responde já: o diálogo Imprimir não deve esperar notify/pull do Atlas (5s–60s).
   sendJson(response, 200, responsePayload);
+  setImmediate(() => {
+    void notifyAtlasRelativePaths(notifyPaths);
+  });
 }
 
 /** Legado: seletor nativo Windows. O botão Abrir usa o modal #snapshotPicker (listSnapshots/loadSnapshot). */

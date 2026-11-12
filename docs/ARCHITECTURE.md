@@ -214,7 +214,7 @@ Endpoints principais:
 - `GET /api/snapshots`: lista snapshots ativos em `output/` (caminho relativo, data, tamanho).
 - `GET /api/snapshots/:caminho`: lê um `.json` com validação de caminho (subpastas permitidas; sem `..`).
 - `DELETE /api/snapshots/:caminho`: tombstone em `orcamentos-index.json`, remove par pdf+json (`server/trash-file.js` no Atlas), responde na hora; reconstrói SQLite e enfileira sync/notify em background.
-- `POST /api/pdf`: gera PDF + snapshot JSON em `output/` (mesmo nome base) e, em seguida, reconstrói `export/orcamentos.sqlite` a partir de todos os JSON de `output/` (falha no SQLite não falha a resposta do PDF).
+- `POST /api/pdf`: gera PDF + snapshot JSON em `output/` (mesmo nome base) e, em seguida, reconstrói `export/orcamentos.sqlite` a partir de todos os JSON de `output/` (falha no SQLite não falha a resposta do PDF); responde na hora e dispara notify Axis→Atlas em background.
 - `POST /api/shutdown`: encerra o servidor ao fechar a janela (`launcher/native_launcher.py` ou fallback `launcher/launch-app.js`); bloqueado para visitantes remotos; ignorado com `--keep-server`.
 
 **Catálogos v2** (`data/pacientes.json`, `cirurgias.json`, `hospitais.json`, `pagamentos.json`, `observacoes.json`, `extras.json`, `tecnologias.json`, `unimed-n.json`): envelope `{ schemaVersion: 2, items: [{ id, label, mtime, deleted?, valor?, checked? }] }`; GET devolve só itens ativos; blur/reorder via `server/catalog-http.js`; merge por UUID no sync Python (`sync_catalog_v2.py`). `checked` só nas listas rápidas de pagamento, observações e extras. `settings.json` permanece objeto simples (zoom / `lastSnapshotDir`). Ver [`docs/agent-memory/data-schema-v2.md`](docs/agent-memory/data-schema-v2.md).
@@ -415,6 +415,7 @@ exportPdfDocument()
   -> pdf-export.js: buildPdfFilename + buildPdfDocumentHtml + puppeteer-core
   -> output/{paciente} - {cirurgia} {data} {hora}.pdf + .json
   -> export-sqlite.js: reconstrói export/orcamentos.sqlite (espelho de todos os JSON)
+  -> responde JSON; notify Axis→Atlas em background (não bloqueia window.print)
 ```
 
 A consolidação SQLite também corre no **arranque** de `server/server.js` (callback de `listen`), para alinhar `export/` mesmo sem imprimir.
