@@ -2,12 +2,15 @@
 
 Complemento a [`axis-data-live-sync.md`](axis-data-live-sync.md). O **CT** não roda `sync_auto_orcamento.py`; após gravar, avisa o **Atlas** para enfileirar `--pull-if-remote-newer` no caminho informado. Coordenação do merge permanece no Atlas (Python + `axis-sync.js`).
 
+
+**Atlas always-on (2026-11-19):** o dono de `:3010` e o `local-atlas/axis/atlas-axis-listener/` (logon / Startup). A GUI do auto-orçamento **nao** sobe mais essa porta (opt-in `AUTO_ORCAMENTO_ATLAS_NOTIFY_EMBEDDED=1`). Skill: `/atlas-axis-listener`.
+
 ## Fluxo
 
 1. Axis grava em `/data/auto-orcamento/…` (bind axis-data).
 2. `server/atlas-notify.js` envia `POST` com `{ relativePath }` ou `{ relativePaths }`.
 3. Atlas valida o token, responde na hora `{ phase: "received" }` e mantém o POST aberto até o `--pull-if-remote-newer` terminar; aí envia `{ phase: "synced" }`. O CT espera no máximo 1 minuto depois do `received`.
-4. No Axis, cada linha vira um toast ao vivo no SSE `/api/sync/events` (sem replay de sessões anteriores). Sem resposta do Atlas em 5 segundos, toast amarelo «O Atlas não respondeu em 5 segundos.» (a gravação local segue). Ao fechar a UI, encerrar também `:3010`. O botão de histórico fica na barra **Documento Final** (também no Tailscale).
+4. No Axis, cada linha vira um toast ao vivo no SSE `/api/sync/events` (sem replay de sessões anteriores). Sem resposta do Atlas em 5 segundos, toast amarelo «O Atlas não respondeu em 5 segundos.» (a gravação local segue). Fechar a UI **nao** encerra `:3010` (dono = atlas-axis-listener). O botão de histórico fica na barra **Documento Final** (também no Tailscale).
 
 **PUT só `zoom` em settings:** responde sem esperar pull/notify (UI otimista); sync segue em background — evita os botoes `#zoomFlag` parecerem mortos durante o notify.
 

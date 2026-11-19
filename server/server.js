@@ -803,11 +803,8 @@ handleAtlasNotifyRequest = createAtlasNotifyRequestHandler({
 });
 
 function shutdownAtlasServers() {
-  const notifyPort = Number(process.env.AUTO_ORCAMENTO_ATLAS_NOTIFY_PORT || 3010);
+  // :3010 e do atlas-axis-listener (always-on); nao liberar essa porta ao fechar a UI.
   const finish = () => {
-    if (process.platform === "win32" && Number.isFinite(notifyPort)) {
-      freeTcpPortSync(notifyPort);
-    }
     process.exit(0);
   };
   const closeMain = () => {
@@ -853,7 +850,12 @@ async function startServer() {
     // Espelho SQLite alinhado a output/ em cada abertura do app (além da impressão).
     consolidateOutputSqliteSafe();
     axisSync.scheduleStartupWhenUiReady();
-    notifyHttpServer = startAtlasNotifyListener({ axisSync, handler: handleAtlasNotifyRequest });
+    // Notify LAN :3010: atlas-axis-listener (logon). GUI nao sobe a porta.
+    if (process.env.AUTO_ORCAMENTO_ATLAS_NOTIFY_EMBEDDED === "1") {
+      notifyHttpServer = startAtlasNotifyListener({ axisSync, handler: handleAtlasNotifyRequest });
+    } else {
+      console.log("Atlas notify :3010 delegado ao atlas-axis-listener (sempre ligado).");
+    }
   });
 }
 

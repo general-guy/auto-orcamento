@@ -1,4 +1,5 @@
 # Agent memory — changelog
+- 2026-11-19: notify `:3010` = atlas-axis-listener (GUI nao sobe porta; EMBEDDED=1 legado).
 - 2026-11-12: Imprimir — diálogo nativo consome o PDF em `output/` (blob+iframe), não `window.print()` no HTML; evita spool PCL aos pedaços (HP2700) com timbrado/fontes. Stub `print-via-pdf.md`; README/AGENTS/ARCHITECTURE/acesso-remoto/ui-layout/atlas-notify/cursor-plugins + skill ct100.
 - 2026-11-12: Imprimir no Axis — POST /api/pdf aguardava notify (e settings lastSnapshotDir); diálogo travava 5s–60s. Fix: responde após gravar; notify/settings defer em background.
 - 2026-11-12: UI zoom/layout final — desktop `height:100%`+`overflow:hidden` restaura scroll independente form/preview; `#zoomFlag` sempre no desktop; escala `#uiZoomRoot`; zoom otimista + PUT so-zoom sem await notify. Docs/skill ct100.

@@ -152,7 +152,7 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 | `server/paths.js` | Raiz do repo, `data/`, `export/` e `outputDir` (`C:\auto-orcamento\output` no Windows; `OUTPUT_DIR` opcional) |
 | `server/server.js` | Servidor na porta 3000 (`BIND_HOST`), APIs REST |
 | `server/axis-sync.js` | Fila sync Atlas↔Axis (só Windows localhost): coalesce ~400 ms; `--startup`, `--pull-if-remote-newer`, `--push-relative`, `enqueuePullIfRemoteNewer` (notify); SSE `/api/sync/events`; wake + stamp online 45s via `ensure_axis_online.py`; log em `C:\auto-orcamento\logs\axis-sync\` |
-| `server/atlas-notify.js` | Notify Axis→Atlas: `POST /api/sync/notify`, listener canônico LAN `:3010` (`0.0.0.0`); cliente HTTP no CT após gravar |
+| `server/atlas-notify.js` | Notify Axis→Atlas: cliente CT + handler; porta LAN `:3010` no **atlas-axis-listener** (GUI so com `AUTO_ORCAMENTO_ATLAS_NOTIFY_EMBEDDED=1`) |
 | `server/http-utils.js` | `normalizeText` + `collectRequestBody` compartilhados (server/catalog/notify) |
 | `server/load-local-env.js` | Carrega `config/atlas-notify.env` no clone (gitignored) no Atlas |
 | `web/sync-toasts.js` | Toasts SSE (`/api/sync/events`) no Atlas e no Axis; histórico (10) e botão de recarregar na `preview-toolbar`; ver `docs/agent-memory/axis-sync-ui.md` |
