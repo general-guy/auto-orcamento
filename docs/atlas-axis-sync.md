@@ -27,7 +27,7 @@ Antes de qualquer SSH/rsync: se o PVE não responde, o script chama o mesmo flux
 Ordem fixa:
 
 1. **Merge** `data/` → `output/` → `export/` (por arquivo: mtime mais novo vence; empate + SHA diferente → **toast amarelo**, sem overwrite). Em `output/`, reconciliar primeiro `orcamentos-index.json` (`sync_output_index.py` — tombstones de pares pdf+json; ver [`agent-memory/output-index-sync.md`](agent-memory/output-index-sync.md)).
-2. **Código** incremental para `/opt/auto-orcamento` (manifesto local vs CT; `npm install` só se `package.json` / lock mudou; `systemctl restart auto-orcamento` se houve alteração).
+2. **Código** incremental para `/opt/auto-orcamento` (manifesto local vs CT por **sha256** por arquivo — mtime no manifesto é só metadado; `npm install` só se `package.json` / lock mudou; `systemctl restart` só se algum hash diferir). Auditoria 2026-11-22: sem o bug de fingerprint mtime do banco-fotos.
 3. **Manifesto** axis-data (`publish_manifest` no script Python).
 
 ## Wake automático

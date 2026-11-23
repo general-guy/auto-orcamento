@@ -1,3 +1,7 @@
+## 2026-11-22
+
+- **Auditoria codigo CT100:** `sync_auto_orcamento_code` ja compara sha256 por arquivo — sem o bug de fingerprint por mtime do banco-fotos (2026-11-22).
+
 # Changelog
 
 ## 2026-11-01
