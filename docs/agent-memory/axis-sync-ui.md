@@ -10,7 +10,7 @@ Só em `127.0.0.1` / `localhost` (mesma regra do `axis-sync.js`).
 |------|---------|
 | Fila + SSE | `server/axis-sync.js` — `--startup` após o **primeiro** cliente SSE (fallback 90 s); `enqueueAhead` faz o startup **passar na frente** de pulls já enfileirados; replay de toasts (3 min); fila awaitable (`pull` / `push`) |
 | Toasts ao vivo | `web/sync-toasts.js` — `EventSource` após `window.load` + `requestIdleCallback` (sync não atrasa a UI); `position: fixed` (não empurra o preview); `@media print` oculta `.axis-sync-toasts` (legado HTML); **Imprimir** usa o PDF em `output/` — [`print-via-pdf.md`](print-via-pdf.md) |
-| Histórico (10) | Mesmo script — botão na `preview-toolbar` (à direita de “Documento Final”); painel com horário `HH:MM:SS` |
+| Histórico (20) | Mesmo script — botão na `preview-toolbar` (à direita de “Documento Final”); painel com os **20** últimos toasts + horário `HH:MM:SS` |
 | Recarregar | `web/sync-toasts.js` — botão à esquerda do histórico; `location.replace` com `?_r=`; **todo** HTML já sai com `stampLocalAssets` (`?v=mtime`) e `Cache-Control: no-store` (Safari); `.js`/`.css` com `no-cache`; o script remove `_r` da URL; SSE com `skipReplay=1` |
 
 ## Replay de toasts (SSE)

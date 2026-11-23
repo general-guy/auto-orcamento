@@ -1,4 +1,5 @@
 # Agent memory — changelog
+- 2026-11-22: Histórico de toasts UI **20** (`web/sync-toasts.js`); retenção `session-*.log` **20** (`MAX_SESSION_FILES`). Stubs axis-sync-ui/sessions/atlas-axis-sync/ARCHITECTURE/axis-ct100.
 - 2026-11-19: notify `:3010` = atlas-axis-listener (GUI nao sobe porta; EMBEDDED=1 legado).
 - 2026-11-12: Imprimir — diálogo nativo consome o PDF em `output/` (blob+iframe), não `window.print()` no HTML; evita spool PCL aos pedaços (HP2700) com timbrado/fontes. Stub `print-via-pdf.md`; README/AGENTS/ARCHITECTURE/acesso-remoto/ui-layout/atlas-notify/cursor-plugins + skill ct100.
 - 2026-11-12: Imprimir no Axis — POST /api/pdf aguardava notify (e settings lastSnapshotDir); diálogo travava 5s–60s. Fix: responde após gravar; notify/settings defer em background.

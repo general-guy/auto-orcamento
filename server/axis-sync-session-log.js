@@ -1,7 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const MAX_SESSION_FILES = 10;
+const MAX_SESSION_FILES = 20;
 const SESSION_GLOB_PREFIX = "session-";
 
 function resolveAxisSyncLogDir(dataDir) {

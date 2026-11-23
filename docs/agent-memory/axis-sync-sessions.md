@@ -8,7 +8,7 @@ Cada execução em fila do `axis-sync.js` (`startup`, `pull`, `push`, etc.) grav
 |------|--------|
 | Pasta | `C:\auto-orcamento\logs\axis-sync\` (também `axis-online.stamp` — cache 45 s «Axis online» entre spawns) |
 | Arquivos | `session-<local>-<tarefa>.log` — horário **local** da máquina (ex.: `session-2026-10-26T14-22-56-329-p0300-startup.log`); corpo com `started_at=…-03:00` e `timezone=America/Sao_Paulo` |
-| Retenção | **10** sessões; ao criar a 11ª, apaga a mais antiga |
+| Retenção | **20** sessões; ao criar a 21ª, apaga a mais antiga |
 | Código | `server/axis-sync-session-log.js` + `server/axis-sync.js` |
 
 Cabeçalho: `started_at` / `finished_at` em **horário local** (`timezone=…`); tarefa, script, argv. Rodapé: `exit_code`, timeout ou erro de spawn.
@@ -41,7 +41,7 @@ Wake manual para testar: `py -3 local-atlas/axis/scripts/wake_axis.py`.
 
 ## Histórico na UI (preview)
 
-`web/sync-toasts.js` grava cada toast em memória (máx. **10**) e expõe na `preview-toolbar` do painel “Documento Final” o botão de recarregar a interface (à esquerda) e o de histórico. Os toasts ao vivo **não** entram no fluxo do documento (não empurram a folha); só o painel dropdown lista mensagem + `HH:MM:SS`.
+`web/sync-toasts.js` grava cada toast em memória (máx. **20**) e expõe na `preview-toolbar` do painel “Documento Final” o botão de recarregar a interface (à esquerda) e o de histórico. Os toasts ao vivo **não** entram no fluxo do documento (não empurram a folha); só o painel dropdown lista mensagem + `HH:MM:SS`.
 
 ## O que não é rsync
 

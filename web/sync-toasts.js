@@ -1,7 +1,7 @@
 (function () {
   const DISMISS_MS = 5500;
   const DISMISS_WAKE_MS = 20000;
-  const HISTORY_MAX = 10;
+  const HISTORY_MAX = 20;
 
   /** @type {{ at: Date, level: string, message: string, phase?: string }[]} */
   const historyEntries = [];

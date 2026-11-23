@@ -64,7 +64,7 @@ Só no Windows com `127.0.0.1` (`abrir-auto-orcamento.bat`):
 3. Regra de conflito: mesmo horário e SHA diferente → toast amarelo, sem overwrite.
 4. Após gravar JSON em `data/` (API): pull se Axis mais novo antes de ler, depois reconcilia o arquivo alterado (`--push-relative`). Impressão: reconcilia `output/` + `export/orcamentos.sqlite`. Ver [`axis-data-live-sync.md`](axis-data-live-sync.md).
 5. Toasts: SSE `GET /api/sync/events` + `web/sync-toasts.js` (flutuantes + histórico na toolbar do preview).
-6. Log rotativo (10 sessões): `C:\auto-orcamento\logs\axis-sync\` — ver [`axis-sync-sessions.md`](axis-sync-sessions.md).
+6. Log rotativo (20 sessões): `C:\auto-orcamento\logs\axis-sync\` — ver [`axis-sync-sessions.md`](axis-sync-sessions.md).
 
 Override: `AUTO_ORCAMENTO_LOCAL_ATLAS` aponta para o clone `local-atlas`. Runbook completo: [`../atlas-axis-sync.md`](../atlas-axis-sync.md).
 

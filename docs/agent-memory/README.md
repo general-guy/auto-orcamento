@@ -18,7 +18,7 @@ Memória durável do **Auto Orçamento** (decisões, caminhos, deploy). Cada tem
 | Layout mobile / preview A4 + UI zoom desktop (`#uiZoomRoot`, scroll paineis, `#zoomFlag` sempre; folha 794×1123px / 14px; CT atrasado → `--sync-code`) | [`ui-layout-mobile.md`](ui-layout-mobile.md) |
 | Tombstones `output/` (`orcamentos-index.json`; Excluir não espera notify/SQLite) | [`output-index-sync.md`](output-index-sync.md) |
 | Imprimir → diálogo nativo sobre PDF em `output/` (não `window.print()` no HTML) | [`print-via-pdf.md`](print-via-pdf.md) |
-| Log das últimas 10 sessões de sync (Atlas) | [`axis-sync-sessions.md`](axis-sync-sessions.md) |
+| Log das últimas 20 sessões de sync (Atlas) | [`axis-sync-sessions.md`](axis-sync-sessions.md) |
 | Auditoria sync + roadmap simplificação (P0–P3) | [`auditoria-atlas-axis-roadmap.md`](auditoria-atlas-axis-roadmap.md) |
 | Narrativa Atlas/Axis no app | [`../atlas-axis.md`](../atlas-axis.md) |
 | SQLite para o dados-clinica (leitura unidirecional) | [`../export-sqlite.md`](../export-sqlite.md) |

@@ -155,7 +155,7 @@ Sem Node instalado, o app não inicia. Sem Python/pywebview, o `.bat` cai para `
 | `server/atlas-notify.js` | Notify Axis→Atlas: cliente CT + handler; porta LAN `:3010` no **atlas-axis-listener** (GUI so com `AUTO_ORCAMENTO_ATLAS_NOTIFY_EMBEDDED=1`) |
 | `server/http-utils.js` | `normalizeText` + `collectRequestBody` compartilhados (server/catalog/notify) |
 | `server/load-local-env.js` | Carrega `config/atlas-notify.env` no clone (gitignored) no Atlas |
-| `web/sync-toasts.js` | Toasts SSE (`/api/sync/events`) no Atlas e no Axis; histórico (10) e botão de recarregar na `preview-toolbar`; ver `docs/agent-memory/axis-sync-ui.md` |
+| `web/sync-toasts.js` | Toasts SSE (`/api/sync/events`) no Atlas e no Axis; histórico (20) e botão de recarregar na `preview-toolbar`; ver `docs/agent-memory/axis-sync-ui.md` |
 | `docs/atlas-axis.md` | Relação Atlas (dev) × Axis (produção) |
 | `web/budget-snapshot.js` | Snapshot JSON do formulário na impressão e validação na importação |
 | `server/snapshot-open-dialog.js` | Invoca `scripts/open-snapshot-dialog.py` (pywebview/WebView2) ou PowerShell para seletor nativo de JSON |
